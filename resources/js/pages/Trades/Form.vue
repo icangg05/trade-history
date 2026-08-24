@@ -147,6 +147,21 @@ const SETUPS = [
   'Breakout',
   'Pullback',
   'Pola Candlestick',
+  'Double Top',
+  'Double Bottom',
+  'Head & Shoulders',
+  'Inv. Head & Shoulders',
+  'Triple Top',
+  'Triple Bottom',
+  'Ascending Triangle',
+  'Descending Triangle',
+  'Symmetrical Triangle',
+  'Rising Wedge',
+  'Falling Wedge',
+  'Flag',
+  'Pennant',
+  'Cup & Handle',
+  'Rectangle / Range',
 ]
 
 const selectedSetups = computed<string[]>({
