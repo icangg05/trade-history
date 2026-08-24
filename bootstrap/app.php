@@ -17,6 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Di produksi aplikasi berjalan di balik nginx (port kontainer hanya
+        // terikat ke 127.0.0.1), jadi X-Forwarded-Proto dari proxy itu satu-
+        // satunya cara Laravel tahu request aslinya https. Tanpa ini redirect
+        // setelah POST lahir sebagai http:// dan diblokir browser sebagai
+        // mixed content.
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             SetCurrentAccount::class,
             HandleInertiaRequests::class,

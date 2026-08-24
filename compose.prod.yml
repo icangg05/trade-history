@@ -1,0 +1,49 @@
+# Produksi. Kode dibakar ke dalam image (target `production` = Octane worker
+# mode), jadi tidak ada bind mount kode seperti compose.yml — redeploy berarti
+# `git pull && docker compose -f compose.prod.yml up -d --build`.
+#
+# Port hanya terikat ke 127.0.0.1: yang menghadap internet adalah nginx host
+# (TLS via certbot) yang mem-proxy ke sini.
+services:
+  app:
+    build:
+      context: .
+      target: production
+    ports:
+      - "127.0.0.1:8005:80"
+    volumes:
+      # .env tidak ikut ke dalam image (lihat .dockerignore) — dipasang dari
+      # host supaya kredensial tidak pernah ikut terbangun ke layer image.
+      - ./.env:/app/.env:ro
+      # Bukti transfer menempel ke disk host, bukan layer kontainer.
+      - ./storage/app:/app/storage/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  mysql:
+    image: mysql:8.4
+    # Tanpa `ports`: database hanya dijangkau lewat jaringan compose.
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  dbdata:
