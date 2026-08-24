@@ -1,0 +1,14 @@
+{
+	frankenphp
+	auto_https off
+	admin off
+}
+
+:80 {
+	root /app/public
+	encode zstd br gzip
+
+	# Mode klasik: tiap request PHP dijalankan segar, jadi perubahan kode
+	# langsung terlihat tanpa restart. Produksi memakai Octane worker mode.
+	php_server
+}

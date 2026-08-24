@@ -1,0 +1,74 @@
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    # Berjalan sebagai user host: berkas yang ditulis aplikasi langsung dimiliki
+    # user yang sama di host, jadi isi storage/app bisa dibuka dan dipindahkan
+    # tanpa sudo. Tanpa ini semuanya lahir sebagai root:root dan hanya terlihat
+    # dari dalam kontainer.
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/app
+      # Berkas pengguna (bukti transfer) menempel ke disk host, bukan ke lapisan
+      # kontainer — jadi tetap ada setelah image dibangun ulang. Ganti sisi kiri
+      # di sini kalau mau ditaruh di disk lain, mis. /mnt/data/trade-history.
+      - ./storage/app:/app/storage/app
+    # Tanpa `env_file`: Laravel membaca /app/.env langsung dari bind mount.
+    # Menyuntikkannya sebagai variabel proses membuat $_SERVER menimpa nilai
+    # yang di-set phpunit, sehingga `php artisan test` berjalan sebagai `local`.
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    # Healthcheck bawaan image FrankenPHP memakai endpoint admin yang sengaja
+    # dimatikan di Caddyfile; dipakai route /up milik Laravel saja.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: trade_history
+      MYSQL_USER: trade
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  # Tugas sekali jalan: bangun aset lalu berhenti.
+  # Ganti `npm run build` jadi `npm run dev` kalau mau HMR (port 5173).
+  # Bangun ulang kapan saja: docker compose run --rm vite
+  vite:
+    # Debian (glibc), bukan Alpine (musl): binari native seperti rolldown harus
+    # cocok dengan yang dipasang di host, karena node_modules dipakai berdua.
+    image: node:24-slim
+    # Tanpa ini kontainer menulis public/build sebagai root, dan `npm run build`
+    # di host tidak bisa lagi membersihkan direktorinya.
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /app
+    command: sh -c "npm install && npm run build"
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+    # `build` selesai lalu keluar dengan kode 0 — tanpa ini compose
+    # menghidupkannya berulang selamanya.
+    restart: "no"
+
+volumes:
+  dbdata:

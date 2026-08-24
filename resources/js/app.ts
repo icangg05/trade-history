@@ -1,0 +1,44 @@
+import '../css/app.css'
+
+import { createApp, h, type DefineComponent } from 'vue'
+import { createInertiaApp } from '@inertiajs/vue3'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { listenForInstall } from '@/composables/useInstall'
+
+listenForInstall()
+
+const appName = import.meta.env.VITE_APP_NAME || 'Trade History'
+const AUTH_PAGES = new Set(['Login', 'Register'])
+
+createInertiaApp({
+  title: (title) => (title ? `${title} · ${appName}` : appName),
+
+  resolve: async (name) => {
+    const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue')
+    const page = await pages[`./pages/${name}.vue`]()
+
+    // Halaman auth berdiri sendiri; sisanya memakai shell aplikasi.
+    page.default.layout ??= AUTH_PAGES.has(name) ? undefined : AppLayout
+
+    return page
+  },
+
+  setup({ el, App, props, plugin }) {
+    createApp({ render: () => h(App, props) })
+      .use(plugin)
+      .mount(el)
+  },
+
+  progress: { color: 'hsl(43 96% 56%)', showSpinner: false },
+})
+
+// Didaftarkan di dev juga: tanpa service worker aktif, browser tidak pernah
+// menawarkan "Install". Aman untuk HMR karena aset dev disajikan dari origin
+// lain (:5173) dan sudah diabaikan sw.js.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // PWA gagal dipasang bukan alasan aplikasi ikut gagal.
+    })
+  })
+}

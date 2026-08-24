@@ -1,0 +1,306 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Tema selalu dark: buat varian `dark:` milik komponen shadcn selalu aktif,
+   bukan bergantung pada prefers-color-scheme. */
+@custom-variant dark (&);
+
+@source '../js/**/*.{vue,ts,js}';
+@source '../views/**/*.blade.php';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+/* ---------------------------------------------------------------------------
+   Tema tunggal: dark. Nilai diambil dari blok `.dark` project `nfp`,
+   di-flatten ke :root. Tidak ada light mode, tidak ada toggle.
+   --------------------------------------------------------------------------- */
+:root {
+  --background: 222 30% 6%;
+  --foreground: 210 24% 94%;
+
+  --card: 220 26% 11%;
+  --card-foreground: 210 24% 94%;
+
+  --popover: 221 28% 9%;
+  --popover-foreground: 210 24% 94%;
+
+  --primary: 43 96% 56%;
+  --primary-foreground: 40 65% 8%;
+
+  --secondary: 220 20% 16%;
+  --secondary-foreground: 210 24% 94%;
+
+  --muted: 220 18% 15%;
+  --muted-foreground: 216 16% 62%;
+
+  --accent: 220 22% 18%;
+  --accent-foreground: 43 96% 62%;
+
+  --gold: 43 96% 56%;
+  --gold-foreground: 40 65% 8%;
+  --cyan: 187 92% 56%;
+
+  --destructive: 0 74% 56%;
+  --destructive-foreground: 210 40% 98%;
+  --success: 152 66% 46%;
+  --success-foreground: 220 30% 8%;
+
+  --border: 216 24% 22%;
+  --input: 216 24% 24%;
+  --ring: 43 96% 56%;
+
+  --chart-1: 43 96% 56%;
+  --chart-2: 187 92% 56%;
+  --chart-3: 152 66% 46%;
+  --chart-4: 0 74% 56%;
+  --chart-5: 258 80% 66%;
+
+  --glass-bg: 220 26% 13%;
+  --glass-alpha: 0.55;
+  --glass-border: 0 0% 100%;
+  --glass-border-alpha: 0.06;
+
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-gold: hsl(var(--gold));
+  --color-gold-foreground: hsl(var(--gold-foreground));
+  --color-cyan: hsl(var(--cyan));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'ss01', 'ss02';
+  }
+
+  h1, h2, h3 {
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Angka selalu rata kolom */
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  /* ---- Scrollbar ---- */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.32) transparent;
+  }
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: hsl(var(--gold) / 0.55); }
+  ::-webkit-scrollbar-thumb:active { background-color: hsl(var(--gold) / 0.75); }
+  ::-webkit-scrollbar-corner { background: transparent; }
+}
+
+@layer components {
+  /* ---- Glassmorphism (port dari nfp) ---- */
+  .glass {
+    background-color: hsl(var(--glass-bg) / var(--glass-alpha));
+    border: 1px solid hsl(var(--glass-border) / var(--glass-border-alpha));
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+  }
+  .glass-card {
+    position: relative;
+    border-radius: var(--radius);
+    background-color: hsl(var(--glass-bg) / var(--glass-alpha));
+    border: 1px solid hsl(var(--glass-border) / var(--glass-border-alpha));
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+    box-shadow:
+      0 1px 0 0 hsl(0 0% 100% / 0.04) inset,
+      0 1px 2px 0 hsl(222 60% 2% / 0.28);
+  }
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, hsl(var(--glass-border) / 0.09), transparent 40%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .glass, .glass-card { background-color: hsl(var(--card)); }
+  }
+
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    border-color: hsl(var(--gold) / 0.3);
+  }
+
+  .table-scroll { scrollbar-width: thin; }
+  .table-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .table-scroll::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.25);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
+
+  /* ---- Markdown catatan aturan & hasil analisa AI ---- */
+  .rte-content { font-size: 0.875rem; line-height: 1.6; word-break: break-word; }
+  .rte-content > :first-child { margin-top: 0; }
+  .rte-content > :last-child { margin-bottom: 0; }
+  .rte-content p { margin: 0.5rem 0; }
+  .rte-content h1, .rte-content h2 { font-size: 1rem; font-weight: 700; margin: 0.9rem 0 0.4rem; letter-spacing: -0.01em; }
+  .rte-content h3 { font-size: 0.9rem; font-weight: 600; margin: 0.7rem 0 0.3rem; }
+  .rte-content strong { font-weight: 600; color: hsl(var(--foreground)); }
+  .rte-content em { font-style: italic; }
+  .rte-content ul, .rte-content ol { margin: 0.5rem 0; padding-left: 1.25rem; }
+  .rte-content ul { list-style: disc; }
+  .rte-content ol { list-style: decimal; }
+  .rte-content li { margin: 0.2rem 0; }
+  .rte-content hr { margin: 1rem 0; border-color: hsl(var(--border)); }
+  .rte-content blockquote {
+    margin: 0.6rem 0;
+    padding-left: 0.75rem;
+    border-left: 2px solid hsl(var(--gold) / 0.6);
+    color: hsl(var(--muted-foreground));
+  }
+  .rte-content code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: hsl(var(--muted));
+    padding: 0.05rem 0.3rem;
+    border-radius: 0.25rem;
+  }
+  .rte-content table {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0.6rem 0;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+  .rte-content td { white-space: nowrap; }
+  .rte-content th, .rte-content td { border: 1px solid hsl(var(--border)); padding: 0.3rem 0.5rem; text-align: left; }
+  .rte-content th { background: hsl(var(--muted) / 0.5); font-weight: 600; }
+}
+
+/* ---- Ornamen latar (fixed layer, dipaint sekali) ---- */
+.bg-ornaments {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(50rem 42rem at 100% -8%, hsl(var(--gold) / 0.14), transparent 52%),
+    radial-gradient(48rem 44rem at -8% 4%, hsl(var(--cyan) / 0.12), transparent 52%),
+    radial-gradient(44rem 40rem at 50% 120%, hsl(258 80% 60% / 0.1), transparent 60%),
+    linear-gradient(180deg, hsl(222 32% 7%), hsl(222 30% 5%));
+}
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(hsl(var(--cyan) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--cyan) / 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(56px);
+  opacity: 0.5;
+  will-change: transform;
+}
+.blob-a {
+  width: 26rem; height: 26rem; top: -6rem; right: -6rem;
+  background: radial-gradient(circle, hsl(var(--gold) / 0.5), transparent 70%);
+  animation: floaty 16s ease-in-out infinite;
+}
+.blob-b {
+  width: 24rem; height: 24rem; bottom: -8rem; left: -6rem;
+  background: radial-gradient(circle, hsl(var(--cyan) / 0.42), transparent 70%);
+  animation: floaty 20s ease-in-out infinite reverse;
+}
+.ring-ornament {
+  position: absolute;
+  top: 20%; left: 60%;
+  width: 30rem; height: 30rem;
+  border: 1px solid hsl(var(--foreground) / 0.06);
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 40px hsl(var(--foreground) / 0.02);
+  animation: spin-slow 90s linear infinite;
+  will-change: transform;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-24px, 26px) scale(1.06); }
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blob, .ring-ornament { animation: none; }
+}
+
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
