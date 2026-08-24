@@ -46,9 +46,10 @@ jobs:
             # `optimize` = config + route + view + event cache sekaligus. Dijalankan
             # di sini, bukan saat build: .env baru dipasang ketika kontainer jalan.
             docker compose exec -T app php artisan optimize
-            # Octane menahan aplikasi di memori. Tanpa reload, worker yang sudah
-            # boot tetap memakai config lama yang dimuat sebelum `optimize`.
-            docker compose exec -T app php artisan octane:reload
+            # Tidak ada `octane:reload` di sini: `up -d --build` di atas sudah
+            # membuat ulang kontainer, jadi worker memang baru. (Selain itu
+            # reload gagal karena config('octane.server') default ke roadrunner
+            # sementara kita jalan dengan frankenphp.)
 
             echo "==> Tunggu aplikasi siap..."
             # Port hanya terikat ke 127.0.0.1:8005; yang menghadap internet nginx host.
