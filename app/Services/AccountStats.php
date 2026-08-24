@@ -284,7 +284,9 @@ class AccountStats
             'by_direction' => $this->breakdown($trades, fn (Trade $t) => $t->direction),
             'by_weekday' => $this->breakdown($trades, fn (Trade $t) => ($t->closed_at ?? $t->opened_at)->isoFormat('dddd')),
             'by_hour' => $this->breakdown($trades, fn (Trade $t) => $t->opened_at->format('H').':00'),
-            'by_setup' => $this->breakdown($trades, fn (Trade $t) => $t->setup ?: '(tanpa setup)'),
+            'by_setup' => $this->breakdown($trades, fn (Trade $t) => $t->setup
+                ? array_filter(array_map('trim', explode(',', $t->setup)))
+                : '(tanpa setup)'),
             'violations' => $this->violations($from, $to),
         ];
     }

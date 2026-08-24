@@ -20,7 +20,7 @@ class TradeRequest extends FormRequest
             'pnl' => ['nullable', 'required_with:closed_at', 'numeric'],
             'closed_at' => ['nullable', 'required_with:pnl', 'date', 'after_or_equal:opened_at'],
             'opened_at' => ['required', 'date'],
-            'setup' => ['nullable', 'string', 'max:50'],
+            'setup' => ['nullable', 'string', 'max:255'],
             'tags' => ['nullable', 'array', 'max:10'],
             'tags.*' => ['string', 'max:30'],
             'notes' => ['nullable', 'string', 'max:5000'],

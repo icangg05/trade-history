@@ -25,3 +25,19 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# dump database / data pribadi
+*.sql
+*.sqlite
+*.sqlite-journal
+*.csv
+
+# graphify: laporan boleh masuk, cache & snapshot harian tidak
+/graphify-out/cache/
+/graphify-out/20*/
+/graphify-out/graph.html
+/graphify-out/.graphify_python
+/graphify-out/.graphify_root
+
+# tooling lokal
+/.claude/settings.local.json

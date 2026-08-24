@@ -126,6 +126,38 @@ function submit() {
   editing.value ? form.put(`/trades/${props.trade!.id}`) : form.post('/trades')
 }
 
+/**
+ * Satu trade sering memakai beberapa strategi sekaligus, jadi `setup` disimpan
+ * sebagai daftar dipisah koma. Nilai yang tidak ada di daftar bawaan (mis. hasil
+ * baca AI atau trade lama) tetap muncul sebagai pilihan supaya tidak hilang saat
+ * diedit.
+ */
+const SETUPS = [
+  'Supply Demand',
+  'Support Resisten',
+  'Fibonacci',
+  'Order Block',
+  'FVG',
+  'Parallel Channel',
+  'Break of Structure',
+  'CHoCH',
+  'Liquidity Sweep',
+  'Trendline',
+  'Moving Average',
+  'Breakout',
+  'Pullback',
+  'Pola Candlestick',
+]
+
+const selectedSetups = computed<string[]>({
+  get: () => String(form.setup).split(',').map((s: string) => s.trim()).filter(Boolean),
+  set: (list) => {
+    form.setup = list.join(', ')
+  },
+})
+
+const setupOptions = computed(() => [...new Set([...SETUPS, ...selectedSetups.value])])
+
 function badge(field: string): string | null {
   if (lowConfidence.value.includes(field)) return 'ragu'
 
@@ -279,8 +311,24 @@ function badge(field: string): string | null {
         </div>
 
         <div class="space-y-1.5">
-          <Label for="setup">Setup / strategi</Label>
-          <Input id="setup" v-model="form.setup" placeholder="Break of structure" maxlength="50" />
+          <Label>Setup / strategi</Label>
+          <div class="flex flex-wrap gap-2">
+            <label
+              v-for="option in setupOptions"
+              :key="option"
+              class="flex cursor-pointer items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm transition-colors"
+              :class="
+                selectedSetups.includes(option)
+                  ? 'border-gold/60 bg-gold/10 text-gold'
+                  : 'text-muted-foreground hover:text-foreground'
+              "
+            >
+              <input v-model="selectedSetups" type="checkbox" :value="option" class="size-3.5 accent-gold" />
+              {{ option }}
+            </label>
+          </div>
+          <p v-if="badge('setup')" class="text-[10px] text-gold">{{ badge('setup') }}</p>
+          <p v-if="form.errors.setup" class="text-xs text-destructive">{{ form.errors.setup }}</p>
         </div>
 
         <div class="space-y-1.5">

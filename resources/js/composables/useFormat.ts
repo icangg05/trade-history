@@ -104,6 +104,13 @@ export function dateTime(value: string | null | undefined): string {
   return `${longDate(value)}, ${date.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' })}`
 }
 
+/** Jam saja: "14.05". Dipakai saat tanggalnya sudah jelas dari konteks. */
+export function clock(value: string | null | undefined): string {
+  if (!value) return '—'
+
+  return new Date(value).toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' })
+}
+
 export function monthLabel(value: string): string {
   const [year, month] = value.split('-').map(Number)
 

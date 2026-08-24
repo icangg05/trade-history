@@ -104,7 +104,7 @@ watch(
     <header class="glass fixed inset-x-0 top-0 z-40 h-14 border-b">
       <div class="mx-auto flex h-full max-w-7xl items-center gap-3 px-4">
         <Link href="/" class="flex shrink-0 items-center gap-2">
-          <span class="grid size-7 place-items-center rounded-md bg-gold text-gold-foreground text-xs font-bold">TH</span>
+          <img src="/icons/icon-192.png" alt="Trade History" class="size-7 rounded-md" />
           <span class="hidden text-sm font-semibold tracking-tight sm:block">Trade History</span>
         </Link>
 

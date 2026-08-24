@@ -7,7 +7,7 @@ import PnlCalendar from '@/components/PnlCalendar.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { dateTime, longDate, money, monthLabel, num, useCurrency } from '@/composables/useFormat'
+import { clock, longDate, money, monthLabel, num, pnlClass, useCurrency } from '@/composables/useFormat'
 import type { DayStat, Trade } from '@/types'
 
 const props = defineProps<{
@@ -45,6 +45,29 @@ function shift(offset: number) {
 
 const dayTrades = computed(() => (selected.value ? (props.trades[selected.value] ?? []) : []))
 const dayStat = computed(() => (selected.value ? props.days[selected.value] : undefined))
+
+/**
+ * Trade dikelompokkan menurut hari tutupnya, jadi jam bukanya bisa jatuh di hari
+ * sebelumnya. Selama masih hari yang sama cukup jamnya, karena tanggalnya sudah
+ * jadi judul modal; kalau beda, tanggalnya ikut ditulis singkat.
+ */
+const shortDay = new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: '2-digit' })
+
+function openedLabel(trade: Trade): string {
+  const time = clock(trade.opened_at)
+
+  return trade.opened_at.slice(0, 10) === selected.value
+    ? time
+    : `${shortDay.format(new Date(trade.opened_at))} ${time}`
+}
+
+/** Angka yang tidak dikirim server tapi bisa dihitung dari daftar trade hari itu. */
+const dayLots = computed(() => dayTrades.value.reduce((sum, t) => sum + (t.lot ?? 0), 0))
+const dayWinRate = computed(() => {
+  const stat = dayStat.value
+
+  return stat && stat.trades ? (stat.wins / stat.trades) * 100 : null
+})
 </script>
 
 <template>
@@ -93,58 +116,102 @@ const dayStat = computed(() => (selected.value ? props.days[selected.value] : un
           <DialogTitle>{{ selected ? longDate(selected) : '' }}</DialogTitle>
         </DialogHeader>
 
-        <div v-if="dayStat" class="flex flex-wrap gap-4 text-sm">
-          <span class="tnum font-mono" :class="dayStat.pnl >= 0 ? 'text-success' : 'text-destructive'">
-            {{ money(dayStat.pnl, currency, true) }}
-          </span>
-          <span class="text-muted-foreground">
-            {{ dayStat.trades }} trade · {{ dayStat.wins }}W / {{ dayStat.losses }}L
-          </span>
+        <div v-if="dayStat" class="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
+          <div>
+            <p class="text-[11px] text-muted-foreground">P/L hari ini</p>
+            <p class="tnum font-mono text-sm" :class="pnlClass(dayStat.pnl)">
+              {{ money(dayStat.pnl, currency, true) }}
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] text-muted-foreground">Trade</p>
+            <p class="tnum font-mono text-sm">
+              {{ dayStat.trades }}
+              <span class="text-xs text-muted-foreground">
+                {{ dayStat.wins }}W / {{ dayStat.losses }}L
+              </span>
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] text-muted-foreground">Winrate</p>
+            <p class="tnum font-mono text-sm">{{ dayWinRate === null ? '—' : `${num(dayWinRate, 0)}%` }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-muted-foreground">Total lot</p>
+            <p class="tnum font-mono text-sm">{{ num(dayLots, 2) }}</p>
+          </div>
         </div>
 
         <div v-if="selected && violations[selected]" class="rounded-md border border-gold/40 bg-gold/5 p-2 text-xs text-gold">
           {{ violations[selected].join(' · ') }}
         </div>
 
-        <div class="table-scroll max-h-80 overflow-auto">
+        <p v-if="!dayTrades.length" class="py-6 text-center text-sm text-muted-foreground">
+          Tidak ada trade tertutup di hari ini.
+        </p>
+
+        <!-- Ponsel: satu baris per trade. Tanggalnya sudah jadi judul modal, jadi
+             kolom waktu cukup jamnya dan sisa ruangnya dipakai untuk setup + lot. -->
+        <ul v-else class="table-scroll max-h-[50vh] divide-y overflow-y-auto pr-3 sm:hidden">
+          <li v-for="trade in dayTrades" :key="trade.id" class="flex items-start justify-between gap-3 py-2.5">
+            <div class="min-w-0">
+              <p class="flex items-center gap-1.5">
+                <span class="tnum shrink-0 font-mono text-xs text-muted-foreground">
+                  {{ openedLabel(trade) }}
+                </span>
+                <span class="truncate text-sm font-medium">{{ trade.symbol }}</span>
+                <Badge
+                  :variant="trade.direction === 'buy' ? 'default' : 'secondary'"
+                  class="shrink-0 text-[10px]"
+                >
+                  {{ trade.direction === 'buy' ? 'BUY' : 'SELL' }}
+                </Badge>
+              </p>
+              <p class="truncate text-[11px] text-muted-foreground">
+                <template v-if="trade.setup">{{ trade.setup }} · </template>{{ num(trade.lot, 2) }} lot
+              </p>
+            </div>
+
+            <div class="shrink-0 text-right">
+              <p class="tnum font-mono text-sm" :class="pnlClass(trade.pnl)">
+                {{ money(trade.pnl, currency, true) }}
+              </p>
+              <p class="tnum font-mono text-[11px] text-muted-foreground">
+                {{ trade.rr_realized === null ? '—' : `${num(trade.rr_realized)}R` }}
+              </p>
+            </div>
+          </li>
+        </ul>
+
+        <div v-if="dayTrades.length" class="table-scroll hidden max-h-[55vh] overflow-auto pr-4 sm:block">
           <table class="w-full text-xs sm:text-sm">
             <thead class="text-left text-[11px] uppercase text-muted-foreground">
               <tr>
                 <th class="pb-2 font-medium">Waktu</th>
                 <th class="pb-2 font-medium">Simbol</th>
-                <th class="hidden pb-2 font-medium sm:table-cell">Arah</th>
+                <th class="pb-2 font-medium">Arah</th>
+                <th class="pb-2 text-right font-medium">Lot</th>
                 <th class="pb-2 text-right font-medium">RR</th>
                 <th class="pb-2 text-right font-medium">P/L</th>
               </tr>
             </thead>
             <tbody class="divide-y">
               <tr v-for="trade in dayTrades" :key="trade.id">
-                <td class="py-2 text-xs text-muted-foreground">{{ dateTime(trade.opened_at) }}</td>
+                <td class="tnum py-2 font-mono text-xs text-muted-foreground">{{ openedLabel(trade) }}</td>
                 <td class="py-2">
-                  <span class="flex items-center gap-1.5">
-                    {{ trade.symbol }}
-                    <!-- Di ponsel badge arah ikut di sini; kolomnya sendiri disembunyikan. -->
-                    <Badge
-                      :variant="trade.direction === 'buy' ? 'default' : 'secondary'"
-                      class="text-[10px] sm:hidden"
-                    >
-                      {{ trade.direction === 'buy' ? 'BUY' : 'SELL' }}
-                    </Badge>
-                  </span>
+                  {{ trade.symbol }}
                   <span v-if="trade.setup" class="block text-[11px] text-muted-foreground">{{ trade.setup }}</span>
                 </td>
-                <td class="hidden py-2 sm:table-cell">
+                <td class="py-2">
                   <Badge :variant="trade.direction === 'buy' ? 'default' : 'secondary'" class="text-[10px]">
                     {{ trade.direction === 'buy' ? 'BUY' : 'SELL' }}
                   </Badge>
                 </td>
+                <td class="py-2 text-right"><span class="tnum font-mono text-xs">{{ num(trade.lot, 2) }}</span></td>
                 <td class="tnum py-2 text-right font-mono text-xs">
                   {{ trade.rr_realized === null ? '—' : `${num(trade.rr_realized)}R` }}
                 </td>
-                <td
-                  class="tnum py-2 text-right font-mono"
-                  :class="(trade.pnl ?? 0) >= 0 ? 'text-success' : 'text-destructive'"
-                >
+                <td class="tnum py-2 text-right font-mono" :class="pnlClass(trade.pnl)">
                   {{ money(trade.pnl, currency, true) }}
                 </td>
               </tr>

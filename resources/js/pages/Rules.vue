@@ -55,8 +55,8 @@ function toggleSession(key: string) {
       <h1 class="text-xl font-semibold">Aturan trading</h1>
       <p class="text-sm text-muted-foreground">
         Catatan pribadi untuk mengingat batasan sendiri. Tidak ada satu pun angka di sini yang
-        memblokir pencatatan trade — hanya dipakai untuk menghitung sisa jatah dan menandai
-        hari yang melanggar.
+        memblokir pencatatan trade. Semuanya hanya dipakai untuk menghitung sisa jatah dan
+        menandai hari yang melanggar.
       </p>
     </div>
 

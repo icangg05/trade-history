@@ -112,7 +112,7 @@ class TradeImportController extends Controller
             'pnl' => $pnl,
             'opened_at' => $openedAt,
             'closed_at' => $closedAt,
-            'setup' => filled($e['setup'] ?? null) ? mb_substr($e['setup'], 0, 50) : null,
+            'setup' => filled($e['setup'] ?? null) ? mb_substr($e['setup'], 0, 255) : null,
             'notes' => $e['notes'] ?? null,
         ];
     }

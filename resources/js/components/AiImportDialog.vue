@@ -130,8 +130,8 @@ function close(revoke = true) {
       <DialogHeader>
         <DialogTitle>Baca screenshot dengan AI</DialogTitle>
         <DialogDescription>
-          Unggah layar posisi atau riwayat order yang memuat entry, SL, dan TP. Hasilnya
-          mengisi form — periksa dulu sebelum disimpan.
+          Unggah layar posisi atau riwayat order yang memuat entry, SL, dan TP.
+          Hasilnya mengisi form, periksa dulu sebelum disimpan.
         </DialogDescription>
       </DialogHeader>
 
@@ -167,7 +167,7 @@ function close(revoke = true) {
       </p>
 
       <p class="text-[11px] text-muted-foreground">
-        <template v-if="busy">Jangan tutup jendela ini — permintaan sedang berjalan.</template>
+        <template v-if="busy">Jangan tutup jendela ini, permintaan sedang berjalan.</template>
         <template v-else>Gambar hanya dibaca sekali dan tidak ikut tersimpan.</template>
       </p>
 
