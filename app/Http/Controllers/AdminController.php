@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GeminiSetting;
+use App\Models\GeminiKey;
 use App\Models\User;
+use App\Services\Gemini;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Process;
@@ -11,18 +13,17 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Satu halaman untuk dua hal yang hanya boleh disentuh admin:
- * daftar pengguna, dan kunci Gemini yang dipakai seluruh aplikasi.
+ * daftar pengguna, dan kunci-kunci Gemini yang dipakai seluruh aplikasi.
  */
 class AdminController extends Controller
 {
     public function index(Request $request): Response
     {
-        $setting = GeminiSetting::current();
-
         return Inertia::render('Admin', [
             'users' => User::withCount('accounts')
                 ->orderBy('name')
@@ -32,12 +33,12 @@ class AdminController extends Controller
                     'created_at' => $user->created_at->toDateString(),
                     'is_self' => $user->id === $request->user()->id,
                 ]),
-            'gemini' => [
-                // Kunci utuh tidak pernah dikirim ke browser — cukup potongannya.
-                'key_preview' => $setting->preview(),
-                'model' => $setting->model ?: config('services.gemini.model'),
-                ...$setting->limits(),
-            ],
+            // Kunci utuh tidak pernah dikirim ke browser — cukup potongannya.
+            'geminiKeys' => GeminiKey::query()->orderBy('id')->get()->map(fn (GeminiKey $key) => [
+                'id' => $key->id,
+                'name' => $key->name,
+                'preview' => $key->preview(),
+            ]),
         ]);
     }
 
@@ -90,34 +91,42 @@ class AdminController extends Controller
         return back()->with('success', 'Pengguna beserta seluruh datanya dihapus.');
     }
 
-    public function updateGemini(Request $request): RedirectResponse
+    public function storeGeminiKey(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            // Dikosongkan = kunci lama dipertahankan; tidak ada cara "tidak sengaja" menghapusnya.
-            'api_key' => ['nullable', 'string', 'max:255'],
-            'model' => ['required', 'string', 'max:60'],
-            'rpm' => ['required', 'integer', 'min:1', 'max:10000'],
-            'tpm' => ['required', 'integer', 'min:1000'],
-            'rpd' => ['required', 'integer', 'min:1'],
-        ]);
+        GeminiKey::create($request->validate([
+            'name' => ['required', 'string', 'max:60'],
+            'api_key' => ['required', 'string', 'max:255'],
+        ]));
 
-        $setting = GeminiSetting::current();
-        $setting->fill(array_diff_key($data, ['api_key' => null]));
-
-        if (filled($data['api_key'])) {
-            $setting->api_key = trim($data['api_key']);
-        }
-
-        $setting->save();
-
-        return back()->with('success', 'Setelan Gemini disimpan.');
+        return back()->with('success', 'Kunci ditambahkan.');
     }
 
-    public function forgetGeminiKey(): RedirectResponse
+    public function destroyGeminiKey(GeminiKey $key): RedirectResponse
     {
-        GeminiSetting::current()->fill(['api_key' => null])->save();
+        $key->delete();
 
-        return back()->with('success', 'Kunci dihapus. Aplikasi kembali memakai GEMINI_API_KEY di .env.');
+        return back()->with('success', 'Kunci dihapus.');
+    }
+
+    /**
+     * Panggil Gemini sekali dengan kunci ini; kalimat yang kembali = kunci hidup.
+     * JSON, bukan redirect: hasilnya menempel di baris kuncinya sendiri.
+     */
+    public function testGeminiKey(GeminiKey $key, Gemini $gemini): JsonResponse
+    {
+        // Sisa jeda dikirim terpisah supaya browser bisa menghitungnya mundur.
+        if ($sisa = $key->cooldownLeft()) {
+            return response()->json([
+                'message' => sprintf('Kunci "%s" baru saja dipakai.', $key->name),
+                'retry_after' => $sisa,
+            ], 429);
+        }
+
+        try {
+            return response()->json(['message' => $gemini->ping($key)]);
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 502);
+        }
     }
 
     /**

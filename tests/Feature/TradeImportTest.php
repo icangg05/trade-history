@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Account;
-use App\Models\GeminiSetting;
+use App\Models\GeminiKey;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,7 +25,7 @@ class TradeImportTest extends TestCase
     {
         parent::setUp();
 
-        GeminiSetting::create(['api_key' => 'kunci-uji', 'model' => 'gemini-3.5-flash']);
+        GeminiKey::create(['name' => 'Uji', 'api_key' => 'kunci-uji']);
     }
 
     private function actingOnAccount(): Account

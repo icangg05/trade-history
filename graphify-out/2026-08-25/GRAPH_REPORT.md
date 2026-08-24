@@ -1,12 +1,12 @@
 # Graph Report - trade-history  (2026-08-25)
 
 ## Corpus Check
-- 182 files · ~46,647 words
+- 182 files · ~46,432 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1032 nodes · 1752 edges · 72 communities (62 shown, 10 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 45 edges (avg confidence: 0.86)
+- 1029 nodes · 1747 edges · 69 communities (59 shown, 10 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -57,9 +57,7 @@
 - UserFactory.php
 - DialogContent.vue
 - AdminTest
-- DropdownMenuRadioItem.vue
 - shadcn-vue (reka-ui)
-- DropdownMenuRadioGroup.vue
 - Input.vue
 - App\Services\AccountStats
 - compose service: app (FrankenPHP dev)
@@ -67,7 +65,6 @@
 - Tabel accounts
 - PWA (manifest + service worker tulis tangan)
 - logging.php
-- SelectTrigger.vue
 - DropdownMenuCheckboxItem.vue
 - DropdownMenuContent.vue
 - draw_icon
@@ -113,7 +110,7 @@
 - **Maskable-Purpose Icon Variants** — public_icons_maskable_512_maskable_icon, public_icons_maskable_192_maskable_icon, public_icons_maskable_512_safe_zone [INFERRED 0.85]
 - **PWA / Web App Manifest Icon Set** — public_icons_icon_512_app_icon, public_icons_icon_192_app_icon, public_icons_icon_32_favicon, public_icons_apple_touch_icon_icon, public_icons_maskable_512_maskable_icon, public_icons_maskable_192_maskable_icon [INFERRED 0.95]
 
-## Communities (72 total, 10 thin omitted)
+## Communities (69 total, 10 thin omitted)
 
 ### Community 0 - "User"
 Cohesion: 0.16
@@ -121,7 +118,7 @@ Nodes (8): User, DatabaseSeeder, DemoSeeder, Illuminate\Database\Eloquent\Attrib
 
 ### Community 1 - "Account"
 Cohesion: 0.07
-Nodes (15): Account, AccountRule, Transaction, AppServiceProvider, AccountStats, Carbon\CarbonInterface, CarbonImmutable, Illuminate\Database\Eloquent\Attributes\Fillable (+7 more)
+Nodes (16): Account, AccountRule, AiAnalysis, Transaction, AppServiceProvider, AccountStats, Carbon\CarbonInterface, CarbonImmutable (+8 more)
 
 ### Community 2 - "composer.json"
 Cohesion: 0.05
@@ -136,16 +133,16 @@ Cohesion: 0.10
 Nodes (17): html, props, currency, form, PERIODS, props, confirming, profile (+9 more)
 
 ### Community 5 - "dropdown-menu/index.ts"
-Cohesion: 0.06
-Nodes (21): emits, forwarded, props, props, delegatedProps, forwardedProps, props, delegatedProps (+13 more)
+Cohesion: 0.05
+Nodes (28): emits, forwarded, props, props, delegatedProps, forwardedProps, props, delegatedProps (+20 more)
 
 ### Community 6 - "button/index.ts"
 Cohesion: 0.10
 Nodes (15): code, emit, props, typed, Props, ButtonVariants, CURRENCIES, pnlClass() (+7 more)
 
 ### Community 7 - "select/index.ts"
-Cohesion: 0.07
-Nodes (18): emits, forwarded, props, props, delegatedProps, forwardedProps, props, props (+10 more)
+Cohesion: 0.06
+Nodes (21): emits, forwarded, props, props, delegatedProps, forwardedProps, props, props (+13 more)
 
 ### Community 8 - "compilerOptions"
 Cohesion: 0.07
@@ -173,15 +170,15 @@ Nodes (14): active, areaPath, box, flowPoints, gridLines, hover, PAD, path (+6 m
 
 ### Community 14 - "Illuminate\Http\Request"
 Cohesion: 0.06
-Nodes (30): AccountController, AdminController, AnalysisController, LoginController, RegisterController, CalendarController, Controller, DashboardController (+22 more)
+Nodes (29): AccountController, AdminController, AnalysisController, LoginController, RegisterController, CalendarController, Controller, DashboardController (+21 more)
 
 ### Community 15 - "useFormat.ts"
 Cohesion: 0.10
 Nodes (20): emit, iso(), maxAbs, props, today, WEEKDAYS, weeks, compact() (+12 more)
 
 ### Community 16 - "Admin.vue"
-Cohesion: 0.10
-Nodes (15): csrf(), editing, gemini, GeminiKey, now, open, removing, removingKey (+7 more)
+Cohesion: 0.11
+Nodes (12): csrf(), editing, gemini, GeminiKey, open, removing, removingKey, results (+4 more)
 
 ### Community 17 - "TestCase"
 Cohesion: 0.14
@@ -271,17 +268,9 @@ Nodes (6): UserFactory, Illuminate\Database\Eloquent\Factories\Factory, Illumina
 Cohesion: 0.25
 Nodes (6): delegatedProps, emits, forwarded, props, delegatedProps, props
 
-### Community 42 - "DropdownMenuRadioItem.vue"
-Cohesion: 0.40
-Nodes (4): delegatedProps, emits, forwarded, props
-
 ### Community 43 - "shadcn-vue (reka-ui)"
 Cohesion: 0.32
 Nodes (8): Tema dark-only, Token warna nfp dark di-flatten ke :root, Utilities .glass / ornamen / hover-lift, PnlCalendar (grid CSS 7 kolom manual), Aturan warna semantik (gold / success / destructive / cyan), shadcn-vue (reka-ui), Tailwind CSS v4 (CSS-first), Waktu disimpan dalam Asia/Jakarta
-
-### Community 44 - "DropdownMenuRadioGroup.vue"
-Cohesion: 0.50
-Nodes (3): emits, forwarded, props
 
 ### Community 45 - "Input.vue"
 Cohesion: 0.50
@@ -311,10 +300,6 @@ Nodes (6): Menu "Pasang aplikasi" + manifest.id, PWA (manifest + service worker 
 Cohesion: 0.40
 Nodes (4): Monolog\Handler\NullHandler, Monolog\Handler\StreamHandler, Monolog\Handler\SyslogUdpHandler, Monolog\Processor\PsrLogMessageProcessor
 
-### Community 52 - "SelectTrigger.vue"
-Cohesion: 0.50
-Nodes (3): delegatedProps, forwardedProps, props
-
 ### Community 53 - "DropdownMenuCheckboxItem.vue"
 Cohesion: 0.40
 Nodes (4): delegatedProps, emits, forwarded, props
@@ -332,7 +317,7 @@ Nodes (3): Image, draw_icon(), main()
   public/robots.txt · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **368 isolated node(s):** `$schema`, `style`, `typescript`, `config`, `css` (+363 more)
+- **367 isolated node(s):** `$schema`, `style`, `typescript`, `config`, `css` (+362 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -341,15 +326,15 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `robots.txt mengizinkan seluruh crawler` and `REGISTER_TOKEN penjaga pendaftaran mandiri`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `cn()` connect `utils.ts` to `SelectContent.vue`, `Separator.vue`, `dropdown-menu/index.ts`, `button/index.ts`, `select/index.ts`, `DialogContent.vue`, `DropdownMenuRadioItem.vue`, `DropdownMenuSubContent.vue`, `Input.vue`, `SelectTrigger.vue`, `DropdownMenuCheckboxItem.vue`, `DropdownMenuContent.vue`, `Rules.vue`, `Tabs.vue`, `Index.vue`, `dialog/index.ts`, `Progress.vue`?**
+- **Why does `cn()` connect `utils.ts` to `SelectContent.vue`, `Separator.vue`, `dropdown-menu/index.ts`, `button/index.ts`, `select/index.ts`, `DialogContent.vue`, `DropdownMenuSubContent.vue`, `Input.vue`, `DropdownMenuCheckboxItem.vue`, `DropdownMenuContent.vue`, `Rules.vue`, `Tabs.vue`, `Index.vue`, `dialog/index.ts`, `Progress.vue`?**
   _High betweenness centrality (0.041) - this node is a cross-community bridge._
 - **Why does `User` connect `User` to `Account`, `TradeImportTest`, `UserFactory.php`, `AdminTest`, `Illuminate\Http\Request`, `TestCase`, `Trade`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
-- **Why does `Trade` connect `Trade` to `Account`, `Illuminate\Http\Request`, `TestCase`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `Trade` connect `Trade` to `Account`, `Illuminate\Http\Request`, `TestCase`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `typescript` to the rest of the system?**
-  _368 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _367 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Account` be split into smaller, more focused modules?**
-  _Cohesion score 0.07103825136612021 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06696428571428571 - nodes in this community are weakly interconnected._
 - **Should `composer.json` be split into smaller, more focused modules?**
   _Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected._

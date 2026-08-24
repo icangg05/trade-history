@@ -15,10 +15,9 @@ return [
     */
 
     'gemini' => [
-        // Hanya nilai bawaan. Kunci, model, dan batas kuota yang benar-benar
-        // dipakai datang dari tabel `gemini_settings` — lihat halaman /admin.
-        'model' => 'gemini-3.5-flash',
-        'limits' => ['rpm' => 15, 'tpm' => 250000, 'rpd' => 500],
+        // Model dipakai apa adanya untuk semua kunci. Kuncinya sendiri ada di
+        // tabel `gemini_keys` dan dikelola lewat halaman /admin.
+        'model' => 'gemini-3.5-flash-lite',
     ],
 
     'postmark' => [

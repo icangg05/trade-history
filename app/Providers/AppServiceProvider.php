@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Models\Account;
 use App\Models\Trade;
 use App\Models\Transaction;
-use App\Services\Gemini;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -14,12 +13,6 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        // Satu instance per request: setelan Gemini cukup dibaca sekali dari database.
-        $this->app->singleton(Gemini::class);
-    }
-
     public function boot(): void
     {
         $this->registerRequestMacros();

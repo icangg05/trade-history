@@ -150,6 +150,19 @@
       "source_location": "L9"
     },
     {
+      "id": "app_models_aianalysis_aianalysis",
+      "label": "AiAnalysis",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "aianalysis",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L9"
+    },
+    {
       "id": "app_models_transaction_transaction",
       "label": "Transaction",
       "_callable": true,
@@ -369,19 +382,6 @@
       "norm_label": "transactioncontroller",
       "source_file": "app/Http/Controllers/TransactionController.php",
       "source_location": "L15"
-    },
-    {
-      "id": "app_models_aianalysis_aianalysis",
-      "label": "AiAnalysis",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": "aianalysis",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L9"
     },
     {
       "id": "app_services_uploads_uploads",
@@ -1094,6 +1094,30 @@
       "source_location": "L20"
     },
     {
+      "id": "app_models_aianalysis_aianalysis_casts",
+      "label": ".casts()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": ".casts()",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L12"
+    },
+    {
+      "id": "app_models_trade_trade_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/Trade.php",
+      "source_location": "L50"
+    },
+    {
       "id": "app_models_transaction_transaction_account",
       "label": ".account()",
       "_callable": true,
@@ -1607,7 +1631,7 @@
       "file_type": "code",
       "norm_label": ".backup()",
       "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L138"
+      "source_location": "L130"
     },
     {
       "id": "app_http_controllers_admincontroller_admincontroller_destroygeminikey",
@@ -1655,7 +1679,7 @@
       "file_type": "code",
       "norm_label": ".islastadmin()",
       "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L172"
+      "source_location": "L164"
     },
     {
       "id": "app_http_controllers_admincontroller_admincontroller_storegeminikey",
@@ -2102,18 +2126,6 @@
       "source_location": "L45"
     },
     {
-      "id": "app_models_aianalysis_aianalysis_casts",
-      "label": ".casts()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": ".casts()",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L12"
-    },
-    {
       "id": "app_services_uploads_uploads_delete",
       "label": ".delete()",
       "_callable": true,
@@ -2231,7 +2243,7 @@
       "file_type": "code",
       "norm_label": "addkey()",
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L116"
+      "source_location": "L94"
     },
     {
       "id": "resources_js_pages_admin_closeresult",
@@ -2243,7 +2255,7 @@
       "file_type": "code",
       "norm_label": "closeresult()",
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L127"
+      "source_location": "L105"
     },
     {
       "id": "resources_js_pages_admin_create",
@@ -2267,7 +2279,7 @@
       "file_type": "code",
       "norm_label": "csrf()",
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L121"
+      "source_location": "L99"
     },
     {
       "id": "resources_js_pages_admin_destroykey",
@@ -2306,18 +2318,6 @@
       "source_location": "L55"
     },
     {
-      "id": "resources_js_pages_admin_secondsleft",
-      "label": "secondsLeft()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "Admin.vue",
-      "file_type": "code",
-      "norm_label": "secondsleft()",
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L97"
-    },
-    {
       "id": "resources_js_pages_admin_submituser",
       "label": "submitUser()",
       "_callable": true,
@@ -2339,19 +2339,7 @@
       "file_type": "code",
       "norm_label": "testkey()",
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L131"
-    },
-    {
-      "id": "resources_js_pages_admin_tick",
-      "label": "tick()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "Admin.vue",
-      "file_type": "code",
-      "norm_label": "tick()",
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L101"
+      "source_location": "L109"
     },
     {
       "id": "tests_feature_geminikeytest_geminikeytest_setup",
@@ -2664,18 +2652,6 @@
       "norm_label": ".rules()",
       "source_file": "app/Http/Requests/TradeRequest.php",
       "source_location": "L10"
-    },
-    {
-      "id": "app_models_trade_trade_account",
-      "label": ".account()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Trade",
-      "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/Trade.php",
-      "source_location": "L50"
     },
     {
       "id": "app_models_trade_trade_booted",
@@ -3479,7 +3455,7 @@
       "file_type": "code",
       "norm_label": ".analyze()",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L151"
+      "source_location": "L138"
     },
     {
       "id": "app_services_gemini_gemini_call",
@@ -3491,7 +3467,7 @@
       "file_type": "code",
       "norm_label": ".call()",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L258"
+      "source_location": "L245"
     },
     {
       "id": "app_services_gemini_gemini_extracttrade",
@@ -3503,7 +3479,7 @@
       "file_type": "code",
       "norm_label": ".extracttrade()",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L70"
+      "source_location": "L57"
     },
     {
       "id": "app_services_gemini_gemini_model",
@@ -3539,7 +3515,7 @@
       "file_type": "code",
       "norm_label": ".text()",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L287"
+      "source_location": "L274"
     },
     {
       "id": "tests_feature_tradeimporttest_tradeimporttest_actingonaccount",
@@ -5573,17 +5549,6 @@
       "source_location": "L89"
     },
     {
-      "id": "resources_js_pages_admin_now",
-      "label": "now",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "Admin.vue",
-      "file_type": "code",
-      "norm_label": "now",
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L94"
-    },
-    {
       "id": "resources_js_pages_admin_open",
       "label": "open",
       "_origin": "ast",
@@ -5625,7 +5590,7 @@
       "file_type": "code",
       "norm_label": "results",
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L93"
+      "source_location": "L92"
     },
     {
       "id": "resources_js_pages_admin_testing",
@@ -8873,105 +8838,6 @@
       "source_location": "L8"
     },
     {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem",
-      "label": "DropdownMenuRadioItem.vue",
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "DropdownMenuRadioItem.vue",
-      "file_type": "code",
-      "norm_label": "dropdownmenuradioitem.vue",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem_delegatedprops",
-      "label": "delegatedProps",
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "DropdownMenuRadioItem.vue",
-      "file_type": "code",
-      "norm_label": "delegatedprops",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
-      "source_location": "L17"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem_emits",
-      "label": "emits",
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "DropdownMenuRadioItem.vue",
-      "file_type": "code",
-      "norm_label": "emits",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
-      "source_location": "L15"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem_forwarded",
-      "label": "forwarded",
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "DropdownMenuRadioItem.vue",
-      "file_type": "code",
-      "norm_label": "forwarded",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
-      "source_location": "L19"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "DropdownMenuRadioItem.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
-      "source_location": "L13"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradiogroup",
-      "label": "DropdownMenuRadioGroup.vue",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "DropdownMenuRadioGroup.vue",
-      "file_type": "code",
-      "norm_label": "dropdownmenuradiogroup.vue",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradiogroup_emits",
-      "label": "emits",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "DropdownMenuRadioGroup.vue",
-      "file_type": "code",
-      "norm_label": "emits",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue",
-      "source_location": "L9"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradiogroup_forwarded",
-      "label": "forwarded",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "DropdownMenuRadioGroup.vue",
-      "file_type": "code",
-      "norm_label": "forwarded",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue",
-      "source_location": "L11"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradiogroup_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "DropdownMenuRadioGroup.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue",
-      "source_location": "L8"
-    },
-    {
       "id": "resources_js_components_ui_input_input",
       "label": "Input.vue",
       "_origin": "ast",
@@ -9168,6 +9034,105 @@
       "norm_label": "props",
       "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuLabel.vue",
       "source_location": "L8"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradiogroup",
+      "label": "DropdownMenuRadioGroup.vue",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "dropdownmenuradiogroup.vue",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradiogroup_emits",
+      "label": "emits",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "emits",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue",
+      "source_location": "L9"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradiogroup_forwarded",
+      "label": "forwarded",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "forwarded",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue",
+      "source_location": "L11"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradiogroup_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioGroup.vue",
+      "source_location": "L8"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem",
+      "label": "DropdownMenuRadioItem.vue",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "dropdownmenuradioitem.vue",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem_delegatedprops",
+      "label": "delegatedProps",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "delegatedprops",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
+      "source_location": "L17"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem_emits",
+      "label": "emits",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "emits",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
+      "source_location": "L15"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem_forwarded",
+      "label": "forwarded",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "forwarded",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
+      "source_location": "L19"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenuradioitem_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuRadioItem.vue",
+      "source_location": "L13"
     },
     {
       "id": "resources_js_components_ui_dropdown_menu_dropdownmenuseparator",
@@ -9410,50 +9375,6 @@
       "norm_label": "monolog\\processor\\psrlogmessageprocessor",
       "source_file": "",
       "source_location": ""
-    },
-    {
-      "id": "resources_js_components_ui_select_selecttrigger",
-      "label": "SelectTrigger.vue",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "SelectTrigger.vue",
-      "file_type": "code",
-      "norm_label": "selecttrigger.vue",
-      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_select_selecttrigger_delegatedprops",
-      "label": "delegatedProps",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "SelectTrigger.vue",
-      "file_type": "code",
-      "norm_label": "delegatedprops",
-      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
-      "source_location": "L14"
-    },
-    {
-      "id": "resources_js_components_ui_select_selecttrigger_forwardedprops",
-      "label": "forwardedProps",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "SelectTrigger.vue",
-      "file_type": "code",
-      "norm_label": "forwardedprops",
-      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
-      "source_location": "L15"
-    },
-    {
-      "id": "resources_js_components_ui_select_selecttrigger_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "SelectTrigger.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
-      "source_location": "L9"
     },
     {
       "id": "resources_js_components_ui_dropdown_menu_dropdownmenucheckboxitem",
@@ -10268,6 +10189,50 @@
       "norm_label": "props",
       "source_file": "resources/js/components/ui/select/SelectSeparator.vue",
       "source_location": "L8"
+    },
+    {
+      "id": "resources_js_components_ui_select_selecttrigger",
+      "label": "SelectTrigger.vue",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "select/index.ts",
+      "file_type": "code",
+      "norm_label": "selecttrigger.vue",
+      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_select_selecttrigger_delegatedprops",
+      "label": "delegatedProps",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "select/index.ts",
+      "file_type": "code",
+      "norm_label": "delegatedprops",
+      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "source_location": "L14"
+    },
+    {
+      "id": "resources_js_components_ui_select_selecttrigger_forwardedprops",
+      "label": "forwardedProps",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "select/index.ts",
+      "file_type": "code",
+      "norm_label": "forwardedprops",
+      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "source_location": "L15"
+    },
+    {
+      "id": "resources_js_components_ui_select_selecttrigger_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "select/index.ts",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "source_location": "L9"
     },
     {
       "id": "resources_js_components_ui_select_selectvalue",
@@ -12231,7 +12196,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L174",
+      "source_location": "L166",
       "weight": 1.0
     },
     {
@@ -13035,7 +13000,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L243",
+      "source_location": "L230",
       "weight": 1.0
     },
     {
@@ -13047,7 +13012,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L252",
+      "source_location": "L239",
       "weight": 1.0
     },
     {
@@ -13059,7 +13024,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L260",
+      "source_location": "L247",
       "weight": 1.0
     },
     {
@@ -13071,7 +13036,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L267",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -13095,7 +13060,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L123",
+      "source_location": "L110",
       "weight": 1.0
     },
     {
@@ -13107,7 +13072,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L137",
+      "source_location": "L124",
       "weight": 1.0
     },
     {
@@ -13119,7 +13084,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L46",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -13131,7 +13096,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L55",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -13323,19 +13288,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L138",
-      "weight": 1.0
-    },
-    {
-      "source": "resources_js_pages_admin_tick",
-      "target": "resources_js_pages_admin_secondsleft",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L105",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -22599,7 +22552,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L138",
+      "source_location": "L130",
       "weight": 1.0
     },
     {
@@ -27456,46 +27409,24 @@
     },
     {
       "source": "resources_js_pages_admin",
-      "target": "resources_js_pages_admin_tick",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L101",
-      "weight": 1.0
-    },
-    {
-      "source": "resources_js_pages_admin",
-      "target": "resources_js_pages_admin_addkey",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L116",
-      "weight": 1.0
-    },
-    {
-      "source": "resources_js_pages_admin",
-      "target": "resources_js_pages_admin_csrf",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L121",
-      "weight": 1.0
-    },
-    {
-      "source": "resources_js_pages_admin",
       "target": "resources_js_pages_admin_closeresult",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L127",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "resources_js_pages_admin",
+      "target": "resources_js_pages_admin_testkey",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "resources/js/pages/Admin.vue",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -27507,17 +27438,6 @@
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Admin.vue",
       "source_location": "L13",
-      "weight": 1.0
-    },
-    {
-      "source": "resources_js_pages_admin",
-      "target": "resources_js_pages_admin_testkey",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L131",
       "weight": 1.0
     },
     {
@@ -27671,12 +27591,12 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L93",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
       "source": "resources_js_pages_admin",
-      "target": "resources_js_pages_admin_now",
+      "target": "resources_js_pages_admin_addkey",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -27687,13 +27607,13 @@
     },
     {
       "source": "resources_js_pages_admin",
-      "target": "resources_js_pages_admin_secondsleft",
+      "target": "resources_js_pages_admin_csrf",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L97",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -29200,7 +29120,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L138",
+      "source_location": "L130",
       "weight": 1.0
     },
     {
@@ -29211,7 +29131,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L172",
+      "source_location": "L164",
       "weight": 1.0
     },
     {
@@ -30344,7 +30264,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L151",
+      "source_location": "L138",
       "weight": 1.0
     },
     {
@@ -30366,7 +30286,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L258",
+      "source_location": "L245",
+      "weight": 1.0
+    },
+    {
+      "source": "app_services_gemini_gemini",
+      "target": "app_services_gemini_gemini_text",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L274",
       "weight": 1.0
     },
     {
@@ -30378,17 +30309,6 @@
       "confidence_score": 1.0,
       "source_file": "app/Services/Gemini.php",
       "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "app_services_gemini_gemini",
-      "target": "app_services_gemini_gemini_text",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L287",
       "weight": 1.0
     },
     {
@@ -30410,7 +30330,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Services/Gemini.php",
-      "source_location": "L70",
+      "source_location": "L57",
       "weight": 1.0
     },
     {
@@ -31071,18 +30991,6 @@
       "confidence_score": 1.0,
       "source_file": "database/factories/UserFactory.php",
       "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "resources_js_pages_admin_testkey",
-      "target": "resources_js_pages_admin_tick",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "resources/js/pages/Admin.vue",
-      "source_location": "L149",
       "weight": 1.0
     },
     {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { DatabaseBackup, KeyRound, Pencil, Plus, ShieldCheck, Trash2 } from '@lucide/vue'
+import { DatabaseBackup, KeyRound, Pencil, Plus, ShieldCheck, Trash2, X, Zap } from '@lucide/vue'
 
 import ConfirmDestroy from '@/components/ConfirmDestroy.vue'
 import { Button } from '@/components/ui/button'
@@ -20,14 +20,21 @@ interface Row {
   is_self: boolean
 }
 
-const props = defineProps<{
+interface GeminiKey {
+  id: number
+  name: string
+  preview: string
+}
+
+defineProps<{
   users: Row[]
-  gemini: { key_preview: string | null; model: string; rpm: number; tpm: number; rpd: number }
+  geminiKeys: GeminiKey[]
 }>()
 
 const open = ref(false)
 const editing = ref<Row | null>(null)
 const removing = ref<Row | null>(null)
+const removingKey = ref<GeminiKey | null>(null)
 
 const user = useForm({
   name: '',
@@ -65,6 +72,13 @@ function submitUser() {
   editing.value ? user.put(`/admin/users/${editing.value.id}`, done) : user.post('/admin/users', done)
 }
 
+function destroyKey() {
+  router.delete(`/admin/gemini-keys/${removingKey.value!.id}`, {
+    preserveScroll: true,
+    onFinish: () => (removingKey.value = null),
+  })
+}
+
 function destroyUser() {
   router.delete(`/admin/users/${removing.value!.id}`, {
     preserveScroll: true,
@@ -72,16 +86,72 @@ function destroyUser() {
   })
 }
 
-const gemini = useForm({
-  api_key: '',
-  model: props.gemini.model,
-  rpm: props.gemini.rpm,
-  tpm: props.gemini.tpm,
-  rpd: props.gemini.rpd,
-})
+const gemini = useForm({ name: '', api_key: '' })
+const testing = ref<number | null>(null)
+// Hasil uji menempel di baris kuncinya. Yang bertema jeda punya `until` dan
+// hilang sendiri saat hitungan mundurnya habis; sisanya menunggu tombol tutup.
+const results = ref<Record<number, { text: string; ok: boolean; until?: number }>>({})
+const now = ref(Date.now())
+let ticker: ReturnType<typeof setInterval> | undefined
 
-function saveGemini() {
-  gemini.put('/admin/gemini', { preserveScroll: true, onSuccess: () => (gemini.api_key = '') })
+function secondsLeft(until: number): number {
+  return Math.max(0, Math.ceil((until - now.value) / 1000))
+}
+
+function tick() {
+  now.value = Date.now()
+
+  for (const [id, result] of Object.entries(results.value)) {
+    if (result.until && secondsLeft(result.until) === 0) delete results.value[Number(id)]
+  }
+
+  if (!Object.values(results.value).some((result) => result.until)) {
+    clearInterval(ticker)
+    ticker = undefined
+  }
+}
+
+onUnmounted(() => clearInterval(ticker))
+
+function addKey() {
+  gemini.post('/admin/gemini-keys', { preserveScroll: true, onSuccess: () => gemini.reset() })
+}
+
+/** Laravel menerima token CSRF terenkripsi lewat header X-XSRF-TOKEN. */
+function csrf(): string {
+  const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/)
+
+  return match ? decodeURIComponent(match[1]) : ''
+}
+
+function closeResult(id: number) {
+  delete results.value[id]
+}
+
+async function testKey(id: number) {
+  testing.value = id
+  delete results.value[id]
+
+  try {
+    const response = await fetch(`/admin/gemini-keys/${id}/test`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'X-XSRF-TOKEN': csrf() },
+    })
+    const payload = await response.json()
+
+    results.value[id] = {
+      text: payload.message ?? 'Gagal menguji kunci.',
+      ok: response.ok,
+      until: payload.retry_after ? Date.now() + payload.retry_after * 1000 : undefined,
+    }
+
+    now.value = Date.now()
+    ticker ??= setInterval(tick, 250)
+  } catch {
+    results.value[id] = { text: 'Tidak bisa terhubung ke server.', ok: false }
+  } finally {
+    testing.value = null
+  }
 }
 </script>
 
@@ -101,78 +171,78 @@ function saveGemini() {
         <div>
           <h2 class="text-sm font-semibold">Kunci Gemini</h2>
           <p class="text-xs text-muted-foreground">
-            Tersimpan terenkripsi di database dan dipakai semua pengguna. Kosong → aplikasi memakai
-            <code>GEMINI_API_KEY</code> di <code>.env</code>.
+            Tersimpan terenkripsi di database dan dipakai semua pengguna. Kunci dipakai bergantian:
+            satu kunci baru boleh dipakai lagi setelah 10 detik. Tanpa kunci, fitur AI (import
+            screenshot dan analisa) tidak bisa dipakai.
           </p>
         </div>
       </div>
 
-      <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="saveGemini">
+      <div v-if="geminiKeys.length" class="divide-y rounded-md border">
+        <div v-for="row in geminiKeys" :key="row.id" class="flex flex-wrap items-center gap-3 p-2.5">
+          <div class="min-w-0 shrink-0">
+            <p class="truncate text-sm font-medium">{{ row.name }}</p>
+            <p class="truncate font-mono text-[11px] text-muted-foreground">{{ row.preview }}</p>
+          </div>
+
+          <!-- Hasil uji: mengisi ruang antara nama kunci dan tombol, dibuang saat ditutup.
+               out-in = klik Tes berulang membuat hasil lama pudar dulu, baru yang baru masuk. -->
+          <Transition
+            mode="out-in"
+            enter-active-class="animate-in fade-in slide-in-from-left-2 duration-200"
+            leave-active-class="animate-out fade-out slide-out-to-left-2 duration-150"
+          >
+            <div
+              v-if="results[row.id]"
+              :key="results[row.id].text"
+              class="order-last flex w-full min-w-0 flex-1 items-start gap-2 rounded-md px-2.5 py-1.5 text-xs sm:order-none sm:w-auto"
+              :class="results[row.id].ok ? 'bg-gold/10 text-foreground' : 'bg-destructive/10 text-destructive'"
+            >
+              <p class="min-w-0 flex-1 break-words">
+                {{ results[row.id].text }}
+                <template v-if="results[row.id].until">
+                  Tunggu {{ secondsLeft(results[row.id].until!) }} detik lagi.
+                </template>
+              </p>
+              <button
+                type="button"
+                title="Tutup"
+                class="shrink-0 text-muted-foreground hover:text-foreground"
+                @click="closeResult(row.id)"
+              >
+                <X class="size-3.5" />
+              </button>
+            </div>
+          </Transition>
+
+          <div class="ml-auto flex shrink-0 gap-1">
+            <Button size="sm" variant="outline" class="gap-1.5" :disabled="testing === row.id" @click="testKey(row.id)">
+              <Zap class="size-3.5" />
+              {{ testing === row.id ? 'Menguji…' : 'Tes' }}
+            </Button>
+            <Button size="icon-xs" variant="ghost" title="Hapus" @click="removingKey = row">
+              <Trash2 class="size-3.5 text-destructive" />
+            </Button>
+          </div>
+        </div>
+      </div>
+      <p v-else class="text-xs text-muted-foreground">Belum ada kunci — import AI dan analisa nonaktif.</p>
+
+      <form class="grid gap-3 sm:grid-cols-[1fr_2fr_auto]" @submit.prevent="addKey">
+        <div class="space-y-1.5">
+          <Label for="key_name">Nama kunci</Label>
+          <Input id="key_name" v-model="gemini.name" placeholder="Akun utama" required />
+          <p v-if="gemini.errors.name" class="text-xs text-destructive">{{ gemini.errors.name }}</p>
+        </div>
         <div class="space-y-1.5">
           <Label for="api_key">Kunci API</Label>
-          <Input
-            id="api_key"
-            v-model="gemini.api_key"
-            type="password"
-            autocomplete="off"
-            :placeholder="props.gemini.key_preview ?? 'AIza… (tempel kunci di sini)'"
-          />
-          <p class="text-[11px] text-muted-foreground">
-            <template v-if="props.gemini.key_preview">
-              Terpasang: <span class="font-mono">{{ props.gemini.key_preview }}</span
-              >. Kosongkan bila tidak diganti.
-            </template>
-            <template v-else>Belum ada kunci — import AI dan analisa nonaktif.</template>
-          </p>
+          <Input id="api_key" v-model="gemini.api_key" type="password" autocomplete="off" placeholder="AIza… (tempel kunci di sini)" required />
           <p v-if="gemini.errors.api_key" class="text-xs text-destructive">{{ gemini.errors.api_key }}</p>
         </div>
-
-        <div class="space-y-1.5">
-          <Label for="model">Nama model</Label>
-          <Input id="model" v-model="gemini.model" placeholder="gemini-3.5-flash-lite" list="gemini-models" />
-          <datalist id="gemini-models">
-            <option value="gemini-3.5-flash" />
-            <option value="gemini-3.5-flash-lite" />
-            <option value="gemini-3-pro" />
-          </datalist>
-          <p class="text-[11px] text-muted-foreground">Sesuaikan batas di bawah kalau model diganti.</p>
-          <p v-if="gemini.errors.model" class="text-xs text-destructive">{{ gemini.errors.model }}</p>
-        </div>
-
-        <div class="grid gap-3 sm:col-span-2 sm:grid-cols-3">
-          <div class="space-y-1.5">
-            <Label for="rpm">Permintaan / menit</Label>
-            <Input id="rpm" v-model="gemini.rpm" type="number" min="1" placeholder="15" />
-            <p v-if="gemini.errors.rpm" class="text-xs text-destructive">{{ gemini.errors.rpm }}</p>
-          </div>
-          <div class="space-y-1.5">
-            <Label for="tpm">Token / menit</Label>
-            <Input id="tpm" v-model="gemini.tpm" type="number" min="1000" step="1000" placeholder="250000" />
-            <p v-if="gemini.errors.tpm" class="text-xs text-destructive">{{ gemini.errors.tpm }}</p>
-          </div>
-          <div class="space-y-1.5">
-            <Label for="rpd">Permintaan / hari</Label>
-            <Input id="rpd" v-model="gemini.rpd" type="number" min="1" placeholder="500" />
-            <p v-if="gemini.errors.rpd" class="text-xs text-destructive">{{ gemini.errors.rpd }}</p>
-          </div>
-        </div>
-
-        <p class="text-[11px] text-muted-foreground sm:col-span-2">
-          Permintaan ditolak di sisi aplikasi begitu salah satu batas ini terpakai habis, jadi
-          Google tidak pernah sempat mengembalikan 429. Isi sedikit di bawah kuota resmi model.
-        </p>
-
-        <div class="flex justify-end gap-2 sm:col-span-2">
-          <Button
-            v-if="props.gemini.key_preview"
-            type="button"
-            variant="ghost"
-            size="sm"
-            @click="router.delete('/admin/gemini', { preserveScroll: true })"
-          >
-            Hapus kunci
+        <div class="flex items-end">
+          <Button type="submit" class="w-full gap-1.5" :disabled="gemini.processing">
+            <Plus class="size-4" /> Tambah
           </Button>
-          <Button type="submit" :disabled="gemini.processing">Simpan</Button>
         </div>
       </form>
     </div>
@@ -184,9 +254,7 @@ function saveGemini() {
         <div>
           <h2 class="text-sm font-semibold">Cadangan database</h2>
           <p class="text-xs text-muted-foreground">
-            Unduh seluruh isi database sebagai berkas <code>.sql</code> — pengguna, akun, trade,
-            transaksi, dan aturan. Bukti transfer tidak ikut (berkasnya ada di
-            <code>storage/app</code>).
+            Unduh seluruh isi database yang mencakup pengguna, akun, trade, transaksi, dan aturan ke dalam berkas <code>.sql</code> (berkas bukti transfer di <code>storage/app</code> tidak termasuk).
           </p>
         </div>
       </div>
@@ -326,6 +394,15 @@ function saveGemini() {
         </form>
       </DialogContent>
     </Dialog>
+
+    <ConfirmDestroy
+      :open="removingKey !== null"
+      :title="`Hapus kunci ${removingKey?.name ?? ''}?`"
+      description="Kunci ini tidak lagi dipakai untuk memanggil Gemini. Kunci lain tetap jalan."
+      confirm-label="Hapus kunci"
+      @update:open="(value) => !value && (removingKey = null)"
+      @confirm="destroyKey"
+    />
 
     <ConfirmDestroy
       :open="removing !== null"

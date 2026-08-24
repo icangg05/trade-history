@@ -12,10 +12,10 @@
     "semantic_hash": "f986b21c0a90cb5e09405aad99bf4dde"
   },
   "app/Http/Controllers/AdminController.php": {
-    "mtime": 1787590661.850653,
-    "seen": 1787590732.5360315,
-    "ast_hash": "af946b52f62638505c432ecadddd715b",
-    "semantic_hash": ""
+    "mtime": 1787570439.3191392,
+    "seen": 1787570818.9442616,
+    "ast_hash": "8d7d5286b3621854d8b0abe7003f62f0",
+    "semantic_hash": "8d7d5286b3621854d8b0abe7003f62f0"
   },
   "app/Http/Controllers/AnalysisController.php": {
     "mtime": 1787566959.629597,
@@ -66,16 +66,16 @@
     "semantic_hash": "6feac2b91515aee41dbc1212ef500794"
   },
   "app/Http/Controllers/TradeController.php": {
-    "mtime": 1787570969.9294443,
-    "seen": 1787573798.8984518,
-    "ast_hash": "01244bedd1c2e450fef5fb5fbd5ddd78",
-    "semantic_hash": ""
+    "mtime": 1787566969.4448652,
+    "seen": 1787570818.9442673,
+    "ast_hash": "db4520977d0d24c971f9bd64aa9ef626",
+    "semantic_hash": "db4520977d0d24c971f9bd64aa9ef626"
   },
   "app/Http/Controllers/TradeImportController.php": {
-    "mtime": 1787589802.3108928,
-    "seen": 1787589873.7910151,
-    "ast_hash": "a32c64c838a8b55607caaeb62957dea6",
-    "semantic_hash": ""
+    "mtime": 1787536681.800649,
+    "seen": 1787570818.9442677,
+    "ast_hash": "324dab85de31af8fffc755b6d49d629f",
+    "semantic_hash": "324dab85de31af8fffc755b6d49d629f"
   },
   "app/Http/Controllers/TransactionController.php": {
     "mtime": 1787536593.7845733,
@@ -114,10 +114,10 @@
     "semantic_hash": "539ff8e8ecad9b26150020a10adcca96"
   },
   "app/Http/Requests/TradeRequest.php": {
-    "mtime": 1787570990.1166275,
-    "seen": 1787573798.89868,
-    "ast_hash": "67437c4690c38582b365609a18765606",
-    "semantic_hash": ""
+    "mtime": 1787539483.1212146,
+    "seen": 1787570818.9442718,
+    "ast_hash": "87f26ed0c2499465697196ee77e0a11e",
+    "semantic_hash": "87f26ed0c2499465697196ee77e0a11e"
   },
   "app/Models/Account.php": {
     "mtime": 1787532055.912547,
@@ -137,11 +137,17 @@
     "ast_hash": "706cee0f2193bfe6061f7c63fc013eb2",
     "semantic_hash": "706cee0f2193bfe6061f7c63fc013eb2"
   },
+  "app/Models/GeminiSetting.php": {
+    "mtime": 1787568388.4956782,
+    "seen": 1787570818.9442742,
+    "ast_hash": "a0979ca01e3f0b873d49274336b0d049",
+    "semantic_hash": "a0979ca01e3f0b873d49274336b0d049"
+  },
   "app/Models/Trade.php": {
-    "mtime": 1787570969.9292936,
-    "seen": 1787573798.898801,
-    "ast_hash": "78d53ad90fd352264d51625e37ba3e7c",
-    "semantic_hash": ""
+    "mtime": 1787536558.2880583,
+    "seen": 1787570818.9442747,
+    "ast_hash": "187726a8e4cc1091cf1012a1bf322cb9",
+    "semantic_hash": "187726a8e4cc1091cf1012a1bf322cb9"
   },
   "app/Models/Transaction.php": {
     "mtime": 1787536558.2881434,
@@ -156,10 +162,10 @@
     "semantic_hash": "e094d3bd59e4060d3bbccde9f2c391ae"
   },
   "app/Providers/AppServiceProvider.php": {
-    "mtime": 1787589716.112384,
-    "seen": 1787589873.791762,
-    "ast_hash": "d20283432ba75674eda83d1943d8f047",
-    "semantic_hash": ""
+    "mtime": 1787568403.352356,
+    "seen": 1787570818.9442763,
+    "ast_hash": "087fab67b6cbc30ef28fb60e3bba8dfc",
+    "semantic_hash": "087fab67b6cbc30ef28fb60e3bba8dfc"
   },
   "app/Services/AccountStats.php": {
     "mtime": 1787533608.551192,
@@ -168,10 +174,10 @@
     "semantic_hash": "d53fef99e348b2b982db4cbea6519d82"
   },
   "app/Services/Gemini.php": {
-    "mtime": 1787590661.8503978,
-    "seen": 1787590732.5368197,
-    "ast_hash": "c92a920afa7f5155b84daa3854987d43",
-    "semantic_hash": ""
+    "mtime": 1787568403.3516016,
+    "seen": 1787570818.9442775,
+    "ast_hash": "90d263099b93fe57d1cadb5b93da49fb",
+    "semantic_hash": "90d263099b93fe57d1cadb5b93da49fb"
   },
   "app/Services/Uploads.php": {
     "mtime": 1787536558.2922862,
@@ -186,10 +192,10 @@
     "semantic_hash": "e66bb13691f6184c762c196427d8e685"
   },
   "bootstrap/app.php": {
-    "mtime": 1787572891.3247912,
-    "seen": 1787573798.8989947,
-    "ast_hash": "6b08e99bb0274e4d1821dcb08917081d",
-    "semantic_hash": ""
+    "mtime": 1787568418.145169,
+    "seen": 1787570818.944279,
+    "ast_hash": "603f2c11fa5f3ceb7c21f3d8829e3a9b",
+    "semantic_hash": "603f2c11fa5f3ceb7c21f3d8829e3a9b"
   },
   "bootstrap/providers.php": {
     "mtime": 1787003123.0,
@@ -258,10 +264,10 @@
     "semantic_hash": "f98ce92e7bf51db1fabaf8a30e12fc5a"
   },
   "config/services.php": {
-    "mtime": 1787589716.1125238,
-    "seen": 1787589873.792509,
-    "ast_hash": "bd4487699ac36fb8e7705fe1a3b35277",
-    "semantic_hash": ""
+    "mtime": 1787568388.514997,
+    "seen": 1787570818.944286,
+    "ast_hash": "027bc7ca18a45771b3f53bd3a3d43c20",
+    "semantic_hash": "027bc7ca18a45771b3f53bd3a3d43c20"
   },
   "config/session.php": {
     "mtime": 1787003123.0,
@@ -912,16 +918,16 @@
     "semantic_hash": "c0f18db18460c6f4658a7eb8df6ac6c0"
   },
   "resources/js/pages/Admin.vue": {
-    "mtime": 1787590677.7193146,
-    "seen": 1787590732.540721,
-    "ast_hash": "93a47bddaa62fe4d13d7975949410841",
-    "semantic_hash": ""
+    "mtime": 1787568672.5409014,
+    "seen": 1787570818.9443517,
+    "ast_hash": "5f9edac1a40664deda22297d1f81f2e3",
+    "semantic_hash": "5f9edac1a40664deda22297d1f81f2e3"
   },
   "resources/js/pages/Analysis.vue": {
-    "mtime": 1787571535.7489173,
-    "seen": 1787573798.9029164,
-    "ast_hash": "5b0eb007fee470854afc73006eceb743",
-    "semantic_hash": ""
+    "mtime": 1787568597.400793,
+    "seen": 1787570818.9443521,
+    "ast_hash": "58984c6a5b424525d457d05e1e41b882",
+    "semantic_hash": "58984c6a5b424525d457d05e1e41b882"
   },
   "resources/js/pages/Calendar.vue": {
     "mtime": 1787567193.8194213,
@@ -960,16 +966,16 @@
     "semantic_hash": "56e2af90e42d3db2edd7bb4146649e1e"
   },
   "resources/js/pages/Trades/Form.vue": {
-    "mtime": 1787570990.1169853,
-    "seen": 1787573798.9030976,
-    "ast_hash": "dd68922da47b7a2e6b3e169b42b856c6",
-    "semantic_hash": ""
+    "mtime": 1787568597.400982,
+    "seen": 1787570818.9443564,
+    "ast_hash": "6e72b2456923e6d46756d6798c9599f5",
+    "semantic_hash": "6e72b2456923e6d46756d6798c9599f5"
   },
   "resources/js/pages/Trades/Index.vue": {
-    "mtime": 1787571013.6449885,
-    "seen": 1787573798.9030986,
-    "ast_hash": "bbfe97acae6864e06b362f585ba438b9",
-    "semantic_hash": ""
+    "mtime": 1787567162.277527,
+    "seen": 1787570818.944357,
+    "ast_hash": "e326ec308495d8a8bbead7428fe2878e",
+    "semantic_hash": "e326ec308495d8a8bbead7428fe2878e"
   },
   "resources/js/pages/Transactions.vue": {
     "mtime": 1787568641.2324047,
@@ -978,10 +984,10 @@
     "semantic_hash": "014564d86454629ee50e312908b9e428"
   },
   "resources/js/types/index.ts": {
-    "mtime": 1787570969.9294803,
-    "seen": 1787573798.9031281,
-    "ast_hash": "af8bc8df22bec9f236f853d3c0baa433",
-    "semantic_hash": ""
+    "mtime": 1787567086.7335372,
+    "seen": 1787570818.9443579,
+    "ast_hash": "ad3b7b6f7841572a9d16c888c55456d3",
+    "semantic_hash": "ad3b7b6f7841572a9d16c888c55456d3"
   },
   "resources/views/app.blade.php": {
     "mtime": 1787537018.7073526,
@@ -996,10 +1002,10 @@
     "semantic_hash": "3c6ce2e6d16444282b24a9aa63885563"
   },
   "routes/web.php": {
-    "mtime": 1787589737.3864312,
-    "seen": 1787589873.7975366,
-    "ast_hash": "896ce1f5a0a06c7dd8b613bfc03e9e8e",
-    "semantic_hash": ""
+    "mtime": 1787568427.6152012,
+    "seen": 1787570818.9443598,
+    "ast_hash": "b16094043634458707d385393046e40e",
+    "semantic_hash": "b16094043634458707d385393046e40e"
   },
   "scripts/make-icons.py": {
     "mtime": 1787536971.6732159,
@@ -1008,16 +1014,22 @@
     "semantic_hash": "ebfabe349c4714fe6b167732959fb9a9"
   },
   "tests/Feature/AdminTest.php": {
-    "mtime": 1787590694.2108188,
-    "seen": 1787590732.5412507,
-    "ast_hash": "2d954306eecde4e414d47f1fa0c445b4",
-    "semantic_hash": ""
+    "mtime": 1787568799.0295131,
+    "seen": 1787570818.9443607,
+    "ast_hash": "2c06b00a001861cd9f175bac3c83dd9c",
+    "semantic_hash": "2c06b00a001861cd9f175bac3c83dd9c"
+  },
+  "tests/Feature/GeminiQuotaTest.php": {
+    "mtime": 1787568707.2027967,
+    "seen": 1787570818.9443612,
+    "ast_hash": "78a4f38b20a87e703260cec2febd1ac6",
+    "semantic_hash": "78a4f38b20a87e703260cec2febd1ac6"
   },
   "tests/Feature/JournalTest.php": {
-    "mtime": 1787571074.1353884,
-    "seen": 1787573798.9032876,
-    "ast_hash": "79e35427f3596769cd481e3affddb1bb",
-    "semantic_hash": ""
+    "mtime": 1787539532.8635628,
+    "seen": 1787570818.944363,
+    "ast_hash": "20243d6905ef642e8783f52f199787c9",
+    "semantic_hash": "20243d6905ef642e8783f52f199787c9"
   },
   "tests/Feature/RegisterTest.php": {
     "mtime": 1787569761.71535,
@@ -1026,10 +1038,10 @@
     "semantic_hash": "442d21787d4dfaec48c59c549fab631d"
   },
   "tests/Feature/TradeImportTest.php": {
-    "mtime": 1787589802.3109832,
-    "seen": 1787589873.7976067,
-    "ast_hash": "5243bef58e1596e26dfda9789790f6da",
-    "semantic_hash": ""
+    "mtime": 1787568707.2022953,
+    "seen": 1787570818.944364,
+    "ast_hash": "c8adb62269d19897a4bcea965853de33",
+    "semantic_hash": "c8adb62269d19897a4bcea965853de33"
   },
   "tests/TestCase.php": {
     "mtime": 1787003123.0,
@@ -1056,10 +1068,10 @@
     "semantic_hash": "82efb97a359f5c7290bf2513d14686be"
   },
   "RANCANGAN.md": {
-    "mtime": 1787589912.6942177,
-    "seen": 1787590504.466191,
-    "ast_hash": "144168cff30b9ada18d5d91a554e66c7",
-    "semantic_hash": ""
+    "mtime": 1787539907.5086303,
+    "seen": 1787570818.944367,
+    "ast_hash": "05a7eb5dca389549452bda057c9454f2",
+    "semantic_hash": "05a7eb5dca389549452bda057c9454f2"
   },
   "README.md": {
     "mtime": 1787570459.9237442,
@@ -1114,35 +1126,5 @@
     "seen": 1787570818.944372,
     "ast_hash": "ba20ebef07519e3eecfe027303a8de49",
     "semantic_hash": "ba20ebef07519e3eecfe027303a8de49"
-  },
-  "compose.prod.yml": {
-    "mtime": 1787572910.388093,
-    "seen": 1787573798.903489,
-    "ast_hash": "cf50ae877d0701fe957d46237052e27e",
-    "semantic_hash": ""
-  },
-  "app/Models/GeminiKey.php": {
-    "mtime": 1787590475.0756624,
-    "seen": 1787590504.4613488,
-    "ast_hash": "c95447fda1721ef6af4e37b7ce063469",
-    "semantic_hash": ""
-  },
-  "database/migrations/2026_08_25_000008_create_gemini_keys.php": {
-    "mtime": 1787589645.2349122,
-    "seen": 1787589873.7931073,
-    "ast_hash": "5eec476e6b50391a0310fad4b336aac5",
-    "semantic_hash": ""
-  },
-  "tests/Feature/GeminiKeyTest.php": {
-    "mtime": 1787589818.7875223,
-    "seen": 1787589873.7975593,
-    "ast_hash": "98db111675cae64b3d1d83a7b3e1b479",
-    "semantic_hash": ""
-  },
-  ".github/workflows/deploy.yml": {
-    "mtime": 1787589847.8810422,
-    "seen": 1787589873.797667,
-    "ast_hash": "2a570cc541004f9c3a2c9bf5d2a205ac",
-    "semantic_hash": ""
   }
 }

@@ -36,7 +36,7 @@ class TradeImportController extends Controller
 
         if (! $gemini->configured()) {
             return response()->json([
-                'error' => 'GEMINI_API_KEY belum diisi — silakan isi form secara manual.',
+                'error' => 'Kunci Gemini belum ditambahkan admin — silakan isi form secara manual.',
             ], 503);
         }
 

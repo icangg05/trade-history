@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\GeminiSetting;
+use App\Models\GeminiKey;
 use App\Models\User;
 use App\Services\Gemini;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 /**
  * Halaman admin: hanya admin yang boleh masuk, admin terakhir tidak bisa
- * dilucuti, dan kunci Gemini di database yang dipakai — bukan yang di .env.
+ * dilucuti, dan kunci Gemini di database yang dipakai memanggil Gemini.
  */
 class AdminTest extends TestCase
 {
@@ -32,7 +32,7 @@ class AdminTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin')
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->component('Admin')->has('users', 1)->has('gemini.model'));
+            ->assertInertia(fn ($page) => $page->component('Admin')->has('users', 1)->has('geminiKeys'));
     }
 
     public function test_admin_tidak_bisa_masuk_wilayah_trading(): void
@@ -87,7 +87,7 @@ class AdminTest extends TestCase
 
     public function test_kunci_dari_database_yang_dipakai_memanggil_gemini(): void
     {
-        GeminiSetting::create(['api_key' => 'kunci-dari-database', 'model' => 'gemini-3.5-flash-lite']);
+        GeminiKey::create(['name' => 'Utama', 'api_key' => 'kunci-dari-database']);
 
         Http::fake([
             'generativelanguage.googleapis.com/*' => Http::response([
@@ -98,12 +98,48 @@ class AdminTest extends TestCase
         $gemini = app(Gemini::class);
 
         $this->assertTrue($gemini->configured());
-        $this->assertSame('gemini-3.5-flash-lite', $gemini->model());
-        $this->assertSame('kunci-dari-database', $gemini->model() ? GeminiSetting::current()->api_key : null);
 
         $gemini->analyze(['total_trades' => 1]);
 
         Http::assertSent(fn ($request) => $request->hasHeader('x-goog-api-key', 'kunci-dari-database')
-            && str_contains($request->url(), 'gemini-3.5-flash-lite'));
+            && str_contains($request->url(), config('services.gemini.model')));
+    }
+
+    public function test_admin_menambah_menguji_dan_menghapus_kunci(): void
+    {
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [['content' => ['parts' => [['text' => 'Sabar itu posisi terbaik.']]]]],
+            ]),
+        ]);
+
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post('/admin/gemini-keys', ['name' => 'Cadangan', 'api_key' => 'AIza-cadangan'])
+            ->assertSessionHas('success');
+
+        $key = GeminiKey::sole();
+        $this->assertSame('AIza-cadangan', $key->api_key);
+
+        $this->actingAs($admin)
+            ->postJson('/admin/gemini-keys/'.$key->id.'/test')
+            ->assertOk()
+            ->assertJson(['message' => 'Sabar itu posisi terbaik.']);
+
+        // Tombol Tes tidak boleh jadi pintu belakang: kunci yang sama tetap dingin dulu,
+        // dan sisa detiknya dikirim terpisah supaya browser bisa menghitung mundur.
+        $this->actingAs($admin)
+            ->postJson('/admin/gemini-keys/'.$key->id.'/test')
+            ->assertStatus(429)
+            ->assertJson(['retry_after' => GeminiKey::COOLDOWN]);
+
+        $this->travel(GeminiKey::COOLDOWN + 1)->seconds();
+
+        $this->actingAs($admin)->postJson('/admin/gemini-keys/'.$key->id.'/test')->assertOk();
+
+        $this->actingAs($admin)->delete('/admin/gemini-keys/'.$key->id)->assertSessionHas('success');
+
+        $this->assertSame(0, GeminiKey::count());
     }
 }

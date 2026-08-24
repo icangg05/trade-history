@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\GeminiSetting;
+use App\Models\GeminiKey;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\RateLimiter;
 use RuntimeException;
 
 /**
@@ -21,22 +20,39 @@ class Gemini
 {
     private const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-    /** Setelan boleh disuntik (untuk test); kalau tidak, dibaca sekali dari database. */
-    public function __construct(private ?GeminiSetting $setting = null) {}
-
     public function model(): string
     {
-        return $this->setting()->model ?: config('services.gemini.model');
+        return config('services.gemini.model');
     }
 
     public function configured(): bool
     {
-        return filled($this->setting()->api_key);
+        return GeminiKey::query()->exists();
     }
 
-    private function setting(): GeminiSetting
+    /** Uji satu kunci dengan permintaan sekali pakai yang murah. */
+    public function ping(GeminiKey $key): string
     {
-        return $this->setting ??= GeminiSetting::current();
+        // Tema diacak di sini, bukan diserahkan ke suhu model: tanpa ini model
+        // hampir selalu mengembalikan kalimat yang itu-itu juga.
+        $tema = collect([
+            'disiplin mengikuti rencana', 'kesabaran menunggu setup', 'manajemen risiko',
+            'konsistensi jangka panjang', 'belajar dari kerugian', 'mental saat drawdown',
+            'masa depan finansial', 'kebebasan waktu', 'menikmati proses, bukan hasil sesaat',
+            'berhenti membalas dendam ke pasar', 'syukur atas profit kecil', 'jurnal dan evaluasi',
+            'modal yang dijaga hari ini', 'keyakinan pada sistem sendiri', 'istirahat setelah rugi beruntun',
+        ])->random();
+
+        $response = $this->call([
+            'contents' => [['parts' => [['text' => sprintf(
+                'Tulis SATU kalimat motivasi untuk seorang trader bertema "%s". Maksimal 15 kata, '
+                .'bahasa Indonesia, gaya segar dan tidak klise. Balas hanya kalimat itu, tanpa tanda kutip.',
+                $tema
+            )]]]],
+            'generationConfig' => ['temperature' => 1.5, 'maxOutputTokens' => 512],
+        ], $key);
+
+        return trim($this->text($response));
     }
 
     // ------------------------------------------------------------------ vision
@@ -238,29 +254,16 @@ class Gemini
 
     // ---------------------------------------------------------------- internal
 
-    private function call(array $body): array
+    /** Kunci boleh ditentukan (uji satu kunci); kalau tidak, giliran yang menentukan. */
+    private function call(array $body, ?GeminiKey $key = null): array
     {
-        $key = $this->setting()->api_key;
-
-        if (blank($key)) {
-            throw new RuntimeException('Kunci Gemini belum diisi. Minta admin mengisinya di halaman Admin.');
-        }
-
-        $this->reserveQuota();
+        $key = $key?->claim() ?? GeminiKey::next();
 
         try {
-            $response = Http::withHeaders(['x-goog-api-key' => $key])
+            $response = Http::withHeaders(['x-goog-api-key' => $key->api_key])
                 ->timeout(120)
-                ->retry(2, 1000, function ($e) {
-                    // 429 dari Google = kuota memang habis. Mengulang hanya membakar sisa kuota.
-                    if ($e instanceof RequestException && $e->response->status() === 429) {
-                        return false;
-                    }
-
-                    $this->countRequest(); // percobaan ulang tetap satu permintaan di mata Google
-
-                    return true;
-                }, throw: false)
+                // 429 dari Google = kuota kunci itu memang habis. Mengulang tidak menolong.
+                ->retry(2, 1000, fn ($e) => ! ($e instanceof RequestException && $e->response->status() === 429), throw: false)
                 ->post(self::ENDPOINT.'/'.$this->model().':generateContent', $body);
         } catch (ConnectionException $e) {
             throw new RuntimeException('Tidak bisa menghubungi Gemini: '.$e->getMessage(), previous: $e);
@@ -268,15 +271,8 @@ class Gemini
 
         $json = $response->json() ?? [];
 
-        // Token dihitung dari pemakaian sebenarnya yang dilaporkan Google, bukan taksiran.
-        RateLimiter::increment('gemini:tpm', 60, (int) data_get($json, 'usageMetadata.totalTokenCount', 0));
-
         if ($response->status() === 429) {
-            // Kuota kita sendiri masih longgar tapi Google menolak — samakan hitungan
-            // dengan menutup jendela di sisi kita sampai menit berganti.
-            RateLimiter::increment('gemini:rpm', 60, $this->limit('rpm'));
-
-            throw new RuntimeException('Kuota Gemini di sisi Google habis. Tunggu satu menit lalu coba lagi.');
+            throw new RuntimeException('Kuota kunci "'.$key->name.'" di sisi Google habis. Coba lagi nanti atau tambah kunci lain.');
         }
 
         if ($response->failed()) {
@@ -286,40 +282,6 @@ class Gemini
         }
 
         return $json;
-    }
-
-    // ------------------------------------------------------------------ kuota
-
-    /**
-     * Tolak permintaan di sini sebelum Google yang menolaknya. Tiga jendela
-     * dijaga: permintaan per menit, token per menit, permintaan per hari.
-     */
-    private function reserveQuota(): void
-    {
-        foreach (['rpm' => 60, 'tpm' => 60, 'rpd' => 86400] as $name => $window) {
-            if (RateLimiter::tooManyAttempts('gemini:'.$name, $this->limit($name))) {
-                throw new RuntimeException(sprintf(
-                    'Kuota %s Gemini (%s/%s) sudah terpakai habis. Coba lagi dalam %d detik.',
-                    strtoupper($name),
-                    RateLimiter::attempts('gemini:'.$name),
-                    $this->limit($name),
-                    RateLimiter::availableIn('gemini:'.$name),
-                ));
-            }
-        }
-
-        $this->countRequest();
-    }
-
-    private function countRequest(): void
-    {
-        RateLimiter::increment('gemini:rpm', 60);
-        RateLimiter::increment('gemini:rpd', 86400);
-    }
-
-    private function limit(string $name): int
-    {
-        return $this->setting()->limits()[$name];
     }
 
     private function text(array $response): string

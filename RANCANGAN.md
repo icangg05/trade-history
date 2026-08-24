@@ -363,7 +363,9 @@ Yang dikirim ke Gemini hanya **angka agregat + teks aturan**. Bukan gambar,
 bukan tabel mentah — lebih murah, lebih fokus, dan statistik dihitung di SQL
 (deterministik) bukan oleh model.
 
-`GEMINI_API_KEY` di `.env`, dibaca lewat `config/services.php`.
+Kunci API disimpan terenkripsi di tabel `gemini_keys` (dikelola di `/admin`),
+boleh lebih dari satu dan dipakai bergantian dengan jeda 10 detik per kunci.
+Nama model tetap di `config/services.php`.
 
 ---
 

@@ -35,8 +35,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
         Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
         Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
-        Route::put('/gemini', [AdminController::class, 'updateGemini'])->name('gemini.update');
-        Route::delete('/gemini', [AdminController::class, 'forgetGeminiKey'])->name('gemini.forget');
+        Route::post('/gemini-keys', [AdminController::class, 'storeGeminiKey'])->name('gemini.store');
+        Route::post('/gemini-keys/{key}/test', [AdminController::class, 'testGeminiKey'])->middleware('throttle:20,1')->name('gemini.test');
+        Route::delete('/gemini-keys/{key}', [AdminController::class, 'destroyGeminiKey'])->name('gemini.destroy');
         Route::get('/backup', [AdminController::class, 'backup'])->middleware('throttle:5,1')->name('backup');
     });
 
