@@ -4,23 +4,22 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// Satu ide trading sering dieksekusi berlapis: beberapa entry di harga berbeda
-// dengan setup, arah, SL, dan TP yang sama. Layer-layernya disimpan di sini;
-// `entry_price` dan `lot` tetap jadi ringkasannya (rata-rata terboboti & total)
-// supaya semua hitungan lain tidak perlu tahu soal layer.
+// Setup dan catatan milik trade sebelum ia masuk grup. Begitu bergrup, kedua
+// field itu dipakai bersama seluruh anggota; salinan ini yang dikembalikan saat
+// trade dikeluarkan lagi.
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::table('trades', function (Blueprint $table) {
-            $table->json('entries')->nullable()->after('entry_price');
+            $table->json('pre_group')->nullable()->after('group_id');
         });
     }
 
     public function down(): void
     {
         Schema::table('trades', function (Blueprint $table) {
-            $table->dropColumn('entries');
+            $table->dropColumn('pre_group');
         });
     }
 };

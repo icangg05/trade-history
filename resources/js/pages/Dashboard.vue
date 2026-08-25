@@ -7,16 +7,18 @@ import EquityChart from '@/components/EquityChart.vue'
 import MonthlyPnlChart from '@/components/MonthlyPnlChart.vue'
 import RuleStatusBanner from '@/components/RuleStatusBanner.vue'
 import StatCard from '@/components/StatCard.vue'
+import StopBadge from '@/components/StopBadge.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { dateTime, longDate, money, num, pct } from '@/composables/useFormat'
+import { frameClass, frameGap } from '@/composables/useGroupFrame'
 import type { EquityPoint, RuleStatus, Summary, Trade } from '@/types'
 
 const props = defineProps<{
   range: string
   summary: Summary
   equity: EquityPoint[]
-  monthly: { month: string; pnl: number }[]
+  monthly: { month: string; pnl: number; profit: number; loss: number }[]
   ruleStatus: RuleStatus
   recent: Trade[]
 }>()
@@ -132,8 +134,8 @@ const growthPct = computed(() => {
 
     <div class="grid items-start gap-4 lg:grid-cols-2">
       <div class="glass-card p-4">
-        <h2 class="mb-3 text-sm font-semibold">P/L per bulan</h2>
-        <MonthlyPnlChart :data="monthly" :currency="currency" />
+        <h2 class="mb-2 text-sm font-semibold">P/L per bulan</h2>
+        <MonthlyPnlChart :data="monthly" :currency="currency" :base="summary.initial_balance + summary.net_flow" />
       </div>
 
       <div class="glass-card p-4">
@@ -144,8 +146,14 @@ const growthPct = computed(() => {
 
         <p v-if="!recent.length" class="py-8 text-center text-sm text-muted-foreground">Belum ada trade.</p>
 
-        <ul v-else class="divide-y">
-          <li v-for="trade in recent" :key="trade.id" class="flex items-center gap-2 py-1.5">
+        <ul v-else class="-mx-2 divide-y">
+          <template v-for="(trade, index) in recent" :key="trade.id">
+          <li v-if="frameGap(recent, index)" class="mx-2 h-2 border-b-gold/40" />
+
+          <li
+            class="flex items-center gap-2 px-2 py-1.5"
+            :class="[frameClass(recent, index)]"
+          >
             <Badge
               :variant="trade.direction === 'buy' ? 'default' : 'secondary'"
               class="w-10 shrink-0 justify-center px-0 text-[9px]"
@@ -154,7 +162,10 @@ const growthPct = computed(() => {
             </Badge>
             <div class="min-w-0 flex-1">
               <p class="truncate text-[13px] leading-tight font-medium">{{ trade.symbol }}</p>
-              <p class="truncate text-[10px] leading-tight text-muted-foreground">{{ dateTime(trade.opened_at) }}</p>
+              <p class="flex items-center gap-1 truncate text-[10px] leading-tight text-muted-foreground">
+                <span class="truncate">{{ dateTime(trade.opened_at) }}</span>
+                <StopBadge :state="trade.stop_state" />
+              </p>
             </div>
             <span
               class="tnum shrink-0 font-mono text-xs"
@@ -163,6 +174,7 @@ const growthPct = computed(() => {
               {{ trade.pnl === null ? 'Open' : money(trade.pnl, currency, true) }}
             </span>
           </li>
+          </template>
         </ul>
       </div>
     </div>

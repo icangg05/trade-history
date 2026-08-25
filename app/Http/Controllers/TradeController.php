@@ -8,7 +8,6 @@ use App\Services\Gemini;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -79,6 +78,12 @@ class TradeController extends Controller
         $data = $request->validated();
         $data['source'] ??= $trade->source;
 
+        // Setup dan catatan milik grup, bukan milik satu trade. Form sudah
+        // mengunci fieldnya; ini penjaga terakhirnya.
+        if ($trade->group_id !== null) {
+            unset($data['setup'], $data['notes']);
+        }
+
         $trade->update($data);
 
         return redirect()->route('trades.index')->with('success', 'Trade diperbarui.');
@@ -92,80 +97,150 @@ class TradeController extends Controller
     }
 
     /**
-     * Gabungkan beberapa trade yang sebenarnya satu ide berlapis menjadi satu
-     * trade berlayer. Trade asalnya dihapus — ini jalan satu arah, jadi UI-nya
-     * memakai konfirmasi berkode.
+     * Tandai beberapa trade berurutan sebagai satu ide yang sama. Tidak ada
+     * baris yang hilang dan tidak ada nama grup: kuncinya id trade paling awal.
+     * Setup dan catatan anggotanya digabung, lalu dikelola lewat grup.
      */
-    public function merge(Request $request): RedirectResponse
+    public function group(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'ids' => ['required', 'array', 'min:2', 'max:20'],
+            'ids' => ['required', 'array', 'min:2', 'max:50'],
             'ids.*' => ['integer'],
         ]);
 
-        // Diambil lewat relasi akun aktif: id milik akun lain tidak akan ikut,
-        // dan selisih jumlahnya sudah cukup jadi penolakan.
-        $trades = $request->currentAccount()
-            ->trades()
-            ->whereIn('id', $data['ids'])
-            ->orderBy('opened_at')
-            ->orderBy('id')
-            ->get();
+        $account = $request->currentAccount();
+        $trades = $account->trades()->whereIn('id', $data['ids'])->orderBy('opened_at')->orderBy('id')->get();
 
         if ($trades->count() !== count($data['ids'])) {
             return back()->with('error', 'Ada trade yang tidak ditemukan di akun ini.');
         }
 
-        if ($trades->pluck('symbol')->unique()->count() > 1 || $trades->pluck('direction')->unique()->count() > 1) {
-            return back()->with('error', 'Hanya trade dengan simbol dan arah yang sama bisa digabung.');
+        // Pilihan boleh menyentuh satu grup yang sudah ada — itu cara menambah
+        // anggota baru ke dalamnya. Dua grup sekaligus tidak: pindah grup harus
+        // lewat dikeluarkan dulu.
+        $existing = $trades->pluck('group_id')->filter()->unique();
+
+        if ($existing->count() > 1) {
+            return back()->with('error', 'Pilihannya menyentuh dua grup — keluarkan dulu salah satunya.');
         }
 
-        if ($trades->contains(fn (Trade $t) => $t->lot === null)) {
-            return back()->with('error', 'Semua trade harus punya lot — entry rata-rata dihitung dari lot.');
+        if (! $this->adjacent($account, $trades->pluck('id')->all())) {
+            return back()->with('error', 'Hanya trade yang berurutan yang bisa digabung jadi satu grup.');
         }
 
-        $closed = $trades->filter(fn (Trade $t) => $t->isClosed());
+        $groupId = (int) ($existing->first() ?? $trades->first()->id);
+        $setup = $this->unionSetup($trades);
+        $notes = $this->unionNotes($trades);
 
-        if ($closed->isNotEmpty() && $closed->count() !== $trades->count()) {
-            return back()->with('error', 'Jangan campur posisi terbuka dengan yang sudah tertutup.');
+        foreach ($trades as $trade) {
+            $data = [
+                'group_id' => $groupId,
+                'setup' => $setup ?? $trade->setup,
+                'notes' => $notes ?? $trade->notes,
+            ];
+
+            // Setup & catatan aslinya disimpan sekali, saat trade pertama kali
+            // masuk grup — itu yang dikembalikan kalau nanti dikeluarkan.
+            if ($trade->group_id === null) {
+                $data['pre_group'] = ['setup' => $trade->setup, 'notes' => $trade->notes];
+            }
+
+            $trade->update($data);
         }
 
-        $first = $trades->first();
-        $exitLots = $trades->filter(fn (Trade $t) => $t->exit_price !== null);
-        $exitWeight = (float) $exitLots->sum('lot');
-        $account = $request->currentAccount();
-
-        $merged = DB::transaction(function () use ($account, $trades, $first, $closed, $exitLots, $exitWeight) {
-            $trade = $account->trades()->create([
-                'symbol' => $first->symbol,
-                'direction' => $first->direction,
-                'entries' => $trades->flatMap(fn (Trade $t) => $t->layers())->all(),
-                'sl_price' => $first->sl_price,
-                'tp_price' => $first->tp_price,
-                'exit_price' => $exitWeight > 0
-                    ? round($exitLots->sum(fn (Trade $t) => (float) $t->exit_price * (float) $t->lot) / $exitWeight, 5)
-                    : null,
-                'pnl' => $closed->isEmpty() ? null : round((float) $closed->sum('pnl'), 2),
-                'opened_at' => $trades->min('opened_at'),
-                'closed_at' => $closed->isEmpty() ? null : $closed->max('closed_at'),
-                'setup' => $this->mergedSetup($trades),
-                'tags' => $trades->flatMap(fn (Trade $t) => $t->tags ?? [])->unique()->values()->all(),
-                'notes' => $this->mergedNotes($trades),
-                'source' => $trades->every(fn (Trade $t) => $t->source === 'ai') ? 'ai' : 'manual',
-            ]);
-
-            Trade::whereIn('id', $trades->pluck('id'))->delete();
-
-            return $trade;
-        });
-
-        return redirect()
-            ->route('trades.index')
-            ->with('success', $trades->count().' trade digabung jadi satu '.$merged->symbol.' berlayer.');
+        return back()->with('success', $trades->count().' trade jadi satu grup.');
     }
 
-    /** @param Collection<int, Trade> $trades */
-    private function mergedSetup(Collection $trades): ?string
+    /** Setup dan catatan grup: satu form untuk semua anggotanya. */
+    public function updateGroup(Request $request, int $group): RedirectResponse
+    {
+        $data = $request->validate([
+            'setup' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $members = $request->currentAccount()->trades()->where('group_id', $group)->get();
+
+        if ($members->isEmpty()) {
+            return back()->with('error', 'Grup tidak ditemukan.');
+        }
+
+        foreach ($members as $trade) {
+            $trade->update($data);
+        }
+
+        return back()->with('success', 'Grup diperbarui.');
+    }
+
+    /**
+     * Keluarkan satu trade dari grupnya, hanya dari ujung atas atau bawah.
+     * Melepas yang di tengah akan meninggalkan grup yang anggotanya terpisah —
+     * tidak lagi berurutan, dan bingkainya jadi bohong.
+     *
+     * Grup yang tinggal satu anggota bukan grup lagi, jadi sisanya ikut dilepas.
+     */
+    public function ungroup(Request $request, Trade $trade): RedirectResponse
+    {
+        $group = $trade->group_id;
+
+        if ($group === null) {
+            return back();
+        }
+
+        $members = $request->currentAccount()
+            ->trades()
+            ->where('group_id', $group)
+            ->orderBy('opened_at')
+            ->orderBy('id')
+            ->get();
+
+        if ($members->first()->id !== $trade->id && $members->last()->id !== $trade->id) {
+            return back()->with('error', 'Hanya trade di ujung grup yang bisa dikeluarkan.');
+        }
+
+        $this->release($trade);
+
+        $left = $members->reject(fn (Trade $t) => $t->id === $trade->id);
+
+        if ($left->count() < 2) {
+            $left->each(fn (Trade $t) => $this->release($t));
+        }
+
+        return back()->with('success', 'Trade dikeluarkan dari grup.');
+    }
+
+    /** Lepas dari grup: setup & catatan sebelum bergrup dipulihkan. */
+    private function release(Trade $trade): void
+    {
+        $before = $trade->pre_group ?? [];
+
+        $trade->update([
+            'group_id' => null,
+            'pre_group' => null,
+            'setup' => $before['setup'] ?? $trade->setup,
+            'notes' => $before['notes'] ?? $trade->notes,
+        ]);
+    }
+
+    /**
+     * Benar hanya bila id-id itu berurutan tanpa sela di riwayat akun.
+     *
+     * ponytail: membandingkan posisi di daftar id akun — cukup sampai puluhan
+     * ribu trade; kalau lebih, ganti dengan query rentang waktu.
+     *
+     * @param  list<int>  $ids
+     */
+    private function adjacent($account, array $ids): bool
+    {
+        $order = $account->trades()->orderBy('opened_at')->orderBy('id')->pluck('id')->all();
+        $positions = array_keys(array_intersect($order, $ids));
+
+        return count($positions) === count($ids)
+            && max($positions) - min($positions) + 1 === count($ids);
+    }
+
+    /** Semua strategi yang dipakai anggota grup, tercentang di tiap trade. */
+    private function unionSetup(Collection $trades): ?string
     {
         $list = $trades->pluck('setup')
             ->flatMap(fn (?string $setup) => explode(',', (string) $setup))
@@ -173,22 +248,27 @@ class TradeController extends Controller
             ->filter()
             ->unique();
 
-        // Kolomnya 255 karakter; gabungan dari banyak trade bisa lewat.
         return $list->isEmpty() ? null : mb_substr($list->implode(', '), 0, 255);
     }
 
-    /** @param Collection<int, Trade> $trades */
-    private function mergedNotes(Collection $trades): ?string
+    /** Catatan anggota grup disambung jadi satu paragraf, tanpa yang kembar. */
+    private function unionNotes(Collection $trades): ?string
     {
-        $notes = $trades->pluck('notes')->filter();
+        $notes = $trades->pluck('notes')
+            ->map(fn (?string $note) => trim((string) $note))
+            ->filter()
+            ->unique()
+            ->map(fn (string $note) => str_ends_with($note, '.') || str_ends_with($note, '!') || str_ends_with($note, '?')
+                ? $note
+                : $note.'.');
 
-        return $notes->isEmpty() ? null : mb_substr($notes->implode("\n\n---\n\n"), 0, 5000);
+        return $notes->isEmpty() ? null : mb_substr($notes->implode(' '), 0, 5000);
     }
 
     private function present(Trade $trade, bool $full = false): array
     {
         $base = [
-            ...$trade->only('id', 'symbol', 'direction', 'status', 'setup', 'source', 'notes'),
+            ...$trade->only('id', 'symbol', 'direction', 'status', 'setup', 'group_id', 'source', 'notes'),
             'lot' => $this->num($trade->lot),
             'entry_price' => $this->num($trade->entry_price),
             'sl_price' => $this->num($trade->sl_price),
@@ -201,7 +281,6 @@ class TradeController extends Controller
             'opened_at' => $trade->opened_at->format('Y-m-d\TH:i'),
             'closed_at' => $trade->closed_at?->format('Y-m-d\TH:i'),
             'tags' => $trade->tags ?? [],
-            'entries' => $trade->entries ?? [],
         ];
 
         return $full ? [...$base, 'ai_raw' => $trade->ai_raw] : $base;

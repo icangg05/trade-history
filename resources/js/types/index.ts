@@ -15,23 +15,17 @@ export interface CurrentAccount extends AccountBrief {
   started_at: string
 }
 
-/** Satu lapis entry: harga dan lotnya sendiri. */
-export interface TradeLayer {
-  price: number | null
-  lot: number | null
-}
-
 export interface Trade {
   id: number
   symbol: string
   direction: Direction
   status: TradeStatus
   setup: string | null
+  /** Kunci grup: penanda beberapa trade berurutan lahir dari satu ide. */
+  group_id?: number | null
   notes?: string | null
   source?: 'manual' | 'ai'
   lot: number | null
-  /** Kosong = trade satu layer; `entry_price` dan `lot` adalah ringkasannya. */
-  entries?: TradeLayer[]
   entry_price: number | null
   sl_price: number | null
   stop_state?: StopState

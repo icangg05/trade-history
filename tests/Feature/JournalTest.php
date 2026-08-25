@@ -305,6 +305,25 @@ class JournalTest extends TestCase
         $this->assertSame(3, $user->accounts()->count());
     }
 
+    public function test_pnl_bulanan_memisahkan_profit_dan_loss_kotor(): void
+    {
+        $account = $this->account();
+        $today = CarbonImmutable::today()->toDateString();
+
+        $this->trade($account, $today, 300);
+        $this->trade($account, $today, -150);
+        $this->trade($account, $today, 50);
+
+        $months = (new AccountStats($account))->monthlyPnl();
+        $month = end($months);
+
+        // Bersih 200, tapi kotornya tetap terpisah: +350 dan −150.
+        $this->assertSame(
+            ['pnl' => 200.0, 'profit' => 350.0, 'loss' => -150.0],
+            ['pnl' => $month['pnl'], 'profit' => $month['profit'], 'loss' => $month['loss']],
+        );
+    }
+
     private function trade(Account $account, string $date, float $pnl): Trade
     {
         return $account->trades()->create([

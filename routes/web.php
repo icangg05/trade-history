@@ -62,7 +62,9 @@ Route::middleware('auth')->group(function () {
             Route::post('/trades/extract', TradeImportController::class)
                 ->middleware('throttle:20,1')
                 ->name('trades.extract');
-            Route::post('/trades/merge', [TradeController::class, 'merge'])->name('trades.merge');
+            Route::post('/trades/group', [TradeController::class, 'group'])->name('trades.group');
+            Route::put('/trades/group/{group}', [TradeController::class, 'updateGroup'])->name('trades.group.update');
+            Route::delete('/trades/{trade}/group', [TradeController::class, 'ungroup'])->name('trades.ungroup');
             Route::get('/trades/{trade}/edit', [TradeController::class, 'edit'])->name('trades.edit');
             Route::put('/trades/{trade}', [TradeController::class, 'update'])->name('trades.update');
             Route::delete('/trades/{trade}', [TradeController::class, 'destroy'])->name('trades.destroy');

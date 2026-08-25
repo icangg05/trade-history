@@ -72,8 +72,8 @@ function weekTotal(week: { stat?: DayStat }[]): number {
 <template>
   <!-- Ponsel: 7 kolom tanpa total mingguan, supaya muat tanpa geser ke samping.
        Mulai sm: kolom total mingguan ikut tampil. -->
-  <div class="glass-card table-scroll overflow-x-auto p-2 sm:p-3">
-    <div class="sm:min-w-[42rem]">
+  <div class="glass-card table-scroll overflow-x-auto p-2 sm:p-3 lg:flex lg:h-[calc(100dvh-13.5rem)] lg:flex-col lg:overflow-hidden">
+    <div class="sm:min-w-[42rem] lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
       <div class="grid grid-cols-7 gap-1 pb-1.5 sm:grid-cols-8 sm:gap-1.5">
         <div v-for="name in WEEKDAYS" :key="name" class="text-center text-[10px] font-medium text-muted-foreground sm:text-[11px]">
           {{ name }}
@@ -81,12 +81,12 @@ function weekTotal(week: { stat?: DayStat }[]): number {
         <div class="hidden text-center text-[11px] font-medium text-muted-foreground sm:block">Minggu</div>
       </div>
 
-      <div v-for="(week, index) in weeks" :key="index" class="grid grid-cols-7 gap-1 pb-1 sm:grid-cols-8 sm:gap-1.5 sm:pb-1.5">
+      <div v-for="(week, index) in weeks" :key="index" class="grid grid-cols-7 gap-1 pb-1 sm:grid-cols-8 sm:gap-1.5 sm:pb-1.5 lg:min-h-0 lg:flex-1">
         <button
           v-for="day in week"
           :key="day.date"
           type="button"
-          class="relative flex aspect-square flex-col overflow-hidden rounded-md border p-1 text-left transition-colors sm:p-1.5"
+          class="relative flex aspect-square flex-col overflow-hidden rounded-md border p-1 text-left transition-colors sm:p-1.5 lg:aspect-auto lg:h-full"
           :class="[
             day.inMonth ? 'border-border' : 'border-transparent opacity-35',
             day.stat ? 'hover:border-gold/50' : 'hover:border-border',

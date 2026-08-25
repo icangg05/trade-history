@@ -4,10 +4,12 @@ import { Head, router } from '@inertiajs/vue3'
 import { ChevronDown } from '@lucide/vue'
 
 import PnlCalendar from '@/components/PnlCalendar.vue'
+import StopBadge from '@/components/StopBadge.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { clock, longDate, money, monthLabel, num, pnlClass, useCurrency } from '@/composables/useFormat'
+import { frameClass, frameGap } from '@/composables/useGroupFrame'
 import type { DayStat, Trade } from '@/types'
 
 const props = defineProps<{
@@ -153,34 +155,42 @@ const dayWinRate = computed(() => {
         <!-- Ponsel: satu baris per trade. Tanggalnya sudah jadi judul modal, jadi
              kolom waktu cukup jamnya dan sisa ruangnya dipakai untuk setup + lot. -->
         <ul v-else class="table-scroll max-h-[50vh] divide-y overflow-y-auto pr-3 sm:hidden">
-          <li v-for="trade in dayTrades" :key="trade.id" class="flex items-start justify-between gap-3 py-2.5">
-            <div class="min-w-0">
-              <p class="flex items-center gap-1.5">
-                <span class="tnum shrink-0 font-mono text-xs text-muted-foreground">
-                  {{ openedLabel(trade) }}
-                </span>
-                <span class="truncate text-sm font-medium">{{ trade.symbol }}</span>
-                <Badge
-                  :variant="trade.direction === 'buy' ? 'default' : 'secondary'"
-                  class="shrink-0 text-[10px]"
-                >
-                  {{ trade.direction === 'buy' ? 'BUY' : 'SELL' }}
-                </Badge>
-              </p>
-              <p class="truncate text-[11px] text-muted-foreground">
-                <template v-if="trade.setup">{{ trade.setup }} · </template>{{ num(trade.lot, 2) }} lot
-              </p>
-            </div>
+          <template v-for="(trade, index) in dayTrades" :key="trade.id">
+            <li v-if="frameGap(dayTrades, index)" class="mx-2 h-2 border-b-gold/40" />
 
-            <div class="shrink-0 text-right">
-              <p class="tnum font-mono text-sm" :class="pnlClass(trade.pnl)">
-                {{ money(trade.pnl, currency, true) }}
-              </p>
-              <p class="tnum font-mono text-[11px] text-muted-foreground">
-                {{ trade.rr_realized === null ? '—' : `${num(trade.rr_realized)}R` }}
-              </p>
-            </div>
-          </li>
+            <li
+              class="flex items-start justify-between gap-3 px-2 py-2.5"
+              :class="[frameClass(dayTrades, index)]"
+            >
+              <div class="min-w-0">
+                <p class="flex items-center gap-1.5">
+                  <span class="tnum shrink-0 font-mono text-xs text-muted-foreground">
+                    {{ openedLabel(trade) }}
+                  </span>
+                  <span class="truncate text-sm font-medium">{{ trade.symbol }}</span>
+                  <Badge
+                    :variant="trade.direction === 'buy' ? 'default' : 'secondary'"
+                    class="shrink-0 text-[10px]"
+                  >
+                    {{ trade.direction === 'buy' ? 'BUY' : 'SELL' }}
+                  </Badge>
+                  <StopBadge :state="trade.stop_state" />
+                </p>
+                <p class="truncate text-[11px] text-muted-foreground">
+                  <template v-if="trade.setup">{{ trade.setup }} · </template>{{ num(trade.lot, 2) }} lot
+                </p>
+              </div>
+
+              <div class="shrink-0 text-right">
+                <p class="tnum font-mono text-sm" :class="pnlClass(trade.pnl)">
+                  {{ money(trade.pnl, currency, true) }}
+                </p>
+                <p class="tnum font-mono text-[11px] text-muted-foreground">
+                  {{ trade.rr_realized === null ? '—' : `${num(trade.rr_realized)}R` }}
+                </p>
+              </div>
+            </li>
+          </template>
         </ul>
 
         <div v-if="dayTrades.length" class="table-scroll hidden max-h-[55vh] overflow-auto pr-4 sm:block">
@@ -196,10 +206,16 @@ const dayWinRate = computed(() => {
               </tr>
             </thead>
             <tbody class="divide-y">
-              <tr v-for="trade in dayTrades" :key="trade.id">
+              <template v-for="(trade, index) in dayTrades" :key="trade.id">
+              <tr v-if="frameGap(dayTrades, index)" class="h-2 border-b-gold/40"><td colspan="6" class="p-0" /></tr>
+
+              <tr :class="frameClass(dayTrades, index)">
                 <td class="tnum py-2 font-mono text-xs text-muted-foreground">{{ openedLabel(trade) }}</td>
                 <td class="py-2">
-                  {{ trade.symbol }}
+                  <span class="inline-flex items-center gap-1.5">
+                    {{ trade.symbol }}
+                    <StopBadge :state="trade.stop_state" />
+                  </span>
                   <span v-if="trade.setup" class="block text-[11px] text-muted-foreground">{{ trade.setup }}</span>
                 </td>
                 <td class="py-2">
@@ -215,6 +231,7 @@ const dayWinRate = computed(() => {
                   {{ money(trade.pnl, currency, true) }}
                 </td>
               </tr>
+              </template>
             </tbody>
           </table>
         </div>

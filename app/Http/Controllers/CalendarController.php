@@ -29,7 +29,8 @@ class CalendarController extends Controller
             ->get()
             ->groupBy(fn (Trade $t) => ($t->closed_at ?? $t->opened_at)->toDateString())
             ->map(fn ($group) => $group->map(fn (Trade $t) => [
-                ...$t->only('id', 'symbol', 'direction', 'status', 'setup'),
+                ...$t->only('id', 'symbol', 'direction', 'status', 'setup', 'group_id'),
+                'stop_state' => $t->stopState(),
                 'lot' => $t->lot === null ? null : (float) $t->lot,
                 'pnl' => (float) $t->pnl,
                 'rr_realized' => $t->rr_realized === null ? null : (float) $t->rr_realized,

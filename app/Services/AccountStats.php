@@ -103,7 +103,7 @@ class AccountStats
         return $points;
     }
 
-    /** @return list<array{month: string, pnl: float}> */
+    /** @return list<array{month: string, pnl: float, profit: float, loss: float}> */
     public function monthlyPnl(int $months = 12): array
     {
         $start = CarbonImmutable::now()->startOfMonth()->subMonths($months - 1);
@@ -113,12 +113,16 @@ class AccountStats
             ->whereRaw(self::TRADE_DATE.' >= ?', [$start])
             ->get(['pnl', 'closed_at', 'opened_at'])
             ->groupBy(fn (Trade $t) => ($t->closed_at ?? $t->opened_at)->format('Y-m'))
-            ->map(fn (Collection $g) => round((float) $g->sum('pnl'), 2));
+            ->map(fn (Collection $g) => [
+                'pnl' => round((float) $g->sum('pnl'), 2),
+                'profit' => round((float) $g->sum(fn (Trade $t) => max((float) $t->pnl, 0)), 2),
+                'loss' => round((float) $g->sum(fn (Trade $t) => min((float) $t->pnl, 0)), 2),
+            ]);
 
         $out = [];
         for ($i = 0; $i < $months; $i++) {
             $key = $start->addMonths($i)->format('Y-m');
-            $out[] = ['month' => $key, 'pnl' => (float) ($grouped[$key] ?? 0)];
+            $out[] = ['month' => $key, ...($grouped[$key] ?? ['pnl' => 0.0, 'profit' => 0.0, 'loss' => 0.0])];
         }
 
         return $out;
