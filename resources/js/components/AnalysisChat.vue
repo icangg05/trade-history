@@ -213,7 +213,7 @@ async function send(text = draft.value.trim()) {
 
     <!-- Satu kolom selebar bacaan; garis tepinya menandai lebar chat di layar besar. -->
     <div v-else class="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col lg:border-x">
-      <div ref="scroller" class="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-6">
+      <div ref="scroller" class="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pt-5 pb-10 sm:px-6">
         <div v-if="!messages.length" class="grid gap-2 py-10 text-center">
           <Sparkles class="mx-auto size-6 text-gold" />
           <p class="text-sm">Tanyakan apa saja soal cara kamu trading.</p>
