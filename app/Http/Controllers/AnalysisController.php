@@ -6,6 +6,7 @@ use App\Models\AiAnalysis;
 use App\Services\AccountStats;
 use App\Services\Gemini;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -75,6 +76,59 @@ class AnalysisController extends Controller
         );
 
         return back()->with('success', 'Analisa selesai.');
+    }
+
+    /** Layar chat penuh, terpisah dari halaman analisa supaya muat sampai ujung. */
+    public function chatPage(Request $request, Gemini $gemini): Response
+    {
+        [, , $period] = $this->period($request);
+
+        return Inertia::render('Analysis/Chat', [
+            'period' => $period,
+            'aiEnabled' => $gemini->configured(),
+        ]);
+    }
+
+    /**
+     * Tanya jawab dengan AI soal akun ini.
+     *
+     * JSON, bukan Inertia: percakapan hanya hidup di layar dan tidak disimpan,
+     * jadi tidak ada yang perlu dikirim ulang sebagai props halaman.
+     * ponytail: simpan ke tabel kalau riwayat chat mulai dibutuhkan lintas sesi.
+     */
+    public function chat(Request $request, Gemini $gemini): JsonResponse
+    {
+        if (! $gemini->configured()) {
+            return response()->json(['error' => 'Kunci Gemini belum ditambahkan admin.'], 503);
+        }
+
+        $data = $request->validate([
+            'message' => ['required', 'string', 'max:2000'],
+            'history' => ['array', 'max:20'],
+            'history.*.role' => ['required', 'in:user,assistant'],
+            'history.*.text' => ['required', 'string', 'max:8000'],
+        ]);
+
+        $account = $request->currentAccount();
+        [$from, $to] = $this->period($request);
+
+        $stats = (new AccountStats($account))->summary($from, $to);
+
+        if ($stats['total_trades'] === 0) {
+            return response()->json(['error' => 'Belum ada trade di periode ini untuk dibahas.'], 422);
+        }
+
+        // Pertanyaan baru selalu ditempel di ujung: urutan giliran ditentukan di
+        // sini, bukan dipercayakan pada apa yang dikirim browser.
+        $messages = [...($data['history'] ?? []), ['role' => 'user', 'text' => $data['message']]];
+
+        try {
+            $reply = $gemini->chat($stats, $account->rule?->notes, $messages);
+        } catch (RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 502);
+        }
+
+        return response()->json(['reply' => $reply]);
     }
 
     /** @return array{0: CarbonImmutable, 1: CarbonImmutable, 2: string} */

@@ -4,12 +4,14 @@ import { Head, router, useForm } from '@inertiajs/vue3'
 import { ImageUp, Plus, Trash2 } from '@lucide/vue'
 
 import ConfirmDestroy from '@/components/ConfirmDestroy.vue'
+import Pagination from '@/components/Pagination.vue'
 import StatCard from '@/components/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { longDate, money, useCurrency } from '@/composables/useFormat'
+import type { Paginated } from '@/types'
 
 interface Row {
   id: number
@@ -21,7 +23,7 @@ interface Row {
 }
 
 defineProps<{
-  items: { data: Row[]; links: { url: string | null; label: string; active: boolean }[] }
+  items: Paginated<Row>
   totals: {
     deposit: number
     withdrawal: number
@@ -191,18 +193,7 @@ function submit() {
       </table>
     </div>
 
-    <div v-if="items.links.length > 3" class="flex flex-wrap justify-center gap-1">
-      <Button
-        v-for="link in items.links"
-        :key="link.label"
-        size="sm"
-        :variant="link.active ? 'default' : 'ghost'"
-        :disabled="!link.url"
-        @click="link.url && router.get(link.url, {}, { preserveScroll: true })"
-      >
-        <span v-html="link.label" />
-      </Button>
-    </div>
+    <Pagination :meta="items" label="transaksi" />
 
     <ConfirmDestroy
       :open="removing !== null"

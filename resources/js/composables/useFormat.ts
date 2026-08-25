@@ -71,15 +71,17 @@ export function price(value: number | null | undefined): string {
 }
 
 /**
- * Angka pendek untuk sel sempit (kalender di layar ponsel): 1,2 rb / 15 jt.
+ * Angka pendek untuk sel sempit (kalender di layar ponsel): 1.2k / 15m.
  * Tanpa simbol mata uang — konteksnya sudah jelas dari halamannya.
  */
 export function compact(value: number | null | undefined, signed = false): string {
   if (value === null || value === undefined) return '—'
 
-  const text = new Intl.NumberFormat(LOCALE, { notation: 'compact', maximumFractionDigits: 1 }).format(
-    Math.abs(value),
-  )
+  // Notasi k/m/b (en-US, huruf kecil): tiga angka penting, maksimal 6 karakter
+  // supaya muat di sel kalender ponsel yang lebarnya cuma ~40px.
+  const text = new Intl.NumberFormat('en-US', { notation: 'compact', maximumSignificantDigits: 3 })
+    .format(Math.abs(value))
+    .toLowerCase()
 
   return value < 0 ? `−${text}` : signed && value > 0 ? `+${text}` : text
 }

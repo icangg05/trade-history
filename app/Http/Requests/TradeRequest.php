@@ -14,6 +14,11 @@ class TradeRequest extends FormRequest
             'direction' => ['required', 'in:buy,sell'],
             'lot' => ['nullable', 'numeric', 'gt:0', 'max:10000'],
             'entry_price' => ['required', 'numeric', 'gt:0'],
+            // Entry berlapis. `entry_price` dan `lot` di atas tetap dikirim form
+            // sebagai pratinjau, tapi nilai simpannya diturunkan ulang di model.
+            'entries' => ['nullable', 'array', 'max:20'],
+            'entries.*.price' => ['required', 'numeric', 'gt:0'],
+            'entries.*.lot' => ['required', 'numeric', 'gt:0', 'max:10000'],
             'sl_price' => ['nullable', 'numeric', 'gt:0'],
             'tp_price' => ['nullable', 'numeric', 'gt:0'],
             'exit_price' => ['nullable', 'numeric', 'gt:0'],

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import { LoaderCircle, ShieldCheck, Sparkles } from '@lucide/vue'
+import { LoaderCircle, ShieldCheck, Sparkles, Trash2 } from '@lucide/vue'
 
 import AiImportDialog from '@/components/AiImportDialog.vue'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { num, useCurrency } from '@/composables/useFormat'
-import type { Trade } from '@/types'
+import type { Trade, TradeLayer } from '@/types'
 
 const props = defineProps<{
   trade: (Trade & { ai_raw: Record<string, unknown> | null }) | null
@@ -24,6 +24,9 @@ const form = useForm({
   direction: props.trade?.direction ?? 'buy',
   lot: props.trade?.lot ?? null,
   entry_price: props.trade?.entry_price ?? null,
+  // Entry berlapis. Kosong = satu entry biasa; kalau terisi, `entry_price` dan
+  // `lot` di atas jadi ringkasannya (rata-rata terboboti & total).
+  entries: (props.trade?.entries ?? []) as TradeLayer[],
   sl_price: props.trade?.sl_price ?? null,
   tp_price: props.trade?.tp_price ?? null,
   exit_price: props.trade?.exit_price ?? null,
@@ -37,6 +40,59 @@ const form = useForm({
   // ini satu-satunya cara memeriksa ulang kalau angkanya nanti terasa janggal.
   ai_raw: (props.trade?.ai_raw ?? null) as Record<string, unknown> | null,
 })
+
+/**
+ * Entry berlapis: satu ide yang dieksekusi beberapa kali di harga berbeda.
+ * Ringkasannya (entry rata-rata terboboti lot dan lot total) ditulis balik ke
+ * `entry_price`/`lot` supaya pratinjau R, catatan stop, dan validasi server
+ * tetap membaca satu angka yang sama. Server menghitung ulang saat menyimpan.
+ */
+const layered = computed(() => form.entries.length > 0)
+
+const layerSummary = computed(() => {
+  const lots = form.entries.reduce((sum: number, layer: TradeLayer) => sum + Number(layer.lot || 0), 0)
+
+  if (!lots) return null
+
+  const weighted = form.entries.reduce(
+    (sum: number, layer: TradeLayer) => sum + Number(layer.price || 0) * Number(layer.lot || 0),
+    0,
+  )
+
+  return { lot: lots, entry: weighted / lots }
+})
+
+watch(
+  layerSummary,
+  (summary) => {
+    if (!layered.value || !summary) return
+
+    form.entry_price = Number(summary.entry.toFixed(5))
+    form.lot = Number(summary.lot.toFixed(2))
+  },
+  { deep: true, immediate: true },
+)
+
+/** Entry tunggal yang sudah diisi jadi layer pertama, jangan sampai hilang. */
+function addLayer() {
+  if (!layered.value) form.entries.push({ price: form.entry_price, lot: form.lot })
+
+  form.entries.push({ price: null, lot: null })
+}
+
+const layerErrors = computed(() => Object.keys(form.errors).some((key) => key.startsWith('entries')))
+
+function removeLayer(index: number) {
+  form.entries.splice(index, 1)
+
+  // Layer terakhir dihapus → kembali ke mode entry tunggal, angkanya dibawa.
+  if (form.entries.length === 1) {
+    const [last] = form.entries.splice(0, 1)
+
+    form.entry_price = last.price
+    form.lot = last.lot
+  }
+}
 
 /** Field yang barusan diisi AI — ditandai supaya diperiksa dulu. */
 const aiFields = ref<string[]>([])
@@ -246,16 +302,33 @@ function badge(field: string): string | null {
 
           <div class="space-y-1.5">
             <Label for="lot">Lot</Label>
-            <Input id="lot" v-model="form.lot" type="number" step="0.01" min="0" placeholder="0.05" />
-            <p v-if="badge('lot')" class="text-[10px] text-gold">{{ badge('lot') }}</p>
+            <Input id="lot" v-model="form.lot" type="number" step="0.01" min="0" placeholder="0.05" :disabled="layered" />
+            <p v-if="layered" class="text-[10px] text-muted-foreground">Total semua layer.</p>
+            <p v-else-if="badge('lot')" class="text-[10px] text-gold">{{ badge('lot') }}</p>
           </div>
         </div>
 
         <div class="grid gap-3 sm:grid-cols-3">
           <div class="space-y-1.5">
-            <Label for="entry_price">Entry <span class="text-gold">*</span></Label>
-            <Input id="entry_price" v-model="form.entry_price" type="number" step="0.00001" placeholder="2412.35" required />
-            <p v-if="badge('entry_price')" class="text-[10px] text-gold">{{ badge('entry_price') }}</p>
+            <div class="flex items-center justify-between gap-2">
+              <Label for="entry_price">Entry <span class="text-gold">*</span></Label>
+              <button v-if="!layered" type="button" class="text-[11px] text-gold hover:underline" @click="addLayer">
+                + Entry berlapis
+              </button>
+            </div>
+            <Input
+              id="entry_price"
+              v-model="form.entry_price"
+              type="number"
+              step="0.00001"
+              placeholder="2412.35"
+              :disabled="layered"
+              required
+            />
+            <p v-if="layered" class="text-[10px] text-muted-foreground">
+              Rata-rata terboboti dari {{ form.entries.length }} layer.
+            </p>
+            <p v-else-if="badge('entry_price')" class="text-[10px] text-gold">{{ badge('entry_price') }}</p>
             <p v-if="form.errors.entry_price" class="text-xs text-destructive">{{ form.errors.entry_price }}</p>
           </div>
 
@@ -278,6 +351,38 @@ function badge(field: string): string | null {
             </p>
             <p v-else-if="badge('tp_price')" class="text-[10px] text-gold">{{ badge('tp_price') }}</p>
             <p v-if="form.errors.tp_price" class="text-xs text-destructive">{{ form.errors.tp_price }}</p>
+          </div>
+        </div>
+
+        <!-- Satu ide, beberapa entry. Jurnal tetap mencatatnya sebagai satu
+             trade; entry dan lot di atas adalah ringkasan layer di sini. -->
+        <div v-if="layered" class="space-y-2 rounded-md border border-dashed p-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="text-xs font-medium">Layer entry</p>
+            <p class="tnum font-mono text-[11px] text-muted-foreground">
+              Rata-rata {{ num(form.entry_price, 5) }} · lot {{ num(form.lot, 2) }}
+            </p>
+          </div>
+
+          <div v-for="(layer, index) in form.entries" :key="index" class="flex items-end gap-2">
+            <div class="flex-1 space-y-1">
+              <Label :for="`layer_price_${index}`" class="text-[11px] text-muted-foreground">
+                Harga layer {{ index + 1 }}
+              </Label>
+              <Input :id="`layer_price_${index}`" v-model="layer.price" type="number" step="0.00001" placeholder="2412.35" />
+            </div>
+            <div class="w-24 space-y-1">
+              <Label :for="`layer_lot_${index}`" class="text-[11px] text-muted-foreground">Lot</Label>
+              <Input :id="`layer_lot_${index}`" v-model="layer.lot" type="number" step="0.01" min="0" placeholder="0.05" />
+            </div>
+            <Button type="button" variant="ghost" size="icon" title="Hapus layer" @click="removeLayer(index)">
+              <Trash2 class="size-4" />
+            </Button>
+          </div>
+
+          <div class="flex items-center justify-between gap-2">
+            <button type="button" class="text-[11px] text-gold hover:underline" @click="addLayer">+ Tambah layer</button>
+            <p v-if="layerErrors" class="text-xs text-destructive">Harga dan lot tiap layer wajib diisi.</p>
           </div>
         </div>
 

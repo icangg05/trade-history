@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'account_id', 'symbol', 'direction', 'lot',
-    'entry_price', 'sl_price', 'tp_price', 'exit_price',
+    'entry_price', 'entries', 'sl_price', 'tp_price', 'exit_price',
     'pnl', 'pips', 'opened_at', 'closed_at',
     'setup', 'tags', 'notes', 'source', 'ai_raw',
 ])]
@@ -29,18 +29,22 @@ class Trade extends Model
             'rr_planned' => 'decimal:2',
             'rr_realized' => 'decimal:2',
             'tags' => 'array',
+            'entries' => 'array',
             'ai_raw' => 'array',
         ];
     }
 
     /**
-     * `status`, `rr_planned` dan `rr_realized` selalu diturunkan dari harga &
-     * pnl — dipasang di event `saving` supaya semua jalur simpan (form manual,
-     * import AI, seeder, tinker) menghasilkan nilai yang sama.
+     * `entry_price`, `lot`, `status`, `rr_planned` dan `rr_realized` selalu
+     * diturunkan dari layer, harga & pnl — dipasang di event `saving` supaya
+     * semua jalur simpan (form manual, import AI, seeder, tinker) menghasilkan
+     * nilai yang sama.
      */
     protected static function booted(): void
     {
         static::saving(function (Trade $trade) {
+            // Ringkasan layer harus lebih dulu: hitungan R di bawah membacanya.
+            $trade->summariseEntries();
             $trade->rr_planned = $trade->computeRrPlanned();
             $trade->rr_realized = $trade->computeRrRealized();
             $trade->status = $trade->computeStatus();
@@ -50,6 +54,49 @@ class Trade extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
+    }
+
+    /**
+     * Layer entry trade ini. Trade satu layer (termasuk semua data lama) tetap
+     * punya satu layer di sini, jadi pemanggilnya tidak perlu bercabang.
+     *
+     * @return list<array{price: float, lot: float|null}>
+     */
+    public function layers(): array
+    {
+        if (! $this->entries) {
+            return [['price' => (float) $this->entry_price, 'lot' => $this->lot === null ? null : (float) $this->lot]];
+        }
+
+        return array_map(
+            fn (array $layer) => ['price' => (float) $layer['price'], 'lot' => (float) $layer['lot']],
+            $this->entries,
+        );
+    }
+
+    /**
+     * Entry dan lot yang tersimpan adalah ringkasan layernya: rata-rata harga
+     * terboboti lot, dan lot total. Semua hitungan lain (R, statistik, kalender)
+     * cukup membaca dua kolom itu dan tidak perlu tahu soal layer.
+     */
+    private function summariseEntries(): void
+    {
+        $layers = $this->entries;
+
+        if (! $layers) {
+            return;
+        }
+
+        $lots = array_sum(array_column($layers, 'lot'));
+
+        if ($lots <= 0) {
+            return;
+        }
+
+        $weighted = array_sum(array_map(fn (array $l) => $l['price'] * $l['lot'], $layers));
+
+        $this->lot = round($lots, 2);
+        $this->entry_price = round($weighted / $lots, 5);
     }
 
     /**

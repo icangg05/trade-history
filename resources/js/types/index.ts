@@ -15,6 +15,12 @@ export interface CurrentAccount extends AccountBrief {
   started_at: string
 }
 
+/** Satu lapis entry: harga dan lotnya sendiri. */
+export interface TradeLayer {
+  price: number | null
+  lot: number | null
+}
+
 export interface Trade {
   id: number
   symbol: string
@@ -24,6 +30,8 @@ export interface Trade {
   notes?: string | null
   source?: 'manual' | 'ai'
   lot: number | null
+  /** Kosong = trade satu layer; `entry_price` dan `lot` adalah ringkasannya. */
+  entries?: TradeLayer[]
   entry_price: number | null
   sl_price: number | null
   stop_state?: StopState
@@ -35,6 +43,25 @@ export interface Trade {
   opened_at: string
   closed_at?: string | null
   tags: string[]
+}
+
+/**
+ * Paginator Laravel apa adanya — hanya field yang benar-benar dipakai layar.
+ *
+ * `links` sengaja tidak dipakai untuk tombol maju/mundur: label pertama dan
+ * terakhirnya diterjemahkan Laravel, dan tanpa berkas lang/id keduanya keluar
+ * mentah sebagai "pagination.previous". Panahnya digambar dari *_page_url.
+ */
+export interface Paginated<T> {
+  data: T[]
+  links: { url: string | null; label: string; active: boolean }[]
+  current_page: number
+  last_page: number
+  prev_page_url: string | null
+  next_page_url: string | null
+  from: number | null
+  to: number | null
+  total: number
 }
 
 export interface EquityPoint {

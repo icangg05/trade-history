@@ -252,6 +252,57 @@ class Gemini
         return trim($this->text($response));
     }
 
+    /**
+     * Tanya jawab bebas seputar akun ini.
+     *
+     * Statistik yang sama dengan analyze() dikirim sebagai instruksi sistem —
+     * model menjawab pertanyaan, tidak menghitung ulang angkanya.
+     *
+     * @param  list<array{role: string, text: string}>  $messages  urut lama → baru, yang terakhir dari trader
+     */
+    public function chat(array $stats, ?string $rules, array $messages): string
+    {
+        $system = <<<'TXT'
+        Kamu mentor trading yang sedang berbicara langsung dengan pemilik jurnal ini.
+        Jawab pertanyaannya tentang cara dia trading, berdasarkan STATISTIK AKUN di bawah.
+
+        Angka di STATISTIK AKUN sudah dihitung dari database — pakai apa adanya,
+        jangan hitung ulang dan jangan mengarang angka yang tidak ada di sana. Kalau
+        sebuah pertanyaan tidak bisa dijawab dari data yang ada, katakan terus terang
+        data mana yang kurang, jangan menebak.
+
+        Gaya jawaban:
+        - Bahasa Indonesia, santai tapi padat. Ini percakapan, bukan laporan.
+        - Pendek secukupnya — biasanya 2-5 kalimat atau satu daftar singkat.
+          Panjangkan hanya kalau pertanyaannya memang menuntut itu.
+        - Markdown seperlunya: **tebal** untuk angka kunci, daftar berpoin untuk
+          hal sejajar. Jangan pakai judul `##` dan jangan membuat laporan tujuh bagian.
+        - Setiap klaim tentang cara dia trading harus menyebut angka pendukungnya.
+        - Jangan mengulang seluruh statistik kalau yang ditanya cuma satu hal.
+
+        Larangan: jangan memberi sinyal, prediksi arah pasar, atau rekomendasi entry.
+        Kalau ditanya hal itu, tolak singkat lalu belokkan ke apa yang bisa dibaca
+        dari jurnalnya sendiri.
+        TXT;
+
+        $context = "STATISTIK AKUN:\n".json_encode($stats, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        if (filled($rules)) {
+            $context .= "\n\nATURAN TRADING YANG DITULIS TRADER:\n".$rules;
+        }
+
+        $response = $this->call([
+            'systemInstruction' => ['parts' => [['text' => $system."\n\n".$context]]],
+            'contents' => array_map(fn (array $message): array => [
+                'role' => $message['role'] === 'assistant' ? 'model' : 'user',
+                'parts' => [['text' => $message['text']]],
+            ], $messages),
+            'generationConfig' => ['temperature' => 0.6, 'maxOutputTokens' => 2000],
+        ]);
+
+        return trim($this->text($response));
+    }
+
     // ---------------------------------------------------------------- internal
 
     /** Kunci boleh ditentukan (uji satu kunci); kalau tidak, giliran yang menentukan. */

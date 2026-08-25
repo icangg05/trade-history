@@ -21,7 +21,13 @@ const form = useForm({ email: '', password: '', remember: false })
       <div class="blob blob-b" />
     </div>
 
-    <form class="glass-card w-full max-w-sm space-y-5 p-6" @submit.prevent="form.post('/login')">
+    <!-- showProgress: false — bar tipis di puncak layar hanya berkedip sekejap
+         saat login dan justru terbaca seperti halaman gagal dimuat. Umpan
+         baliknya sudah dipegang tombol yang berputar di bawah. -->
+    <form
+      class="glass-card w-full max-w-sm space-y-5 p-6"
+      @submit.prevent="form.post('/login', { showProgress: false })"
+    >
       <div class="space-y-1">
         <div class="mb-3 grid size-9 place-items-center rounded-lg bg-gold text-sm font-bold text-gold-foreground">
           TH

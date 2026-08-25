@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/trades/extract', TradeImportController::class)
                 ->middleware('throttle:20,1')
                 ->name('trades.extract');
+            Route::post('/trades/merge', [TradeController::class, 'merge'])->name('trades.merge');
             Route::get('/trades/{trade}/edit', [TradeController::class, 'edit'])->name('trades.edit');
             Route::put('/trades/{trade}', [TradeController::class, 'update'])->name('trades.update');
             Route::delete('/trades/{trade}', [TradeController::class, 'destroy'])->name('trades.destroy');
@@ -78,6 +79,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/analysis', [AnalysisController::class, 'generate'])
                 ->middleware('throttle:10,1')
                 ->name('analysis.generate');
+            Route::get('/analysis/chat', [AnalysisController::class, 'chatPage'])->name('analysis.chat.page');
+            Route::post('/analysis/chat', [AnalysisController::class, 'chat'])
+                ->middleware('throttle:30,1')
+                ->name('analysis.chat');
         });
     });
 });

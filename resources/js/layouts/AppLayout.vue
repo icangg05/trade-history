@@ -59,6 +59,11 @@ const mobileMore = computed(() =>
   isAdmin.value ? [] : nav.value.filter((item) => !MOBILE_TABS.includes(item.href)),
 )
 
+// Layar chat AI tampil penuh: header dan tab bar disembunyikan, halaman
+// mengisi seluruh tinggi layar seperti aplikasi chat pada umumnya.
+// Tombol tutupnya ada di dalam halaman chat itu sendiri.
+const fullscreen = computed(() => page.url.split('?')[0] === '/analysis/chat')
+
 const { available: canInstall, install } = useInstall()
 
 async function installApp() {
@@ -93,7 +98,7 @@ watch(
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col pt-14">
+  <div class="flex min-h-screen flex-col" :class="fullscreen ? '' : 'pt-14'">
     <div class="bg-ornaments" aria-hidden="true">
       <div class="bg-grid" />
       <div class="ring-ornament" />
@@ -101,7 +106,7 @@ watch(
       <div class="blob blob-b" />
     </div>
 
-    <header class="glass fixed inset-x-0 top-0 z-40 h-14 border-b">
+    <header v-if="!fullscreen" class="glass fixed inset-x-0 top-0 z-40 h-14 border-b">
       <div class="mx-auto flex h-full max-w-7xl items-center gap-3 px-4">
         <Link href="/" class="flex shrink-0 items-center gap-2">
           <img src="/icons/icon-192.png" alt="Trade History" class="size-7 rounded-md" />
@@ -176,54 +181,70 @@ watch(
       </div>
     </header>
 
-    <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 lg:pb-10" :class="isAdmin ? 'pb-10' : 'pb-24'">
+    <!-- Ruang bawah dipesan sebesar tinggi tab bar mengambang (~95px) plus
+         jarak napas dan safe area — nav-nya `fixed`, jadi tidak ikut mendorong
+         isi halaman. Angka ini terikat pada tinggi nav di bawah: kalau ikonnya
+         diperbesar lagi, naikkan juga nilai ini. -->
+    <main
+      class="mx-auto w-full flex-1"
+      :class="
+        fullscreen
+          ? 'h-[100dvh] overflow-hidden'
+          : [
+              'max-w-7xl px-4 py-6 lg:pb-10',
+              isAdmin ? 'pb-10' : 'pb-[calc(7.5rem+env(safe-area-inset-bottom))]',
+            ]
+      "
+    >
       <slot />
     </main>
 
-    <nav v-if="!isAdmin" class="glass pb-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t lg:hidden">
-      <Link
-        v-for="item in mobileNav"
-        :key="item.href"
-        :href="item.href"
-        class="flex flex-col items-center gap-0.5 py-1.5 text-[10px] transition-colors"
-        :class="isActive(item.href) ? 'text-gold' : 'text-muted-foreground'"
-      >
-        <span
-          class="grid place-items-center rounded-full px-3 py-1 transition-colors"
-          :class="
-            item.href === '/trades'
-              ? isActive(item.href)
-                ? 'bg-gold text-gold-foreground'
-                : 'bg-gold/15 text-gold'
-              : ''
-          "
+    <!-- Tab bar mobile: island mengambang, tab aktif ditandai kotak emas. -->
+    <div v-if="!isAdmin && !fullscreen" class="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] lg:hidden">
+      <nav class="glass grid grid-cols-5 rounded-[1.75rem] p-1.5 shadow-lg shadow-black/30">
+        <Link
+          v-for="item in mobileNav"
+          :key="item.href"
+          :href="item.href"
+          class="flex flex-col items-center gap-1 py-1.5 text-[10px] font-medium transition-colors"
+          :class="isActive(item.href) ? 'text-gold' : 'text-muted-foreground'"
         >
-          <component :is="item.icon" class="size-4" />
-        </span>
-        {{ item.label }}
-      </Link>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          class="flex w-full flex-col items-center gap-0.5 py-1.5 text-[10px] transition-colors"
-          :class="mobileMore.some((item) => isActive(item.href)) ? 'text-gold' : 'text-muted-foreground'"
-        >
-          <span class="grid place-items-center px-3 py-1"><Ellipsis class="size-4" /></span>
-          Lainnya
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" side="top" :side-offset="8" class="w-44">
-          <DropdownMenuItem
-            v-for="item in mobileMore"
-            :key="item.href"
-            :class="isActive(item.href) ? 'text-gold' : ''"
-            @select="router.visit(item.href)"
+          <span
+            class="grid size-10 place-items-center rounded-2xl transition-colors"
+            :class="isActive(item.href) ? 'bg-gold/15 ring-1 ring-gold/25' : ''"
           >
-            <component :is="item.icon" class="size-4" />
-            {{ item.label }}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </nav>
+            <component :is="item.icon" class="size-5" />
+          </span>
+          {{ item.label }}
+        </Link>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            class="flex w-full flex-col items-center gap-1 py-1.5 text-[10px] font-medium transition-colors"
+            :class="mobileMore.some((item) => isActive(item.href)) ? 'text-gold' : 'text-muted-foreground'"
+          >
+            <span
+              class="grid size-10 place-items-center rounded-2xl transition-colors"
+              :class="mobileMore.some((item) => isActive(item.href)) ? 'bg-gold/15 ring-1 ring-gold/25' : ''"
+            >
+              <Ellipsis class="size-5" />
+            </span>
+            Lainnya
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="top" :side-offset="8" class="w-44">
+            <DropdownMenuItem
+              v-for="item in mobileMore"
+              :key="item.href"
+              :class="isActive(item.href) ? 'text-gold' : ''"
+              @select="router.visit(item.href)"
+            >
+              <component :is="item.icon" class="size-4" />
+              {{ item.label }}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </nav>
+    </div>
 
     <Toaster position="top-center" theme="dark" rich-colors close-button :duration="3500" />
   </div>

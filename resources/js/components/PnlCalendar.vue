@@ -86,7 +86,7 @@ function weekTotal(week: { stat?: DayStat }[]): number {
           v-for="day in week"
           :key="day.date"
           type="button"
-          class="relative flex h-16 flex-col overflow-hidden rounded-md border p-1 text-left transition-colors sm:h-20 sm:p-1.5"
+          class="relative flex aspect-square flex-col overflow-hidden rounded-md border p-1 text-left transition-colors sm:p-1.5"
           :class="[
             day.inMonth ? 'border-border' : 'border-transparent opacity-35',
             day.stat ? 'hover:border-gold/50' : 'hover:border-border',
@@ -96,20 +96,21 @@ function weekTotal(week: { stat?: DayStat }[]): number {
           :disabled="!day.stat"
           @click="emit('select', day.date)"
         >
-          <span class="tnum font-mono text-[10px] text-muted-foreground sm:text-[11px]">
+          <span class="tnum font-mono text-[10px] leading-none text-muted-foreground sm:text-[11px]">
             {{ Number(day.date.slice(-2)) }}
           </span>
 
           <template v-if="day.stat">
             <span
-              class="tnum mt-auto font-mono text-[10px] font-semibold sm:text-xs"
+              class="tnum mt-auto whitespace-nowrap font-mono text-[10px] font-semibold leading-none sm:text-xs"
               :class="day.stat.pnl >= 0 ? 'text-success' : 'text-destructive'"
             >
               <span class="sm:hidden">{{ compact(day.stat.pnl, true) }}</span>
               <span class="hidden sm:inline">{{ money(day.stat.pnl, currency, true) }}</span>
             </span>
-            <span class="text-[9px] text-muted-foreground sm:text-[10px]">
-              {{ day.stat.trades }}T · {{ day.stat.wins }}W/{{ day.stat.losses }}L
+            <span class="mt-0.5 whitespace-nowrap text-[9px] leading-none text-muted-foreground sm:mt-1 sm:text-[10px]">
+              <span class="sm:hidden">{{ day.stat.wins }}W/{{ day.stat.losses }}L</span>
+              <span class="hidden sm:inline">{{ day.stat.trades }}T · {{ day.stat.wins }}W/{{ day.stat.losses }}L</span>
             </span>
           </template>
 
@@ -120,7 +121,7 @@ function weekTotal(week: { stat?: DayStat }[]): number {
           />
         </button>
 
-        <div class="hidden h-20 flex-col justify-center rounded-md bg-muted/30 px-1.5 text-center sm:flex">
+        <div class="hidden flex-col justify-center rounded-md bg-muted/30 px-1.5 text-center sm:flex">
           <span
             class="tnum font-mono text-xs font-semibold"
             :class="weekTotal(week) === 0 ? 'text-muted-foreground' : weekTotal(week) > 0 ? 'text-success' : 'text-destructive'"

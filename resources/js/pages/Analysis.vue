@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { LoaderCircle, Sparkles } from '@lucide/vue'
+import { LoaderCircle, MessageCircleQuestion, Sparkles } from '@lucide/vue'
 
 import Markdown from '@/components/Markdown.vue'
 import StatCard from '@/components/StatCard.vue'
@@ -56,17 +56,23 @@ function top(breakdown: Breakdown, limit = 5) {
         </p>
       </div>
 
-      <div class="flex rounded-md border p-0.5">
-        <button
-          v-for="item in PERIODS"
-          :key="item.key"
-          type="button"
-          class="rounded px-2 py-1 text-xs transition-colors"
-          :class="period === item.key ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'"
-          @click="router.get('/analysis', { period: item.key }, { preserveScroll: true })"
-        >
-          {{ item.label }}
-        </button>
+      <div class="flex items-center gap-2">
+        <Button variant="outline" size="sm" class="gap-1.5" @click="router.get('/analysis/chat', { period })">
+          <MessageCircleQuestion class="size-4" /> Tanya AI
+        </Button>
+
+        <div class="flex rounded-md border p-0.5">
+          <button
+            v-for="item in PERIODS"
+            :key="item.key"
+            type="button"
+            class="rounded px-2 py-1 text-xs transition-colors"
+            :class="period === item.key ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'"
+            @click="router.get('/analysis', { period: item.key }, { preserveScroll: true })"
+          >
+            {{ item.label }}
+          </button>
+        </div>
       </div>
     </div>
 
