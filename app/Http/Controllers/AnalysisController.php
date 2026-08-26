@@ -23,21 +23,29 @@ class AnalysisController extends Controller
         [$from, $to, $period] = $this->period($request);
 
         $stats = (new AccountStats($account))->summary($from, $to);
+        $hash = $this->hash($stats);
+
+        // Cocok persis dulu; kalau statistik sudah berubah, analisa terakhir
+        // tetap ditampilkan (ditandai usang) supaya bacaannya tidak hilang
+        // begitu satu trade baru masuk.
+        $saved = AiAnalysis::where('account_id', $account->id)->latest();
+        $analysis = (clone $saved)->where('stats_hash', $hash)->first() ?? $saved->first();
 
         return Inertia::render('Analysis', [
             'period' => $period,
             'summary' => $stats,
             'aiEnabled' => $gemini->configured(),
             'model' => $gemini->model(),
-            'analysis' => AiAnalysis::where('account_id', $account->id)
-                ->where('stats_hash', $this->hash($stats))
-                ->latest()
-                ->first()
-                ?->only('result_md', 'model', 'created_at'),
-            'history' => AiAnalysis::where('account_id', $account->id)
-                ->latest()
-                ->limit(10)
-                ->get(['id', 'period_start', 'period_end', 'model', 'created_at']),
+            'analysis' => $analysis ? [
+                ...$analysis->only('result_md', 'model'),
+                // Baris ini hanya ditulis saat AI benar-benar dipanggil, jadi
+                // updated_at = kapan terakhir dianalisa (created_at tidak bergerak
+                // saat hasil lama ditimpa).
+                'analyzed_at' => $analysis->updated_at,
+                'period_start' => $analysis->period_start->toDateString(),
+                'period_end' => $analysis->period_end->toDateString(),
+                'stale' => $analysis->stats_hash !== $hash,
+            ] : null,
         ]);
     }
 
@@ -52,13 +60,9 @@ class AnalysisController extends Controller
             return back()->with('error', 'Belum ada trade tertutup di periode ini.');
         }
 
-        $hash = $this->hash($stats);
-
-        // Statistik identik → hasil lama dipakai ulang, tidak memanggil Gemini lagi.
-        if (! $request->boolean('force') && AiAnalysis::where('account_id', $account->id)->where('stats_hash', $hash)->exists()) {
-            return back();
-        }
-
+        // Tombol ini selalu memanggil Gemini: diam-diam memakai ulang hasil lama
+        // terbaca seperti tombol rusak. Pemborosannya ditahan di tempat lain —
+        // jeda 10 detik per kunci (GeminiKey::COOLDOWN) dan throttle rute.
         try {
             $markdown = $gemini->analyze($stats, $account->rule?->notes);
         } catch (RuntimeException $e) {
@@ -66,14 +70,14 @@ class AnalysisController extends Controller
         }
 
         AiAnalysis::updateOrCreate(
-            ['account_id' => $account->id, 'stats_hash' => $hash],
+            ['account_id' => $account->id, 'stats_hash' => $this->hash($stats)],
             [
                 'period_start' => $from->toDateString(),
                 'period_end' => $to->toDateString(),
                 'result_md' => $markdown,
                 'model' => $gemini->model(),
             ],
-        );
+        )->touch();
 
         return back()->with('success', 'Analisa selesai.');
     }

@@ -1,16 +1,16 @@
 # Graph Report - trade-history  (2026-08-26)
 
 ## Corpus Check
-- 192 files · ~48,631 words
+- 193 files · ~48,938 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1143 nodes · 2020 edges · 82 communities (69 shown, 13 thin omitted)
-- Extraction: 97% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 50 edges (avg confidence: 0.86)
+- 1150 nodes · 2049 edges · 77 communities (66 shown, 11 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 52 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `87e9deb3`
+- Built from commit: `035febf9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -19,7 +19,7 @@
 - AiImportDialog.vue
 - composer.json
 - Illuminate\Database\Migrations\Migration
-- Analysis.vue
+- Dashboard.vue
 - dropdown-menu/index.ts
 - Form.vue
 - select/index.ts
@@ -29,7 +29,7 @@
 - utils.ts
 - TradeRequest
 - EquityChart.vue
-- Controller
+- Illuminate\Http\Request
 - PnlCalendar.vue
 - Admin.vue
 - TestCase
@@ -42,7 +42,7 @@
 - bootstrap/app.php
 - Tabs.vue
 - Alur import trade dari screenshot
-- Gemini
+- SetupPicker.vue
 - dialog/index.ts
 - types/index.ts
 - DropdownMenuSubContent.vue
@@ -55,51 +55,46 @@
 - App Icon 512 (rounded squircle, rising-chart mark)
 - Tabel trades
 - UserFactory.php
-- Illuminate\Http\Request
+- GeminiKey
 - @inertiajs/vue3
-- Account
+- AiAnalysis
 - shadcn-vue (reka-ui)
 - Illuminate\Database\Eloquent\Model
-- Input.vue
+- AdminTest
 - App\Services\AccountStats
 - compose service: app (FrankenPHP dev)
 - Penyimpanan bukti transfer privat
 - Tabel accounts
 - PWA (manifest + service worker tulis tangan)
 - logging.php
-- Inertia\Response
-- TradeController
+- Account
+- TradeImportTest
 - DropdownMenuContent.vue
 - Rules.vue
-- AdminController.php
-- AdminTest
-- GeminiKey
+- AnalysisChatTest
+- DropdownMenuSub.vue
+- SelectTrigger.vue
 - draw_icon
-- TradeImportTest
-- TransactionController.php
 - @types/node
 - Progress.vue
-- DropdownMenuSub.vue
 - Separator.vue
 - console.php
 - DialogContent.vue
 - @tailwindcss/vite
-- SelectTrigger.vue
 - @vitejs/plugin-vue
-- AnalysisChatTest
 - DropdownMenuCheckboxItem.vue
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 52 edges
 2. `Trade` - 40 edges
-3. `Account` - 34 edges
-4. `User` - 33 edges
-5. `AccountStats` - 26 edges
-6. `GeminiKey` - 25 edges
+3. `Account` - 37 edges
+4. `User` - 35 edges
+5. `GeminiKey` - 28 edges
+6. `AccountStats` - 26 edges
 7. `Gemini` - 21 edges
 8. `JournalTest` - 20 edges
 9. `TradeController` - 18 edges
-10. `TradeGroupTest` - 16 edges
+10. `TestCase` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Penyimpanan bukti transfer privat` --semantically_similar_to--> `Screenshot trade tidak disimpan`  [INFERRED] [semantically similar]
@@ -123,7 +118,7 @@
 - **Maskable-Purpose Icon Variants** — public_icons_maskable_512_maskable_icon, public_icons_maskable_192_maskable_icon, public_icons_maskable_512_safe_zone [INFERRED 0.85]
 - **PWA / Web App Manifest Icon Set** — public_icons_icon_512_app_icon, public_icons_icon_192_app_icon, public_icons_icon_32_favicon, public_icons_apple_touch_icon_icon, public_icons_maskable_512_maskable_icon, public_icons_maskable_192_maskable_icon [INFERRED 0.95]
 
-## Communities (82 total, 13 thin omitted)
+## Communities (77 total, 11 thin omitted)
 
 ### Community 0 - "useFormat.ts"
 Cohesion: 0.10
@@ -141,17 +136,17 @@ Nodes (42): pestphp/pest-plugin, php-http/discovery, autoload, autoload-dev, psr
 Cohesion: 0.07
 Nodes (4): Illuminate\Database\Migrations\Migration, Illuminate\Database\Schema\Blueprint, Illuminate\Support\Facades\DB, Illuminate\Support\Facades\Schema
 
-### Community 4 - "Analysis.vue"
-Cohesion: 0.14
-Nodes (9): html, props, tones, currency, form, PERIODS, props, Breakdown (+1 more)
+### Community 4 - "Dashboard.vue"
+Cohesion: 0.11
+Nodes (18): tones, dateTime(), longDate(), frameClass(), frameGap(), Groupable, currency, form (+10 more)
 
 ### Community 5 - "dropdown-menu/index.ts"
 Cohesion: 0.06
 Nodes (25): emits, forwarded, props, props, delegatedProps, forwardedProps, props, delegatedProps (+17 more)
 
 ### Community 6 - "Form.vue"
-Cohesion: 0.09
-Nodes (19): code, emit, props, typed, Props, ButtonVariants, form, form (+11 more)
+Cohesion: 0.07
+Nodes (22): code, emit, props, typed, Props, ButtonVariants, emits, modelValue (+14 more)
 
 ### Community 7 - "select/index.ts"
 Cohesion: 0.07
@@ -181,24 +176,24 @@ Nodes (3): TradeRequest, Illuminate\Contracts\Validation\Validator, Illuminate\F
 Cohesion: 0.12
 Nodes (14): active, areaPath, box, flowPoints, gridLines, hover, PAD, path (+6 more)
 
-### Community 14 - "Controller"
-Cohesion: 0.16
-Nodes (5): LoginController, RegisterController, Controller, DashboardController, RuleController
+### Community 14 - "Illuminate\Http\Request"
+Cohesion: 0.05
+Nodes (28): AccountController, AnalysisController, LoginController, RegisterController, CalendarController, Controller, DashboardController, ProfileController (+20 more)
 
 ### Community 15 - "PnlCalendar.vue"
 Cohesion: 0.20
 Nodes (8): emit, iso(), maxAbs, props, today, WEEKDAYS, weeks, DayStat
 
 ### Community 16 - "Admin.vue"
-Cohesion: 0.08
-Nodes (20): emit, options, props, selected, SETUPS, csrf(), editing, gemini (+12 more)
+Cohesion: 0.10
+Nodes (15): csrf(), editing, gemini, GeminiKey, now, open, removing, removingKey (+7 more)
 
 ### Community 17 - "TestCase"
-Cohesion: 0.13
-Nodes (8): Illuminate\Foundation\Testing\RefreshDatabase, Illuminate\Foundation\Testing\TestCase, Illuminate\Http\Client\ConnectionException, Illuminate\Http\Client\RequestException, Illuminate\Support\Facades\Http, GeminiKeyTest, RegisterTest, TestCase
+Cohesion: 0.15
+Nodes (6): Illuminate\Foundation\Testing\RefreshDatabase, Illuminate\Foundation\Testing\TestCase, Illuminate\Support\Facades\Http, GeminiKeyTest, RegisterTest, TestCase
 
 ### Community 18 - "AccountStats"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (7): Transaction, AppServiceProvider, AccountStats, Carbon\CarbonInterface, Illuminate\Support\Collection, Illuminate\Support\Facades\Route, Illuminate\Support\ServiceProvider
 
 ### Community 19 - "dependencies"
@@ -206,8 +201,8 @@ Cohesion: 0.11
 Nodes (19): class-variance-authority, clsx, @lucide/vue, marked, dependencies, class-variance-authority, clsx, @lucide/vue (+11 more)
 
 ### Community 20 - "AnalysisChat.vue"
-Cohesion: 0.10
-Nodes (21): busy, clear(), closing, confirming, csrf(), draft, error, finishTyping() (+13 more)
+Cohesion: 0.11
+Nodes (20): busy, clear(), closing, confirming, csrf(), draft, error, finishTyping() (+12 more)
 
 ### Community 21 - "Trade"
 Cohesion: 0.13
@@ -233,33 +228,37 @@ Nodes (11): delegatedProps, emits, forwarded, props, delegatedProps, props, dele
 Cohesion: 0.15
 Nodes (15): Alur kerja graphify untuk repo ini, robots.txt mengizinkan seluruh crawler, Alur import trade dari screenshot, AiImportDialog, Urutan pengerjaan 7 fase, Gemini::extractTrade(), Gemini API (gemini-3.5-flash), App\Services\Gemini (+7 more)
 
+### Community 27 - "SetupPicker.vue"
+Cohesion: 0.40
+Nodes (5): emit, options, props, selected, SETUPS
+
 ### Community 28 - "dialog/index.ts"
 Cohesion: 0.08
 Nodes (17): emits, forwarded, props, props, delegatedProps, forwardedProps, props, props (+9 more)
 
 ### Community 29 - "types/index.ts"
-Cohesion: 0.15
-Nodes (12): props, TAG, confirming, profile, removal, AccountBrief, CurrentAccount, Direction (+4 more)
+Cohesion: 0.14
+Nodes (13): props, TAG, confirming, profile, removal, AccountBrief, CurrentAccount, Direction (+5 more)
 
 ### Community 30 - "DropdownMenuSubContent.vue"
 Cohesion: 0.40
 Nodes (4): delegatedProps, emits, forwarded, props
 
 ### Community 31 - "Calendar.vue"
-Cohesion: 0.09
-Nodes (23): delegatedProps, props, BadgeVariants, clock(), frameClass(), frameGap(), Groupable, currency (+15 more)
+Cohesion: 0.12
+Nodes (14): delegatedProps, props, BadgeVariants, clock(), currency, dayLots, dayStat, dayTrades (+6 more)
 
 ### Community 32 - "SelectContent.vue"
 Cohesion: 0.40
 Nodes (4): delegatedProps, emits, forwarded, props
 
 ### Community 33 - "Index.vue"
-Cohesion: 0.09
-Nodes (21): dateTime(), longDate(), apply, blockRange(), currency, editGroup(), filters, groupForm (+13 more)
+Cohesion: 0.10
+Nodes (18): apply, blockRange(), currency, editGroup(), filters, groupForm, grouping, open() (+10 more)
 
 ### Community 34 - "User"
-Cohesion: 0.15
-Nodes (8): User, DatabaseSeeder, DemoSeeder, Illuminate\Database\Eloquent\Attributes\Hidden, Illuminate\Database\Eloquent\Factories\HasFactory, Illuminate\Database\Seeder, Illuminate\Foundation\Auth\User, Illuminate\Notifications\Notifiable
+Cohesion: 0.14
+Nodes (9): AdminController, User, DatabaseSeeder, DemoSeeder, Illuminate\Database\Eloquent\Attributes\Hidden, Illuminate\Database\Eloquent\Factories\HasFactory, Illuminate\Database\Seeder, Illuminate\Foundation\Auth\User (+1 more)
 
 ### Community 35 - "Transactions.vue"
 Cohesion: 0.14
@@ -281,25 +280,17 @@ Nodes (10): Kolom ai_raw (jejak bacaan Gemini), Font self-host via bunny() larav
 Cohesion: 0.18
 Nodes (6): UserFactory, Illuminate\Database\Eloquent\Factories\Factory, Illuminate\Support\Facades\Hash, Illuminate\Support\Str, Pdo\Mysql, static
 
-### Community 40 - "Illuminate\Http\Request"
-Cohesion: 0.21
-Nodes (5): AccountController, AdminController, ProfileController, Illuminate\Http\RedirectResponse, Illuminate\Http\Request
-
-### Community 42 - "Account"
-Cohesion: 0.22
-Nodes (4): Account, Illuminate\Database\Eloquent\Relations\HasMany, Illuminate\Http\UploadedFile, Illuminate\Support\Facades\Storage
+### Community 40 - "GeminiKey"
+Cohesion: 0.25
+Nodes (4): GeminiKey, Illuminate\Http\Client\ConnectionException, Illuminate\Http\Client\RequestException, self
 
 ### Community 43 - "shadcn-vue (reka-ui)"
 Cohesion: 0.32
 Nodes (8): Tema dark-only, Token warna nfp dark di-flatten ke :root, Utilities .glass / ornamen / hover-lift, PnlCalendar (grid CSS 7 kolom manual), Aturan warna semantik (gold / success / destructive / cyan), shadcn-vue (reka-ui), Tailwind CSS v4 (CSS-first), Waktu disimpan dalam Asia/Jakarta
 
 ### Community 44 - "Illuminate\Database\Eloquent\Model"
-Cohesion: 0.17
-Nodes (6): AccountRule, AiAnalysis, Illuminate\Database\Eloquent\Attributes\Fillable, Illuminate\Database\Eloquent\Model, Illuminate\Database\Eloquent\Relations\BelongsTo, Illuminate\Database\Eloquent\Relations\HasOne
-
-### Community 45 - "Input.vue"
-Cohesion: 0.50
-Nodes (3): emits, modelValue, props
+Cohesion: 0.20
+Nodes (5): AccountRule, Illuminate\Database\Eloquent\Attributes\Fillable, Illuminate\Database\Eloquent\Model, Illuminate\Database\Eloquent\Relations\BelongsTo, Illuminate\Database\Eloquent\Relations\HasOne
 
 ### Community 46 - "App\Services\AccountStats"
 Cohesion: 0.38
@@ -325,41 +316,33 @@ Nodes (6): Menu "Pasang aplikasi" + manifest.id, PWA (manifest + service worker 
 Cohesion: 0.40
 Nodes (4): Monolog\Handler\NullHandler, Monolog\Handler\StreamHandler, Monolog\Handler\SyslogUdpHandler, Monolog\Processor\PsrLogMessageProcessor
 
-### Community 52 - "Inertia\Response"
-Cohesion: 0.24
-Nodes (7): CalendarController, Carbon\CarbonImmutable, Illuminate\Support\Facades\Auth, Illuminate\Validation\Rules\Password, Illuminate\Validation\ValidationException, Inertia\Inertia, Inertia\Response
+### Community 52 - "Account"
+Cohesion: 0.20
+Nodes (5): Account, Carbon\CarbonImmutable, Illuminate\Database\Eloquent\Relations\HasMany, Illuminate\Http\UploadedFile, Illuminate\Support\Facades\Storage
 
 ### Community 54 - "DropdownMenuContent.vue"
 Cohesion: 0.40
 Nodes (4): delegatedProps, emits, forwarded, props
 
 ### Community 55 - "Rules.vue"
-Cohesion: 0.15
-Nodes (11): breached, lossPct, profitPct, props, useCurrency(), currency, form, preview (+3 more)
+Cohesion: 0.11
+Nodes (14): breached, lossPct, profitPct, props, emits, modelValue, props, useCurrency() (+6 more)
 
-### Community 56 - "AdminController.php"
-Cohesion: 0.21
-Nodes (7): TradeImportController, Illuminate\Http\JsonResponse, Illuminate\Support\Facades\Log, Illuminate\Support\Facades\Process, Illuminate\Validation\Rule, RuntimeException, Throwable
+### Community 57 - "DropdownMenuSub.vue"
+Cohesion: 0.50
+Nodes (3): emits, forwarded, props
+
+### Community 58 - "SelectTrigger.vue"
+Cohesion: 0.50
+Nodes (3): delegatedProps, forwardedProps, props
 
 ### Community 59 - "draw_icon"
 Cohesion: 0.67
 Nodes (3): Image, draw_icon(), main()
 
-### Community 61 - "TransactionController.php"
-Cohesion: 0.27
-Nodes (3): TransactionController, Uploads, Symfony\Component\HttpFoundation\StreamedResponse
-
-### Community 64 - "DropdownMenuSub.vue"
-Cohesion: 0.50
-Nodes (3): emits, forwarded, props
-
 ### Community 67 - "DialogContent.vue"
 Cohesion: 0.25
 Nodes (6): delegatedProps, emits, forwarded, props, delegatedProps, props
-
-### Community 69 - "SelectTrigger.vue"
-Cohesion: 0.50
-Nodes (3): delegatedProps, forwardedProps, props
 
 ### Community 81 - "DropdownMenuCheckboxItem.vue"
 Cohesion: 0.40
@@ -372,19 +355,19 @@ Nodes (4): delegatedProps, emits, forwarded, props
 ## Knowledge Gaps
 - **396 isolated node(s):** `$schema`, `style`, `typescript`, `config`, `css` (+391 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `robots.txt mengizinkan seluruh crawler` and `REGISTER_TOKEN penjaga pendaftaran mandiri`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `cn()` connect `utils.ts` to `SelectContent.vue`, `Separator.vue`, `DialogContent.vue`, `dropdown-menu/index.ts`, `Form.vue`, `select/index.ts`, `SelectTrigger.vue`, `Input.vue`, `DropdownMenuCheckboxItem.vue`, `AnalysisChat.vue`, `DropdownMenuContent.vue`, `Tabs.vue`, `dialog/index.ts`, `Progress.vue`, `DropdownMenuSubContent.vue`, `Calendar.vue`?**
+- **Why does `cn()` connect `utils.ts` to `SelectContent.vue`, `Separator.vue`, `DialogContent.vue`, `dropdown-menu/index.ts`, `Form.vue`, `select/index.ts`, `DropdownMenuCheckboxItem.vue`, `DropdownMenuContent.vue`, `Rules.vue`, `Tabs.vue`, `SelectTrigger.vue`, `dialog/index.ts`, `Progress.vue`, `DropdownMenuSubContent.vue`, `Calendar.vue`?**
   _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `Account` connect `Account` to `User`, `Illuminate\Http\Request`, `Illuminate\Database\Eloquent\Model`, `AnalysisChatTest`, `TestCase`, `AccountStats`, `Trade`, `TradeImportTest`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `User` connect `User` to `UserFactory.php`, `Illuminate\Http\Request`, `Account`, `Controller`, `AnalysisChatTest`, `TestCase`, `Inertia\Response`, `Trade`, `AdminController.php`, `AdminTest`, `TradeImportTest`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `Account` connect `Account` to `User`, `AiAnalysis`, `Illuminate\Database\Eloquent\Model`, `Illuminate\Http\Request`, `TestCase`, `AccountStats`, `Trade`, `TradeImportTest`, `AnalysisChatTest`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Why does `User` connect `User` to `UserFactory.php`, `AiAnalysis`, `AdminTest`, `Illuminate\Http\Request`, `TestCase`, `Account`, `Trade`, `TradeImportTest`, `AnalysisChatTest`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `typescript` to the rest of the system?**
   _396 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `useFormat.ts` be split into smaller, more focused modules?**

@@ -14,8 +14,14 @@ const props = defineProps<{
   summary: Summary
   aiEnabled: boolean
   model: string
-  analysis: { result_md: string; model: string; created_at: string } | null
-  history: { id: number; period_start: string; period_end: string; model: string; created_at: string }[]
+  analysis: {
+    result_md: string
+    model: string
+    analyzed_at: string
+    period_start: string
+    period_end: string
+    stale: boolean
+  } | null
 }>()
 
 const PERIODS = [
@@ -26,11 +32,10 @@ const PERIODS = [
 ]
 
 const currency = computed(() => props.summary.currency)
-const form = useForm({ period: props.period, force: false })
+const form = useForm({ period: props.period })
 
-function generate(force = false) {
+function generate() {
   form.period = props.period
-  form.force = force
 
   // Tanpa progress bar: permintaan ini bisa berjalan puluhan detik, dan bar
   // yang menggantung di atas halaman selama itu terbaca seperti macet.
@@ -136,16 +141,16 @@ function top(breakdown: Breakdown, limit = 5) {
         <div>
           <h2 class="text-sm font-semibold">Analisa AI</h2>
           <p class="text-[11px] text-muted-foreground">
-            Model {{ model }}. Hasil disimpan; selama statistik tidak berubah, tombol ini tidak
-            memanggil AI lagi.
+            Model {{ model }}. Hasil terakhir tetap tersimpan walau data berubah.
+          </p>
+          <p v-if="analysis" class="text-[11px]" :class="analysis.stale ? 'text-gold' : 'text-muted-foreground'">
+            Terakhir dianalisa {{ dateTime(analysis.analyzed_at) }}<span v-if="analysis.stale">
+              · data sudah berubah sejak itu</span>
           </p>
         </div>
 
         <div class="flex gap-2">
-          <Button v-if="analysis" variant="outline" size="sm" :disabled="form.processing" @click="generate(true)">
-            Buat ulang
-          </Button>
-          <Button size="sm" class="gap-2" :disabled="!aiEnabled || form.processing" @click="generate(false)">
+          <Button size="sm" class="gap-2" :disabled="!aiEnabled || form.processing" @click="generate()">
             <LoaderCircle v-if="form.processing" class="size-4 animate-spin" />
             <Sparkles v-else class="size-4" />
             {{ analysis ? 'Perbarui' : 'Analisa sekarang' }}
@@ -171,7 +176,8 @@ function top(breakdown: Breakdown, limit = 5) {
       <template v-else-if="analysis">
         <Markdown :source="analysis.result_md" />
         <p class="mt-4 border-t pt-2 text-[11px] text-muted-foreground">
-          Dibuat {{ dateTime(analysis.created_at) }} dengan {{ analysis.model }}.
+          Ditulis {{ analysis.model }} atas data
+          {{ longDate(analysis.period_start) }} — {{ longDate(analysis.period_end) }}.
           Ini bukan saran finansial — hanya pembacaan pola dari jurnalmu sendiri.
         </p>
       </template>
@@ -179,16 +185,6 @@ function top(breakdown: Breakdown, limit = 5) {
       <p v-else class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
         Belum ada analisa untuk periode ini.
       </p>
-    </div>
-
-    <div v-if="history.length" class="glass-card p-4">
-      <h2 class="mb-2 text-sm font-semibold">Analisa sebelumnya</h2>
-      <ul class="space-y-1 text-xs text-muted-foreground">
-        <li v-for="row in history" :key="row.id">
-          {{ longDate(row.period_start) }} — {{ longDate(row.period_end) }} · {{ row.model }} ·
-          {{ dateTime(row.created_at) }}
-        </li>
-      </ul>
     </div>
   </div>
 </template>
