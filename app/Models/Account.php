@@ -44,12 +44,4 @@ class Account extends Model
     {
         return $this->hasMany(AiAnalysis::class);
     }
-
-    /**
-     * Aturan akun, dibuat dengan nilai kosong bila belum pernah diisi.
-     */
-    public function ruleOrNew(): AccountRule
-    {
-        return $this->rule ?? $this->rule()->make(['account_id' => $this->id]);
-    }
 }

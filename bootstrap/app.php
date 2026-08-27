@@ -9,6 +9,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -36,7 +38,29 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
-        );
+        $wantsJson = fn (Request $request) => $request->is('api/*') || $request->expectsJson();
+
+        $exceptions->shouldRenderJsonWhen($wantsJson);
+
+        /**
+         * Halaman galat memakai tampilan aplikasi sendiri, bukan halaman putih
+         * bawaan Symfony. Dua hal tetap dilewatkan apa adanya: permintaan yang
+         * meminta JSON, dan galat server saat mode debug menyala — jejak galat
+         * Laravel jauh lebih berguna daripada halaman yang rapi.
+         */
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request) use ($wantsJson) {
+            $status = $response->getStatusCode();
+
+            if ($wantsJson($request) || ($status === 500 && config('app.debug'))) {
+                return $response;
+            }
+
+            if (! in_array($status, [403, 404, 419, 429, 500, 503], true)) {
+                return $response;
+            }
+
+            return Inertia::render('Error', ['status' => $status])
+                ->toResponse($request)
+                ->setStatusCode($status);
+        });
     })->create();

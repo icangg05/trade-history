@@ -11,6 +11,7 @@ import {
   ListOrdered,
   LogOut,
   ScrollText,
+  Settings,
   ShieldCheck,
   Smartphone,
   Sparkles,
@@ -110,7 +111,7 @@ watch(
       <div class="mx-auto flex h-full max-w-7xl items-center gap-3 px-4">
         <Link href="/" class="flex shrink-0 items-center gap-2">
           <img src="/icons/icon-192.png" alt="Trade History" class="size-7 rounded-md" />
-          <span class="hidden text-sm font-semibold tracking-tight sm:block">Trade History</span>
+          <span class="text-sm font-semibold tracking-tight">Trade History</span>
         </Link>
 
         <nav class="ml-4 hidden items-center gap-1 lg:flex">
@@ -138,14 +139,18 @@ watch(
               <DropdownMenuItem
                 v-for="account in accounts"
                 :key="account.id"
-                class="flex items-center justify-between gap-2"
+                class="flex items-center gap-2"
                 @select="switchAccount(account.id)"
               >
-                <span class="truncate">{{ account.name }}</span>
+                <Wallet class="size-4 shrink-0 opacity-70" />
+                <span class="flex-1 truncate">{{ account.name }}</span>
                 <span v-if="account.id === current.id" class="size-1.5 shrink-0 rounded-full bg-gold" />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem @select="router.visit('/accounts')">Kelola akun…</DropdownMenuItem>
+              <DropdownMenuItem @select="router.visit('/accounts')">
+                <Settings class="size-4" />
+                Kelola akun
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 

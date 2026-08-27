@@ -31,7 +31,9 @@ class DashboardController extends Controller
             'monthly' => $stats->monthlyPnl(12),
             'ruleStatus' => $stats->ruleStatus(),
             'recent' => $account->trades()
-                ->orderByDesc('opened_at')
+                // Urutan yang sama dengan /trades dan kalender: hari trade ditutup.
+                ->orderByRaw('COALESCE(closed_at, opened_at) DESC')
+                ->orderByDesc('id')
                 ->limit(10)
                 ->get()
                 ->map(fn ($t) => $this->row($t)),

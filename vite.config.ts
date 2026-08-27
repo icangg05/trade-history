@@ -37,7 +37,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     resolve: {
-        alias: { '@': resolve(__dirname, 'resources/js') },
+        alias: { '@': resolve(import.meta.dirname, 'resources/js') },
     },
     server: {
         host: '0.0.0.0',

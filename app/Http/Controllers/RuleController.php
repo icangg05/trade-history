@@ -18,6 +18,7 @@ class RuleController extends Controller
     {
         $account = $request->currentAccount();
         $rule = $account->rule;
+        $stats = new AccountStats($account);
 
         return Inertia::render('Rules', [
             'rule' => [
@@ -32,7 +33,13 @@ class RuleController extends Controller
                 'allowed_sessions' => $rule?->allowed_sessions ?? [],
                 'notes' => $rule?->notes ?? '',
             ],
-            'status' => (new AccountStats($account))->ruleStatus(),
+            'status' => $stats->ruleStatus(),
+
+            // Dasar perkiraan untuk aturan yang diisi dalam persen: modal awal
+            // ditambah dana yang masuk dan keluar, tanpa hasil trading. Angka
+            // yang dipakai saat menilai pelanggaran tetap saldo pembukaan hari
+            // itu, jadi ini memang perkiraan.
+            'basis' => round((float) $account->initial_balance + $stats->netFlow(), 2),
         ]);
     }
 

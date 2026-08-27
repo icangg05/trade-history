@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'account_id', 'symbol', 'direction', 'lot',
     'entry_price', 'sl_price', 'tp_price', 'exit_price',
-    'pnl', 'pips', 'opened_at', 'closed_at',
-    'setup', 'group_id', 'pre_group', 'tags', 'notes', 'source', 'ai_raw',
+    'pnl', 'opened_at', 'closed_at',
+    'setup', 'group_id', 'pre_group', 'notes', 'source', 'ai_raw',
 ])]
 class Trade extends Model
 {
@@ -25,10 +25,8 @@ class Trade extends Model
             'tp_price' => 'decimal:5',
             'exit_price' => 'decimal:5',
             'pnl' => 'decimal:2',
-            'pips' => 'decimal:1',
             'rr_planned' => 'decimal:2',
             'rr_realized' => 'decimal:2',
-            'tags' => 'array',
             'pre_group' => 'array',
             'ai_raw' => 'array',
         ];
@@ -82,11 +80,6 @@ class Trade extends Model
             : self::STOP_LOCKED;
     }
 
-    public function isClosed(): bool
-    {
-        return $this->pnl !== null;
-    }
-
     /** +1 untuk buy, -1 untuk sell. */
     public function sign(): int
     {
@@ -134,10 +127,6 @@ class Trade extends Model
 
     public function computeStatus(): string
     {
-        if ($this->pnl === null) {
-            return 'open';
-        }
-
         return match (true) {
             (float) $this->pnl > 0 => 'win',
             (float) $this->pnl < 0 => 'loss',

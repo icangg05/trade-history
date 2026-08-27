@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Head, usePage, useForm } from '@inertiajs/vue3'
 import { TriangleAlert } from '@lucide/vue'
 
@@ -18,7 +18,11 @@ const profile = useForm({
   email: user.email,
   password: '',
   password_confirmation: '',
+  current_password: '',
 })
+
+/** Ganti sandi atau email = mengganti pintu masuk akun; server minta buktinya. */
+const takesOverLogin = computed(() => !!profile.password || profile.email !== user.email)
 
 const confirming = ref(false)
 const removal = useForm({ password: '' })
@@ -29,6 +33,7 @@ function save() {
     onSuccess: () => {
       profile.password = ''
       profile.password_confirmation = ''
+      profile.current_password = ''
     },
   })
 }
@@ -81,6 +86,21 @@ function save() {
             placeholder="Ketik ulang kata sandi baru"
           />
         </div>
+      </div>
+
+      <div v-if="takesOverLogin" class="space-y-1.5">
+        <Label for="current_password">Kata sandi sekarang</Label>
+        <Input
+          id="current_password"
+          v-model="profile.current_password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Wajib saat mengganti email atau kata sandi"
+          required
+        />
+        <p v-if="profile.errors.current_password" class="text-xs text-destructive">
+          {{ profile.errors.current_password }}
+        </p>
       </div>
 
       <div class="flex justify-end">

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { clock, dateTime, longDate, money, num, price, useCurrency } from '@/composables/useFormat'
 import { frameClass, frameGap } from '@/composables/useGroupFrame'
@@ -18,6 +19,7 @@ import type { Paginated, Trade } from '@/types'
 
 const props = defineProps<{
   trades: Paginated<Trade>
+  daily: Record<string, number>
   filters: Record<string, string | null>
   symbols: string[]
 }>()
@@ -27,6 +29,7 @@ const currency = useCurrency()
 const filters = reactive({
   symbol: props.filters.symbol ?? '',
   status: props.filters.status ?? '',
+  stop: props.filters.stop ?? '',
   direction: props.filters.direction ?? '',
   from: props.filters.from ?? '',
   to: props.filters.to ?? '',
@@ -42,8 +45,23 @@ const apply = useDebounceFn(() => {
 
 watch(filters, apply)
 
+/**
+ * Select-nya reka-ui menolak nilai kosong, jadi "semua" diwakili sebuah
+ * sentinel yang diterjemahkan balik ke string kosong sebelum masuk filter.
+ */
+const ALL = 'all'
+
+const choice = (key: 'status' | 'stop' | 'direction') =>
+  computed({
+    get: () => filters[key] || ALL,
+    set: (value: string) => (filters[key] = value === ALL ? '' : value),
+  })
+
+const status = choice('status')
+const stop = choice('stop')
+const direction = choice('direction')
+
 const STATUS = {
-  open: { label: 'Open', class: 'text-muted-foreground' },
   win: { label: 'Win', class: 'text-success' },
   loss: { label: 'Loss', class: 'text-destructive' },
   be: { label: 'BE', class: 'text-muted-foreground' },
@@ -181,17 +199,25 @@ function destroy(trade: Trade) {
  * yang urut mundur itu punya pembatas yang terlihat tiap ganti hari. Sisanya
  * cukup menampilkan jam.
  *
- * Urutannya `opened_at` menurun, jadi membandingkan dengan baris sebelumnya
- * sudah cukup — tidak perlu mengelompokkan ulang.
+ * Harinya dihitung dari `closed_at` — trade yang dibuka kemarin tapi ditutup
+ * hari ini masuk hitungan hari ini. Yang masih terbuka memakai `opened_at`.
+ * P/L hariannya datang dari server, jadi tetap utuh walau harinya terpotong
+ * batas halaman.
  */
-const rows = computed(() => {
-  const day = (trade: Trade) => trade.opened_at.slice(0, 10)
+const dayKey = (trade: Trade) => (trade.closed_at ?? trade.opened_at).slice(0, 10)
 
-  return props.trades.data.map((trade, index, list) => ({
-    trade,
-    day: index === 0 || day(trade) !== day(list[index - 1]) ? longDate(trade.opened_at) : null,
-  }))
-})
+const rows = computed(() =>
+  props.trades.data.map((trade, index, list) => {
+    const key = dayKey(trade)
+    const first = index === 0 || key !== dayKey(list[index - 1])
+
+    return {
+      trade,
+      day: first ? longDate(key) : null,
+      pnl: first ? (props.daily[key] ?? null) : null,
+    }
+  }),
+)
 
 /**
  * Detail satu trade untuk layar ponsel. Barisnya diringkas jadi simbol, waktu,
@@ -215,7 +241,7 @@ const detail = computed(() => {
     ['Stop loss', price(trade.sl_price)],
     ['Take profit', price(trade.tp_price)],
     ['Exit', price(trade.exit_price)],
-    ['P/L', trade.pnl === null ? 'Masih terbuka' : money(trade.pnl, currency.value, true)],
+    ['P/L', money(trade.pnl, currency.value, true)],
     ['RR rencana', trade.rr_planned === null ? '—' : `${num(trade.rr_planned)}R`],
     ['RR hasil', trade.rr_realized === null ? '—' : `${num(trade.rr_realized)}R`],
     ['Ditutup', dateTime(trade.closed_at)],
@@ -259,25 +285,41 @@ const detail = computed(() => {
       </Button>
     </div>
 
-    <div class="glass-card grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-5">
+    <div class="glass-card grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3">
       <Input v-model="filters.symbol" placeholder="Cari simbol — XAUUSD" list="symbols" class="h-9" />
       <datalist id="symbols">
         <option v-for="symbol in symbols" :key="symbol" :value="symbol" />
       </datalist>
 
-      <select v-model="filters.status" class="h-9 rounded-md border bg-background px-3 text-sm">
-        <option value="">Semua status</option>
-        <option value="open">Open</option>
-        <option value="win">Win</option>
-        <option value="loss">Loss</option>
-        <option value="be">Breakeven</option>
-      </select>
+      <Select v-model="status">
+        <SelectTrigger class="h-9 w-full" aria-label="Status"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">Semua status</SelectItem>
+          <SelectItem value="win">Win</SelectItem>
+          <SelectItem value="loss">Loss</SelectItem>
+          <SelectItem value="be">Breakeven</SelectItem>
+        </SelectContent>
+      </Select>
 
-      <select v-model="filters.direction" class="h-9 rounded-md border bg-background px-3 text-sm">
-        <option value="">Buy & sell</option>
-        <option value="buy">Buy</option>
-        <option value="sell">Sell</option>
-      </select>
+      <!-- Sumbu kedua: letak stop loss terhadap entry, bukan hasil trade-nya. -->
+      <Select v-model="stop">
+        <SelectTrigger class="h-9 w-full" aria-label="Posisi stop"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">Semua posisi stop</SelectItem>
+          <SelectItem value="risk">Stop masih berisiko</SelectItem>
+          <SelectItem value="breakeven">BE — stop di harga entry</SelectItem>
+          <SelectItem value="sl_plus">SL+ — profit terkunci</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select v-model="direction">
+        <SelectTrigger class="h-9 w-full" aria-label="Arah"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">Buy &amp; sell</SelectItem>
+          <SelectItem value="buy">Buy</SelectItem>
+          <SelectItem value="sell">Sell</SelectItem>
+        </SelectContent>
+      </Select>
 
       <label class="flex items-center gap-2 text-xs text-muted-foreground">
         <span class="shrink-0">Dari</span>
@@ -303,9 +345,16 @@ const detail = computed(() => {
         <template v-for="(row, index) in rows" :key="row.trade.id">
           <li
             v-if="row.day"
-            class="-mx-1 bg-muted/40 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase"
+            class="-mx-1 flex items-center justify-between gap-2 bg-muted/40 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase"
           >
-            {{ row.day }}
+            <span>{{ row.day }}</span>
+            <span
+              v-if="row.pnl !== null"
+              class="tnum font-mono normal-case"
+              :class="row.pnl > 0 ? 'text-success' : row.pnl < 0 ? 'text-destructive' : ''"
+            >
+              {{ money(row.pnl, currency, true) }}
+            </span>
           </li>
 
           <li v-if="frameGap(trades.data, index)" class="mx-2 h-2 border-b-gold/40" />
@@ -353,7 +402,7 @@ const detail = computed(() => {
               </div>
 
               <span class="tnum shrink-0 font-mono text-xs" :class="STATUS[row.trade.status].class">
-                {{ row.trade.pnl === null ? 'Open' : money(row.trade.pnl, currency, true) }}
+                {{ money(row.trade.pnl, currency, true) }}
               </span>
             </button>
           </li>
@@ -424,10 +473,6 @@ const detail = computed(() => {
           <p>{{ selected.setup }}</p>
         </div>
 
-        <div v-if="selected.tags?.length" class="flex flex-wrap gap-1">
-          <Badge v-for="tag in selected.tags" :key="tag" variant="secondary" class="text-[10px]">{{ tag }}</Badge>
-        </div>
-
         <div v-if="selected.notes && !selected.group_id" class="border-t pt-3 text-xs">
           <p class="mb-1 text-[10px] text-muted-foreground">Catatan</p>
           <p class="whitespace-pre-line text-muted-foreground">{{ selected.notes }}</p>
@@ -466,9 +511,18 @@ const detail = computed(() => {
 
           <template v-for="(row, index) in rows" :key="row.trade.id">
             <tr v-if="row.day" class="bg-muted/40">
-              <td colspan="9" class="px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+              <td colspan="7" class="px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
                 {{ row.day }}
               </td>
+              <td class="tnum px-3 py-1 text-right font-mono text-[11px] font-medium">
+                <span
+                  v-if="row.pnl !== null"
+                  :class="row.pnl > 0 ? 'text-success' : row.pnl < 0 ? 'text-destructive' : 'text-muted-foreground'"
+                >
+                  {{ money(row.pnl, currency, true) }}
+                </span>
+              </td>
+              <td class="p-0" />
             </tr>
 
             <tr v-if="frameGap(trades.data, index)" class="h-2 border-b-gold/40">
@@ -533,7 +587,7 @@ const detail = computed(() => {
                 </span>
               </td>
               <td class="tnum p-3 text-right font-mono text-sm" :class="STATUS[row.trade.status].class">
-                {{ row.trade.pnl === null ? 'Open' : money(row.trade.pnl, currency, true) }}
+                {{ money(row.trade.pnl, currency, true) }}
               </td>
               <td class="p-3" @click.stop>
                 <div class="flex justify-end gap-1">
@@ -554,9 +608,9 @@ const detail = computed(() => {
     <p class="text-[11px] text-muted-foreground">
       RR bertanda * adalah rencana, bukan hasil. Tanda
       <span class="rounded-full bg-cyan/15 px-1.5 text-[9px] text-cyan">BE</span> berarti stop loss
-      sudah dipindah ke harga entry dan
+      sudah dipindah ke harga entry, sedangkan
       <span class="rounded-full bg-cyan/15 px-1.5 text-[9px] text-cyan">SL+</span> berarti sudah
-      melewatinya — risikonya dilepas, jadi nilai R tidak lagi bisa dihitung.
+      melewatinya. Risikonya sudah dilepas, jadi nilai R tidak lagi bisa dihitung.
     </p>
 
     <Pagination :meta="trades" label="trade" />

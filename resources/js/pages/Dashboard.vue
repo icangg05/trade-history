@@ -171,7 +171,7 @@ const growthPct = computed(() => {
               class="tnum shrink-0 font-mono text-xs"
               :class="trade.pnl === null ? 'text-muted-foreground' : trade.pnl >= 0 ? 'text-success' : 'text-destructive'"
             >
-              {{ trade.pnl === null ? 'Open' : money(trade.pnl, currency, true) }}
+              {{ money(trade.pnl, currency, true) }}
             </span>
           </li>
           </template>

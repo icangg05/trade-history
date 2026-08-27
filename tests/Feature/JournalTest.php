@@ -69,18 +69,21 @@ class JournalTest extends TestCase
         $this->assertSame('loss', $trade->status);
     }
 
-    public function test_posisi_tanpa_pnl_dianggap_masih_terbuka(): void
+    public function test_trade_tanpa_hasil_dan_waktu_tutup_ditolak(): void
     {
-        $trade = $this->account()->trades()->create([
+        $account = $this->account();
+        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+
+        // Aplikasi ini mencatat riwayat: posisi yang belum ada hasilnya tidak dicatat.
+        $this->post('/trades', [
             'symbol' => 'XAUUSD',
             'direction' => 'buy',
             'entry_price' => 100,
             'sl_price' => 90,
             'opened_at' => '2026-01-04 09:00',
-        ]);
+        ])->assertSessionHasErrors(['pnl', 'closed_at']);
 
-        $this->assertSame('open', $trade->status);
-        $this->assertNull($trade->rr_realized);
+        $this->assertSame(0, Trade::count());
     }
 
     public function test_saldo_menggabungkan_modal_arus_dana_dan_hasil_trading(): void
@@ -164,6 +167,8 @@ class JournalTest extends TestCase
             'sl_price' => 100,
             'tp_price' => 90,
             'opened_at' => '2026-01-02 10:00',
+            'closed_at' => '2026-01-02 11:00',
+            'pnl' => 0,
         ])->assertSessionHasNoErrors();
 
         $trade = Trade::sole();
@@ -270,6 +275,8 @@ class JournalTest extends TestCase
             'entry_price' => 4402.285,
             'sl_price' => 4392.765,
             'opened_at' => '2026-01-02 10:00',
+            'closed_at' => '2026-01-02 11:00',
+            'pnl' => 12.5,
             'source' => 'ai',
             'ai_raw' => $raw,
         ])->assertSessionHasNoErrors();

@@ -25,7 +25,8 @@ class CalendarController extends Controller
         $trades = Trade::where('account_id', $account->id)
             ->whereNotNull('pnl')
             ->whereRaw('COALESCE(closed_at, opened_at) BETWEEN ? AND ?', [$gridStart, $gridEnd])
-            ->orderBy('opened_at')
+            ->orderByRaw('COALESCE(closed_at, opened_at) DESC')
+            ->orderByDesc('id')
             ->get()
             ->groupBy(fn (Trade $t) => ($t->closed_at ?? $t->opened_at)->toDateString())
             ->map(fn ($group) => $group->map(fn (Trade $t) => [

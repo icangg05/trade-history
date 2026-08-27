@@ -112,8 +112,8 @@ function applyAi(payload: {
   aiPreview.value = payload.preview
 }
 
-// Posisi yang punya hasil pasti punya waktu tutup: isikan otomatis (dan terlihat
-// di field) supaya tidak tertahan validasi `required_with`.
+// Waktu tutup wajib diisi: begitu hasilnya diketik, field-nya diisikan sama
+// dengan waktu buka supaya tidak perlu diketik ulang untuk trade intraday.
 watch(
   () => form.pnl,
   (pnl) => {
@@ -255,12 +255,13 @@ function badge(field: string): string | null {
           </div>
 
           <div class="space-y-1.5">
-            <Label for="closed_at">Ditutup</Label>
+            <Label for="closed_at">Ditutup <span class="text-gold">*</span></Label>
             <Input
               id="closed_at"
               v-model="form.closed_at"
               type="datetime-local"
-              placeholder="Kosongkan bila posisi masih open"
+              placeholder="Tanggal & jam posisi ditutup"
+              required
             />
             <p v-if="form.errors.closed_at" class="text-xs text-destructive">{{ form.errors.closed_at }}</p>
           </div>
@@ -274,13 +275,13 @@ function badge(field: string): string | null {
               v-model="form.exit_price"
               type="number"
               step="0.00001"
-              placeholder="Kosongkan bila posisi masih open"
+              placeholder="Kosongkan bila tidak tertulis"
             />
           </div>
 
           <div class="space-y-1.5">
-            <Label for="pnl">Hasil ({{ currency }})</Label>
-            <Input id="pnl" v-model="form.pnl" type="number" step="0.01" placeholder="Kosongkan bila masih open" />
+            <Label for="pnl">Hasil ({{ currency }}) <span class="text-gold">*</span></Label>
+            <Input id="pnl" v-model="form.pnl" type="number" step="0.01" placeholder="Untung/rugi akhir" required />
             <p v-if="form.errors.pnl" class="text-xs text-destructive">{{ form.errors.pnl }}</p>
           </div>
         </div>

@@ -18,10 +18,13 @@ return new class extends Migration
             $table->decimal('sl_price', 18, 5)->nullable();
             $table->decimal('tp_price', 18, 5)->nullable();
             $table->decimal('exit_price', 18, 5)->nullable();
-            $table->decimal('pnl', 18, 2)->nullable();     // null = posisi masih terbuka
+            $table->decimal('pnl', 18, 2)->nullable();
             $table->decimal('pips', 10, 1)->nullable();
             $table->decimal('rr_planned', 6, 2)->nullable();
             $table->decimal('rr_realized', 6, 2)->nullable();
+            // 'open' tidak pernah terpakai: aplikasi ini mencatat riwayat, dan
+            // TradeRequest mewajibkan pnl + closed_at. Nilainya selalu diturunkan
+            // ulang di event `saving` milik Trade.
             $table->enum('status', ['open', 'win', 'loss', 'be'])->default('open');
             $table->dateTime('opened_at');
             $table->dateTime('closed_at')->nullable();

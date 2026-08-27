@@ -22,6 +22,9 @@ class AccountStats
     /** Tanggal efektif sebuah trade = hari ia ditutup (fallback: hari dibuka). */
     private const TRADE_DATE = 'COALESCE(closed_at, opened_at)';
 
+    /** Kurva penuh dipakai berkali-kali per request (saldo, puncak, drawdown). */
+    private ?array $curve = null;
+
     public function __construct(private readonly Account $account) {}
 
     // ------------------------------------------------------------------ saldo
@@ -61,6 +64,17 @@ class AccountStats
      */
     public function equityCurve(?CarbonInterface $from = null, ?CarbonInterface $to = null): array
     {
+        $points = $this->curve ??= $this->buildCurve();
+
+        return ($from || $to)
+            // Simpan titik terakhir sebelum rentang supaya garis tidak mulai dari nol.
+            ? $this->clipToRange($points, $from, $to)
+            : $points;
+    }
+
+    /** @return list<array{date: string, balance: float, pnl: float, flow: float}> */
+    private function buildCurve(): array
+    {
         $pnlByDate = $this->closedTrades()
             ->selectRaw('DATE('.self::TRADE_DATE.') as d, SUM(pnl) as total')
             ->groupBy('d')
@@ -93,11 +107,6 @@ class AccountStats
                 'pnl' => round($pnl, 2),
                 'flow' => round($flow, 2),
             ];
-        }
-
-        if ($from || $to) {
-            // Simpan titik terakhir sebelum rentang supaya garis tidak mulai dari nol.
-            $points = $this->clipToRange($points, $from, $to);
         }
 
         return $points;
@@ -166,12 +175,18 @@ class AccountStats
             ->get(['pnl', 'rr_planned']);
 
         $pnl = round((float) $today->sum('pnl'), 2);
-        $openingBalance = $this->balance($day->subDay());
+        $openingBalance = $this->openingBalances([$day->toDateString()])[$day->toDateString()];
 
         $lossLimit = $rule?->dailyLossLimit($openingBalance);
         $profitGoal = $rule?->dailyProfitGoal($openingBalance);
         $peak = $this->peakBalance();
-        $drawdownPct = $peak > 0 ? round((1 - $this->balance() / $peak) * 100, 2) : 0.0;
+        $drawdownPct = $peak > 0 ? round((1 - $this->latestBalance() / $peak) * 100, 2) : 0.0;
+
+        // Trade yang stopnya sudah digeser ke BE/SL+ punya rr_planned null dan
+        // memang tidak ikut dinilai — risiko awalnya tidak tercatat di mana pun.
+        $lowRr = $rule?->min_rr === null
+            ? 0
+            : $today->filter(fn (Trade $t) => $t->rr_planned !== null && (float) $t->rr_planned < (float) $rule->min_rr)->count();
 
         return [
             'date' => $day->toDateString(),
@@ -188,11 +203,20 @@ class AccountStats
             'drawdown_pct' => $drawdownPct,
             'max_drawdown_pct' => $rule?->max_total_loss_pct ? (float) $rule->max_total_loss_pct : null,
             'drawdown_breached' => $rule?->max_total_loss_pct !== null && $drawdownPct >= (float) $rule->max_total_loss_pct,
+            'min_rr' => $rule?->min_rr === null ? null : (float) $rule->min_rr,
+            'low_rr_trades' => $lowRr,
             'has_rules' => $rule !== null,
         ];
     }
 
-    /** Hari-hari di mana aturan dilanggar — dipakai untuk penanda kalender & AI. */
+    /**
+     * Hari-hari di mana aturan dilanggar — dipakai untuk penanda kalender & AI.
+     *
+     * Semua aturan dinilai dari data yang sudah ada; tidak ada satu pun query
+     * per hari di dalam loop. Aturan yang tidak diisi tidak menghabiskan apa pun.
+     *
+     * @return array<string, list<string>>
+     */
     public function violations(CarbonInterface $from, CarbonInterface $to): array
     {
         $rule = $this->account->rule;
@@ -201,37 +225,93 @@ class AccountStats
             return [];
         }
 
+        $sessions = filled($rule->allowed_sessions) ? $rule->allowed_sessions : null;
+        $riskPct = $rule->max_risk_per_trade_pct === null ? null : (float) $rule->max_risk_per_trade_pct;
+        $perDay = $rule->max_daily_loss !== null || $rule->max_daily_loss_pct !== null || $rule->max_trades_per_day !== null;
+        $perTrade = $rule->min_rr !== null || $sessions !== null || $riskPct !== null;
+
+        if (! $perDay && ! $perTrade) {
+            return [];
+        }
+
+        // Saldo pembukaan hanya perlu ditelusuri untuk aturan yang berbasis persen.
+        $needsBalance = ($rule->max_daily_loss === null && $rule->max_daily_loss_pct !== null) || $riskPct !== null;
+        $days = ($perDay || $needsBalance) ? $this->dailyPnl($from, $to) : [];
+        $opening = $needsBalance ? $this->openingBalances(array_keys($days)) : [];
+
         $out = [];
-        foreach ($this->dailyPnl($from, $to) as $date => $day) {
-            $reasons = [];
-            $limit = $rule->dailyLossLimit($this->balance(CarbonImmutable::parse($date)->subDay()));
 
-            if ($limit !== null && $day['pnl'] < 0 && abs($day['pnl']) > $limit) {
-                $reasons[] = 'melewati batas loss harian';
-            }
-            if ($rule->max_trades_per_day !== null && $day['trades'] > $rule->max_trades_per_day) {
-                $reasons[] = 'melebihi jumlah trade harian';
-            }
-            if ($reasons) {
-                $out[$date] = $reasons;
+        if ($perDay) {
+            foreach ($days as $date => $day) {
+                $limit = $rule->dailyLossLimit($opening[$date] ?? 0.0);
+
+                if ($limit !== null && $day['pnl'] < 0 && abs($day['pnl']) > $limit) {
+                    $out[$date][] = 'melewati batas loss harian';
+                }
+                if ($rule->max_trades_per_day !== null && $day['trades'] > $rule->max_trades_per_day) {
+                    $out[$date][] = 'melebihi jumlah trade harian';
+                }
             }
         }
 
-        if ($rule->min_rr !== null) {
-            $lowRr = $this->closedTrades()
+        if ($perTrade) {
+            $trades = $this->closedTrades()
                 ->whereRaw(self::TRADE_DATE.' BETWEEN ? AND ?', [$from->copy()->startOfDay(), $to->copy()->endOfDay()])
-                ->whereNotNull('rr_planned')
-                ->where('rr_planned', '<', $rule->min_rr)
-                ->get(['closed_at', 'opened_at']);
+                ->get(['pnl', 'rr_planned', 'opened_at', 'closed_at']);
 
-            foreach ($lowRr as $trade) {
+            foreach ($trades as $trade) {
                 $date = ($trade->closed_at ?? $trade->opened_at)->toDateString();
-                $out[$date][] = 'RR di bawah minimum';
-                $out[$date] = array_values(array_unique($out[$date]));
+
+                if ($rule->min_rr !== null && $trade->rr_planned !== null && (float) $trade->rr_planned < (float) $rule->min_rr) {
+                    $out[$date][] = 'RR di bawah minimum';
+                }
+
+                if ($sessions !== null && ! $this->inAnySession($trade->opened_at->hour, $sessions)) {
+                    $out[$date][] = 'entry di luar sesi yang diizinkan';
+                }
+
+                // Risiko yang benar-benar terjadi: kerugian satu trade terhadap
+                // saldo pembukaan hari itu. Yang direncanakan tidak pernah tercatat
+                // dalam nilai uang, jadi ini satu-satunya angka yang jujur.
+                $balance = $opening[$date] ?? 0.0;
+
+                if ($riskPct !== null && $balance > 0 && (float) $trade->pnl < 0
+                    && abs((float) $trade->pnl) > $balance * $riskPct / 100) {
+                    $out[$date][] = 'rugi satu trade melewati batas risiko';
+                }
             }
         }
 
-        return $out;
+        return array_map(fn (array $reasons) => array_values(array_unique($reasons)), $out);
+    }
+
+    /**
+     * Rentang jam sesi pasar dalam WIB, [mulai, selesai). Nilai di atas 24 berarti
+     * sesinya menyeberang tengah malam.
+     *
+     * ponytail: batasnya dipatok dan mengabaikan DST London/New York yang menggeser
+     * sesi satu jam dua kali setahun. Kalau penandaannya nanti terasa meleset di
+     * bulan peralihan, ganti dengan tabel per musim.
+     */
+    private const SESSIONS = [
+        'sydney' => [4, 13],
+        'tokyo' => [7, 16],
+        'london' => [14, 23],
+        'newyork' => [19, 28],
+    ];
+
+    /** @param  list<string>  $sessions */
+    private function inAnySession(int $hour, array $sessions): bool
+    {
+        foreach ($sessions as $session) {
+            [$start, $end] = self::SESSIONS[$session] ?? [0, 24];
+
+            if (($hour >= $start && $hour < $end) || ($hour + 24 >= $start && $hour + 24 < $end)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // ------------------------------------------------------------------ ringkasan
@@ -264,7 +344,6 @@ class AccountStats
             'balance' => round($this->balance(), 2),
             'net_flow' => round($this->netFlow(), 2),
             'total_trades' => $count,
-            'open_trades' => (int) Trade::where('account_id', $this->account->id)->whereNull('pnl')->count(),
             'wins' => $wins->count(),
             'losses' => $losses->count(),
             'breakeven' => $trades->where('status', 'be')->count(),
@@ -307,6 +386,43 @@ class AccountStats
     private function peakBalance(): float
     {
         return collect($this->equityCurve())->max('balance') ?: (float) $this->account->initial_balance;
+    }
+
+    /** Saldo sekarang menurut kurva — sama dengan balance(), tanpa query tambahan. */
+    private function latestBalance(): float
+    {
+        $curve = $this->equityCurve();
+
+        return (float) end($curve)['balance'];
+    }
+
+    /**
+     * Saldo pembukaan sejumlah tanggal sekaligus: saldo di titik kurva terakhir
+     * sebelum hari itu. Satu kali telusur atas kurva yang urut kronologis, bukan
+     * dua query per hari seperti balance().
+     *
+     * @param  list<string>  $dates
+     * @return array<string, float>
+     */
+    private function openingBalances(array $dates): array
+    {
+        $curve = $this->equityCurve();
+        sort($dates);
+
+        $out = [];
+        $at = 0;
+        $balance = (float) $this->account->initial_balance;
+
+        foreach ($dates as $date) {
+            while ($at < count($curve) && $curve[$at]['date'] < $date) {
+                $balance = $curve[$at]['balance'];
+                $at++;
+            }
+
+            $out[$date] = $balance;
+        }
+
+        return $out;
     }
 
     /** Penurunan terdalam dari puncak saldo, dalam mata uang & persen. */

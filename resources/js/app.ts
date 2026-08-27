@@ -8,7 +8,9 @@ import { listenForInstall } from '@/composables/useInstall'
 listenForInstall()
 
 const appName = import.meta.env.VITE_APP_NAME || 'Trade History'
-const AUTH_PAGES = new Set(['Login', 'Register'])
+// Halaman yang berdiri sendiri tanpa shell aplikasi: dua halaman auth dan
+// halaman galat, yang juga bisa muncul untuk pengunjung yang belum masuk.
+const BARE_PAGES = new Set(['Login', 'Register', 'Error'])
 
 createInertiaApp({
   title: (title) => (title ? `${title} · ${appName}` : appName),
@@ -17,8 +19,7 @@ createInertiaApp({
     const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue')
     const page = await pages[`./pages/${name}.vue`]()
 
-    // Halaman auth berdiri sendiri; sisanya memakai shell aplikasi.
-    page.default.layout ??= AUTH_PAGES.has(name) ? undefined : AppLayout
+    page.default.layout ??= BARE_PAGES.has(name) ? undefined : AppLayout
 
     return page
   },

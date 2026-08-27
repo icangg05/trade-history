@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { SendHorizontal, Sparkles, X } from '@lucide/vue'
 
@@ -123,18 +123,47 @@ function clear() {
  * dipulihkan Inertia apa adanya — tidak dimuat ulang dari server, jadi terasa
  * memang menunggu di belakang. Kalau chat dibuka langsung dari alamatnya,
  * tidak ada yang bisa dimundurkan, jadi pindah halaman seperti biasa.
+ *
+ * Jaraknya dua langkah karena ada satu entri history semu di atas halaman chat
+ * (lihat `onMounted` di bawah); tombol kembali perangkat sudah memakan satu, jadi
+ * dari sana sisa satu langkah.
  */
-function close() {
-  const canGoBack = window.history.length > 1
+const canGoBack = window.history.length > 1
+
+function close(steps = 2) {
+  if (closing.value) return
 
   closing.value = true
   setTimeout(
-    () => (canGoBack ? window.history.back() : router.visit('/analysis', { data: { period: props.period } })),
+    () => (canGoBack ? window.history.go(-steps) : router.visit('/analysis', { data: { period: props.period } })),
     180,
   )
 }
 
-onUnmounted(finishTyping)
+/**
+ * Tombol kembali perangkat harus terasa sama dengan tombol tutup, bukan lompat
+ * mendadak ke halaman sebelumnya. Caranya: satu entri history semu ditumpuk di
+ * atas halaman chat, jadi tekan-kembali yang pertama cuma memakan entri itu dan
+ * animasinya sempat main sebelum benar-benar pergi.
+ *
+ * Entri chat aslinya di-null-kan lebih dulu karena Inertia sengaja mengabaikan
+ * popstate berstate null — tanpa itu, halaman ini dirender ulang tepat di tengah
+ * animasi.
+ */
+const onBack = () => close(1)
+
+onMounted(() => {
+  const state = window.history.state
+
+  window.history.replaceState(null, '')
+  window.history.pushState(state, '')
+  window.addEventListener('popstate', onBack)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('popstate', onBack)
+  finishTyping()
+})
 
 async function send(text = draft.value.trim()) {
   if (!text || busy.value || !props.enabled) return
@@ -201,7 +230,7 @@ async function send(text = draft.value.trim()) {
         <Button v-if="messages.length" variant="ghost" size="sm" :disabled="busy" @click="confirming = true">
           Bersihkan
         </Button>
-        <Button variant="ghost" size="icon-sm" title="Tutup chat" @click="close">
+        <Button variant="ghost" size="icon-sm" title="Tutup chat" @click="close()">
           <X class="size-4" />
         </Button>
       </div>

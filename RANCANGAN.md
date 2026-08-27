@@ -483,3 +483,19 @@ supaya compiler SFC bisa membaca tipe props dari reka-ui.
 | Menu "Pasang aplikasi" + `manifest.id` | tawaran bawaan browser mudah terlewat; iOS bahkan tidak punya `beforeinstallprompt` sama sekali |
 | `vite` pindah ke `node:24-slim`, `restart: "no"`, jalan sebagai UID host | `npm run build` selesai lalu keluar (loop restart tanpa henti); kontainer root membuat `public/build` tidak bisa dibersihkan dari host; volume bernama selalu lahir milik root |
 | Healthcheck `app` memakai `/up` | healthcheck bawaan image FrankenPHP memakai endpoint admin yang dimatikan di Caddyfile, jadi container selalu "unhealthy" |
+
+---
+
+## 13. Revisi ketiga (review fitur)
+
+| Perubahan | Alasan |
+|---|---|
+| `/profile` minta sandi sekarang saat mengganti sandi atau email | tanpa itu satu sesi yang terlanjur dibajak cukup untuk mengunci pemiliknya sendiri di luar; ganti nama tetap tidak diminta. Sandi baru sekaligus mematikan sesi di perangkat lain |
+| `violations()` tidak lagi menanyakan saldo per hari | `balance()` dipanggil di dalam loop, dua query tiap hari, bahkan saat batas loss harian tidak diisi. Saldo pembukaan sekarang ditelusuri sekali dari kurva ekuitas: 300 hari aktif turun dari **611 query jadi 10** |
+| `equityCurve()` disimpan di properti objek | dihitung tiga kali per muat Dashboard (langsung, lewat `maxDrawdown()`, lewat `peakBalance()`) padahal isinya sama |
+| `max_risk_per_trade_pct` dan `allowed_sessions` akhirnya dinilai | keduanya bisa diisi di /rules lalu tidak pernah dibaca satu baris pun. Risiko dinilai dari kerugian yang benar-benar terjadi terhadap saldo pembukaan hari itu; sesi dari jam `opened_at` |
+| `min_rr` ikut tampil di banner harian | aturannya sudah dinilai di kalender, tapi tidak pernah muncul di halaman yang dilihat tiap hari |
+| Kolom `pips` dan `tags` dihapus | `pips` tidak pernah diisi jalur simpan mana pun; `tags` divalidasi dan ditampilkan tapi tidak punya field di form — penandaan strategi sudah dikerjakan `setup` |
+| `Transaction::signedAmount()`, `Account::ruleOrNew()`, dan suite `Unit` di phpunit.xml dihapus | nol pemanggil; direktori `tests/Unit` yang tidak ada membuat `php artisan test` gagal sebelum satu tes pun jalan |
+| Dashboard "10 trade terakhir" ikut `COALESCE(closed_at, opened_at)` | satu-satunya tempat yang masih mengurut `opened_at`, jadi daftarnya bisa berbeda dari baris teratas /trades |
+

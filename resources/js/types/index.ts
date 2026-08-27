@@ -1,5 +1,5 @@
 export type Direction = 'buy' | 'sell'
-export type TradeStatus = 'open' | 'win' | 'loss' | 'be'
+export type TradeStatus = 'win' | 'loss' | 'be'
 /** Posisi stop loss terhadap entry; null bila SL tidak diisi. */
 export type StopState = 'risk' | 'breakeven' | 'locked' | null
 
@@ -36,7 +36,6 @@ export interface Trade {
   rr_realized: number | null
   opened_at: string
   closed_at?: string | null
-  tags: string[]
 }
 
 /**
@@ -83,7 +82,6 @@ export interface Summary {
   balance: number
   net_flow: number
   total_trades: number
-  open_trades: number
   wins: number
   losses: number
   breakeven: number
@@ -126,6 +124,8 @@ export interface RuleStatus {
   drawdown_pct: number
   max_drawdown_pct: number | null
   drawdown_breached: boolean
+  min_rr: number | null
+  low_rr_trades: number
   has_rules: boolean
 }
 

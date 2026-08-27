@@ -21,10 +21,4 @@ class Transaction extends Model
     {
         return $this->belongsTo(Account::class);
     }
-
-    /** Efek terhadap saldo: deposit menambah, withdrawal mengurangi. */
-    public function signedAmount(): float
-    {
-        return (float) $this->amount * ($this->type === 'withdrawal' ? -1 : 1);
-    }
 }

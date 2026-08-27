@@ -17,12 +17,12 @@ class TradeRequest extends FormRequest
             'sl_price' => ['nullable', 'numeric', 'gt:0'],
             'tp_price' => ['nullable', 'numeric', 'gt:0'],
             'exit_price' => ['nullable', 'numeric', 'gt:0'],
-            'pnl' => ['nullable', 'required_with:closed_at', 'numeric'],
-            'closed_at' => ['nullable', 'required_with:pnl', 'date', 'after_or_equal:opened_at'],
+            // Aplikasi ini mencatat riwayat, bukan posisi berjalan: tiap trade
+            // yang masuk sudah punya hasil dan waktu tutup.
+            'pnl' => ['required', 'numeric'],
+            'closed_at' => ['required', 'date', 'after_or_equal:opened_at'],
             'opened_at' => ['required', 'date'],
             'setup' => ['nullable', 'string', 'max:255'],
-            'tags' => ['nullable', 'array', 'max:10'],
-            'tags.*' => ['string', 'max:30'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'source' => ['nullable', 'in:manual,ai'],
             // Respons mentah Gemini, disimpan apa adanya sebagai jejak audit.

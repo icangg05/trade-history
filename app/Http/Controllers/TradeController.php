@@ -13,25 +13,39 @@ use Inertia\Response;
 
 class TradeController extends Controller
 {
+    /** Sebuah trade dihitung di hari ia ditutup; yang masih terbuka di hari ia dibuka. */
+    private const TRADE_DATE = 'COALESCE(closed_at, opened_at)';
+
     public function index(Request $request): Response
     {
         $account = $request->currentAccount();
 
         $filters = $request->validate([
             'symbol' => ['nullable', 'string', 'max:20'],
-            'status' => ['nullable', 'in:open,win,loss,be'],
+            'status' => ['nullable', 'in:win,loss,be'],
+            'stop' => ['nullable', 'in:risk,breakeven,sl_plus'],
             'direction' => ['nullable', 'in:buy,sell'],
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date'],
         ]);
 
-        $trades = $account->trades()
+        $query = $account->trades()
             ->when($filters['symbol'] ?? null, fn ($q, $v) => $q->where('symbol', strtoupper($v)))
             ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
+            // Posisi stop itu sumbu lain dari status hasil: trade bisa saja `win`
+            // sekaligus SL+. Tidak disimpan sebagai kolom, jadi dibandingkan
+            // langsung terhadap harga entry.
+            ->when($filters['stop'] ?? null, fn ($q, $v) => match ($v) {
+                'breakeven' => $q->whereColumn('sl_price', '=', 'entry_price'),
+                'sl_plus' => $q->whereRaw("((direction = 'buy' AND sl_price > entry_price) OR (direction = 'sell' AND sl_price < entry_price))"),
+                default => $q->whereRaw("((direction = 'buy' AND sl_price < entry_price) OR (direction = 'sell' AND sl_price > entry_price))"),
+            })
             ->when($filters['direction'] ?? null, fn ($q, $v) => $q->where('direction', $v))
-            ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereRaw('COALESCE(closed_at, opened_at) >= ?', [$v.' 00:00:00']))
-            ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereRaw('COALESCE(closed_at, opened_at) <= ?', [$v.' 23:59:59']))
-            ->orderByDesc('opened_at')
+            ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereRaw(self::TRADE_DATE.' >= ?', [$v.' 00:00:00']))
+            ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereRaw(self::TRADE_DATE.' <= ?', [$v.' 23:59:59']));
+
+        $trades = (clone $query)
+            ->orderByRaw(self::TRADE_DATE.' DESC')
             ->orderByDesc('id')
             ->paginate(25)
             ->withQueryString()
@@ -39,6 +53,7 @@ class TradeController extends Controller
 
         return Inertia::render('Trades/Index', [
             'trades' => $trades,
+            'daily' => $this->dailyPnl($query, $trades->items()),
             'filters' => $filters,
             'symbols' => $account->trades()->distinct()->orderBy('symbol')->pluck('symbol'),
         ]);
@@ -109,7 +124,7 @@ class TradeController extends Controller
         ]);
 
         $account = $request->currentAccount();
-        $trades = $account->trades()->whereIn('id', $data['ids'])->orderBy('opened_at')->orderBy('id')->get();
+        $trades = $account->trades()->whereIn('id', $data['ids'])->orderByRaw(self::TRADE_DATE)->orderBy('id')->get();
 
         if ($trades->count() !== count($data['ids'])) {
             return back()->with('error', 'Ada trade yang tidak ditemukan di akun ini.');
@@ -190,7 +205,7 @@ class TradeController extends Controller
         $members = $request->currentAccount()
             ->trades()
             ->where('group_id', $group)
-            ->orderBy('opened_at')
+            ->orderByRaw(self::TRADE_DATE)
             ->orderBy('id')
             ->get();
 
@@ -232,7 +247,7 @@ class TradeController extends Controller
      */
     private function adjacent($account, array $ids): bool
     {
-        $order = $account->trades()->orderBy('opened_at')->orderBy('id')->pluck('id')->all();
+        $order = $account->trades()->orderByRaw(self::TRADE_DATE)->orderBy('id')->pluck('id')->all();
         $positions = array_keys(array_intersect($order, $ids));
 
         return count($positions) === count($ids)
@@ -265,6 +280,31 @@ class TradeController extends Controller
         return $notes->isEmpty() ? null : mb_substr($notes->implode(' '), 0, 5000);
     }
 
+    /**
+     * P/L per hari untuk baris pembatas tanggal — dihitung di server supaya
+     * tetap benar walau harinya terpotong batas halaman.
+     *
+     * @param  list<array<string, mixed>>  $page
+     * @return array<string, float>
+     */
+    private function dailyPnl($query, array $page): array
+    {
+        $days = collect($page)->map(fn (array $t) => substr($t['closed_at'] ?? $t['opened_at'], 0, 10));
+
+        if ($days->isEmpty()) {
+            return [];
+        }
+
+        return (clone $query)
+            ->whereNotNull('pnl')
+            ->whereRaw('DATE('.self::TRADE_DATE.') BETWEEN ? AND ?', [$days->min(), $days->max()])
+            ->selectRaw('DATE('.self::TRADE_DATE.') as d, SUM(pnl) as total')
+            ->groupBy('d')
+            ->pluck('total', 'd')
+            ->map(fn ($total) => round((float) $total, 2))
+            ->all();
+    }
+
     private function present(Trade $trade, bool $full = false): array
     {
         $base = [
@@ -280,7 +320,6 @@ class TradeController extends Controller
             'rr_realized' => $this->num($trade->rr_realized),
             'opened_at' => $trade->opened_at->format('Y-m-d\TH:i'),
             'closed_at' => $trade->closed_at?->format('Y-m-d\TH:i'),
-            'tags' => $trade->tags ?? [],
         ];
 
         return $full ? [...$base, 'ai_raw' => $trade->ai_raw] : $base;

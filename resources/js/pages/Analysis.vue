@@ -82,7 +82,7 @@ function top(breakdown: Breakdown, limit = 5) {
     </div>
 
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <StatCard label="Trade" :value="String(summary.total_trades)" :hint="`${summary.open_trades} masih terbuka`" />
+      <StatCard label="Trade" :value="String(summary.total_trades)" :hint="`${summary.wins} win, ${summary.losses} loss`" />
       <StatCard
         label="Net P/L"
         :value="money(summary.net_pnl, currency, true)"
@@ -177,8 +177,8 @@ function top(breakdown: Breakdown, limit = 5) {
         <Markdown :source="analysis.result_md" />
         <p class="mt-4 border-t pt-2 text-[11px] text-muted-foreground">
           Ditulis {{ analysis.model }} atas data
-          {{ longDate(analysis.period_start) }} — {{ longDate(analysis.period_end) }}.
-          Ini bukan saran finansial — hanya pembacaan pola dari jurnalmu sendiri.
+          {{ longDate(analysis.period_start) }} sampai {{ longDate(analysis.period_end) }}.
+          Ini bukan saran finansial, hanya pembacaan pola dari jurnalmu sendiri.
         </p>
       </template>
 

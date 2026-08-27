@@ -1,41 +1,48 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { LoaderCircle } from '@lucide/vue'
+import { onUnmounted, ref, watch } from 'vue'
 
+import AuthShell from '@/components/AuthShell.vue'
+import PasswordInput from '@/components/PasswordInput.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-defineProps<{ canRegister: boolean }>()
+const props = defineProps<{ canRegister: boolean; lockedFor: number }>()
 
 const form = useForm({ email: '', password: '', remember: false })
+
+// Komponennya tetap terpasang saat server menolak dan mengirim ulang
+// lockedFor, jadi jam-nya di-restart lewat watch, bukan sekali saat mount.
+const sisaKunci = ref(0)
+let timer: ReturnType<typeof setInterval> | undefined
+
+watch(
+  () => props.lockedFor,
+  (detik) => {
+    clearInterval(timer)
+    sisaKunci.value = detik
+    if (detik > 0) {
+      timer = setInterval(() => {
+        if (--sisaKunci.value <= 0) clearInterval(timer)
+      }, 1000)
+    }
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => clearInterval(timer))
 </script>
 
 <template>
   <Head title="Masuk" />
 
-  <div class="relative flex min-h-screen items-center justify-center p-4">
-    <div class="bg-ornaments" aria-hidden="true">
-      <div class="bg-grid" />
-      <div class="blob blob-a" />
-      <div class="blob blob-b" />
-    </div>
-
-    <!-- showProgress: false — bar tipis di puncak layar hanya berkedip sekejap
-         saat login dan justru terbaca seperti halaman gagal dimuat. Umpan
-         baliknya sudah dipegang tombol yang berputar di bawah. -->
-    <form
-      class="glass-card w-full max-w-sm space-y-5 p-6"
-      @submit.prevent="form.post('/login', { showProgress: false })"
-    >
-      <div class="space-y-1">
-        <div class="mb-3 grid size-9 place-items-center rounded-lg bg-gold text-sm font-bold text-gold-foreground">
-          TH
-        </div>
-        <h1 class="text-lg font-semibold">Trade History</h1>
-        <p class="text-sm text-muted-foreground">Jurnal trading pribadi.</p>
-      </div>
-
+  <AuthShell title="Masuk" subtitle="Masuk untuk melanjutkan jurnal tradingmu.">
+    <!-- showProgress: false, karena bar tipis di puncak layar cuma berkedip
+         sekejap saat login dan justru terbaca seperti halaman gagal dimuat.
+         Umpan baliknya sudah dipegang tombol yang berputar di bawah. -->
+    <form class="space-y-5" @submit.prevent="form.post('/login', { showProgress: false })">
       <div class="space-y-2">
         <Label for="email">Email</Label>
         <Input
@@ -47,15 +54,17 @@ const form = useForm({ email: '', password: '', remember: false })
           autofocus
           required
         />
-        <p v-if="form.errors.email" class="text-xs text-destructive">{{ form.errors.email }}</p>
+        <p v-if="form.errors.email" class="text-xs text-destructive">
+          {{ form.errors.email }}
+          <template v-if="sisaKunci > 0">Coba lagi dalam {{ sisaKunci }} detik.</template>
+        </p>
       </div>
 
       <div class="space-y-2">
         <Label for="password">Kata sandi</Label>
-        <Input
+        <PasswordInput
           id="password"
           v-model="form.password"
-          type="password"
           autocomplete="current-password"
           placeholder="Kata sandi kamu"
           required
@@ -68,15 +77,15 @@ const form = useForm({ email: '', password: '', remember: false })
         Ingat saya
       </label>
 
-      <Button type="submit" class="w-full gap-2" :disabled="form.processing">
+      <Button type="submit" class="w-full gap-2" :disabled="form.processing || sisaKunci > 0">
         <LoaderCircle v-if="form.processing" class="size-4 animate-spin" />
         Masuk
       </Button>
 
-      <p v-if="canRegister" class="text-center text-xs text-muted-foreground">
+      <p v-if="canRegister" class="border-t pt-4 text-center text-xs text-muted-foreground">
         Belum punya akun?
         <Link href="/register" class="text-gold hover:underline">Daftar</Link>
       </p>
     </form>
-  </div>
+  </AuthShell>
 </template>

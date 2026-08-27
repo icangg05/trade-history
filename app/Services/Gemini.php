@@ -88,12 +88,12 @@ class Gemini
           `closed_at` adalah waktu posisi ditutup — di MetaTrader biasanya kolom "Time"
           kedua pada baris riwayat, atau "Close Time". Kalau posisi sudah tertutup
           (ada profit/loss akhir) tetapi waktu tutup tidak terlihat, isi `closed_at`
-          sama dengan `opened_at`. Null hanya bila posisi memang masih terbuka.
+          sama dengan `opened_at`.
         - `exit_price` HANYA diisi bila harga penutupan benar-benar tertulis di gambar.
           JANGAN menyalin nilai S/L atau T/P ke sana, dan jangan menyimpulkan harga
           penutupan dari untung/rugi. Tidak tertulis → null.
         - `lot` adalah ukuran posisi/volume (contoh: 0.05).
-        - `pnl` adalah profit/loss dalam mata uang akun; null jika posisi masih terbuka.
+        - `pnl` adalah profit/loss akhir dalam mata uang akun.
         - `setup` diisi hanya jika nama strategi/pola tertulis di gambar.
         - `notes` maksimal satu kalimat berisi konteks lain yang terbaca (timeframe, sesi, dsb).
         - Cantumkan setiap field yang kamu ragukan di `low_confidence_fields`.
@@ -213,7 +213,7 @@ class Gemini
         dan sebutkan berapa kerugian yang bisa dihindari kalau kelompok itu dilewati.
 
         ## Risiko & disiplin
-        `max_drawdown` (nominal dan persen), `longest_loss_streak`, dan `open_trades`.
+        `max_drawdown` (nominal dan persen) dan `longest_loss_streak`.
         Kalau `violations` berisi tanggal pelanggaran, sebut berapa hari yang melanggar
         dan aturan mana yang paling sering dilanggar. Kalau trader menulis aturannya
         sendiri di bawah, nilai kepatuhannya terhadap aturan itu secara spesifik. Kalau

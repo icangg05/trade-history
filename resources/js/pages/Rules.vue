@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import { Eye, Pencil } from '@lucide/vue'
 
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { useCurrency } from '@/composables/useFormat'
+import { money, useCurrency } from '@/composables/useFormat'
 import type { RuleStatus } from '@/types'
 
 const props = defineProps<{
@@ -26,10 +26,12 @@ const props = defineProps<{
     notes: string
   }
   status: RuleStatus
+  /** Modal awal + dana masuk/keluar: dasar perkiraan nilai aturan berbentuk persen. */
+  basis: number
 }>()
 
 const currency = useCurrency()
-const preview = ref(false)
+const preview = ref(true)
 
 const SESSIONS = [
   { key: 'sydney', label: 'Sydney' },
@@ -39,6 +41,50 @@ const SESSIONS = [
 ]
 
 const form = useForm({ ...props.rule })
+
+/**
+ * Batas harian boleh ditulis sebagai nominal atau persen, tapi hanya salah
+ * satunya: satu kolom isian dengan pemilih satuan di sebelahnya. Menukar
+ * satuan mengosongkan isinya, karena angka yang sama berarti hal yang berbeda
+ * di satuan yang lain.
+ */
+type AmountKey = 'max_daily_loss' | 'daily_profit_target'
+type PctKey = 'max_daily_loss_pct' | 'daily_profit_target_pct'
+
+const UNITS = [
+  { key: 'amount', label: currency.value },
+  { key: 'pct', label: '%' },
+] as const
+
+/** Nilai perkiraan dari sebuah persentase, null kalau belum ada dasarnya. */
+function estimate(pct: unknown): number | null {
+  const value = Number(pct)
+
+  return props.basis > 0 && value > 0 ? (props.basis * value) / 100 : null
+}
+
+function limit(amountKey: AmountKey, pctKey: PctKey) {
+  const unit = ref<'amount' | 'pct'>(
+    props.rule[amountKey] === null && props.rule[pctKey] !== null ? 'pct' : 'amount',
+  )
+
+  watch(unit, () => {
+    form[amountKey] = null
+    form[pctKey] = null
+  })
+
+  return reactive({
+    unit,
+    input: computed({
+      get: () => (unit.value === 'pct' ? form[pctKey] : form[amountKey]),
+      set: (value) => (unit.value === 'pct' ? (form[pctKey] = value) : (form[amountKey] = value)),
+    }),
+    estimate: computed(() => (unit.value === 'pct' ? estimate(form[pctKey]) : null)),
+  })
+}
+
+const dailyLoss = limit('max_daily_loss', 'max_daily_loss_pct')
+const dailyTarget = limit('daily_profit_target', 'daily_profit_target_pct')
 
 function toggleSession(key: string) {
   form.allowed_sessions = form.allowed_sessions.includes(key)
@@ -60,56 +106,77 @@ function toggleSession(key: string) {
       </p>
     </div>
 
-    <form class="grid gap-4 lg:grid-cols-3" @submit.prevent="form.put('/rules')">
+    <form class="grid gap-4 lg:grid-cols-3" @submit.prevent="form.put('/rules', { preserveScroll: true })">
       <div class="space-y-4 lg:col-span-2">
         <div class="glass-card space-y-4 p-4">
           <h2 class="text-sm font-semibold">Batas harian</h2>
 
           <div class="grid gap-3 sm:grid-cols-2">
             <div class="space-y-1.5">
-              <Label for="max_daily_loss">Maks. loss harian ({{ currency }})</Label>
-              <Input id="max_daily_loss" v-model="form.max_daily_loss" type="number" step="0.01" min="0" placeholder="Contoh: 100" />
+              <Label for="max_daily_loss">Maks. loss harian</Label>
+              <div class="flex gap-2">
+                <Input
+                  id="max_daily_loss"
+                  v-model="dailyLoss.input"
+                  type="number"
+                  :step="dailyLoss.unit === 'pct' ? 0.1 : 0.01"
+                  min="0"
+                  :max="dailyLoss.unit === 'pct' ? 100 : undefined"
+                  :placeholder="dailyLoss.unit === 'pct' ? 'Contoh: 2' : 'Contoh: 100'"
+                />
+                <div class="flex shrink-0 rounded-md border p-0.5">
+                  <button
+                    v-for="u in UNITS"
+                    :key="u.key"
+                    type="button"
+                    class="rounded px-2 text-xs transition-colors"
+                    :class="dailyLoss.unit === u.key ? 'bg-gold/15 text-gold' : 'text-muted-foreground hover:text-foreground'"
+                    @click="dailyLoss.unit = u.key"
+                  >
+                    {{ u.label }}
+                  </button>
+                </div>
+              </div>
+              <p v-if="dailyLoss.estimate" class="text-[11px] text-muted-foreground">
+                Sekitar {{ money(dailyLoss.estimate, currency) }} per hari.
+              </p>
             </div>
+
             <div class="space-y-1.5">
-              <Label for="max_daily_loss_pct">…atau dalam persen saldo</Label>
-              <Input
-                id="max_daily_loss_pct"
-                v-model="form.max_daily_loss_pct"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                placeholder="Contoh: 2"
-              />
-            </div>
-            <div class="space-y-1.5">
-              <Label for="daily_profit_target">Target profit harian ({{ currency }})</Label>
-              <Input
-                id="daily_profit_target"
-                v-model="form.daily_profit_target"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Contoh: 150"
-              />
-            </div>
-            <div class="space-y-1.5">
-              <Label for="daily_profit_target_pct">…atau dalam persen saldo</Label>
-              <Input
-                id="daily_profit_target_pct"
-                v-model="form.daily_profit_target_pct"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                placeholder="Contoh: 3"
-              />
+              <Label for="daily_profit_target">Target profit harian</Label>
+              <div class="flex gap-2">
+                <Input
+                  id="daily_profit_target"
+                  v-model="dailyTarget.input"
+                  type="number"
+                  :step="dailyTarget.unit === 'pct' ? 0.1 : 0.01"
+                  min="0"
+                  :max="dailyTarget.unit === 'pct' ? 100 : undefined"
+                  :placeholder="dailyTarget.unit === 'pct' ? 'Contoh: 3' : 'Contoh: 150'"
+                />
+                <div class="flex shrink-0 rounded-md border p-0.5">
+                  <button
+                    v-for="u in UNITS"
+                    :key="u.key"
+                    type="button"
+                    class="rounded px-2 text-xs transition-colors"
+                    :class="dailyTarget.unit === u.key ? 'bg-gold/15 text-gold' : 'text-muted-foreground hover:text-foreground'"
+                    @click="dailyTarget.unit = u.key"
+                  >
+                    {{ u.label }}
+                  </button>
+                </div>
+              </div>
+              <p v-if="dailyTarget.estimate" class="text-[11px] text-muted-foreground">
+                Sekitar {{ money(dailyTarget.estimate, currency) }} per hari.
+              </p>
             </div>
           </div>
 
           <p class="text-[11px] text-muted-foreground">
-            Kalau keduanya diisi, nilai nominal yang dipakai. Persentase dihitung dari saldo
-            pembukaan hari itu.
+            Perkiraan dihitung dari modal ditambah dana yang masuk, sekarang
+            {{ money(basis, currency) }}. Saat menilai hari yang melanggar, yang dipakai adalah
+            saldo pembukaan hari itu, jadi angkanya bisa sedikit berbeda.
           </p>
         </div>
 
@@ -128,6 +195,9 @@ function toggleSession(key: string) {
                 max="100"
                 placeholder="Contoh: 1"
               />
+              <p v-if="estimate(form.max_risk_per_trade_pct)" class="text-[11px] text-muted-foreground">
+                Sekitar {{ money(estimate(form.max_risk_per_trade_pct), currency) }} per trade.
+              </p>
             </div>
             <div class="space-y-1.5">
               <Label for="min_rr">RR minimum</Label>
@@ -148,6 +218,9 @@ function toggleSession(key: string) {
                 max="100"
                 placeholder="Contoh: 10"
               />
+              <p v-if="estimate(form.max_total_loss_pct)" class="text-[11px] text-muted-foreground">
+                Sekitar {{ money(estimate(form.max_total_loss_pct), currency) }} dari puncak saldo.
+              </p>
             </div>
           </div>
 

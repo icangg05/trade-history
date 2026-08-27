@@ -105,6 +105,8 @@ class TradeGroupTest extends TestCase
             'direction' => 'buy',
             'entry_price' => 111,
             'opened_at' => '2026-01-02 10:30',
+            'closed_at' => '2026-01-02 12:00',
+            'pnl' => 50,
             'setup' => 'Breakout',
             'notes' => 'Catatan sendiri.',
         ])->assertSessionHasNoErrors();

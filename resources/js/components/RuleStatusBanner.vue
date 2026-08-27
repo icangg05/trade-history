@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
-import { money, pct } from '@/composables/useFormat'
+import { money, num, pct } from '@/composables/useFormat'
 import type { RuleStatus } from '@/types'
 
 const props = defineProps<{ status: RuleStatus; currency: string }>()
@@ -78,6 +78,10 @@ const breached = computed(
         </span>
         <span v-if="status.max_drawdown_pct" :class="status.drawdown_breached ? 'text-destructive' : ''">
           Drawdown: {{ pct(status.drawdown_pct) }} / {{ pct(status.max_drawdown_pct) }}
+        </span>
+        <span v-if="status.min_rr" :class="status.low_rr_trades ? 'text-destructive' : ''">
+          RR minimum {{ num(status.min_rr) }}<template v-if="status.low_rr_trades">
+            — {{ status.low_rr_trades }} trade di bawahnya</template>
         </span>
       </div>
     </div>
