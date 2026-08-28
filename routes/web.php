@@ -38,7 +38,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/gemini-keys', [AdminController::class, 'storeGeminiKey'])->name('gemini.store');
         Route::post('/gemini-keys/{key}/test', [AdminController::class, 'testGeminiKey'])->middleware('throttle:20,1')->name('gemini.test');
         Route::delete('/gemini-keys/{key}', [AdminController::class, 'destroyGeminiKey'])->name('gemini.destroy');
-        Route::get('/backup', [AdminController::class, 'backup'])->middleware('throttle:5,1')->name('backup');
+        Route::post('/backup', [AdminController::class, 'backup'])->middleware('throttle:5,1')->name('backup');
+        Route::get('/backup/{name}', [AdminController::class, 'downloadBackup'])->name('backup.download');
     });
 
     // Semua di bawah ini milik trader; admin dilempar balik ke halamannya.

@@ -11,7 +11,7 @@ import StopBadge from '@/components/StopBadge.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { dateTime, longDate, money, num, pct } from '@/composables/useFormat'
-import { frameClass, frameGap } from '@/composables/useGroupFrame'
+import { frameClass, frameGap, frameTop } from '@/composables/useGroupFrame'
 import type { EquityPoint, RuleStatus, Summary, Trade } from '@/types'
 
 const props = defineProps<{
@@ -19,6 +19,7 @@ const props = defineProps<{
   summary: Summary
   equity: EquityPoint[]
   monthly: { month: string; pnl: number; profit: number; loss: number }[]
+  monthlyBase: number
   ruleStatus: RuleStatus
   recent: Trade[]
 }>()
@@ -33,10 +34,18 @@ const RANGES = [
 const mode = ref<'balance' | 'pnl'>('balance')
 const currency = computed(() => props.summary.currency)
 
+/**
+ * Pertumbuhan periode ini: P/L periode dibagi saldo di awal periode.
+ *
+ * Dasarnya sengaja bukan `modal awal + arus dana`: withdrawal mengecilkan angka
+ * itu, jadi menarik dana bikin persennya meledak padahal tidak ada yang berubah
+ * di hasil trading. Saldo pembukaan adalah modal yang benar-benar dipakai
+ * selama periode ini, dan tidak ikut berubah saat dana ditarik setelahnya.
+ */
 const growthPct = computed(() => {
-  const base = props.summary.initial_balance + props.summary.net_flow
+  const base = props.equity[0]?.balance ?? 0
 
-  return base > 0 ? ((props.summary.balance - base) / base) * 100 : 0
+  return base > 0 ? (props.summary.net_pnl / base) * 100 : 0
 })
 </script>
 
@@ -135,7 +144,7 @@ const growthPct = computed(() => {
     <div class="grid items-start gap-4 lg:grid-cols-2">
       <div class="glass-card p-4">
         <h2 class="mb-2 text-sm font-semibold">P/L per bulan</h2>
-        <MonthlyPnlChart :data="monthly" :currency="currency" :base="summary.initial_balance + summary.net_flow" />
+        <MonthlyPnlChart :data="monthly" :currency="currency" :base="monthlyBase" />
       </div>
 
       <div class="glass-card p-4">
@@ -148,7 +157,7 @@ const growthPct = computed(() => {
 
         <ul v-else class="-mx-2 divide-y">
           <template v-for="(trade, index) in recent" :key="trade.id">
-          <li v-if="frameGap(recent, index)" class="mx-2 h-2 border-b-gold/40" />
+          <li v-if="frameGap(recent, index)" class="mx-2 h-2" :class="frameTop(recent, index)" />
 
           <li
             class="flex items-center gap-2 px-2 py-1.5"

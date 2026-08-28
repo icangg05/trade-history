@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Console\Commands\BackupDatabase;
 use App\Models\GeminiKey;
 use App\Models\User;
 use App\Services\Gemini;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Satu halaman untuk dua hal yang hanya boleh disentuh admin:
@@ -39,6 +40,7 @@ class AdminController extends Controller
                 'name' => $key->name,
                 'preview' => $key->preview(),
             ]),
+            'backups' => BackupDatabase::files(),
         ]);
     }
 
@@ -130,43 +132,34 @@ class AdminController extends Controller
     }
 
     /**
-     * Cadangan database sebagai berkas .sql yang langsung diunduh.
-     *
-     * ponytail: dump ditampung di memori dulu. Cukup untuk jurnal satu tim;
-     * kalau databasenya sudah ratusan MB, pipe langsung ke output.
+     * Buat cadangan sekarang juga. Berkasnya masuk ke daftar di halaman admin
+     * (dipangkas jadi 4 terbaru), diunduh lewat downloadBackup().
      */
-    public function backup(): StreamedResponse
+    public function backup(): RedirectResponse
     {
-        $db = config('database.connections.'.config('database.default'));
+        abort_unless(config('database.connections.'.config('database.default'))['driver'] === 'mysql', 422, 'Backup hanya tersedia untuk MySQL.');
 
-        abort_unless($db['driver'] === 'mysql', 422, 'Backup hanya tersedia untuk MySQL.');
+        try {
+            BackupDatabase::dump();
+        } catch (RuntimeException $e) {
+            abort(500, $e->getMessage());
+        }
 
-        // Kata sandi lewat environment, bukan argumen — argumen terbaca di daftar proses.
-        $dump = Process::env(['MYSQL_PWD' => $db['password']])
-            ->timeout(300)
-            ->run([
-                'mysqldump',
-                '--host='.$db['host'],
-                '--port='.$db['port'],
-                '--user='.$db['username'],
-                '--single-transaction',
-                '--quick',
-                // Tanpa --set-gtid-purged: klien di image ini mariadb-dump,
-                // yang tidak mengenal opsi khusus MySQL itu.
-                '--no-tablespaces',
-                // MySQL memakai sertifikat bikinan sendiri dan hanya bisa dihubungi
-                // dari jaringan compose, jadi verifikasi sertifikatnya dilewati.
-                '--ssl-verify-server-cert=0',
-                $db['database'],
-            ]);
+        return back()->with('success', 'Cadangan database dibuat.');
+    }
 
-        abort_if($dump->failed(), 500, 'mysqldump gagal: '.$dump->errorOutput());
+    /**
+     * Unduh cadangan yang sudah tersimpan. Nama dicocokkan ke pola berkas dump
+     * — polanya tidak memuat "/", jadi tidak ada jalan keluar dari direktori.
+     */
+    public function downloadBackup(string $name): BinaryFileResponse
+    {
+        abort_unless(preg_match('/^[\w-]+\.sql$/', $name) === 1, 404);
 
-        $name = $db['database'].'-'.now()->format('Y-m-d-His').'.sql';
+        $path = BackupDatabase::dir().'/'.$name;
+        abort_unless(File::exists($path), 404);
 
-        return response()->streamDownload(fn () => print $dump->output(), $name, [
-            'Content-Type' => 'application/sql',
-        ]);
+        return response()->download($path);
     }
 
     private function isLastAdmin(User $user): bool

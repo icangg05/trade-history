@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { onUnmounted, ref } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { DatabaseBackup, KeyRound, Pencil, Plus, ShieldCheck, Trash2, X, Zap } from '@lucide/vue'
+import { DatabaseBackup, Download, KeyRound, Pencil, Plus, ShieldCheck, Trash2, X, Zap } from '@lucide/vue'
 
 import ConfirmDestroy from '@/components/ConfirmDestroy.vue'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { longDate } from '@/composables/useFormat'
+import { dateTime, longDate } from '@/composables/useFormat'
 
 interface Row {
   id: number
@@ -26,10 +26,19 @@ interface GeminiKey {
   preview: string
 }
 
+interface Backup {
+  name: string
+  size: string
+  created_at: string
+}
+
 defineProps<{
   users: Row[]
   geminiKeys: GeminiKey[]
+  backups: Backup[]
 }>()
+
+const backingUp = ref(false)
 
 const open = ref(false)
 const editing = ref<Row | null>(null)
@@ -70,6 +79,16 @@ function submitUser() {
   const done = { preserveScroll: true, onSuccess: () => (open.value = false) }
 
   editing.value ? user.put(`/admin/users/${editing.value.id}`, done) : user.post('/admin/users', done)
+}
+
+// mysqldump butuh beberapa detik; halaman di-refresh sendiri supaya berkas
+// baru langsung muncul di daftar.
+function createBackup() {
+  backingUp.value = true
+  router.post('/admin/backup', {}, {
+    preserveScroll: true,
+    onFinish: () => (backingUp.value = false),
+  })
 }
 
 function destroyKey() {
@@ -248,22 +267,38 @@ async function testKey(id: number) {
     </div>
 
     <!-- ------------------------------------------------------------ Backup -->
-    <div class="glass-card flex flex-wrap items-center justify-between gap-3 p-4">
-      <div class="flex items-start gap-2">
-        <DatabaseBackup class="mt-0.5 size-4 shrink-0 text-gold" />
-        <div>
-          <h2 class="text-sm font-semibold">Cadangan database</h2>
-          <p class="text-xs text-muted-foreground">
-            Unduh seluruh isi database yang mencakup pengguna, akun, trade, transaksi, dan aturan ke dalam berkas <code>.sql</code> (berkas bukti transfer di <code>storage/app</code> tidak termasuk).
-          </p>
+    <div class="glass-card space-y-3 p-4">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="flex items-start gap-2">
+          <DatabaseBackup class="mt-0.5 size-4 shrink-0 text-gold" />
+          <div>
+            <h2 class="text-sm font-semibold">Cadangan database</h2>
+            <p class="text-xs text-muted-foreground">
+              Seluruh isi database — pengguna, akun, trade, transaksi, aturan — dalam berkas <code>.sql</code> (berkas bukti transfer di <code>storage/app</code> tidak termasuk).
+              Dibuat otomatis tiap Minggu pukul 03.00; hanya 4 yang terbaru disimpan.
+            </p>
+          </div>
+        </div>
+        <Button variant="outline" size="sm" class="gap-1.5" :disabled="backingUp" @click="createBackup">
+          <DatabaseBackup class="size-4" />
+          {{ backingUp ? 'Membuat…' : 'Buat sekarang' }}
+        </Button>
+      </div>
+
+      <div v-if="backups.length" class="divide-y rounded-md border">
+        <div v-for="file in backups" :key="file.name" class="flex flex-wrap items-center justify-between gap-3 p-2.5">
+          <div class="min-w-0">
+            <p class="truncate font-mono text-xs">{{ file.name }}</p>
+            <p class="text-[11px] text-muted-foreground">{{ dateTime(file.created_at) }} · {{ file.size }}</p>
+          </div>
+          <a :href="`/admin/backup/${file.name}`" download class="shrink-0">
+            <Button size="sm" variant="ghost" class="gap-1.5">
+              <Download class="size-3.5" /> Unduh
+            </Button>
+          </a>
         </div>
       </div>
-      <a href="/admin/backup" download>
-        <Button variant="outline" size="sm" class="gap-1.5">
-          <DatabaseBackup class="size-4" />
-          Unduh .sql
-        </Button>
-      </a>
+      <p v-else class="text-xs text-muted-foreground">Belum ada cadangan tersimpan.</p>
     </div>
 
     <!-- ----------------------------------------------------------- Pengguna -->

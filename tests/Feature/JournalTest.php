@@ -246,7 +246,7 @@ class JournalTest extends TestCase
             'type' => 'deposit',
             'amount' => 500,
             'occurred_at' => '2026-01-05',
-        ])->assertSessionHasErrors('proof');
+        ])->assertSessionHasErrors(['proof', 'rate_idr']);
 
         $this->assertSame(0, $account->transactions()->count());
 
@@ -255,11 +255,87 @@ class JournalTest extends TestCase
         $this->post('/transactions', [
             'type' => 'deposit',
             'amount' => 500,
+            'rate_idr' => 16250,
             'occurred_at' => '2026-01-05',
             'proof' => UploadedFile::fake()->image('bukti.jpg'),
         ])->assertSessionHasNoErrors();
 
         $this->assertNotNull($account->transactions()->sole()->proof_path);
+    }
+
+    public function test_withdrawal_tidak_menggeser_dasar_persentase_dashboard(): void
+    {
+        CarbonImmutable::setTestNow('2026-08-20');
+
+        $account = $this->account(['initial_balance' => 10_000, 'started_at' => '2025-01-01']);
+        $account->trades()->create([
+            'symbol' => 'XAUUSD', 'direction' => 'buy', 'status' => 'win',
+            'entry_price' => 100, 'exit_price' => 110, 'pnl' => 1_000,
+            'opened_at' => '2026-08-10 09:00', 'closed_at' => '2026-08-10 12:00',
+        ]);
+        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+
+        $base = fn () => $this->get('/')->viewData('page')['props']['monthlyBase'];
+
+        // Jendela 12 bulan mulai September 2025, jadi dasarnya modal awal.
+        $this->assertSame(10_000.0, $base());
+
+        // Menarik dana sekarang tidak boleh menyentuh dasar itu — hasil trading
+        // tidak berubah, jadi persentasenya juga tidak boleh berubah.
+        $account->transactions()->create([
+            'type' => 'withdrawal', 'amount' => 8_000, 'occurred_at' => '2026-08-15',
+        ]);
+
+        $this->assertSame(10_000.0, $base());
+    }
+
+    public function test_filter_periode_membatasi_daftar_dan_total_dana(): void
+    {
+        $account = $this->account();
+        $account->transactions()->createMany([
+            ['type' => 'deposit', 'amount' => 500, 'occurred_at' => '2026-01-05'],
+            ['type' => 'deposit', 'amount' => 300, 'occurred_at' => '2026-08-10'],
+            ['type' => 'withdrawal', 'amount' => 200, 'occurred_at' => '2025-08-10'],
+        ]);
+        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+
+        $totals = fn (array $query) => $this->get('/transactions?'.http_build_query($query))
+            ->viewData('page')['props']['totals'];
+
+        // Tanpa parameter: bulan berjalan, bukan seluruh riwayat.
+        CarbonImmutable::setTestNow('2026-08-20');
+        $this->assertSame(300.0, $totals([])['deposit']);
+
+        $all = $totals(['year' => 'all']);
+        $this->assertSame(800.0, $all['deposit']);
+        $this->assertSame(200.0, $all['withdrawal']);
+
+        $year = $totals(['year' => 2026, 'month' => 'all']);
+        $this->assertSame(800.0, $year['deposit']);
+        $this->assertSame(0.0, $year['withdrawal']);
+
+        $this->assertSame(300.0, $totals(['year' => 2026, 'month' => 8])['deposit']);
+
+        // "Semua tahun" ikut mengunci bulannya — Agustus 2025 tidak boleh hilang
+        // kalau filter bulannya bocor lintas tahun.
+        $this->assertSame(200.0, $totals(['year' => 'all', 'month' => 8])['withdrawal']);
+    }
+
+    public function test_kurs_rupiah_tidak_diminta_untuk_akun_rupiah(): void
+    {
+        $account = $this->account(['currency' => 'IDR']);
+        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+
+        Storage::fake('local');
+
+        $this->post('/transactions', [
+            'type' => 'deposit',
+            'amount' => 5_000_000,
+            'occurred_at' => '2026-01-05',
+            'proof' => UploadedFile::fake()->image('bukti.jpg'),
+        ])->assertSessionHasNoErrors();
+
+        $this->assertNull($account->transactions()->sole()->rate_idr);
     }
 
     public function test_jejak_bacaan_ai_ikut_tersimpan(): void

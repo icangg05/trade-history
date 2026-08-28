@@ -28,6 +28,24 @@ services:
       retries: 5
       start_period: 20s
 
+  # Penjadwal Laravel: menjalankan cadangan mingguan (routes/console.php).
+  scheduler:
+    build:
+      context: .
+      target: production
+    command: php artisan schedule:work
+    # Image FrankenPHP bawa healthcheck HTTP; kontainer ini tidak melayani HTTP,
+    # jadi tanpa ini statusnya "unhealthy" selamanya.
+    healthcheck:
+      disable: true
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./storage/app:/app/storage/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
   mysql:
     image: mysql:8.4
     # Tanpa `ports`: database hanya dijangkau lewat jaringan compose.

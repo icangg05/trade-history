@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
+import { useEventListener } from '@vueuse/core'
 import { ImageUp, Plus, Trash2 } from '@lucide/vue'
 
 import ConfirmDestroy from '@/components/ConfirmDestroy.vue'
@@ -10,31 +11,92 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { longDate, money, useCurrency } from '@/composables/useFormat'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { longDate, money, monthLabel, price, rateCurrency, toIdr, useCurrency } from '@/composables/useFormat'
 import type { Paginated } from '@/types'
 
 interface Row {
   id: number
   type: 'deposit' | 'withdrawal'
   amount: number
+  rate_idr: number | null
   occurred_at: string
   note: string | null
   has_proof: boolean
 }
 
-defineProps<{
+const props = defineProps<{
+  filters: { year: number | null; month: number | null }
+  years: number[]
   items: Paginated<Row>
   totals: {
     deposit: number
     withdrawal: number
+    deposit_idr: number
+    withdrawal_idr: number
     balance: number
     initial_balance: number
-    realised_pnl: number
   }
 }>()
 
 const currency = useCurrency()
 const open = ref(false)
+
+/**
+ * Filter periode. Bawaannya bulan berjalan; `ALL` yang eksplisit membuka
+ * seluruh riwayat. Bulan hanya berarti kalau tahunnya juga dipilih — "Agustus"
+ * lintas tahun bukan angka yang berarti, jadi memilih semua tahun ikut
+ * mengunci bulannya ke semua.
+ */
+const ALL = 'all'
+
+const MONTHS = Array.from({ length: 12 }, (_, i) => ({
+  value: String(i + 1),
+  label: monthLabel(`2000-${String(i + 1).padStart(2, '0')}`).split(' ')[0],
+}))
+
+function filterBy(year: string, month: string) {
+  router.get(
+    '/transactions',
+    { year, month: year === ALL ? ALL : month },
+    { preserveScroll: true, preserveState: true },
+  )
+}
+
+const year = computed(() => (props.filters.year === null ? ALL : String(props.filters.year)))
+const month = computed(() => (props.filters.month === null ? ALL : String(props.filters.month)))
+
+const scopeLabel = computed(() => {
+  if (!props.filters.year) return 'sepanjang waktu'
+
+  return props.filters.month
+    ? monthLabel(`${props.filters.year}-${String(props.filters.month).padStart(2, '0')}`)
+    : String(props.filters.year)
+})
+
+// Akun rupiah tidak perlu kurs — nilainya sudah rupiah.
+const needsRate = computed(() => currency.value !== 'IDR')
+
+// Bukti transfer dibaca di sini, bukan di tab baru: gambarnya kecil dan
+// tab baru selalu berarti kehilangan tempat di daftar.
+const viewing = ref<Row | null>(null)
+
+/**
+ * Tombol kembali menutup gambarnya, bukan meninggalkan halaman — di ponsel itu
+ * gerakan refleks untuk keluar dari tampilan penuh layar. Caranya satu entri
+ * riwayat semu saat dibuka, dan dipulangkan lagi saat ditutup dengan cara lain.
+ *
+ * State Inertia ikut disalin supaya entri ini tidak mengosongkan data halaman
+ * kalau riwayatnya berhenti di sini.
+ */
+watch(viewing, (row) => {
+  if (row) history.pushState({ ...history.state, proof: true }, '')
+  else if (history.state?.proof) history.back()
+})
+
+useEventListener('popstate', () => (viewing.value = null))
+
+const inIdr = (row: Row) => toIdr(row.amount, row.rate_idr, currency.value)
 
 // Uang sungguhan: hapus hanya lewat konfirmasi berkode, bukan confirm() browser.
 const removing = ref<Row | null>(null)
@@ -49,6 +111,7 @@ function destroy() {
 const form = useForm({
   type: 'deposit' as 'deposit' | 'withdrawal',
   amount: null as number | null,
+  rate_idr: null as number | null,
   occurred_at: new Date().toISOString().slice(0, 10),
   proof: null as File | null,
   note: '',
@@ -89,33 +152,54 @@ function submit() {
       <Button class="gap-1.5" @click="open = true"><Plus class="size-4" /> Catat</Button>
     </div>
 
+    <div class="flex flex-wrap items-center gap-2">
+      <Select :model-value="year" @update:model-value="(value) => filterBy(String(value), month)">
+        <SelectTrigger class="h-9 w-36" aria-label="Tahun"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">Semua tahun</SelectItem>
+          <SelectItem v-for="item in years" :key="item" :value="String(item)">{{ item }}</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select
+        :model-value="month"
+        :disabled="year === ALL"
+        @update:model-value="(value) => filterBy(year, String(value))"
+      >
+        <SelectTrigger class="h-9 w-36" aria-label="Bulan"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">Semua bulan</SelectItem>
+          <SelectItem v-for="item in MONTHS" :key="item.value" :value="item.value">{{ item.label }}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard label="Saldo sekarang" :value="money(totals.balance, currency)" tone="gold" />
       <StatCard label="Modal awal" :value="money(totals.initial_balance, currency)" />
-      <StatCard label="Total deposit" :value="money(totals.deposit, currency)" tone="good" />
-      <StatCard label="Total withdrawal" :value="money(totals.withdrawal, currency)" tone="bad" />
+      <StatCard
+        :label="`Deposit · ${scopeLabel}`"
+        :value="money(totals.deposit, currency)"
+        :hint="needsRate ? money(totals.deposit_idr, 'IDR') : null"
+        tone="good"
+      />
+      <StatCard
+        :label="`Withdrawal · ${scopeLabel}`"
+        :value="money(totals.withdrawal, currency)"
+        :hint="needsRate ? money(totals.withdrawal_idr, 'IDR') : null"
+        tone="bad"
+      />
     </div>
-
-    <p class="text-xs text-muted-foreground">
-      Saldo = modal awal + deposit − withdrawal + hasil trading
-      (<span class="tnum font-mono">{{ money(totals.realised_pnl, currency, true) }}</span>).
-    </p>
 
     <div class="grid gap-2 lg:hidden">
       <p v-if="!items.data.length" class="glass-card p-8 text-center text-sm text-muted-foreground">
-        Belum ada transaksi.
+        {{ filters.year ? `Tidak ada transaksi pada ${scopeLabel}.` : 'Belum ada transaksi.' }}
       </p>
 
       <div v-for="row in items.data" :key="row.id" class="glass-card flex items-center gap-3 p-3">
-        <a
-          v-if="row.has_proof"
-          :href="`/transactions/${row.id}/proof`"
-          target="_blank"
-          rel="noopener"
-          class="shrink-0"
-        >
+        <button v-if="row.has_proof" type="button" class="shrink-0" @click="viewing = row">
           <img :src="`/transactions/${row.id}/proof`" alt="Bukti transfer" class="size-10 rounded border object-cover" />
-        </a>
+        </button>
         <span v-else class="grid size-10 shrink-0 place-items-center rounded border text-xs text-muted-foreground">—</span>
 
         <div class="min-w-0 flex-1">
@@ -127,12 +211,15 @@ function submit() {
           </p>
         </div>
 
-        <p
-          class="tnum shrink-0 font-mono text-sm"
-          :class="row.type === 'deposit' ? 'text-success' : 'text-destructive'"
-        >
-          {{ money(row.type === 'deposit' ? row.amount : -row.amount, currency, true) }}
-        </p>
+        <div class="shrink-0 text-right">
+          <p class="tnum font-mono text-sm" :class="row.type === 'deposit' ? 'text-success' : 'text-destructive'">
+            {{ money(row.type === 'deposit' ? row.amount : -row.amount, currency, true) }}
+          </p>
+          <p v-if="needsRate" class="tnum font-mono text-[11px] text-muted-foreground">
+            {{ money(inIdr(row), 'IDR') }}
+            <span v-if="row.rate_idr" class="opacity-70">@ {{ price(row.rate_idr) }}</span>
+          </p>
+        </div>
 
         <Button size="icon-xs" variant="ghost" class="shrink-0" title="Hapus" @click="removing = row">
           <Trash2 class="size-3.5 text-destructive" />
@@ -149,12 +236,15 @@ function submit() {
             <th class="p-3 font-medium">Bukti</th>
             <th class="p-3 font-medium">Catatan</th>
             <th class="p-3 text-right font-medium">Jumlah</th>
+            <th v-if="needsRate" class="p-3 text-right font-medium">Rupiah</th>
             <th class="p-3" />
           </tr>
         </thead>
         <tbody class="divide-y">
           <tr v-if="!items.data.length">
-            <td colspan="6" class="p-10 text-center text-muted-foreground">Belum ada transaksi.</td>
+            <td :colspan="needsRate ? 7 : 6" class="p-10 text-center text-muted-foreground">
+              {{ filters.year ? `Tidak ada transaksi pada ${scopeLabel}.` : 'Belum ada transaksi.' }}
+            </td>
           </tr>
           <tr v-for="row in items.data" :key="row.id" class="hover:bg-accent/40">
             <td class="p-3 text-xs whitespace-nowrap">{{ longDate(row.occurred_at) }}</td>
@@ -164,24 +254,24 @@ function submit() {
               </span>
             </td>
             <td class="p-3">
-              <a
-                v-if="row.has_proof"
-                :href="`/transactions/${row.id}/proof`"
-                target="_blank"
-                rel="noopener"
-                class="inline-block"
-              >
+              <button v-if="row.has_proof" type="button" class="inline-block" @click="viewing = row">
                 <img
                   :src="`/transactions/${row.id}/proof`"
                   alt="Bukti transfer"
                   class="size-9 rounded border object-cover transition-opacity hover:opacity-80"
                 />
-              </a>
+              </button>
               <span v-else class="text-xs text-muted-foreground">—</span>
             </td>
             <td class="p-3 text-xs text-muted-foreground">{{ row.note || '—' }}</td>
             <td class="tnum p-3 text-right font-mono" :class="row.type === 'deposit' ? 'text-success' : 'text-destructive'">
               {{ money(row.type === 'deposit' ? row.amount : -row.amount, currency, true) }}
+            </td>
+            <td v-if="needsRate" class="tnum p-3 text-right font-mono text-xs text-muted-foreground">
+              {{ money(inIdr(row), 'IDR') }}
+              <span v-if="row.rate_idr" class="block text-[11px] opacity-70">
+                @ {{ price(row.rate_idr) }}/{{ rateCurrency(currency) }}
+              </span>
             </td>
             <td class="p-3 text-right">
               <Button size="icon-xs" variant="ghost" title="Hapus" @click="removing = row">
@@ -203,6 +293,20 @@ function submit() {
       @update:open="(value) => !value && (removing = null)"
       @confirm="destroy"
     />
+
+    <Dialog :open="viewing !== null" @update:open="(value) => !value && (viewing = null)">
+      <DialogContent class="h-dvh w-screen max-w-none gap-0 rounded-none border-0 p-3 sm:max-w-none">
+        <DialogHeader class="sr-only">
+          <DialogTitle>Bukti transfer</DialogTitle>
+        </DialogHeader>
+        <img
+          v-if="viewing"
+          :src="`/transactions/${viewing.id}/proof`"
+          alt="Bukti transfer"
+          class="size-full object-contain"
+        />
+      </DialogContent>
+    </Dialog>
 
     <Dialog v-model:open="open">
       <DialogContent class="sm:max-w-sm">
@@ -234,6 +338,15 @@ function submit() {
             <Label for="amount">Jumlah ({{ currency }})</Label>
             <Input id="amount" v-model="form.amount" type="number" step="0.01" min="0" placeholder="500" required />
             <p v-if="form.errors.amount" class="text-xs text-destructive">{{ form.errors.amount }}</p>
+          </div>
+
+          <div v-if="needsRate" class="space-y-2">
+            <Label for="rate_idr">Kurs rupiah (1 {{ rateCurrency(currency) }} = Rp …)</Label>
+            <Input id="rate_idr" v-model="form.rate_idr" type="number" step="0.01" min="0" placeholder="16250" required />
+            <p v-if="form.amount && form.rate_idr" class="text-xs text-muted-foreground">
+              Setara <span class="tnum font-mono">{{ money(toIdr(form.amount, form.rate_idr, currency), 'IDR') }}</span>
+            </p>
+            <p v-if="form.errors.rate_idr" class="text-xs text-destructive">{{ form.errors.rate_idr }}</p>
           </div>
 
           <div class="space-y-2">

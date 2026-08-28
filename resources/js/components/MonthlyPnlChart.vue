@@ -6,7 +6,7 @@ import { compact, money, pct } from '@/composables/useFormat'
 const props = defineProps<{
   data: { month: string; pnl: number; profit: number; loss: number }[]
   currency: string
-  /** Modal + arus kas, dipakai untuk badge persentase. Null = badge disembunyikan. */
+  /** Saldo di awal jendela 12 bulan, dasar badge persentase. Null = badge disembunyikan. */
   base?: number | null
 }>()
 
@@ -88,7 +88,7 @@ const changePct = computed(() =>
         v-if="changePct !== null"
         class="flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium"
         :class="changePct >= 0 ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'"
-        title="Perubahan terhadap modal awal + arus kas"
+        title="Perubahan terhadap saldo di awal periode 12 bulan"
       >
         <component :is="changePct >= 0 ? ArrowUp : ArrowDown" class="size-3" />
         {{ pct(changePct, 2) }}

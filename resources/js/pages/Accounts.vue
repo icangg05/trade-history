@@ -108,7 +108,7 @@ function destroy() {
               {{ row.broker || 'Tanpa broker' }} · {{ row.currency }} · {{ row.trades }} trade
             </p>
           </div>
-          <span v-if="row.id === activeId" class="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] text-gold">aktif</span>
+          <span v-if="row.id === activeId" class="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] text-gold">Aktif</span>
         </div>
 
         <p class="tnum mt-3 font-mono text-lg font-semibold">{{ money(row.balance, row.currency) }}</p>

@@ -47,6 +47,25 @@ export function money(value: number | null | undefined, currency = 'USD', signed
   return value < 0 ? `−${text}` : value > 0 ? `+${text}` : text
 }
 
+/**
+ * Nilai rupiah dari nominal akun. Kurs selalu dicatat per dolar, sedangkan akun
+ * sen (USC) dinyatakan dalam 1/100 dolar — 3700 USC = $37, bukan $3700.
+ */
+export function toIdr(
+  amount: number | null | undefined,
+  rate: number | null | undefined,
+  currency: string,
+): number | null {
+  if (amount === null || amount === undefined || rate === null || rate === undefined) return null
+
+  return currency === 'USC' ? (amount * rate) / 100 : amount * rate
+}
+
+/** Mata uang yang kursnya dipakai: akun sen memakai kurs dolar induknya. */
+export function rateCurrency(currency: string): string {
+  return currency === 'USC' ? 'USD' : currency
+}
+
 export function num(value: number | null | undefined, digits = 2): string {
   if (value === null || value === undefined) return '—'
 

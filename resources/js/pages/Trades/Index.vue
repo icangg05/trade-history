@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { clock, dateTime, longDate, money, num, price, useCurrency } from '@/composables/useFormat'
-import { frameClass, frameGap } from '@/composables/useGroupFrame'
+import { frameClass, frameGap, frameTop } from '@/composables/useGroupFrame'
 import type { Paginated, Trade } from '@/types'
 
 const props = defineProps<{
@@ -220,6 +220,15 @@ const rows = computed(() =>
 )
 
 /**
+ * Tiap trade bisa didahului header tanggal lalu baris jeda. Yang menggambar
+ * tepi atas bingkai grup hanya yang paling bawah dari ketiganya — kalau lebih
+ * dari satu ikut mewarnai, garis emasnya muncul menggantung di atas header.
+ */
+const separated = (index: number) => frameGap(props.trades.data, index) || !!rows.value[index]?.day
+const dayEdge = (index: number) =>
+  frameGap(props.trades.data, index) ? '' : frameTop(props.trades.data, index)
+
+/**
  * Detail satu trade untuk layar ponsel. Barisnya diringkas jadi simbol, waktu,
  * dan P/L saja — sisanya menunggu di modal ini, bukan menumpuk di daftar.
  */
@@ -346,6 +355,7 @@ const detail = computed(() => {
           <li
             v-if="row.day"
             class="-mx-1 flex items-center justify-between gap-2 bg-muted/40 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase"
+            :class="dayEdge(index)"
           >
             <span>{{ row.day }}</span>
             <span
@@ -357,9 +367,9 @@ const detail = computed(() => {
             </span>
           </li>
 
-          <li v-if="frameGap(trades.data, index)" class="mx-2 h-2 border-b-gold/40" />
+          <li v-if="frameGap(trades.data, index)" class="mx-2 h-2" :class="frameTop(trades.data, index)" />
 
-          <li :class="frameClass(trades.data, index)">
+          <li :class="frameClass(trades.data, index, separated(index + 1))">
             <button
               type="button"
               class="flex w-full items-center gap-2 px-2 py-2 text-left transition-colors hover:bg-accent/40"
@@ -510,7 +520,7 @@ const detail = computed(() => {
           </tr>
 
           <template v-for="(row, index) in rows" :key="row.trade.id">
-            <tr v-if="row.day" class="bg-muted/40">
+            <tr v-if="row.day" class="bg-muted/40" :class="dayEdge(index)">
               <td colspan="7" class="px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
                 {{ row.day }}
               </td>
@@ -525,14 +535,14 @@ const detail = computed(() => {
               <td class="p-0" />
             </tr>
 
-            <tr v-if="frameGap(trades.data, index)" class="h-2 border-b-gold/40">
+            <tr v-if="frameGap(trades.data, index)" class="h-2" :class="frameTop(trades.data, index)">
               <td colspan="9" class="p-0" />
             </tr>
 
             <tr
               class="cursor-pointer hover:bg-accent/40"
               :class="[
-                frameClass(trades.data, index),
+                frameClass(trades.data, index, separated(index + 1)),
                 grouping && picked.includes(row.trade.id) ? 'bg-gold/10' : '',
                 grouping && !pickable(row.trade) ? 'opacity-40' : '',
               ]"

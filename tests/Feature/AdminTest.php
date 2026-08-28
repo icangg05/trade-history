@@ -46,13 +46,13 @@ class AdminTest extends TestCase
 
     public function test_backup_hanya_untuk_admin(): void
     {
-        $this->actingAs(User::factory()->create())->get('/admin/backup')->assertNotFound();
+        $this->actingAs(User::factory()->create())->post('/admin/backup')->assertNotFound();
     }
 
     public function test_backup_menolak_koneksi_selain_mysql(): void
     {
         // Test berjalan di sqlite; jalur mysqldump-nya diuji langsung ke kontainer.
-        $this->actingAs($this->admin())->get('/admin/backup')->assertStatus(422);
+        $this->actingAs($this->admin())->post('/admin/backup')->assertStatus(422);
     }
 
     public function test_admin_bisa_menambah_pengguna(): void

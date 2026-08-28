@@ -2,7 +2,7 @@ interface Groupable {
   group_id?: number | null
 }
 
-/**
+/*
  * Bingkai grup: trade yang satu grup dibungkus satu garis emas tipis. Itu
  * satu-satunya penanda grup — tidak ada nama, tidak ada label.
  *
@@ -14,12 +14,30 @@ interface Groupable {
  * Dipakai daftar mana pun yang barisnya sudah urut waktu (riwayat trade,
  * dashboard, kalender); anggota satu grup selalu bersebelahan di sana.
  */
-export function frameClass(rows: Groupable[], index: number): string {
+
+/**
+ * Tepi atas bingkai, untuk dipasang pada apa pun yang tepat di ATAS baris
+ * `index` — baris trade sebelumnya, header tanggal, atau baris jeda. Hanya
+ * elemen terdekat yang boleh memakainya; kalau tidak, garis emasnya muncul di
+ * tempat yang salah.
+ */
+export function frameTop(rows: Groupable[], index: number): string {
+  const group = rows[index]?.group_id
+
+  return group && rows[index - 1]?.group_id !== group ? 'border-b-gold/40' : ''
+}
+
+/**
+ * @param separatedBelow  Ada baris sisipan antara baris ini dan baris di
+ *   bawahnya. Sisipan itulah tetangga langsung grup berikutnya, jadi dialah
+ *   yang menggambar tepi atasnya — bukan baris ini.
+ */
+export function frameClass(rows: Groupable[], index: number, separatedBelow = false): string {
   const group = rows[index]?.group_id
   const next = rows[index + 1]?.group_id
 
   // Baris biasa tepat di atas sebuah grup: garis pemisahnya jadi tepi atas grup.
-  if (!group) return next ? 'border-b-gold/40' : ''
+  if (!group) return separatedBelow ? '' : frameTop(rows, index + 1)
 
   const classes = ['border-x', 'border-x-gold/40', 'bg-gold/[0.04]']
 

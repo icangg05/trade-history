@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['account_id', 'type', 'amount', 'occurred_at', 'proof_path', 'note'])]
+#[Fillable(['account_id', 'type', 'amount', 'rate_idr', 'occurred_at', 'proof_path', 'note'])]
 class Transaction extends Model
 {
     protected function casts(): array
@@ -14,6 +14,7 @@ class Transaction extends Model
         return [
             'occurred_at' => 'date',
             'amount' => 'decimal:2',
+            'rate_idr' => 'decimal:2',
         ];
     }
 

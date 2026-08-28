@@ -50,6 +50,26 @@ services:
       retries: 20
     restart: unless-stopped
 
+  # Penjadwal Laravel: satu-satunya yang menyalakan cadangan mingguan
+  # (routes/console.php). Matikan servis ini dan jadwalnya ikut mati.
+  scheduler:
+    build:
+      context: .
+      target: dev
+    user: "${UID:-1000}:${GID:-1000}"
+    command: php artisan schedule:work
+    # Image FrankenPHP bawa healthcheck HTTP; kontainer ini tidak melayani HTTP,
+    # jadi tanpa ini statusnya "unhealthy" selamanya.
+    healthcheck:
+      disable: true
+    volumes:
+      - .:/app
+      - ./storage/app:/app/storage/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
   # Tugas sekali jalan: bangun aset lalu berhenti.
   # Ganti `npm run build` jadi `npm run dev` kalau mau HMR (port 5173).
   # Bangun ulang kapan saja: docker compose run --rm vite
