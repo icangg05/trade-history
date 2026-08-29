@@ -79,6 +79,7 @@ class AnnualReport
         return [
             'name' => $account->name,
             'broker' => $account->broker,
+            'account_number' => $account->account_number,
             'currency' => $currency,
             'started_at' => $account->started_at->toDateString(),
             'is_archived' => (bool) $account->is_archived,

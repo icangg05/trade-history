@@ -20,6 +20,7 @@ interface Row {
   id: number
   name: string
   broker: string | null
+  account_number: string | null
   currency: string
   is_archived: boolean
   initial_balance: number
@@ -37,6 +38,7 @@ const editing = ref<Row | null>(null)
 const form = useForm({
   name: '',
   broker: '',
+  account_number: '',
   currency: 'USD',
   initial_balance: 0,
   started_at: new Date().toISOString().slice(0, 10),
@@ -56,6 +58,7 @@ function edit(row: Row) {
   form.defaults({
     name: row.name,
     broker: row.broker ?? '',
+    account_number: row.account_number ?? '',
     currency: row.currency,
     initial_balance: row.initial_balance,
     started_at: row.started_at,
@@ -105,7 +108,8 @@ function destroy() {
           <div class="min-w-0">
             <p class="truncate font-medium">{{ row.name }}</p>
             <p class="text-xs text-muted-foreground">
-              {{ row.broker || 'Tanpa broker' }} · {{ row.currency }} · {{ row.trades }} trade
+              {{ row.broker || 'Tanpa broker' }}<template v-if="row.account_number"> · {{ row.account_number }}</template>
+              · {{ row.currency }} · {{ row.trades }} trade
             </p>
           </div>
           <span v-if="row.id === activeId" class="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] text-gold">Aktif</span>
@@ -163,6 +167,17 @@ function destroy() {
             <div class="space-y-2">
               <Label for="broker">Broker</Label>
               <Input id="broker" v-model="form.broker" placeholder="Exness" />
+            </div>
+            <div class="space-y-2">
+              <Label for="account_number">Nomor akun broker</Label>
+              <Input id="account_number" v-model="form.account_number" placeholder="Contoh: 123456789" />
+              <p class="text-[11px] text-muted-foreground">
+                Dicetak di laporan tahunan. Ini yang menyambungkan laporanmu ke statement
+                resmi broker saat pajak minta klarifikasi.
+              </p>
+              <p v-if="form.errors.account_number" class="text-xs text-destructive">
+                {{ form.errors.account_number }}
+              </p>
             </div>
             <div class="space-y-2">
               <Label for="currency">Mata uang</Label>

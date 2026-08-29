@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, onUnmounted } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { toast, Toaster } from 'vue-sonner'
 import 'vue-sonner/style.css'
@@ -88,15 +88,16 @@ function switchAccount(id: number) {
   if (id !== current.value?.id) router.post(`/accounts/${id}/switch`)
 }
 
-// Flash dari server ditampilkan sebagai toast.
-watch(
-  () => page.props.flash,
-  (flash) => {
-    if (flash?.success) toast.success(flash.success)
-    if (flash?.error) toast.error(flash.error)
-    if (flash?.info) toast.info(flash.info)
-  },
-  { immediate: true, deep: true },
+// Flash dari server ditampilkan sebagai toast. Lewat event flash Inertia, bukan
+// prop: prop ikut tersimpan di state history browser, jadi toast lama tampil
+// lagi tiap halaman dipulihkan dengan tombol kembali — termasuk saat chat AI
+// ditutup, yang memang mundur lewat history.
+onUnmounted(
+  router.on('flash', ({ detail: { flash } }) => {
+    if (flash.success) toast.success(flash.success)
+    if (flash.error) toast.error(flash.error)
+    if (flash.info) toast.info(flash.info)
+  }),
 )
 </script>
 

@@ -134,6 +134,12 @@ export interface PageProps {
   accounts: AccountBrief[]
   currentAccount: CurrentAccount | null
   csrf: string
-  flash: { success: string | null; error: string | null; info: string | null }
   [key: string]: unknown
+}
+
+// Bentuk flash Inertia (`page.flash`, bukan prop) supaya terketik di layout.
+declare module '@inertiajs/core' {
+  interface InertiaConfig {
+    flashDataType: { success?: string; error?: string; info?: string }
+  }
 }

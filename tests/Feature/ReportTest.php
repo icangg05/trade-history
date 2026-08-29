@@ -337,6 +337,23 @@ class ReportTest extends TestCase
         $this->assertGreaterThanOrEqual(2, substr_count($pdf, '/Subtype /Image'));
     }
 
+    /**
+     * Nomor akun broker adalah satu-satunya penanda yang menyambungkan laporan ini
+     * ke statement resmi broker. Tanpa itu pemeriksa tidak bisa memastikan kedua
+     * dokumen membicarakan akun yang sama.
+     */
+    public function test_nomor_akun_broker_tercetak_di_laporan(): void
+    {
+        $user = User::factory()->create();
+        $account = $this->account($user, ['broker' => 'Exness', 'account_number' => '123456789']);
+        $this->trade($account, '2025-05-05 12:00', 100);
+
+        $report = AnnualReport::build($user->accounts()->get(), 2025, 16000, '2025-12-31');
+
+        $this->assertSame('123456789', $report['accounts'][0]['account_number']);
+        $this->assertStringContainsString('123456789', $this->html($user));
+    }
+
     public function test_akun_milik_pengguna_lain_tidak_ikut_dilaporkan(): void
     {
         $user = User::factory()->create();

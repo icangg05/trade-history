@@ -18,7 +18,7 @@ class AccountController extends Controller
                 $stats = new AccountStats($account);
 
                 return [
-                    ...$account->only('id', 'name', 'broker', 'currency', 'is_archived'),
+                    ...$account->only('id', 'name', 'broker', 'account_number', 'currency', 'is_archived'),
                     'initial_balance' => (float) $account->initial_balance,
                     'started_at' => $account->started_at->toDateString(),
                     'balance' => $stats->balance(),
@@ -72,6 +72,7 @@ class AccountController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:60'],
             'broker' => ['nullable', 'string', 'max:60'],
+            'account_number' => ['nullable', 'string', 'max:40'],
             'currency' => ['required', 'in:USD,USC,IDR'],
             'initial_balance' => ['required', 'numeric', 'min:0'],
             'started_at' => ['required', 'date'],

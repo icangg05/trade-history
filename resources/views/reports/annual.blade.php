@@ -177,7 +177,8 @@
     <thead>
         <tr>
             <th style="width: 16%">Akun<span class="en">Account</span></th>
-            <th style="width: 14%">Broker<span class="en">Broker</span></th>
+            <th style="width: 12%">Broker<span class="en">Broker</span></th>
+            <th style="width: 10%">Nomor Akun<span class="en">Account No.</span></th>
             <th style="width: 6%">Mata Uang<span class="en">Currency</span></th>
             <th class="num">Saldo Awal<span class="en">Opening Balance</span></th>
             <th class="num">Setoran<span class="en">Deposits</span></th>
@@ -191,6 +192,7 @@
             <tr>
                 <td>{{ $a['name'] }}@if ($a['is_archived'])<span class="muted"> (diarsipkan)</span>@endif</td>
                 <td>{{ $a['broker'] ?: '—' }}</td>
+                <td>{{ $a['account_number'] ?: '—' }}</td>
                 <td>{{ $a['currency'] }}</td>
                 <td class="num">{{ $rp($a['opening_balance_idr']) }}</td>
                 <td class="num">{{ $rp($a['deposit_idr']) }}</td>
@@ -200,7 +202,7 @@
             </tr>
         @endforeach
         <tr class="total">
-            <td colspan="3">TOTAL</td>
+            <td colspan="4">TOTAL</td>
             <td class="num">{{ $rp($total['opening_balance_idr']) }}</td>
             <td class="num">{{ $rp($total['deposit_idr']) }}</td>
             <td class="num">{{ $rp($total['withdrawal_idr']) }}</td>
@@ -262,11 +264,13 @@
 
     <table class="keep">
         <tr>
-            <th style="width: 12%">Broker</th>
-            <td style="width: 21%">{{ $a['broker'] ?: '—' }}</td>
-            <th style="width: 12%">Mata uang</th>
-            <td style="width: 21%">{{ $c }}</td>
-            <th style="width: 12%">Akun dibuka</th>
+            <th style="width: 11%">Broker<span class="en">Broker</span></th>
+            <td style="width: 17%">{{ $a['broker'] ?: '—' }}</td>
+            <th style="width: 12%">Nomor akun<span class="en">Account number</span></th>
+            <td style="width: 17%">{{ $a['account_number'] ?: '—' }}</td>
+            <th style="width: 10%">Mata uang<span class="en">Currency</span></th>
+            <td style="width: 10%">{{ $c }}</td>
+            <th style="width: 11%">Akun dibuka<span class="en">Opened on</span></th>
             <td>{{ $tgl($a['started_at']) }}</td>
         </tr>
     </table>

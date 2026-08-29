@@ -85,17 +85,43 @@
   },
   "nodes": [
     {
-      "id": "app_models_geminikey_geminikey",
-      "label": "GeminiKey",
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller",
+      "label": "TransactionController",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "GeminiKey",
+      "community_name": "TransactionController.php",
       "file_type": "code",
-      "norm_label": "geminikey",
-      "source_file": "app/Models/GeminiKey.php",
-      "source_location": "L15"
+      "norm_label": "transactioncontroller",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L17"
+    },
+    {
+      "id": "app_services_uploads_uploads",
+      "label": "Uploads",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "TransactionController.php",
+      "file_type": "code",
+      "norm_label": "uploads",
+      "source_file": "app/Services/Uploads.php",
+      "source_location": "L17"
+    },
+    {
+      "id": "app_http_controllers_analysiscontroller_analysiscontroller",
+      "label": "AnalysisController",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "AnalysisController.php",
+      "file_type": "code",
+      "norm_label": "analysiscontroller",
+      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "source_location": "L16"
     },
     {
       "id": "app_http_controllers_tradeimportcontroller_tradeimportcontroller",
@@ -104,24 +130,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": "tradeimportcontroller",
       "source_file": "app/Http/Controllers/TradeImportController.php",
       "source_location": "L22"
     },
     {
-      "id": "app_services_gemini_gemini",
-      "label": "Gemini",
+      "id": "app_models_aianalysis_aianalysis",
+      "label": "AiAnalysis",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
-      "norm_label": "gemini",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L19"
+      "norm_label": "aianalysis",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L9"
     },
     {
       "id": "resources_js_composables_useinstall_installpromptevent",
@@ -215,6 +241,19 @@
       "source_location": "L10"
     },
     {
+      "id": "tests_feature_flashtest_flashtest",
+      "label": "FlashTest",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "TestCase",
+      "file_type": "code",
+      "norm_label": "flashtest",
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L15"
+    },
+    {
       "id": "tests_feature_geminikeytest_geminikeytest",
       "label": "GeminiKeyTest",
       "_callable": true,
@@ -228,32 +267,6 @@
       "source_location": "L16"
     },
     {
-      "id": "tests_feature_registertest_registertest",
-      "label": "RegisterTest",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": "registertest",
-      "source_file": "tests/Feature/RegisterTest.php",
-      "source_location": "L12"
-    },
-    {
-      "id": "tests_feature_tradedaytest_tradedaytest",
-      "label": "TradeDayTest",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": "tradedaytest",
-      "source_file": "tests/Feature/TradeDayTest.php",
-      "source_location": "L14"
-    },
-    {
       "id": "tests_testcase_testcase",
       "label": "TestCase",
       "_callable": true,
@@ -265,6 +278,19 @@
       "norm_label": "testcase",
       "source_file": "tests/TestCase.php",
       "source_location": "L7"
+    },
+    {
+      "id": "app_models_accountrule_accountrule",
+      "label": "AccountRule",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "accountrule",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L9"
     },
     {
       "id": "app_models_transaction_transaction",
@@ -306,19 +332,6 @@
       "source_location": "L20"
     },
     {
-      "id": "app_services_uploads_uploads",
-      "label": "Uploads",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "uploads",
-      "source_file": "app/Services/Uploads.php",
-      "source_location": "L17"
-    },
-    {
       "id": "resources_js_components_analysischat_message",
       "label": "Message",
       "_callable": true,
@@ -332,17 +345,17 @@
       "source_location": "L12"
     },
     {
-      "id": "app_models_accountrule_accountrule",
-      "label": "AccountRule",
+      "id": "tests_feature_profiletest_profiletest",
+      "label": "ProfileTest",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "community_name": "ProfileTest",
       "file_type": "code",
-      "norm_label": "accountrule",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L9"
+      "norm_label": "profiletest",
+      "source_file": "tests/Feature/ProfileTest.php",
+      "source_location": "L14"
     },
     {
       "id": "app_http_middleware_ensureadmin_ensureadmin",
@@ -449,30 +462,17 @@
       "source_location": "L52"
     },
     {
-      "id": "resources_js_components_ui_button_button_props",
-      "label": "Props",
+      "id": "tests_feature_registertest_registertest",
+      "label": "RegisterTest",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 30,
-      "community_name": "button/index.ts",
+      "community_name": "RegisterTest",
       "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/ui/button/Button.vue",
-      "source_location": "L9"
-    },
-    {
-      "id": "resources_js_components_ui_button_index_buttonvariants",
-      "label": "ButtonVariants",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "button/index.ts",
-      "file_type": "code",
-      "norm_label": "buttonvariants",
-      "source_file": "resources/js/components/ui/button/index.ts",
-      "source_location": "L40"
+      "norm_label": "registertest",
+      "source_file": "tests/Feature/RegisterTest.php",
+      "source_location": "L12"
     },
     {
       "id": "resources_js_components_ui_badge_index_badgevariants",
@@ -592,17 +592,17 @@
       "source_location": "L1"
     },
     {
-      "id": "resources_js_types_index_pageprops",
-      "label": "PageProps",
+      "id": "resources_js_types_index_inertiaconfig",
+      "label": "InertiaConfig",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 41,
       "community_name": "types/index.ts",
       "file_type": "code",
-      "norm_label": "pageprops",
+      "norm_label": "inertiaconfig",
       "source_file": "resources/js/types/index.ts",
-      "source_location": "L132"
+      "source_location": "L142"
     },
     {
       "id": "resources_js_types_index_paginated",
@@ -631,6 +631,19 @@
       "source_location": "L4"
     },
     {
+      "id": "resources_js_types_index_trade",
+      "label": "Trade",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "types/index.ts",
+      "file_type": "code",
+      "norm_label": "trade",
+      "source_file": "resources/js/types/index.ts",
+      "source_location": "L18"
+    },
+    {
       "id": "resources_js_types_index_tradestatus",
       "label": "TradeStatus",
       "_callable": true,
@@ -644,17 +657,17 @@
       "source_location": "L2"
     },
     {
-      "id": "tests_feature_admintest_admintest",
-      "label": "AdminTest",
+      "id": "tests_feature_tradedaytest_tradedaytest",
+      "label": "TradeDayTest",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 42,
-      "community_name": "AdminTest",
+      "community_name": "TradeDayTest",
       "file_type": "code",
-      "norm_label": "admintest",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L16"
+      "norm_label": "tradedaytest",
+      "source_file": "tests/Feature/TradeDayTest.php",
+      "source_location": "L14"
     },
     {
       "id": "app_models_trade_trade",
@@ -696,19 +709,6 @@
       "source_location": "L16"
     },
     {
-      "id": "resources_js_types_index_trade",
-      "label": "Trade",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "trade",
-      "source_file": "resources/js/types/index.ts",
-      "source_location": "L18"
-    },
-    {
       "id": "app_models_account_account",
       "label": "Account",
       "_callable": true,
@@ -720,19 +720,6 @@
       "norm_label": "account",
       "source_file": "app/Models/Account.php",
       "source_location": "L11"
-    },
-    {
-      "id": "tests_feature_rulelimittest_rulelimittest",
-      "label": "RuleLimitTest",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Account",
-      "file_type": "code",
-      "norm_label": "rulelimittest",
-      "source_file": "tests/Feature/RuleLimitTest.php",
-      "source_location": "L16"
     },
     {
       "id": "tests_feature_analysischattest_analysischattest",
@@ -774,17 +761,30 @@
       "source_location": "L13"
     },
     {
-      "id": "resources_js_pages_accounts_row",
-      "label": "Row",
+      "id": "tests_feature_rulelimittest_rulelimittest",
+      "label": "RuleLimitTest",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "Accounts.vue",
+      "community_name": "RuleLimitTest",
       "file_type": "code",
-      "norm_label": "row",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L19"
+      "norm_label": "rulelimittest",
+      "source_file": "tests/Feature/RuleLimitTest.php",
+      "source_location": "L16"
+    },
+    {
+      "id": "resources_js_types_index_pageprops",
+      "label": "PageProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "Profile.vue",
+      "file_type": "code",
+      "norm_label": "pageprops",
+      "source_file": "resources/js/types/index.ts",
+      "source_location": "L132"
     },
     {
       "id": "app_http_controllers_auth_logincontroller_logincontroller",
@@ -793,11 +793,37 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "LoginController",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": "logincontroller",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
       "source_location": "L21"
+    },
+    {
+      "id": "app_http_controllers_auth_registercontroller_registercontroller",
+      "label": "RegisterController",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": "registercontroller",
+      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L15"
+    },
+    {
+      "id": "app_http_controllers_controller_controller",
+      "label": "Controller",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": "controller",
+      "source_file": "app/Http/Controllers/Controller.php",
+      "source_location": "L5"
     },
     {
       "id": "app_console_commands_backupdatabase_backupdatabase",
@@ -806,11 +832,50 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": "backupdatabase",
       "source_file": "app/Console/Commands/BackupDatabase.php",
       "source_location": "L15"
+    },
+    {
+      "id": "app_models_geminikey_geminikey",
+      "label": "GeminiKey",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "geminikey",
+      "source_file": "app/Models/GeminiKey.php",
+      "source_location": "L15"
+    },
+    {
+      "id": "app_services_gemini_gemini",
+      "label": "Gemini",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "gemini",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L19"
+    },
+    {
+      "id": "tests_feature_admintest_admintest",
+      "label": "AdminTest",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "admintest",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L16"
     },
     {
       "id": "resources_js_composables_useformat_currencycode",
@@ -823,6 +888,19 @@
       "file_type": "code",
       "norm_label": "currencycode",
       "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "resources_js_pages_accounts_row",
+      "label": "Row",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "row",
+      "source_file": "resources/js/pages/Accounts.vue",
       "source_location": "L19"
     },
     {
@@ -852,19 +930,6 @@
       "source_location": "L12"
     },
     {
-      "id": "app_http_controllers_analysiscontroller_analysiscontroller",
-      "label": "AnalysisController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": "analysiscontroller",
-      "source_file": "app/Http/Controllers/AnalysisController.php",
-      "source_location": "L16"
-    },
-    {
       "id": "app_http_middleware_handleinertiarequests_handleinertiarequests",
       "label": "HandleInertiaRequests",
       "_callable": true,
@@ -875,7 +940,7 @@
       "file_type": "code",
       "norm_label": "handleinertiarequests",
       "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L8"
+      "source_location": "L9"
     },
     {
       "id": "tests_feature_tradeimporttest_tradeimporttest",
@@ -891,43 +956,17 @@
       "source_location": "L20"
     },
     {
-      "id": "app_http_controllers_auth_registercontroller_registercontroller",
-      "label": "RegisterController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": "registercontroller",
-      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L15"
-    },
-    {
       "id": "app_http_controllers_calendarcontroller_calendarcontroller",
       "label": "CalendarController",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "calendarcontroller",
       "source_file": "app/Http/Controllers/CalendarController.php",
       "source_location": "L12"
-    },
-    {
-      "id": "app_http_controllers_controller_controller",
-      "label": "Controller",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": "controller",
-      "source_file": "app/Http/Controllers/Controller.php",
-      "source_location": "L5"
     },
     {
       "id": "app_http_controllers_dashboardcontroller_dashboardcontroller",
@@ -936,7 +975,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "dashboardcontroller",
       "source_file": "app/Http/Controllers/DashboardController.php",
@@ -949,24 +988,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "rulecontroller",
       "source_file": "app/Http/Controllers/RuleController.php",
       "source_location": "L15"
-    },
-    {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller",
-      "label": "TransactionController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": "transactioncontroller",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L17"
     },
     {
       "id": "app_http_requests_traderequest_traderequest",
@@ -988,24 +1014,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 89,
-      "community_name": "User.php",
+      "community_name": "Illuminate\\Support\\Str",
       "file_type": "code",
       "norm_label": "userfactory",
       "source_file": "database/factories/UserFactory.php",
       "source_location": "L13"
-    },
-    {
-      "id": "tests_feature_profiletest_profiletest",
-      "label": "ProfileTest",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": "profiletest",
-      "source_file": "tests/Feature/ProfileTest.php",
-      "source_location": "L14"
     },
     {
       "id": "tests_feature_loginthrottletest_loginthrottletest",
@@ -1021,26 +1034,13 @@
       "source_location": "L13"
     },
     {
-      "id": "app_models_aianalysis_aianalysis",
-      "label": "AiAnalysis",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "AiAnalysis",
-      "file_type": "code",
-      "norm_label": "aianalysis",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L9"
-    },
-    {
       "id": "tests_feature_analysistest_analysistest",
       "label": "AnalysisTest",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AiAnalysis",
+      "community_name": "AnalysisTest",
       "file_type": "code",
       "norm_label": "analysistest",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -1053,7 +1053,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 94,
-      "community_name": "ReportController.php",
+      "community_name": "ReportController",
       "file_type": "code",
       "norm_label": "reportcontroller",
       "source_file": "app/Http/Controllers/ReportController.php",
@@ -1086,6 +1086,32 @@
       "source_location": "L78"
     },
     {
+      "id": "resources_js_components_ui_button_button_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 97,
+      "community_name": "button/index.ts",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/button/Button.vue",
+      "source_location": "L9"
+    },
+    {
+      "id": "resources_js_components_ui_button_index_buttonvariants",
+      "label": "ButtonVariants",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 97,
+      "community_name": "button/index.ts",
+      "file_type": "code",
+      "norm_label": "buttonvariants",
+      "source_file": "resources/js/components/ui/button/index.ts",
+      "source_location": "L40"
+    },
+    {
       "id": "database_seeders_databaseseeder_databaseseeder",
       "label": "DatabaseSeeder",
       "_callable": true,
@@ -1112,100 +1138,64 @@
       "source_location": "L13"
     },
     {
-      "id": "app_models_geminikey_geminikey_casts",
-      "label": ".casts()",
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller_destroy",
+      "label": ".destroy()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "GeminiKey",
+      "community_name": "TransactionController.php",
       "file_type": "code",
-      "norm_label": ".casts()",
-      "source_file": "app/Models/GeminiKey.php",
+      "norm_label": ".destroy()",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L117"
+    },
+    {
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller_index",
+      "label": ".index()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "TransactionController.php",
+      "file_type": "code",
+      "norm_label": ".index()",
+      "source_file": "app/Http/Controllers/TransactionController.php",
       "source_location": "L21"
     },
     {
-      "id": "app_models_geminikey_geminikey_claim",
-      "label": ".claim()",
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller_proof",
+      "label": ".proof()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "GeminiKey",
+      "community_name": "TransactionController.php",
       "file_type": "code",
-      "norm_label": ".claim()",
-      "source_file": "app/Models/GeminiKey.php",
-      "source_location": "L56"
+      "norm_label": ".proof()",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L110"
     },
     {
-      "id": "app_models_geminikey_geminikey_cooldownleft",
-      "label": ".cooldownLeft()",
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller_store",
+      "label": ".store()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "GeminiKey",
+      "community_name": "TransactionController.php",
       "file_type": "code",
-      "norm_label": ".cooldownleft()",
-      "source_file": "app/Models/GeminiKey.php",
-      "source_location": "L68"
+      "norm_label": ".store()",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L85"
     },
     {
-      "id": "app_models_geminikey_geminikey_next",
-      "label": ".next()",
+      "id": "app_services_uploads_uploads_delete",
+      "label": ".delete()",
       "_callable": true,
       "_origin": "ast",
       "community": 0,
-      "community_name": "GeminiKey",
+      "community_name": "TransactionController.php",
       "file_type": "code",
-      "norm_label": ".next()",
-      "source_file": "app/Models/GeminiKey.php",
-      "source_location": "L33"
-    },
-    {
-      "id": "app_models_geminikey_geminikey_preview",
-      "label": ".preview()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".preview()",
-      "source_file": "app/Models/GeminiKey.php",
-      "source_location": "L78"
-    },
-    {
-      "id": "app_services_gemini_gemini_configured",
-      "label": ".configured()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".configured()",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L28"
-    },
-    {
-      "id": "tests_feature_admintest_admintest_test_kunci_dari_database_yang_dipakai_memanggil_gemini",
-      "label": ".test_kunci_dari_database_yang_dipakai_memanggil_gemini()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".test_kunci_dari_database_yang_dipakai_memanggil_gemini()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L88"
-    },
-    {
-      "id": "tests_feature_tradeimporttest_tradeimporttest_setup",
-      "label": ".setUp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".setup()",
-      "source_file": "tests/Feature/TradeImportTest.php",
-      "source_location": "L24"
+      "norm_label": ".delete()",
+      "source_file": "app/Services/Uploads.php",
+      "source_location": "L30"
     },
     {
       "id": "app_http_controllers_admincontroller_admincontroller_testgeminikey",
@@ -1213,11 +1203,71 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": ".testgeminikey()",
       "source_file": "app/Http/Controllers/AdminController.php",
       "source_location": "L117"
+    },
+    {
+      "id": "app_http_controllers_analysiscontroller_analysiscontroller_chat",
+      "label": ".chat()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "AnalysisController.php",
+      "file_type": "code",
+      "norm_label": ".chat()",
+      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "source_location": "L103"
+    },
+    {
+      "id": "app_http_controllers_analysiscontroller_analysiscontroller_chatpage",
+      "label": ".chatPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "AnalysisController.php",
+      "file_type": "code",
+      "norm_label": ".chatpage()",
+      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "source_location": "L86"
+    },
+    {
+      "id": "app_http_controllers_analysiscontroller_analysiscontroller_generate",
+      "label": ".generate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "AnalysisController.php",
+      "file_type": "code",
+      "norm_label": ".generate()",
+      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "source_location": "L52"
+    },
+    {
+      "id": "app_http_controllers_analysiscontroller_analysiscontroller_index",
+      "label": ".index()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "AnalysisController.php",
+      "file_type": "code",
+      "norm_label": ".index()",
+      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "source_location": "L20"
+    },
+    {
+      "id": "app_http_controllers_analysiscontroller_analysiscontroller_period",
+      "label": ".period()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "AnalysisController.php",
+      "file_type": "code",
+      "norm_label": ".period()",
+      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "source_location": "L139"
     },
     {
       "id": "app_http_controllers_tradeimportcontroller_tradeimportcontroller_datetime",
@@ -1225,7 +1275,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": ".datetime()",
       "source_file": "app/Http/Controllers/TradeImportController.php",
@@ -1237,7 +1287,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": ".__invoke()",
       "source_file": "app/Http/Controllers/TradeImportController.php",
@@ -1249,95 +1299,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": ".toformfields()",
       "source_file": "app/Http/Controllers/TradeImportController.php",
       "source_location": "L88"
     },
     {
-      "id": "app_services_gemini_gemini_analyze",
-      "label": ".analyze()",
+      "id": "app_models_aianalysis_aianalysis_casts",
+      "label": ".casts()",
       "_callable": true,
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
-      "norm_label": ".analyze()",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L151"
-    },
-    {
-      "id": "app_services_gemini_gemini_call",
-      "label": ".call()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Gemini",
-      "file_type": "code",
-      "norm_label": ".call()",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L309"
-    },
-    {
-      "id": "app_services_gemini_gemini_chat",
-      "label": ".chat()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Gemini",
-      "file_type": "code",
-      "norm_label": ".chat()",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L263"
-    },
-    {
-      "id": "app_services_gemini_gemini_extracttrade",
-      "label": ".extractTrade()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Gemini",
-      "file_type": "code",
-      "norm_label": ".extracttrade()",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L70"
-    },
-    {
-      "id": "app_services_gemini_gemini_model",
-      "label": ".model()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Gemini",
-      "file_type": "code",
-      "norm_label": ".model()",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L23"
-    },
-    {
-      "id": "app_services_gemini_gemini_ping",
-      "label": ".ping()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Gemini",
-      "file_type": "code",
-      "norm_label": ".ping()",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L34"
-    },
-    {
-      "id": "app_services_gemini_gemini_text",
-      "label": ".text()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Gemini",
-      "file_type": "code",
-      "norm_label": ".text()",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L338"
+      "norm_label": ".casts()",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L12"
     },
     {
       "id": "resources_js_app_setup",
@@ -1652,30 +1630,6 @@
       "source_location": "L120"
     },
     {
-      "id": "tests_feature_backuptest_backuptest_test_hanya_empat_cadangan_terbaru_yang_disimpan",
-      "label": ".test_hanya_empat_cadangan_terbaru_yang_disimpan()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_hanya_empat_cadangan_terbaru_yang_disimpan()",
-      "source_file": "tests/Feature/BackupTest.php",
-      "source_location": "L15"
-    },
-    {
-      "id": "tests_feature_backuptest_backuptest_test_nama_berkas_di_luar_pola_cadangan_ditolak",
-      "label": ".test_nama_berkas_di_luar_pola_cadangan_ditolak()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_nama_berkas_di_luar_pola_cadangan_ditolak()",
-      "source_file": "tests/Feature/BackupTest.php",
-      "source_location": "L45"
-    },
-    {
       "id": "tests_feature_errorpagetest_errorpagetest_test_alamat_yang_tidak_ada_menampilkan_halaman_galat_aplikasi",
       "label": ".test_alamat_yang_tidak_ada_menampilkan_halaman_galat_aplikasi()",
       "_callable": true,
@@ -1748,112 +1702,100 @@
       "source_location": "L61"
     },
     {
-      "id": "tests_feature_registertest_registertest_test_halaman_login_menyembunyikan_tautan_daftar",
-      "label": ".test_halaman_login_menyembunyikan_tautan_daftar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_halaman_login_menyembunyikan_tautan_daftar()",
-      "source_file": "tests/Feature/RegisterTest.php",
-      "source_location": "L64"
-    },
-    {
-      "id": "tests_feature_registertest_registertest_test_tanpa_token_di_env_pendaftaran_tertutup",
-      "label": ".test_tanpa_token_di_env_pendaftaran_tertutup()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_tanpa_token_di_env_pendaftaran_tertutup()",
-      "source_file": "tests/Feature/RegisterTest.php",
-      "source_location": "L54"
-    },
-    {
-      "id": "tests_feature_registertest_registertest_test_token_salah_ditolak",
-      "label": ".test_token_salah_ditolak()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_token_salah_ditolak()",
-      "source_file": "tests/Feature/RegisterTest.php",
-      "source_location": "L34"
-    },
-    {
-      "id": "tests_feature_registertest_registertest_test_token_wajib_diisi",
-      "label": ".test_token_wajib_diisi()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_token_wajib_diisi()",
-      "source_file": "tests/Feature/RegisterTest.php",
-      "source_location": "L45"
-    },
-    {
-      "id": "tests_feature_registertest_registertest_test_token_yang_cocok_membuat_akun",
-      "label": ".test_token_yang_cocok_membuat_akun()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_token_yang_cocok_membuat_akun()",
-      "source_file": "tests/Feature/RegisterTest.php",
-      "source_location": "L23"
-    },
-    {
-      "id": "tests_feature_tradedaytest_tradedaytest_test_filter_posisi_stop_terpisah_dari_status_hasil",
-      "label": ".test_filter_posisi_stop_terpisah_dari_status_hasil()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_filter_posisi_stop_terpisah_dari_status_hasil()",
-      "source_file": "tests/Feature/TradeDayTest.php",
-      "source_location": "L45"
-    },
-    {
-      "id": "tests_feature_tradedaytest_tradedaytest_test_trade_dihitung_di_hari_penutupannya_beserta_pl_hariannya",
-      "label": ".test_trade_dihitung_di_hari_penutupannya_beserta_pl_hariannya()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".test_trade_dihitung_di_hari_penutupannya_beserta_pl_hariannya()",
-      "source_file": "tests/Feature/TradeDayTest.php",
-      "source_location": "L18"
-    },
-    {
-      "id": "tests_feature_tradedaytest_tradedaytest_trade",
-      "label": ".trade()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": ".trade()",
-      "source_file": "tests/Feature/TradeDayTest.php",
-      "source_location": "L78"
-    },
-    {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller_proof",
-      "label": ".proof()",
+      "id": "app_models_account_account_user",
+      "label": ".user()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": ".proof()",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L110"
+      "norm_label": ".user()",
+      "source_file": "app/Models/Account.php",
+      "source_location": "L23"
+    },
+    {
+      "id": "app_models_accountrule_accountrule_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L31"
+    },
+    {
+      "id": "app_models_accountrule_accountrule_casts",
+      "label": ".casts()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".casts()",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L22"
+    },
+    {
+      "id": "app_models_accountrule_accountrule_dailylosslimit",
+      "label": ".dailyLossLimit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".dailylosslimit()",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L40"
+    },
+    {
+      "id": "app_models_accountrule_accountrule_dailyprofitgoal",
+      "label": ".dailyProfitGoal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".dailyprofitgoal()",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L51"
+    },
+    {
+      "id": "app_models_aianalysis_aianalysis_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L20"
+    },
+    {
+      "id": "app_models_trade_trade_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/Trade.php",
+      "source_location": "L49"
+    },
+    {
+      "id": "app_models_transaction_transaction_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/Transaction.php",
+      "source_location": "L21"
     },
     {
       "id": "app_models_transaction_transaction_casts",
@@ -2165,31 +2107,7 @@
       "file_type": "code",
       "norm_label": ".consolidate()",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L148"
-    },
-    {
-      "id": "app_services_uploads_uploads_delete",
-      "label": ".delete()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": ".delete()",
-      "source_file": "app/Services/Uploads.php",
-      "source_location": "L30"
-    },
-    {
-      "id": "app_services_uploads_uploads_store",
-      "label": ".store()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": ".store()",
-      "source_file": "app/Services/Uploads.php",
-      "source_location": "L21"
+      "source_location": "L149"
     },
     {
       "id": "resources_js_components_analysischat_clear",
@@ -2336,88 +2254,64 @@
       "source_location": "L110"
     },
     {
-      "id": "app_models_account_account_user",
-      "label": ".user()",
+      "id": "app_http_controllers_analysiscontroller_analysiscontroller_hash",
+      "label": ".hash()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "community_name": "ProfileTest",
       "file_type": "code",
-      "norm_label": ".user()",
-      "source_file": "app/Models/Account.php",
-      "source_location": "L23"
+      "norm_label": ".hash()",
+      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "source_location": "L157"
     },
     {
-      "id": "app_models_accountrule_accountrule_account",
-      "label": ".account()",
+      "id": "tests_feature_profiletest_profiletest_test_dengan_sandi_sekarang_penggantian_berhasil",
+      "label": ".test_dengan_sandi_sekarang_penggantian_berhasil()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "community_name": "ProfileTest",
       "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L31"
+      "norm_label": ".test_dengan_sandi_sekarang_penggantian_berhasil()",
+      "source_file": "tests/Feature/ProfileTest.php",
+      "source_location": "L45"
     },
     {
-      "id": "app_models_accountrule_accountrule_casts",
-      "label": ".casts()",
+      "id": "tests_feature_profiletest_profiletest_test_ganti_email_tanpa_sandi_sekarang_ditolak",
+      "label": ".test_ganti_email_tanpa_sandi_sekarang_ditolak()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "community_name": "ProfileTest",
       "file_type": "code",
-      "norm_label": ".casts()",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L22"
+      "norm_label": ".test_ganti_email_tanpa_sandi_sekarang_ditolak()",
+      "source_file": "tests/Feature/ProfileTest.php",
+      "source_location": "L34"
     },
     {
-      "id": "app_models_accountrule_accountrule_dailylosslimit",
-      "label": ".dailyLossLimit()",
+      "id": "tests_feature_profiletest_profiletest_test_ganti_nama_saja_tidak_minta_sandi",
+      "label": ".test_ganti_nama_saja_tidak_minta_sandi()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "community_name": "ProfileTest",
       "file_type": "code",
-      "norm_label": ".dailylosslimit()",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L40"
+      "norm_label": ".test_ganti_nama_saja_tidak_minta_sandi()",
+      "source_file": "tests/Feature/ProfileTest.php",
+      "source_location": "L65"
     },
     {
-      "id": "app_models_accountrule_accountrule_dailyprofitgoal",
-      "label": ".dailyProfitGoal()",
+      "id": "tests_feature_profiletest_profiletest_test_ganti_sandi_tanpa_sandi_sekarang_ditolak",
+      "label": ".test_ganti_sandi_tanpa_sandi_sekarang_ditolak()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "community_name": "ProfileTest",
       "file_type": "code",
-      "norm_label": ".dailyprofitgoal()",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L51"
-    },
-    {
-      "id": "app_models_trade_trade_account",
-      "label": ".account()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/Trade.php",
-      "source_location": "L49"
-    },
-    {
-      "id": "app_models_transaction_transaction_account",
-      "label": ".account()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/Transaction.php",
-      "source_location": "L21"
+      "norm_label": ".test_ganti_sandi_tanpa_sandi_sekarang_ditolak()",
+      "source_file": "tests/Feature/ProfileTest.php",
+      "source_location": "L18"
     },
     {
       "id": "app_http_middleware_ensureadmin_ensureadmin_handle",
@@ -2960,6 +2854,90 @@
       "source_location": "L9"
     },
     {
+      "id": "database_migrations_2026_08_29_000014_add_account_number_to_accounts_down",
+      "label": "down()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Illuminate\\Database\\Migrations\\Migration",
+      "file_type": "code",
+      "norm_label": "down()",
+      "source_file": "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php",
+      "source_location": "L19"
+    },
+    {
+      "id": "database_migrations_2026_08_29_000014_add_account_number_to_accounts_up",
+      "label": "up()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Illuminate\\Database\\Migrations\\Migration",
+      "file_type": "code",
+      "norm_label": "up()",
+      "source_file": "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php",
+      "source_location": "L9"
+    },
+    {
+      "id": "tests_feature_registertest_registertest_test_halaman_login_menyembunyikan_tautan_daftar",
+      "label": ".test_halaman_login_menyembunyikan_tautan_daftar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "RegisterTest",
+      "file_type": "code",
+      "norm_label": ".test_halaman_login_menyembunyikan_tautan_daftar()",
+      "source_file": "tests/Feature/RegisterTest.php",
+      "source_location": "L64"
+    },
+    {
+      "id": "tests_feature_registertest_registertest_test_tanpa_token_di_env_pendaftaran_tertutup",
+      "label": ".test_tanpa_token_di_env_pendaftaran_tertutup()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "RegisterTest",
+      "file_type": "code",
+      "norm_label": ".test_tanpa_token_di_env_pendaftaran_tertutup()",
+      "source_file": "tests/Feature/RegisterTest.php",
+      "source_location": "L54"
+    },
+    {
+      "id": "tests_feature_registertest_registertest_test_token_salah_ditolak",
+      "label": ".test_token_salah_ditolak()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "RegisterTest",
+      "file_type": "code",
+      "norm_label": ".test_token_salah_ditolak()",
+      "source_file": "tests/Feature/RegisterTest.php",
+      "source_location": "L34"
+    },
+    {
+      "id": "tests_feature_registertest_registertest_test_token_wajib_diisi",
+      "label": ".test_token_wajib_diisi()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "RegisterTest",
+      "file_type": "code",
+      "norm_label": ".test_token_wajib_diisi()",
+      "source_file": "tests/Feature/RegisterTest.php",
+      "source_location": "L45"
+    },
+    {
+      "id": "tests_feature_registertest_registertest_test_token_yang_cocok_membuat_akun",
+      "label": ".test_token_yang_cocok_membuat_akun()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "RegisterTest",
+      "file_type": "code",
+      "norm_label": ".test_token_yang_cocok_membuat_akun()",
+      "source_file": "tests/Feature/RegisterTest.php",
+      "source_location": "L23"
+    },
+    {
       "id": "resources_js_composables_useformat_clock",
       "label": "clock()",
       "_callable": true,
@@ -2970,18 +2948,6 @@
       "norm_label": "clock()",
       "source_file": "resources/js/composables/useFormat.ts",
       "source_location": "L129"
-    },
-    {
-      "id": "resources_js_composables_useformat_pnlclass",
-      "label": "pnlClass()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Calendar.vue",
-      "file_type": "code",
-      "norm_label": "pnlclass()",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L142"
     },
     {
       "id": "resources_js_pages_calendar_openedlabel",
@@ -3008,18 +2974,6 @@
       "source_location": "L40"
     },
     {
-      "id": "resources_js_pages_profile_save",
-      "label": "save()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "input/index.ts",
-      "file_type": "code",
-      "norm_label": "save()",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L30"
-    },
-    {
       "id": "resources_js_composables_useformat_datetime",
       "label": "dateTime()",
       "_callable": true,
@@ -3042,18 +2996,6 @@
       "norm_label": "longdate()",
       "source_file": "resources/js/composables/useFormat.ts",
       "source_location": "L113"
-    },
-    {
-      "id": "resources_js_composables_useformat_price",
-      "label": "price()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "Index.vue",
-      "file_type": "code",
-      "norm_label": "price()",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L83"
     },
     {
       "id": "resources_js_pages_trades_index_atgroupedge",
@@ -3245,7 +3187,31 @@
       "file_type": "code",
       "norm_label": ".idr()",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L190"
+      "source_location": "L191"
+    },
+    {
+      "id": "tests_feature_backuptest_backuptest_test_nama_berkas_di_luar_pola_cadangan_ditolak",
+      "label": ".test_nama_berkas_di_luar_pola_cadangan_ditolak()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "User",
+      "file_type": "code",
+      "norm_label": ".test_nama_berkas_di_luar_pola_cadangan_ditolak()",
+      "source_file": "tests/Feature/BackupTest.php",
+      "source_location": "L45"
+    },
+    {
+      "id": "tests_feature_flashtest_flashtest_test_pesan_sesaat_dikirim_di_luar_props",
+      "label": ".test_pesan_sesaat_dikirim_di_luar_props()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "User",
+      "file_type": "code",
+      "norm_label": ".test_pesan_sesaat_dikirim_di_luar_props()",
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L19"
     },
     {
       "id": "tests_feature_reporttest_reporttest_account",
@@ -3281,7 +3247,7 @@
       "file_type": "code",
       "norm_label": ".test_akun_milik_pengguna_lain_tidak_ikut_dilaporkan()",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L340"
+      "source_location": "L357"
     },
     {
       "id": "tests_feature_reporttest_reporttest_test_akun_sen_dikonversi_dengan_pembagi_seratus",
@@ -3392,6 +3358,18 @@
       "source_location": "L297"
     },
     {
+      "id": "tests_feature_reporttest_reporttest_test_nomor_akun_broker_tercetak_di_laporan",
+      "label": ".test_nomor_akun_broker_tercetak_di_laporan()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "User",
+      "file_type": "code",
+      "norm_label": ".test_nomor_akun_broker_tercetak_di_laporan()",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L345"
+    },
+    {
       "id": "tests_feature_reporttest_reporttest_test_realisasi_kas_memakai_penarikan_dikurangi_setoran",
       "label": ".test_realisasi_kas_memakai_penarikan_dikurangi_setoran()",
       "_callable": true,
@@ -3474,18 +3452,6 @@
       "norm_label": "monthlabel()",
       "source_file": "resources/js/composables/useFormat.ts",
       "source_location": "L135"
-    },
-    {
-      "id": "resources_js_composables_useformat_ratecurrency",
-      "label": "rateCurrency()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "Transactions.vue",
-      "file_type": "code",
-      "norm_label": "ratecurrency()",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L65"
     },
     {
       "id": "resources_js_composables_useformat_toidr",
@@ -3836,112 +3802,40 @@
       "source_location": "L20"
     },
     {
-      "id": "tests_feature_admintest_admintest_admin",
-      "label": ".admin()",
+      "id": "tests_feature_tradedaytest_tradedaytest_test_filter_posisi_stop_terpisah_dari_status_hasil",
+      "label": ".test_filter_posisi_stop_terpisah_dari_status_hasil()",
       "_callable": true,
       "_origin": "ast",
       "community": 42,
-      "community_name": "AdminTest",
+      "community_name": "TradeDayTest",
       "file_type": "code",
-      "norm_label": ".admin()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L20"
+      "norm_label": ".test_filter_posisi_stop_terpisah_dari_status_hasil()",
+      "source_file": "tests/Feature/TradeDayTest.php",
+      "source_location": "L45"
     },
     {
-      "id": "tests_feature_admintest_admintest_test_admin_bisa_menambah_pengguna",
-      "label": ".test_admin_bisa_menambah_pengguna()",
+      "id": "tests_feature_tradedaytest_tradedaytest_test_trade_dihitung_di_hari_penutupannya_beserta_pl_hariannya",
+      "label": ".test_trade_dihitung_di_hari_penutupannya_beserta_pl_hariannya()",
       "_callable": true,
       "_origin": "ast",
       "community": 42,
-      "community_name": "AdminTest",
+      "community_name": "TradeDayTest",
       "file_type": "code",
-      "norm_label": ".test_admin_bisa_menambah_pengguna()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L58"
+      "norm_label": ".test_trade_dihitung_di_hari_penutupannya_beserta_pl_hariannya()",
+      "source_file": "tests/Feature/TradeDayTest.php",
+      "source_location": "L18"
     },
     {
-      "id": "tests_feature_admintest_admintest_test_admin_menambah_menguji_dan_menghapus_kunci",
-      "label": ".test_admin_menambah_menguji_dan_menghapus_kunci()",
+      "id": "tests_feature_tradedaytest_tradedaytest_trade",
+      "label": ".trade()",
       "_callable": true,
       "_origin": "ast",
       "community": 42,
-      "community_name": "AdminTest",
+      "community_name": "TradeDayTest",
       "file_type": "code",
-      "norm_label": ".test_admin_menambah_menguji_dan_menghapus_kunci()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L108"
-    },
-    {
-      "id": "tests_feature_admintest_admintest_test_admin_terakhir_tidak_bisa_dilucuti",
-      "label": ".test_admin_terakhir_tidak_bisa_dilucuti()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "AdminTest",
-      "file_type": "code",
-      "norm_label": ".test_admin_terakhir_tidak_bisa_dilucuti()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L73"
-    },
-    {
-      "id": "tests_feature_admintest_admintest_test_admin_tidak_bisa_masuk_wilayah_trading",
-      "label": ".test_admin_tidak_bisa_masuk_wilayah_trading()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "AdminTest",
-      "file_type": "code",
-      "norm_label": ".test_admin_tidak_bisa_masuk_wilayah_trading()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L38"
-    },
-    {
-      "id": "tests_feature_admintest_admintest_test_backup_hanya_untuk_admin",
-      "label": ".test_backup_hanya_untuk_admin()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "AdminTest",
-      "file_type": "code",
-      "norm_label": ".test_backup_hanya_untuk_admin()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L47"
-    },
-    {
-      "id": "tests_feature_admintest_admintest_test_backup_menolak_koneksi_selain_mysql",
-      "label": ".test_backup_menolak_koneksi_selain_mysql()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "AdminTest",
-      "file_type": "code",
-      "norm_label": ".test_backup_menolak_koneksi_selain_mysql()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L52"
-    },
-    {
-      "id": "tests_feature_admintest_admintest_test_bukan_admin_tidak_melihat_halaman_admin",
-      "label": ".test_bukan_admin_tidak_melihat_halaman_admin()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "AdminTest",
-      "file_type": "code",
-      "norm_label": ".test_bukan_admin_tidak_melihat_halaman_admin()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L25"
-    },
-    {
-      "id": "tests_feature_admintest_admintest_test_halaman_admin_terbuka_untuk_admin",
-      "label": ".test_halaman_admin_terbuka_untuk_admin()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 42,
-      "community_name": "AdminTest",
-      "file_type": "code",
-      "norm_label": ".test_halaman_admin_terbuka_untuk_admin()",
-      "source_file": "tests/Feature/AdminTest.php",
-      "source_location": "L30"
+      "norm_label": ".trade()",
+      "source_file": "tests/Feature/TradeDayTest.php",
+      "source_location": "L78"
     },
     {
       "id": "app_models_trade_trade_booted",
@@ -4544,88 +4438,16 @@
       "source_location": "L28"
     },
     {
-      "id": "tests_feature_rulelimittest_rulelimittest_account",
-      "label": ".account()",
+      "id": "app_services_uploads_uploads_store",
+      "label": ".store()",
       "_callable": true,
       "_origin": "ast",
       "community": 53,
       "community_name": "Account",
       "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "tests/Feature/RuleLimitTest.php",
-      "source_location": "L130"
-    },
-    {
-      "id": "tests_feature_rulelimittest_rulelimittest_test_aturan_yang_tidak_diisi_tidak_menghasilkan_pelanggaran",
-      "label": ".test_aturan_yang_tidak_diisi_tidak_menghasilkan_pelanggaran()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Account",
-      "file_type": "code",
-      "norm_label": ".test_aturan_yang_tidak_diisi_tidak_menghasilkan_pelanggaran()",
-      "source_file": "tests/Feature/RuleLimitTest.php",
-      "source_location": "L117"
-    },
-    {
-      "id": "tests_feature_rulelimittest_rulelimittest_test_batas_harian_tersimpan_dalam_satu_satuan_saja",
-      "label": ".test_batas_harian_tersimpan_dalam_satu_satuan_saja()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Account",
-      "file_type": "code",
-      "norm_label": ".test_batas_harian_tersimpan_dalam_satu_satuan_saja()",
-      "source_file": "tests/Feature/RuleLimitTest.php",
-      "source_location": "L45"
-    },
-    {
-      "id": "tests_feature_rulelimittest_rulelimittest_test_dasar_perkiraan_adalah_modal_ditambah_dana_masuk",
-      "label": ".test_dasar_perkiraan_adalah_modal_ditambah_dana_masuk()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Account",
-      "file_type": "code",
-      "norm_label": ".test_dasar_perkiraan_adalah_modal_ditambah_dana_masuk()",
-      "source_file": "tests/Feature/RuleLimitTest.php",
-      "source_location": "L20"
-    },
-    {
-      "id": "tests_feature_rulelimittest_rulelimittest_test_entry_di_luar_sesi_yang_diizinkan_ditandai",
-      "label": ".test_entry_di_luar_sesi_yang_diizinkan_ditandai()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Account",
-      "file_type": "code",
-      "norm_label": ".test_entry_di_luar_sesi_yang_diizinkan_ditandai()",
-      "source_file": "tests/Feature/RuleLimitTest.php",
-      "source_location": "L76"
-    },
-    {
-      "id": "tests_feature_rulelimittest_rulelimittest_test_rugi_satu_trade_melewati_batas_risiko_ditandai",
-      "label": ".test_rugi_satu_trade_melewati_batas_risiko_ditandai()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Account",
-      "file_type": "code",
-      "norm_label": ".test_rugi_satu_trade_melewati_batas_risiko_ditandai()",
-      "source_file": "tests/Feature/RuleLimitTest.php",
-      "source_location": "L95"
-    },
-    {
-      "id": "tests_feature_rulelimittest_rulelimittest_violations",
-      "label": ".violations()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Account",
-      "file_type": "code",
-      "norm_label": ".violations()",
-      "source_file": "tests/Feature/RuleLimitTest.php",
-      "source_location": "L141"
+      "norm_label": ".store()",
+      "source_file": "app/Services/Uploads.php",
+      "source_location": "L21"
     },
     {
       "id": "tests_feature_analysischattest_analysischattest_account",
@@ -4844,18 +4666,6 @@
       "source_location": "L28"
     },
     {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller_store",
-      "label": ".store()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Illuminate\\Http\\RedirectResponse",
-      "file_type": "code",
-      "norm_label": ".store()",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L85"
-    },
-    {
       "id": "app_models_account_account_rule",
       "label": ".rule()",
       "_callable": true,
@@ -4892,52 +4702,88 @@
       "source_location": "L66"
     },
     {
-      "id": "resources_js_pages_accounts_create",
-      "label": "create()",
+      "id": "tests_feature_rulelimittest_rulelimittest_account",
+      "label": ".account()",
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "Accounts.vue",
+      "community_name": "RuleLimitTest",
       "file_type": "code",
-      "norm_label": "create()",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L46"
+      "norm_label": ".account()",
+      "source_file": "tests/Feature/RuleLimitTest.php",
+      "source_location": "L130"
     },
     {
-      "id": "resources_js_pages_accounts_destroy",
-      "label": "destroy()",
+      "id": "tests_feature_rulelimittest_rulelimittest_test_aturan_yang_tidak_diisi_tidak_menghasilkan_pelanggaran",
+      "label": ".test_aturan_yang_tidak_diisi_tidak_menghasilkan_pelanggaran()",
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "Accounts.vue",
+      "community_name": "RuleLimitTest",
       "file_type": "code",
-      "norm_label": "destroy()",
-      "source_file": "resources/js/pages/Accounts.vue",
+      "norm_label": ".test_aturan_yang_tidak_diisi_tidak_menghasilkan_pelanggaran()",
+      "source_file": "tests/Feature/RuleLimitTest.php",
+      "source_location": "L117"
+    },
+    {
+      "id": "tests_feature_rulelimittest_rulelimittest_test_batas_harian_tersimpan_dalam_satu_satuan_saja",
+      "label": ".test_batas_harian_tersimpan_dalam_satu_satuan_saja()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "RuleLimitTest",
+      "file_type": "code",
+      "norm_label": ".test_batas_harian_tersimpan_dalam_satu_satuan_saja()",
+      "source_file": "tests/Feature/RuleLimitTest.php",
+      "source_location": "L45"
+    },
+    {
+      "id": "tests_feature_rulelimittest_rulelimittest_test_dasar_perkiraan_adalah_modal_ditambah_dana_masuk",
+      "label": ".test_dasar_perkiraan_adalah_modal_ditambah_dana_masuk()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "RuleLimitTest",
+      "file_type": "code",
+      "norm_label": ".test_dasar_perkiraan_adalah_modal_ditambah_dana_masuk()",
+      "source_file": "tests/Feature/RuleLimitTest.php",
+      "source_location": "L20"
+    },
+    {
+      "id": "tests_feature_rulelimittest_rulelimittest_test_entry_di_luar_sesi_yang_diizinkan_ditandai",
+      "label": ".test_entry_di_luar_sesi_yang_diizinkan_ditandai()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "RuleLimitTest",
+      "file_type": "code",
+      "norm_label": ".test_entry_di_luar_sesi_yang_diizinkan_ditandai()",
+      "source_file": "tests/Feature/RuleLimitTest.php",
       "source_location": "L76"
     },
     {
-      "id": "resources_js_pages_accounts_edit",
-      "label": "edit()",
+      "id": "tests_feature_rulelimittest_rulelimittest_test_rugi_satu_trade_melewati_batas_risiko_ditandai",
+      "label": ".test_rugi_satu_trade_melewati_batas_risiko_ditandai()",
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "Accounts.vue",
+      "community_name": "RuleLimitTest",
       "file_type": "code",
-      "norm_label": "edit()",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L53"
+      "norm_label": ".test_rugi_satu_trade_melewati_batas_risiko_ditandai()",
+      "source_file": "tests/Feature/RuleLimitTest.php",
+      "source_location": "L95"
     },
     {
-      "id": "resources_js_pages_accounts_submit",
-      "label": "submit()",
+      "id": "tests_feature_rulelimittest_rulelimittest_violations",
+      "label": ".violations()",
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "Accounts.vue",
+      "community_name": "RuleLimitTest",
       "file_type": "code",
-      "norm_label": "submit()",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L68"
+      "norm_label": ".violations()",
+      "source_file": "tests/Feature/RuleLimitTest.php",
+      "source_location": "L141"
     },
     {
       "id": "resources_js_pages_error_back",
@@ -4945,7 +4791,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 60,
-      "community_name": "Error.vue",
+      "community_name": "Profile.vue",
       "file_type": "code",
       "norm_label": "back()",
       "source_file": "resources/js/pages/Error.vue",
@@ -4957,11 +4803,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 60,
-      "community_name": "Error.vue",
+      "community_name": "Profile.vue",
       "file_type": "code",
       "norm_label": "reload()",
       "source_file": "resources/js/pages/Error.vue",
       "source_location": "L54"
+    },
+    {
+      "id": "resources_js_pages_profile_save",
+      "label": "save()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "Profile.vue",
+      "file_type": "code",
+      "norm_label": "save()",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L30"
     },
     {
       "id": "app_http_controllers_auth_logincontroller_logincontroller_create",
@@ -4969,7 +4827,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "LoginController",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".create()",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
@@ -4981,7 +4839,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "LoginController",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".destroy()",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
@@ -4993,7 +4851,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "LoginController",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".store()",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
@@ -5005,11 +4863,47 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "LoginController",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".throttlekey()",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
       "source_location": "L85"
+    },
+    {
+      "id": "app_http_controllers_auth_registercontroller_registercontroller_closed",
+      "label": ".closed()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": ".closed()",
+      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L51"
+    },
+    {
+      "id": "app_http_controllers_auth_registercontroller_registercontroller_create",
+      "label": ".create()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": ".create()",
+      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L17"
+    },
+    {
+      "id": "app_http_controllers_auth_registercontroller_registercontroller_store",
+      "label": ".store()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": ".store()",
+      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L24"
     },
     {
       "id": "app_console_commands_backupdatabase_backupdatabase_dir",
@@ -5017,7 +4911,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".dir()",
       "source_file": "app/Console/Commands/BackupDatabase.php",
@@ -5029,7 +4923,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".dump()",
       "source_file": "app/Console/Commands/BackupDatabase.php",
@@ -5041,7 +4935,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".files()",
       "source_file": "app/Console/Commands/BackupDatabase.php",
@@ -5053,7 +4947,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".handle()",
       "source_file": "app/Console/Commands/BackupDatabase.php",
@@ -5065,23 +4959,71 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".prune()",
       "source_file": "app/Console/Commands/BackupDatabase.php",
       "source_location": "L99"
     },
     {
-      "id": "app_http_controllers_admincontroller_admincontroller_index",
-      "label": ".index()",
+      "id": "app_models_geminikey_geminikey_casts",
+      "label": ".casts()",
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
-      "norm_label": ".index()",
-      "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L26"
+      "norm_label": ".casts()",
+      "source_file": "app/Models/GeminiKey.php",
+      "source_location": "L21"
+    },
+    {
+      "id": "app_models_geminikey_geminikey_claim",
+      "label": ".claim()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".claim()",
+      "source_file": "app/Models/GeminiKey.php",
+      "source_location": "L56"
+    },
+    {
+      "id": "app_models_geminikey_geminikey_cooldownleft",
+      "label": ".cooldownLeft()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".cooldownleft()",
+      "source_file": "app/Models/GeminiKey.php",
+      "source_location": "L68"
+    },
+    {
+      "id": "app_models_geminikey_geminikey_next",
+      "label": ".next()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".next()",
+      "source_file": "app/Models/GeminiKey.php",
+      "source_location": "L33"
+    },
+    {
+      "id": "app_models_geminikey_geminikey_preview",
+      "label": ".preview()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".preview()",
+      "source_file": "app/Models/GeminiKey.php",
+      "source_location": "L78"
     },
     {
       "id": "app_services_annualreport_annualreport_account",
@@ -5089,7 +5031,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".account()",
       "source_file": "app/Services/AnnualReport.php",
@@ -5101,7 +5043,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".build()",
       "source_file": "app/Services/AnnualReport.php",
@@ -5113,11 +5055,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".mutationidr()",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L179"
+      "source_location": "L180"
     },
     {
       "id": "app_services_annualreport_annualreport_withidr",
@@ -5125,11 +5067,251 @@
       "_callable": true,
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": ".withidr()",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L170"
+      "source_location": "L171"
+    },
+    {
+      "id": "app_services_gemini_gemini_analyze",
+      "label": ".analyze()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".analyze()",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L151"
+    },
+    {
+      "id": "app_services_gemini_gemini_call",
+      "label": ".call()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".call()",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L309"
+    },
+    {
+      "id": "app_services_gemini_gemini_chat",
+      "label": ".chat()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".chat()",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L263"
+    },
+    {
+      "id": "app_services_gemini_gemini_configured",
+      "label": ".configured()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".configured()",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L28"
+    },
+    {
+      "id": "app_services_gemini_gemini_extracttrade",
+      "label": ".extractTrade()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".extracttrade()",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L70"
+    },
+    {
+      "id": "app_services_gemini_gemini_model",
+      "label": ".model()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".model()",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L23"
+    },
+    {
+      "id": "app_services_gemini_gemini_ping",
+      "label": ".ping()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".ping()",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L34"
+    },
+    {
+      "id": "app_services_gemini_gemini_text",
+      "label": ".text()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".text()",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L338"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_admin",
+      "label": ".admin()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".admin()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L20"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_admin_bisa_menambah_pengguna",
+      "label": ".test_admin_bisa_menambah_pengguna()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_admin_bisa_menambah_pengguna()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L58"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_admin_menambah_menguji_dan_menghapus_kunci",
+      "label": ".test_admin_menambah_menguji_dan_menghapus_kunci()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_admin_menambah_menguji_dan_menghapus_kunci()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L108"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_admin_terakhir_tidak_bisa_dilucuti",
+      "label": ".test_admin_terakhir_tidak_bisa_dilucuti()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_admin_terakhir_tidak_bisa_dilucuti()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L73"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_admin_tidak_bisa_masuk_wilayah_trading",
+      "label": ".test_admin_tidak_bisa_masuk_wilayah_trading()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_admin_tidak_bisa_masuk_wilayah_trading()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L38"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_backup_hanya_untuk_admin",
+      "label": ".test_backup_hanya_untuk_admin()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_backup_hanya_untuk_admin()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L47"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_backup_menolak_koneksi_selain_mysql",
+      "label": ".test_backup_menolak_koneksi_selain_mysql()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_backup_menolak_koneksi_selain_mysql()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L52"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_bukan_admin_tidak_melihat_halaman_admin",
+      "label": ".test_bukan_admin_tidak_melihat_halaman_admin()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_bukan_admin_tidak_melihat_halaman_admin()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L25"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_halaman_admin_terbuka_untuk_admin",
+      "label": ".test_halaman_admin_terbuka_untuk_admin()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_halaman_admin_terbuka_untuk_admin()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L30"
+    },
+    {
+      "id": "tests_feature_admintest_admintest_test_kunci_dari_database_yang_dipakai_memanggil_gemini",
+      "label": ".test_kunci_dari_database_yang_dipakai_memanggil_gemini()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_kunci_dari_database_yang_dipakai_memanggil_gemini()",
+      "source_file": "tests/Feature/AdminTest.php",
+      "source_location": "L88"
+    },
+    {
+      "id": "tests_feature_backuptest_backuptest_test_hanya_empat_cadangan_terbaru_yang_disimpan",
+      "label": ".test_hanya_empat_cadangan_terbaru_yang_disimpan()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".test_hanya_empat_cadangan_terbaru_yang_disimpan()",
+      "source_file": "tests/Feature/BackupTest.php",
+      "source_location": "L15"
+    },
+    {
+      "id": "tests_feature_tradeimporttest_tradeimporttest_setup",
+      "label": ".setUp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": ".setup()",
+      "source_file": "tests/Feature/TradeImportTest.php",
+      "source_location": "L24"
     },
     {
       "id": "resources_js_components_monthlypnlchart_nicestep",
@@ -5190,6 +5372,90 @@
       "norm_label": "pct()",
       "source_file": "resources/js/composables/useFormat.ts",
       "source_location": "L108"
+    },
+    {
+      "id": "resources_js_composables_useformat_pnlclass",
+      "label": "pnlClass()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "pnlclass()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L142"
+    },
+    {
+      "id": "resources_js_composables_useformat_price",
+      "label": "price()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "price()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L83"
+    },
+    {
+      "id": "resources_js_composables_useformat_ratecurrency",
+      "label": "rateCurrency()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "ratecurrency()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L65"
+    },
+    {
+      "id": "resources_js_pages_accounts_create",
+      "label": "create()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "create()",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L48"
+    },
+    {
+      "id": "resources_js_pages_accounts_destroy",
+      "label": "destroy()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "destroy()",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L79"
+    },
+    {
+      "id": "resources_js_pages_accounts_edit",
+      "label": "edit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "edit()",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L55"
+    },
+    {
+      "id": "resources_js_pages_accounts_submit",
+      "label": "submit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "submit()",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L71"
     },
     {
       "id": "public_sw_offlinepage",
@@ -5276,66 +5542,6 @@
       "source_location": "L70"
     },
     {
-      "id": "app_http_controllers_analysiscontroller_analysiscontroller_chat",
-      "label": ".chat()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": ".chat()",
-      "source_file": "app/Http/Controllers/AnalysisController.php",
-      "source_location": "L103"
-    },
-    {
-      "id": "app_http_controllers_analysiscontroller_analysiscontroller_chatpage",
-      "label": ".chatPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": ".chatpage()",
-      "source_file": "app/Http/Controllers/AnalysisController.php",
-      "source_location": "L86"
-    },
-    {
-      "id": "app_http_controllers_analysiscontroller_analysiscontroller_generate",
-      "label": ".generate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": ".generate()",
-      "source_file": "app/Http/Controllers/AnalysisController.php",
-      "source_location": "L52"
-    },
-    {
-      "id": "app_http_controllers_analysiscontroller_analysiscontroller_index",
-      "label": ".index()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": ".index()",
-      "source_file": "app/Http/Controllers/AnalysisController.php",
-      "source_location": "L20"
-    },
-    {
-      "id": "app_http_controllers_analysiscontroller_analysiscontroller_period",
-      "label": ".period()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": ".period()",
-      "source_file": "app/Http/Controllers/AnalysisController.php",
-      "source_location": "L139"
-    },
-    {
       "id": "app_http_middleware_handleinertiarequests_handleinertiarequests_share",
       "label": ".share()",
       "_callable": true,
@@ -5345,7 +5551,7 @@
       "file_type": "code",
       "norm_label": ".share()",
       "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "id": "tests_feature_tradeimporttest_tradeimporttest_actingonaccount",
@@ -5444,40 +5650,16 @@
       "source_location": "L56"
     },
     {
-      "id": "app_http_controllers_auth_registercontroller_registercontroller_closed",
-      "label": ".closed()",
+      "id": "app_http_controllers_admincontroller_admincontroller_index",
+      "label": ".index()",
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": ".closed()",
-      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L51"
-    },
-    {
-      "id": "app_http_controllers_auth_registercontroller_registercontroller_create",
-      "label": ".create()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".create()",
-      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L17"
-    },
-    {
-      "id": "app_http_controllers_auth_registercontroller_registercontroller_store",
-      "label": ".store()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".store()",
-      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L24"
+      "norm_label": ".index()",
+      "source_file": "app/Http/Controllers/AdminController.php",
+      "source_location": "L26"
     },
     {
       "id": "app_http_controllers_calendarcontroller_calendarcontroller_invoke",
@@ -5485,7 +5667,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": ".__invoke()",
       "source_file": "app/Http/Controllers/CalendarController.php",
@@ -5497,7 +5679,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": ".month()",
       "source_file": "app/Http/Controllers/CalendarController.php",
@@ -5509,7 +5691,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": ".__invoke()",
       "source_file": "app/Http/Controllers/DashboardController.php",
@@ -5521,7 +5703,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": ".row()",
       "source_file": "app/Http/Controllers/DashboardController.php",
@@ -5533,7 +5715,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": ".edit()",
       "source_file": "app/Http/Controllers/RuleController.php",
@@ -5545,7 +5727,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": ".num()",
       "source_file": "app/Http/Controllers/RuleController.php",
@@ -5557,35 +5739,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": ".update()",
       "source_file": "app/Http/Controllers/RuleController.php",
       "source_location": "L46"
-    },
-    {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller_destroy",
-      "label": ".destroy()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".destroy()",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L117"
-    },
-    {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller_index",
-      "label": ".index()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".index()",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L21"
     },
     {
       "id": "app_http_requests_traderequest_traderequest_after",
@@ -5636,24 +5794,12 @@
       "source_location": "L10"
     },
     {
-      "id": "app_http_controllers_analysiscontroller_analysiscontroller_hash",
-      "label": ".hash()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": ".hash()",
-      "source_file": "app/Http/Controllers/AnalysisController.php",
-      "source_location": "L157"
-    },
-    {
       "id": "database_factories_userfactory_userfactory_definition",
       "label": ".definition()",
       "_callable": true,
       "_origin": "ast",
       "community": 89,
-      "community_name": "User.php",
+      "community_name": "Illuminate\\Support\\Str",
       "file_type": "code",
       "norm_label": ".definition()",
       "source_file": "database/factories/UserFactory.php",
@@ -5665,59 +5811,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 89,
-      "community_name": "User.php",
+      "community_name": "Illuminate\\Support\\Str",
       "file_type": "code",
       "norm_label": ".unverified()",
       "source_file": "database/factories/UserFactory.php",
       "source_location": "L39"
-    },
-    {
-      "id": "tests_feature_profiletest_profiletest_test_dengan_sandi_sekarang_penggantian_berhasil",
-      "label": ".test_dengan_sandi_sekarang_penggantian_berhasil()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": ".test_dengan_sandi_sekarang_penggantian_berhasil()",
-      "source_file": "tests/Feature/ProfileTest.php",
-      "source_location": "L45"
-    },
-    {
-      "id": "tests_feature_profiletest_profiletest_test_ganti_email_tanpa_sandi_sekarang_ditolak",
-      "label": ".test_ganti_email_tanpa_sandi_sekarang_ditolak()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": ".test_ganti_email_tanpa_sandi_sekarang_ditolak()",
-      "source_file": "tests/Feature/ProfileTest.php",
-      "source_location": "L34"
-    },
-    {
-      "id": "tests_feature_profiletest_profiletest_test_ganti_nama_saja_tidak_minta_sandi",
-      "label": ".test_ganti_nama_saja_tidak_minta_sandi()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": ".test_ganti_nama_saja_tidak_minta_sandi()",
-      "source_file": "tests/Feature/ProfileTest.php",
-      "source_location": "L65"
-    },
-    {
-      "id": "tests_feature_profiletest_profiletest_test_ganti_sandi_tanpa_sandi_sekarang_ditolak",
-      "label": ".test_ganti_sandi_tanpa_sandi_sekarang_ditolak()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": ".test_ganti_sandi_tanpa_sandi_sekarang_ditolak()",
-      "source_file": "tests/Feature/ProfileTest.php",
-      "source_location": "L18"
     },
     {
       "id": "tests_feature_loginthrottletest_loginthrottletest_salah",
@@ -5768,36 +5866,12 @@
       "source_location": "L17"
     },
     {
-      "id": "app_models_aianalysis_aianalysis_account",
-      "label": ".account()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "AiAnalysis",
-      "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L20"
-    },
-    {
-      "id": "app_models_aianalysis_aianalysis_casts",
-      "label": ".casts()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "AiAnalysis",
-      "file_type": "code",
-      "norm_label": ".casts()",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L12"
-    },
-    {
       "id": "tests_feature_analysistest_analysistest_account",
       "label": ".account()",
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AiAnalysis",
+      "community_name": "AnalysisTest",
       "file_type": "code",
       "norm_label": ".account()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5809,7 +5883,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AiAnalysis",
+      "community_name": "AnalysisTest",
       "file_type": "code",
       "norm_label": ".test_analisa_tetap_tampil_dan_ditandai_usang_saat_statistik_berubah()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5821,7 +5895,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AiAnalysis",
+      "community_name": "AnalysisTest",
       "file_type": "code",
       "norm_label": ".test_klik_kedua_dalam_10_detik_ditolak_tanpa_memanggil_ai()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5833,7 +5907,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AiAnalysis",
+      "community_name": "AnalysisTest",
       "file_type": "code",
       "norm_label": ".test_perbarui_tetap_memanggil_ai_walau_statistik_tidak_berubah()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5845,7 +5919,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AiAnalysis",
+      "community_name": "AnalysisTest",
       "file_type": "code",
       "norm_label": ".withtrade()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5857,7 +5931,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 94,
-      "community_name": "ReportController.php",
+      "community_name": "ReportController",
       "file_type": "code",
       "norm_label": ".accounts()",
       "source_file": "app/Http/Controllers/ReportController.php",
@@ -5869,7 +5943,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 94,
-      "community_name": "ReportController.php",
+      "community_name": "ReportController",
       "file_type": "code",
       "norm_label": ".datauri()",
       "source_file": "app/Http/Controllers/ReportController.php",
@@ -5881,7 +5955,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 94,
-      "community_name": "ReportController.php",
+      "community_name": "ReportController",
       "file_type": "code",
       "norm_label": ".decimal()",
       "source_file": "app/Http/Controllers/ReportController.php",
@@ -5893,7 +5967,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 94,
-      "community_name": "ReportController.php",
+      "community_name": "ReportController",
       "file_type": "code",
       "norm_label": ".index()",
       "source_file": "app/Http/Controllers/ReportController.php",
@@ -5905,7 +5979,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 94,
-      "community_name": "ReportController.php",
+      "community_name": "ReportController",
       "file_type": "code",
       "norm_label": ".pdf()",
       "source_file": "app/Http/Controllers/ReportController.php",
@@ -5917,7 +5991,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 94,
-      "community_name": "ReportController.php",
+      "community_name": "ReportController",
       "file_type": "code",
       "norm_label": ".watermark()",
       "source_file": "app/Http/Controllers/ReportController.php",
@@ -5984,46 +6058,68 @@
       "source_location": "L15"
     },
     {
+      "id": "app_http_controllers_transactioncontroller",
+      "label": "TransactionController.php",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "TransactionController.php",
+      "file_type": "code",
+      "norm_label": "transactioncontroller.php",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "illuminate_validation_rule",
+      "label": "Illuminate\\Validation\\Rule",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "TransactionController.php",
+      "file_type": "code",
+      "norm_label": "illuminate\\validation\\rule",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "symfony_component_httpfoundation_streamedresponse",
+      "label": "Symfony\\Component\\HttpFoundation\\StreamedResponse",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "TransactionController.php",
+      "file_type": "code",
+      "norm_label": "symfony\\component\\httpfoundation\\streamedresponse",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "app_http_controllers_analysiscontroller",
+      "label": "AnalysisController.php",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "AnalysisController.php",
+      "file_type": "code",
+      "norm_label": "analysiscontroller.php",
+      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "source_location": "L1"
+    },
+    {
       "id": "app_http_controllers_tradeimportcontroller",
       "label": "TradeImportController.php",
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": "tradeimportcontroller.php",
       "source_file": "app/Http/Controllers/TradeImportController.php",
       "source_location": "L1"
     },
     {
-      "id": "app_services_gemini",
-      "label": "Gemini.php",
+      "id": "illuminate_http_jsonresponse",
+      "label": "Illuminate\\Http\\JsonResponse",
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
-      "norm_label": "gemini.php",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "illuminate_http_client_connectionexception",
-      "label": "Illuminate\\Http\\Client\\ConnectionException",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Gemini",
-      "file_type": "code",
-      "norm_label": "illuminate\\http\\client\\connectionexception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_http_client_requestexception",
-      "label": "Illuminate\\Http\\Client\\RequestException",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "Gemini",
-      "file_type": "code",
-      "norm_label": "illuminate\\http\\client\\requestexception",
+      "norm_label": "illuminate\\http\\jsonresponse",
       "source_file": "",
       "source_location": ""
     },
@@ -6032,7 +6128,7 @@
       "label": "Illuminate\\Support\\Facades\\Log",
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": "illuminate\\support\\facades\\log",
       "source_file": "",
@@ -6043,7 +6139,7 @@
       "label": "RuntimeException",
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": "runtimeexception",
       "source_file": "",
@@ -6054,7 +6150,7 @@
       "label": "Throwable",
       "_origin": "ast",
       "community": 1,
-      "community_name": "Gemini",
+      "community_name": "AnalysisController.php",
       "file_type": "code",
       "norm_label": "throwable",
       "source_file": "",
@@ -7271,17 +7367,6 @@
       "source_location": ""
     },
     {
-      "id": "illuminate_support_facades_file",
-      "label": "Illuminate\\Support\\Facades\\File",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": "illuminate\\support\\facades\\file",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "illuminate_support_facades_http",
       "label": "Illuminate\\Support\\Facades\\Http",
       "_origin": "ast",
@@ -7315,6 +7400,17 @@
       "source_location": "L1"
     },
     {
+      "id": "tests_feature_analysistest",
+      "label": "AnalysisTest.php",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "TestCase",
+      "file_type": "code",
+      "norm_label": "analysistest.php",
+      "source_file": "tests/Feature/AnalysisTest.php",
+      "source_location": "L1"
+    },
+    {
       "id": "tests_feature_backuptest",
       "label": "BackupTest.php",
       "_origin": "ast",
@@ -7337,6 +7433,17 @@
       "source_location": "L1"
     },
     {
+      "id": "tests_feature_flashtest",
+      "label": "FlashTest.php",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "TestCase",
+      "file_type": "code",
+      "norm_label": "flashtest.php",
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L1"
+    },
+    {
       "id": "tests_feature_geminikeytest",
       "label": "GeminiKeyTest.php",
       "_origin": "ast",
@@ -7348,6 +7455,28 @@
       "source_location": "L1"
     },
     {
+      "id": "tests_feature_loginthrottletest",
+      "label": "LoginThrottleTest.php",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "TestCase",
+      "file_type": "code",
+      "norm_label": "loginthrottletest.php",
+      "source_file": "tests/Feature/LoginThrottleTest.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_feature_profiletest",
+      "label": "ProfileTest.php",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "TestCase",
+      "file_type": "code",
+      "norm_label": "profiletest.php",
+      "source_file": "tests/Feature/ProfileTest.php",
+      "source_location": "L1"
+    },
+    {
       "id": "tests_feature_registertest",
       "label": "RegisterTest.php",
       "_origin": "ast",
@@ -7356,6 +7485,17 @@
       "file_type": "code",
       "norm_label": "registertest.php",
       "source_file": "tests/Feature/RegisterTest.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_feature_rulelimittest",
+      "label": "RuleLimitTest.php",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "TestCase",
+      "file_type": "code",
+      "norm_label": "rulelimittest.php",
+      "source_file": "tests/Feature/RuleLimitTest.php",
       "source_location": "L1"
     },
     {
@@ -7381,6 +7521,17 @@
       "source_location": "L1"
     },
     {
+      "id": "tests_feature_tradeimporttest",
+      "label": "TradeImportTest.php",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "TestCase",
+      "file_type": "code",
+      "norm_label": "tradeimporttest.php",
+      "source_file": "tests/Feature/TradeImportTest.php",
+      "source_location": "L1"
+    },
+    {
       "id": "tests_testcase",
       "label": "TestCase.php",
       "_origin": "ast",
@@ -7392,14 +7543,58 @@
       "source_location": "L1"
     },
     {
-      "id": "app_http_controllers_transactioncontroller",
-      "label": "TransactionController.php",
+      "id": "app_models_accountrule",
+      "label": "AccountRule.php",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "transactioncontroller.php",
-      "source_file": "app/Http/Controllers/TransactionController.php",
+      "norm_label": "accountrule.php",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_models_aianalysis",
+      "label": "AiAnalysis.php",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "aianalysis.php",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_models_geminikey",
+      "label": "GeminiKey.php",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "geminikey.php",
+      "source_file": "app/Models/GeminiKey.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_models_trade",
+      "label": "Trade.php",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "trade.php",
+      "source_file": "app/Models/Trade.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_models_transaction",
+      "label": "Transaction.php",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "transaction.php",
+      "source_file": "app/Models/Transaction.php",
       "source_location": "L1"
     },
     {
@@ -7436,17 +7631,6 @@
       "source_location": "L1"
     },
     {
-      "id": "app_services_uploads",
-      "label": "Uploads.php",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "uploads.php",
-      "source_file": "app/Services/Uploads.php",
-      "source_location": "L1"
-    },
-    {
       "id": "bootstrap_providers",
       "label": "providers.php",
       "_origin": "ast",
@@ -7456,17 +7640,6 @@
       "norm_label": "providers.php",
       "source_file": "bootstrap/providers.php",
       "source_location": "L1"
-    },
-    {
-      "id": "carbon_carbonimmutable",
-      "label": "Carbon\\CarbonImmutable",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "carbon\\carbonimmutable",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "carbon_carboninterface",
@@ -7480,46 +7653,35 @@
       "source_location": ""
     },
     {
-      "id": "config_cache",
-      "label": "cache.php",
+      "id": "illuminate_database_eloquent_attributes_fillable",
+      "label": "Illuminate\\Database\\Eloquent\\Attributes\\Fillable",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "cache.php",
-      "source_file": "config/cache.php",
-      "source_location": "L1"
+      "norm_label": "illuminate\\database\\eloquent\\attributes\\fillable",
+      "source_file": "",
+      "source_location": ""
     },
     {
-      "id": "config_database",
-      "label": "database.php",
+      "id": "illuminate_database_eloquent_model",
+      "label": "Illuminate\\Database\\Eloquent\\Model",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "database.php",
-      "source_file": "config/database.php",
-      "source_location": "L1"
+      "norm_label": "illuminate\\database\\eloquent\\model",
+      "source_file": "",
+      "source_location": ""
     },
     {
-      "id": "config_session",
-      "label": "session.php",
+      "id": "illuminate_database_eloquent_relations_belongsto",
+      "label": "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "session.php",
-      "source_file": "config/session.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "illuminate_http_uploadedfile",
-      "label": "Illuminate\\Http\\UploadedFile",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "illuminate\\http\\uploadedfile",
+      "norm_label": "illuminate\\database\\eloquent\\relations\\belongsto",
       "source_file": "",
       "source_location": ""
     },
@@ -7546,17 +7708,6 @@
       "source_location": ""
     },
     {
-      "id": "illuminate_support_facades_storage",
-      "label": "Illuminate\\Support\\Facades\\Storage",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "illuminate\\support\\facades\\storage",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "illuminate_support_serviceprovider",
       "label": "Illuminate\\Support\\ServiceProvider",
       "_origin": "ast",
@@ -7566,61 +7717,6 @@
       "norm_label": "illuminate\\support\\serviceprovider",
       "source_file": "",
       "source_location": ""
-    },
-    {
-      "id": "illuminate_support_str",
-      "label": "Illuminate\\Support\\Str",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "illuminate\\support\\str",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "pdo_mysql",
-      "label": "Pdo\\Mysql",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "pdo\\mysql",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "symfony_component_httpfoundation_streamedresponse",
-      "label": "Symfony\\Component\\HttpFoundation\\StreamedResponse",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "symfony\\component\\httpfoundation\\streamedresponse",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "tests_feature_journaltest",
-      "label": "JournalTest.php",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "journaltest.php",
-      "source_file": "tests/Feature/JournalTest.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_feature_tradeimporttest",
-      "label": "TradeImportTest.php",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "tradeimporttest.php",
-      "source_file": "tests/Feature/TradeImportTest.php",
-      "source_location": "L1"
     },
     {
       "id": "package_dependencies",
@@ -7876,15 +7972,37 @@
       "source_location": "L5"
     },
     {
-      "id": "composer_keywords",
-      "label": "keywords",
+      "id": "composer_extra",
+      "label": "extra",
       "_origin": "ast",
       "community": 2,
       "community_name": "composer.json",
       "file_type": "code",
-      "norm_label": "keywords",
+      "norm_label": "extra",
       "source_file": "composer.json",
-      "source_location": "L6"
+      "source_location": "L73"
+    },
+    {
+      "id": "composer_extra_laravel",
+      "label": "laravel",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "composer.json",
+      "file_type": "code",
+      "norm_label": "laravel",
+      "source_file": "composer.json",
+      "source_location": "L74"
+    },
+    {
+      "id": "composer_laravel_dont_discover",
+      "label": "dont-discover",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "composer.json",
+      "file_type": "code",
+      "norm_label": "dont-discover",
+      "source_file": "composer.json",
+      "source_location": "L75"
     },
     {
       "id": "composer_license",
@@ -7962,28 +8080,6 @@
       "norm_label": "type",
       "source_file": "composer.json",
       "source_location": "L4"
-    },
-    {
-      "id": "ref_framework",
-      "label": "framework",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "composer.json",
-      "file_type": "concept",
-      "norm_label": "framework",
-      "source_file": "composer.json",
-      "source_location": "L6"
-    },
-    {
-      "id": "ref_laravel",
-      "label": "laravel",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "composer.json",
-      "file_type": "concept",
-      "norm_label": "laravel",
-      "source_file": "composer.json",
-      "source_location": "L6"
     },
     {
       "id": "resources_js_components_analysischat",
@@ -8105,105 +8201,6 @@
       "norm_label": "chat.vue",
       "source_file": "resources/js/pages/Analysis/Chat.vue",
       "source_location": "L1"
-    },
-    {
-      "id": "app_models_account",
-      "label": "Account.php",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "account.php",
-      "source_file": "app/Models/Account.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_accountrule",
-      "label": "AccountRule.php",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "accountrule.php",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_aianalysis",
-      "label": "AiAnalysis.php",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "aianalysis.php",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_geminikey",
-      "label": "GeminiKey.php",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "geminikey.php",
-      "source_file": "app/Models/GeminiKey.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_trade",
-      "label": "Trade.php",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "trade.php",
-      "source_file": "app/Models/Trade.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_transaction",
-      "label": "Transaction.php",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "transaction.php",
-      "source_file": "app/Models/Transaction.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "illuminate_database_eloquent_attributes_fillable",
-      "label": "Illuminate\\Database\\Eloquent\\Attributes\\Fillable",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\attributes\\fillable",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_database_eloquent_model",
-      "label": "Illuminate\\Database\\Eloquent\\Model",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\model",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_database_eloquent_relations_belongsto",
-      "label": "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "Illuminate\\Database\\Eloquent\\Model",
-      "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\relations\\belongsto",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "components",
@@ -9515,6 +9512,17 @@
       "source_location": "L1"
     },
     {
+      "id": "database_migrations_2026_08_29_000014_add_account_number_to_accounts",
+      "label": "2026_08_29_000014_add_account_number_to_accounts.php",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Illuminate\\Database\\Migrations\\Migration",
+      "file_type": "code",
+      "norm_label": "2026_08_29_000014_add_account_number_to_accounts.php",
+      "source_file": "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php",
+      "source_location": "L1"
+    },
+    {
       "id": "illuminate_database_migrations_migration",
       "label": "Illuminate\\Database\\Migrations\\Migration",
       "_origin": "ast",
@@ -9557,28 +9565,6 @@
       "norm_label": "illuminate\\support\\facades\\schema",
       "source_file": "",
       "source_location": ""
-    },
-    {
-      "id": "resources_js_components_ui_button_button",
-      "label": "Button.vue",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "button/index.ts",
-      "file_type": "code",
-      "norm_label": "button.vue",
-      "source_file": "resources/js/components/ui/button/Button.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_button_index",
-      "label": "button/index.ts",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "button/index.ts",
-      "file_type": "code",
-      "norm_label": "button/index.ts",
-      "source_file": "resources/js/components/ui/button/index.ts",
-      "source_location": "L1"
     },
     {
       "id": "resources_js_components_ui_badge_badge",
@@ -9856,61 +9842,6 @@
       "source_location": "L18"
     },
     {
-      "id": "resources_js_pages_profile",
-      "label": "Profile.vue",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "input/index.ts",
-      "file_type": "code",
-      "norm_label": "profile.vue",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_pages_profile_confirming",
-      "label": "confirming",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "input/index.ts",
-      "file_type": "code",
-      "norm_label": "confirming",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L27"
-    },
-    {
-      "id": "resources_js_pages_profile_profile",
-      "label": "profile",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "input/index.ts",
-      "file_type": "code",
-      "norm_label": "profile",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L16"
-    },
-    {
-      "id": "resources_js_pages_profile_removal",
-      "label": "removal",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "input/index.ts",
-      "file_type": "code",
-      "norm_label": "removal",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L28"
-    },
-    {
-      "id": "resources_js_pages_profile_takesoverlogin",
-      "label": "takesOverLogin",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "input/index.ts",
-      "file_type": "code",
-      "norm_label": "takesoverlogin",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L25"
-    },
-    {
       "id": "resources_js_pages_register",
       "label": "Register.vue",
       "_origin": "ast",
@@ -9964,17 +9895,6 @@
       "norm_label": "currency",
       "source_file": "resources/js/pages/Trades/Index.vue",
       "source_location": "L27"
-    },
-    {
-      "id": "resources_js_pages_trades_index_detail",
-      "label": "detail",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "Index.vue",
-      "file_type": "code",
-      "norm_label": "detail",
-      "source_file": "resources/js/pages/Trades/Index.vue",
-      "source_location": "L242"
     },
     {
       "id": "resources_js_pages_trades_index_direction",
@@ -10615,59 +10535,15 @@
       "source_location": "L1"
     },
     {
-      "id": "resources_js_components_ui_textarea_index",
-      "label": "textarea/index.ts",
+      "id": "resources_js_types_index_inertiajs_core",
+      "label": "@inertiajs/core",
       "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
+      "community": 41,
+      "community_name": "types/index.ts",
       "file_type": "code",
-      "norm_label": "textarea/index.ts",
-      "source_file": "resources/js/components/ui/textarea/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_textarea_textarea",
-      "label": "Textarea.vue",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "textarea.vue",
-      "source_file": "resources/js/components/ui/textarea/Textarea.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_textarea_textarea_emits",
-      "label": "emits",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "emits",
-      "source_file": "resources/js/components/ui/textarea/Textarea.vue",
-      "source_location": "L12"
-    },
-    {
-      "id": "resources_js_components_ui_textarea_textarea_modelvalue",
-      "label": "modelValue",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "modelvalue",
-      "source_file": "resources/js/components/ui/textarea/Textarea.vue",
-      "source_location": "L16"
-    },
-    {
-      "id": "resources_js_components_ui_textarea_textarea_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/ui/textarea/Textarea.vue",
-      "source_location": "L6"
+      "norm_label": "@inertiajs/core",
+      "source_file": "resources/js/types/index.ts",
+      "source_location": "L141"
     },
     {
       "id": "resources_js_pages_trades_form",
@@ -11374,6 +11250,61 @@
       "source_location": "L81"
     },
     {
+      "id": "app_models_account",
+      "label": "Account.php",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "account.php",
+      "source_file": "app/Models/Account.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_models_user",
+      "label": "User.php",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "user.php",
+      "source_file": "app/Models/User.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_services_uploads",
+      "label": "Uploads.php",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "uploads.php",
+      "source_file": "app/Services/Uploads.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "illuminate_database_eloquent_attributes_hidden",
+      "label": "Illuminate\\Database\\Eloquent\\Attributes\\Hidden",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "illuminate\\database\\eloquent\\attributes\\hidden",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_database_eloquent_factories_hasfactory",
+      "label": "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "illuminate\\database\\eloquent\\factories\\hasfactory",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "illuminate_database_eloquent_relations_hasmany",
       "label": "Illuminate\\Database\\Eloquent\\Relations\\HasMany",
       "_origin": "ast",
@@ -11385,14 +11316,58 @@
       "source_location": ""
     },
     {
-      "id": "tests_feature_rulelimittest",
-      "label": "RuleLimitTest.php",
+      "id": "illuminate_database_eloquent_relations_hasone",
+      "label": "Illuminate\\Database\\Eloquent\\Relations\\HasOne",
       "_origin": "ast",
       "community": 53,
       "community_name": "Account",
       "file_type": "code",
-      "norm_label": "rulelimittest.php",
-      "source_file": "tests/Feature/RuleLimitTest.php",
+      "norm_label": "illuminate\\database\\eloquent\\relations\\hasone",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_http_uploadedfile",
+      "label": "Illuminate\\Http\\UploadedFile",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "illuminate\\http\\uploadedfile",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_notifications_notifiable",
+      "label": "Illuminate\\Notifications\\Notifiable",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "illuminate\\notifications\\notifiable",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_support_facades_storage",
+      "label": "Illuminate\\Support\\Facades\\Storage",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "illuminate\\support\\facades\\storage",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "tests_feature_journaltest",
+      "label": "JournalTest.php",
+      "_origin": "ast",
+      "community": 53,
+      "community_name": "Account",
+      "file_type": "code",
+      "norm_label": "journaltest.php",
+      "source_file": "tests/Feature/JournalTest.php",
       "source_location": "L1"
     },
     {
@@ -11495,15 +11470,15 @@
       "source_location": "L6"
     },
     {
-      "id": "illuminate_database_eloquent_relations_hasone",
-      "label": "Illuminate\\Database\\Eloquent\\Relations\\HasOne",
+      "id": "app_http_controllers_admincontroller",
+      "label": "AdminController.php",
       "_origin": "ast",
       "community": 57,
       "community_name": "Illuminate\\Http\\RedirectResponse",
       "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\relations\\hasone",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "admincontroller.php",
+      "source_file": "app/Http/Controllers/AdminController.php",
+      "source_location": "L1"
     },
     {
       "id": "illuminate_http_redirectresponse",
@@ -11627,77 +11602,11 @@
       "source_location": "L1"
     },
     {
-      "id": "resources_js_composables_useformat_currencies",
-      "label": "CURRENCIES",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "Accounts.vue",
-      "file_type": "code",
-      "norm_label": "currencies",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "resources_js_pages_accounts",
-      "label": "Accounts.vue",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "Accounts.vue",
-      "file_type": "code",
-      "norm_label": "accounts.vue",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_pages_accounts_editing",
-      "label": "editing",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "Accounts.vue",
-      "file_type": "code",
-      "norm_label": "editing",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L35"
-    },
-    {
-      "id": "resources_js_pages_accounts_form",
-      "label": "form",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "Accounts.vue",
-      "file_type": "code",
-      "norm_label": "form",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L37"
-    },
-    {
-      "id": "resources_js_pages_accounts_open",
-      "label": "open",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "Accounts.vue",
-      "file_type": "code",
-      "norm_label": "open",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L34"
-    },
-    {
-      "id": "resources_js_pages_accounts_removing",
-      "label": "removing",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "Accounts.vue",
-      "file_type": "code",
-      "norm_label": "removing",
-      "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L74"
-    },
-    {
       "id": "resources_js_pages_error",
       "label": "Error.vue",
       "_origin": "ast",
       "community": 60,
-      "community_name": "Error.vue",
+      "community_name": "Profile.vue",
       "file_type": "code",
       "norm_label": "error.vue",
       "source_file": "resources/js/pages/Error.vue",
@@ -11708,7 +11617,7 @@
       "label": "message",
       "_origin": "ast",
       "community": 60,
-      "community_name": "Error.vue",
+      "community_name": "Profile.vue",
       "file_type": "code",
       "norm_label": "message",
       "source_file": "resources/js/pages/Error.vue",
@@ -11719,7 +11628,7 @@
       "label": "MESSAGES",
       "_origin": "ast",
       "community": 60,
-      "community_name": "Error.vue",
+      "community_name": "Profile.vue",
       "file_type": "code",
       "norm_label": "messages",
       "source_file": "resources/js/pages/Error.vue",
@@ -11730,7 +11639,7 @@
       "label": "props",
       "_origin": "ast",
       "community": 60,
-      "community_name": "Error.vue",
+      "community_name": "Profile.vue",
       "file_type": "code",
       "norm_label": "props",
       "source_file": "resources/js/pages/Error.vue",
@@ -11741,11 +11650,88 @@
       "label": "signedIn",
       "_origin": "ast",
       "community": 60,
-      "community_name": "Error.vue",
+      "community_name": "Profile.vue",
       "file_type": "code",
       "norm_label": "signedin",
       "source_file": "resources/js/pages/Error.vue",
       "source_location": "L52"
+    },
+    {
+      "id": "resources_js_pages_profile",
+      "label": "Profile.vue",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "Profile.vue",
+      "file_type": "code",
+      "norm_label": "profile.vue",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_pages_profile_confirming",
+      "label": "confirming",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "Profile.vue",
+      "file_type": "code",
+      "norm_label": "confirming",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L27"
+    },
+    {
+      "id": "resources_js_pages_profile_profile",
+      "label": "profile",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "Profile.vue",
+      "file_type": "code",
+      "norm_label": "profile",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L16"
+    },
+    {
+      "id": "resources_js_pages_profile_removal",
+      "label": "removal",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "Profile.vue",
+      "file_type": "code",
+      "norm_label": "removal",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L28"
+    },
+    {
+      "id": "resources_js_pages_profile_takesoverlogin",
+      "label": "takesOverLogin",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "Profile.vue",
+      "file_type": "code",
+      "norm_label": "takesoverlogin",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L25"
+    },
+    {
+      "id": "app_http_controllers_controller",
+      "label": "Controller.php",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": "controller.php",
+      "source_file": "app/Http/Controllers/Controller.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "routes_web",
+      "label": "web.php",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": "web.php",
+      "source_file": "routes/web.php",
+      "source_location": "L1"
     },
     {
       "id": "package_devdependencies_types_node",
@@ -11917,7 +11903,7 @@
       "label": "BackupDatabase.php",
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": "backupdatabase.php",
       "source_file": "app/Console/Commands/BackupDatabase.php",
@@ -11928,20 +11914,64 @@
       "label": "CarbonImmutable",
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": "carbonimmutable",
       "source_file": "",
       "source_location": ""
     },
     {
+      "id": "app_services_gemini",
+      "label": "Gemini.php",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "gemini.php",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L1"
+    },
+    {
       "id": "illuminate_console_command",
       "label": "Illuminate\\Console\\Command",
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": "illuminate\\console\\command",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_foundation_inspiring",
+      "label": "Illuminate\\Foundation\\Inspiring",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "illuminate\\foundation\\inspiring",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_http_client_connectionexception",
+      "label": "Illuminate\\Http\\Client\\ConnectionException",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "illuminate\\http\\client\\connectionexception",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_http_client_requestexception",
+      "label": "Illuminate\\Http\\Client\\RequestException",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "illuminate\\http\\client\\requestexception",
       "source_file": "",
       "source_location": ""
     },
@@ -11950,9 +11980,31 @@
       "label": "Illuminate\\Support\\Carbon",
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": "illuminate\\support\\carbon",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_support_facades_artisan",
+      "label": "Illuminate\\Support\\Facades\\Artisan",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "illuminate\\support\\facades\\artisan",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_support_facades_file",
+      "label": "Illuminate\\Support\\Facades\\File",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "illuminate\\support\\facades\\file",
       "source_file": "",
       "source_location": ""
     },
@@ -11961,18 +12013,40 @@
       "label": "Illuminate\\Support\\Facades\\Process",
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": "illuminate\\support\\facades\\process",
       "source_file": "",
       "source_location": ""
     },
     {
+      "id": "illuminate_support_facades_schedule",
+      "label": "Illuminate\\Support\\Facades\\Schedule",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "illuminate\\support\\facades\\schedule",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "routes_console",
+      "label": "console.php",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "GeminiKey",
+      "file_type": "code",
+      "norm_label": "console.php",
+      "source_file": "routes/console.php",
+      "source_location": "L1"
+    },
+    {
       "id": "self",
       "label": "self",
       "_origin": "ast",
       "community": 66,
-      "community_name": "BackupDatabase",
+      "community_name": "GeminiKey",
       "file_type": "code",
       "norm_label": "self",
       "source_file": "",
@@ -12221,6 +12295,17 @@
       "source_location": "L1"
     },
     {
+      "id": "resources_js_composables_useformat_currencies",
+      "label": "CURRENCIES",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "currencies",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L13"
+    },
+    {
       "id": "resources_js_composables_useformat_digits",
       "label": "DIGITS",
       "_origin": "ast",
@@ -12230,6 +12315,72 @@
       "norm_label": "digits",
       "source_file": "resources/js/composables/useFormat.ts",
       "source_location": "L21"
+    },
+    {
+      "id": "resources_js_pages_accounts",
+      "label": "Accounts.vue",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "accounts.vue",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_pages_accounts_editing",
+      "label": "editing",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "editing",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L36"
+    },
+    {
+      "id": "resources_js_pages_accounts_form",
+      "label": "form",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "form",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L38"
+    },
+    {
+      "id": "resources_js_pages_accounts_open",
+      "label": "open",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "open",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L35"
+    },
+    {
+      "id": "resources_js_pages_accounts_removing",
+      "label": "removing",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "removing",
+      "source_file": "resources/js/pages/Accounts.vue",
+      "source_location": "L77"
+    },
+    {
+      "id": "resources_js_pages_trades_index_detail",
+      "label": "detail",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "useFormat.ts",
+      "file_type": "code",
+      "norm_label": "detail",
+      "source_file": "resources/js/pages/Trades/Index.vue",
+      "source_location": "L242"
     },
     {
       "id": "resources_js_components_ui_select_index",
@@ -13024,14 +13175,14 @@
       "source_location": "L19"
     },
     {
-      "id": "app_http_controllers_analysiscontroller",
-      "label": "AnalysisController.php",
+      "id": "app_http_controllers_accountcontroller",
+      "label": "AccountController.php",
       "_origin": "ast",
       "community": 80,
       "community_name": "Illuminate\\Http\\Request",
       "file_type": "code",
-      "norm_label": "analysiscontroller.php",
-      "source_file": "app/Http/Controllers/AnalysisController.php",
+      "norm_label": "accountcontroller.php",
+      "source_file": "app/Http/Controllers/AccountController.php",
       "source_location": "L1"
     },
     {
@@ -13044,17 +13195,6 @@
       "norm_label": "handleinertiarequests.php",
       "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
       "source_location": "L1"
-    },
-    {
-      "id": "illuminate_http_jsonresponse",
-      "label": "Illuminate\\Http\\JsonResponse",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": "illuminate\\http\\jsonresponse",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "illuminate_http_request",
@@ -13244,47 +13384,47 @@
       "source_location": "L18"
     },
     {
-      "id": "illuminate_foundation_inspiring",
-      "label": "Illuminate\\Foundation\\Inspiring",
+      "id": "composer_keywords",
+      "label": "keywords",
       "_origin": "ast",
       "community": 85,
-      "community_name": "console.php",
+      "community_name": "keywords",
       "file_type": "code",
-      "norm_label": "illuminate\\foundation\\inspiring",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "keywords",
+      "source_file": "composer.json",
+      "source_location": "L6"
     },
     {
-      "id": "illuminate_support_facades_artisan",
-      "label": "Illuminate\\Support\\Facades\\Artisan",
+      "id": "ref_framework",
+      "label": "framework",
       "_origin": "ast",
       "community": 85,
-      "community_name": "console.php",
-      "file_type": "code",
-      "norm_label": "illuminate\\support\\facades\\artisan",
-      "source_file": "",
-      "source_location": ""
+      "community_name": "keywords",
+      "file_type": "concept",
+      "norm_label": "framework",
+      "source_file": "composer.json",
+      "source_location": "L6"
     },
     {
-      "id": "illuminate_support_facades_schedule",
-      "label": "Illuminate\\Support\\Facades\\Schedule",
+      "id": "ref_laravel",
+      "label": "laravel",
       "_origin": "ast",
       "community": 85,
-      "community_name": "console.php",
-      "file_type": "code",
-      "norm_label": "illuminate\\support\\facades\\schedule",
-      "source_file": "",
-      "source_location": ""
+      "community_name": "keywords",
+      "file_type": "concept",
+      "norm_label": "laravel",
+      "source_file": "composer.json",
+      "source_location": "L6"
     },
     {
-      "id": "routes_console",
-      "label": "console.php",
+      "id": "app_http_controllers_calendarcontroller",
+      "label": "CalendarController.php",
       "_origin": "ast",
-      "community": 85,
-      "community_name": "console.php",
+      "community": 86,
+      "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": "console.php",
-      "source_file": "routes/console.php",
+      "norm_label": "calendarcontroller.php",
+      "source_file": "app/Http/Controllers/CalendarController.php",
       "source_location": "L1"
     },
     {
@@ -13292,62 +13432,62 @@
       "label": "CarbonImmutable",
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "carbonimmutable",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "app_http_controllers_controller",
-      "label": "Controller.php",
+      "id": "app_http_controllers_dashboardcontroller",
+      "label": "DashboardController.php",
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": "controller.php",
-      "source_file": "app/Http/Controllers/Controller.php",
+      "norm_label": "dashboardcontroller.php",
+      "source_file": "app/Http/Controllers/DashboardController.php",
       "source_location": "L1"
     },
     {
-      "id": "routes_web",
-      "label": "web.php",
+      "id": "app_http_controllers_rulecontroller",
+      "label": "RuleController.php",
       "_origin": "ast",
       "community": 86,
-      "community_name": "Controller",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": "web.php",
-      "source_file": "routes/web.php",
+      "norm_label": "rulecontroller.php",
+      "source_file": "app/Http/Controllers/RuleController.php",
       "source_location": "L1"
     },
     {
-      "id": "app_http_controllers_accountcontroller",
-      "label": "AccountController.php",
+      "id": "carbon_carbonimmutable",
+      "label": "Carbon\\CarbonImmutable",
       "_origin": "ast",
-      "community": 87,
+      "community": 86,
       "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": "accountcontroller.php",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L1"
+      "norm_label": "carbon\\carbonimmutable",
+      "source_file": "",
+      "source_location": ""
     },
     {
-      "id": "app_http_controllers_admincontroller",
-      "label": "AdminController.php",
+      "id": "inertia_response",
+      "label": "Inertia\\Response",
       "_origin": "ast",
-      "community": 87,
+      "community": 86,
       "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": "admincontroller.php",
-      "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L1"
+      "norm_label": "inertia\\response",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "id": "app_http_controllers_auth_logincontroller",
       "label": "LoginController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "logincontroller.php",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
@@ -13358,32 +13498,10 @@
       "label": "RegisterController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "registercontroller.php",
       "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_http_controllers_calendarcontroller",
-      "label": "CalendarController.php",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "Inertia\\Response",
-      "file_type": "code",
-      "norm_label": "calendarcontroller.php",
-      "source_file": "app/Http/Controllers/CalendarController.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_http_controllers_dashboardcontroller",
-      "label": "DashboardController.php",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "Inertia\\Response",
-      "file_type": "code",
-      "norm_label": "dashboardcontroller.php",
-      "source_file": "app/Http/Controllers/DashboardController.php",
       "source_location": "L1"
     },
     {
@@ -13391,21 +13509,21 @@
       "label": "ProfileController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "profilecontroller.php",
       "source_file": "app/Http/Controllers/ProfileController.php",
       "source_location": "L1"
     },
     {
-      "id": "app_http_controllers_rulecontroller",
-      "label": "RuleController.php",
+      "id": "app_http_controllers_reportcontroller",
+      "label": "ReportController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
-      "norm_label": "rulecontroller.php",
-      "source_file": "app/Http/Controllers/RuleController.php",
+      "norm_label": "reportcontroller.php",
+      "source_file": "app/Http/Controllers/ReportController.php",
       "source_location": "L1"
     },
     {
@@ -13413,20 +13531,42 @@
       "label": "TradeController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "tradecontroller.php",
       "source_file": "app/Http/Controllers/TradeController.php",
       "source_location": "L1"
     },
     {
+      "id": "dompdf_dompdf",
+      "label": "Dompdf\\Dompdf",
+      "_origin": "ast",
+      "community": 87,
+      "community_name": "Inertia\\Inertia",
+      "file_type": "code",
+      "norm_label": "dompdf\\dompdf",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "illuminate_auth_events_lockout",
       "label": "Illuminate\\Auth\\Events\\Lockout",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "illuminate\\auth\\events\\lockout",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_database_eloquent_collection",
+      "label": "Illuminate\\Database\\Eloquent\\Collection",
+      "_origin": "ast",
+      "community": 87,
+      "community_name": "Inertia\\Inertia",
+      "file_type": "code",
+      "norm_label": "illuminate\\database\\eloquent\\collection",
       "source_file": "",
       "source_location": ""
     },
@@ -13435,7 +13575,7 @@
       "label": "Illuminate\\Support\\Facades\\Auth",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "illuminate\\support\\facades\\auth",
       "source_file": "",
@@ -13446,20 +13586,9 @@
       "label": "Illuminate\\Support\\Facades\\RateLimiter",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "illuminate\\support\\facades\\ratelimiter",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_validation_rule",
-      "label": "Illuminate\\Validation\\Rule",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "Inertia\\Response",
-      "file_type": "code",
-      "norm_label": "illuminate\\validation\\rule",
       "source_file": "",
       "source_location": ""
     },
@@ -13468,7 +13597,7 @@
       "label": "Illuminate\\Validation\\Rules\\Password",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "illuminate\\validation\\rules\\password",
       "source_file": "",
@@ -13479,7 +13608,7 @@
       "label": "Illuminate\\Validation\\ValidationException",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "illuminate\\validation\\validationexception",
       "source_file": "",
@@ -13490,20 +13619,9 @@
       "label": "Inertia\\Inertia",
       "_origin": "ast",
       "community": 87,
-      "community_name": "Inertia\\Response",
+      "community_name": "Inertia\\Inertia",
       "file_type": "code",
       "norm_label": "inertia\\inertia",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "inertia_response",
-      "label": "Inertia\\Response",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "Inertia\\Response",
-      "file_type": "code",
-      "norm_label": "inertia\\response",
       "source_file": "",
       "source_location": ""
     },
@@ -13541,14 +13659,36 @@
       "source_location": ""
     },
     {
-      "id": "app_models_user",
-      "label": "User.php",
+      "id": "config_cache",
+      "label": "cache.php",
       "_origin": "ast",
       "community": 89,
-      "community_name": "User.php",
+      "community_name": "Illuminate\\Support\\Str",
       "file_type": "code",
-      "norm_label": "user.php",
-      "source_file": "app/Models/User.php",
+      "norm_label": "cache.php",
+      "source_file": "config/cache.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "config_database",
+      "label": "database.php",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Illuminate\\Support\\Str",
+      "file_type": "code",
+      "norm_label": "database.php",
+      "source_file": "config/database.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "config_session",
+      "label": "session.php",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Illuminate\\Support\\Str",
+      "file_type": "code",
+      "norm_label": "session.php",
+      "source_file": "config/session.php",
       "source_location": "L1"
     },
     {
@@ -13556,53 +13696,20 @@
       "label": "UserFactory.php",
       "_origin": "ast",
       "community": 89,
-      "community_name": "User.php",
+      "community_name": "Illuminate\\Support\\Str",
       "file_type": "code",
       "norm_label": "userfactory.php",
       "source_file": "database/factories/UserFactory.php",
       "source_location": "L1"
     },
     {
-      "id": "illuminate_database_eloquent_attributes_hidden",
-      "label": "Illuminate\\Database\\Eloquent\\Attributes\\Hidden",
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\attributes\\hidden",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "illuminate_database_eloquent_factories_factory",
       "label": "Illuminate\\Database\\Eloquent\\Factories\\Factory",
       "_origin": "ast",
       "community": 89,
-      "community_name": "User.php",
+      "community_name": "Illuminate\\Support\\Str",
       "file_type": "code",
       "norm_label": "illuminate\\database\\eloquent\\factories\\factory",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_database_eloquent_factories_hasfactory",
-      "label": "Illuminate\\Database\\Eloquent\\Factories\\HasFactory",
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\factories\\hasfactory",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_notifications_notifiable",
-      "label": "Illuminate\\Notifications\\Notifiable",
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": "illuminate\\notifications\\notifiable",
       "source_file": "",
       "source_location": ""
     },
@@ -13611,9 +13718,31 @@
       "label": "Illuminate\\Support\\Facades\\Hash",
       "_origin": "ast",
       "community": 89,
-      "community_name": "User.php",
+      "community_name": "Illuminate\\Support\\Str",
       "file_type": "code",
       "norm_label": "illuminate\\support\\facades\\hash",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_support_str",
+      "label": "Illuminate\\Support\\Str",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Illuminate\\Support\\Str",
+      "file_type": "code",
+      "norm_label": "illuminate\\support\\str",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "pdo_mysql",
+      "label": "Pdo\\Mysql",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Illuminate\\Support\\Str",
+      "file_type": "code",
+      "norm_label": "pdo\\mysql",
       "source_file": "",
       "source_location": ""
     },
@@ -13622,22 +13751,11 @@
       "label": "static",
       "_origin": "ast",
       "community": 89,
-      "community_name": "User.php",
+      "community_name": "Illuminate\\Support\\Str",
       "file_type": "code",
       "norm_label": "static",
       "source_file": "",
       "source_location": ""
-    },
-    {
-      "id": "tests_feature_profiletest",
-      "label": "ProfileTest.php",
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "User.php",
-      "file_type": "code",
-      "norm_label": "profiletest.php",
-      "source_file": "tests/Feature/ProfileTest.php",
-      "source_location": "L1"
     },
     {
       "id": "composer_scripts",
@@ -13794,61 +13912,6 @@
       "source_location": "L58"
     },
     {
-      "id": "composer_extra",
-      "label": "extra",
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "extra",
-      "file_type": "code",
-      "norm_label": "extra",
-      "source_file": "composer.json",
-      "source_location": "L73"
-    },
-    {
-      "id": "composer_extra_laravel",
-      "label": "laravel",
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "extra",
-      "file_type": "code",
-      "norm_label": "laravel",
-      "source_file": "composer.json",
-      "source_location": "L74"
-    },
-    {
-      "id": "composer_laravel_dont_discover",
-      "label": "dont-discover",
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "extra",
-      "file_type": "code",
-      "norm_label": "dont-discover",
-      "source_file": "composer.json",
-      "source_location": "L75"
-    },
-    {
-      "id": "tests_feature_loginthrottletest",
-      "label": "LoginThrottleTest.php",
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "LoginThrottleTest",
-      "file_type": "code",
-      "norm_label": "loginthrottletest.php",
-      "source_file": "tests/Feature/LoginThrottleTest.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_feature_analysistest",
-      "label": "AnalysisTest.php",
-      "_origin": "ast",
-      "community": 92,
-      "community_name": "AiAnalysis",
-      "file_type": "code",
-      "norm_label": "analysistest.php",
-      "source_file": "tests/Feature/AnalysisTest.php",
-      "source_location": "L1"
-    },
-    {
       "id": "package_devdependencies_vitejs_plugin_vue",
       "label": "@vitejs/plugin-vue",
       "_origin": "ast",
@@ -13871,44 +13934,11 @@
       "source_location": "L12"
     },
     {
-      "id": "app_http_controllers_reportcontroller",
-      "label": "ReportController.php",
-      "_origin": "ast",
-      "community": 94,
-      "community_name": "ReportController.php",
-      "file_type": "code",
-      "norm_label": "reportcontroller.php",
-      "source_file": "app/Http/Controllers/ReportController.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "dompdf_dompdf",
-      "label": "Dompdf\\Dompdf",
-      "_origin": "ast",
-      "community": 94,
-      "community_name": "ReportController.php",
-      "file_type": "code",
-      "norm_label": "dompdf\\dompdf",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_database_eloquent_collection",
-      "label": "Illuminate\\Database\\Eloquent\\Collection",
-      "_origin": "ast",
-      "community": 94,
-      "community_name": "ReportController.php",
-      "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\collection",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "illuminate_http_response",
       "label": "Illuminate\\Http\\Response",
       "_origin": "ast",
       "community": 94,
-      "community_name": "ReportController.php",
+      "community_name": "ReportController",
       "file_type": "code",
       "norm_label": "illuminate\\http\\response",
       "source_file": "",
@@ -14025,6 +14055,61 @@
       "source_location": "L12"
     },
     {
+      "id": "resources_js_components_ui_textarea_index",
+      "label": "textarea/index.ts",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "Report.vue",
+      "file_type": "code",
+      "norm_label": "textarea/index.ts",
+      "source_file": "resources/js/components/ui/textarea/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_textarea_textarea",
+      "label": "Textarea.vue",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "Report.vue",
+      "file_type": "code",
+      "norm_label": "textarea.vue",
+      "source_file": "resources/js/components/ui/textarea/Textarea.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_textarea_textarea_emits",
+      "label": "emits",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "Report.vue",
+      "file_type": "code",
+      "norm_label": "emits",
+      "source_file": "resources/js/components/ui/textarea/Textarea.vue",
+      "source_location": "L12"
+    },
+    {
+      "id": "resources_js_components_ui_textarea_textarea_modelvalue",
+      "label": "modelValue",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "Report.vue",
+      "file_type": "code",
+      "norm_label": "modelvalue",
+      "source_file": "resources/js/components/ui/textarea/Textarea.vue",
+      "source_location": "L16"
+    },
+    {
+      "id": "resources_js_components_ui_textarea_textarea_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 96,
+      "community_name": "Report.vue",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/textarea/Textarea.vue",
+      "source_location": "L6"
+    },
+    {
       "id": "resources_js_pages_report",
       "label": "Report.vue",
       "_origin": "ast",
@@ -14117,7 +14202,7 @@
       "label": "ConfirmDestroy.vue",
       "_origin": "ast",
       "community": 97,
-      "community_name": "ConfirmDestroy.vue",
+      "community_name": "button/index.ts",
       "file_type": "code",
       "norm_label": "confirmdestroy.vue",
       "source_file": "resources/js/components/ConfirmDestroy.vue",
@@ -14128,7 +14213,7 @@
       "label": "code",
       "_origin": "ast",
       "community": 97,
-      "community_name": "ConfirmDestroy.vue",
+      "community_name": "button/index.ts",
       "file_type": "code",
       "norm_label": "code",
       "source_file": "resources/js/components/ConfirmDestroy.vue",
@@ -14139,7 +14224,7 @@
       "label": "emit",
       "_origin": "ast",
       "community": 97,
-      "community_name": "ConfirmDestroy.vue",
+      "community_name": "button/index.ts",
       "file_type": "code",
       "norm_label": "emit",
       "source_file": "resources/js/components/ConfirmDestroy.vue",
@@ -14150,7 +14235,7 @@
       "label": "props",
       "_origin": "ast",
       "community": 97,
-      "community_name": "ConfirmDestroy.vue",
+      "community_name": "button/index.ts",
       "file_type": "code",
       "norm_label": "props",
       "source_file": "resources/js/components/ConfirmDestroy.vue",
@@ -14161,11 +14246,33 @@
       "label": "typed",
       "_origin": "ast",
       "community": 97,
-      "community_name": "ConfirmDestroy.vue",
+      "community_name": "button/index.ts",
       "file_type": "code",
       "norm_label": "typed",
       "source_file": "resources/js/components/ConfirmDestroy.vue",
       "source_location": "L25"
+    },
+    {
+      "id": "resources_js_components_ui_button_button",
+      "label": "Button.vue",
+      "_origin": "ast",
+      "community": 97,
+      "community_name": "button/index.ts",
+      "file_type": "code",
+      "norm_label": "button.vue",
+      "source_file": "resources/js/components/ui/button/Button.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_button_index",
+      "label": "button/index.ts",
+      "_origin": "ast",
+      "community": 97,
+      "community_name": "button/index.ts",
+      "file_type": "code",
+      "norm_label": "button/index.ts",
+      "source_file": "resources/js/components/ui/button/index.ts",
+      "source_location": "L1"
     },
     {
       "id": "database_seeders_databaseseeder",
@@ -17610,6 +17717,18 @@
       "weight": 1.0
     },
     {
+      "source": "tests_feature_flashtest_flashtest_test_pesan_sesaat_dikirim_di_luar_props",
+      "target": "app_models_user_user",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
       "source": "tests_feature_geminikeytest_geminikeytest_test_kunci_dipakai_bergantian_lalu_menunggu_pendinginan",
       "target": "app_models_geminikey_geminikey",
       "relation": "calls",
@@ -18074,7 +18193,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L342",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -18086,7 +18205,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L343",
+      "source_location": "L360",
       "weight": 1.0
     },
     {
@@ -18098,7 +18217,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L344",
+      "source_location": "L361",
       "weight": 1.0
     },
     {
@@ -18110,7 +18229,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L349",
+      "source_location": "L366",
       "weight": 1.0
     },
     {
@@ -18122,7 +18241,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L350",
+      "source_location": "L367",
       "weight": 1.0
     },
     {
@@ -18471,6 +18590,66 @@
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
       "source_location": "L300",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest_test_nomor_akun_broker_tercetak_di_laporan",
+      "target": "app_models_user_user",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L347",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest_test_nomor_akun_broker_tercetak_di_laporan",
+      "target": "tests_feature_reporttest_reporttest_account",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L348",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest_test_nomor_akun_broker_tercetak_di_laporan",
+      "target": "tests_feature_reporttest_reporttest_trade",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L349",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest_test_nomor_akun_broker_tercetak_di_laporan",
+      "target": "app_services_annualreport_annualreport",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L351",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest_test_nomor_akun_broker_tercetak_di_laporan",
+      "target": "tests_feature_reporttest_reporttest_html",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L354",
       "weight": 1.0
     },
     {
@@ -22051,7 +22230,7 @@
     },
     {
       "source": "app_http_middleware_handleinertiarequests",
-      "target": "inertia_middleware",
+      "target": "inertia_inertia",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -22059,6 +22238,18 @@
       "context": "import",
       "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
       "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_http_middleware_handleinertiarequests",
+      "target": "inertia_middleware",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -23702,6 +23893,42 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "database/migrations/2026_08_29_000013_add_rate_idr_to_transactions.php",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "database_migrations_2026_08_29_000014_add_account_number_to_accounts",
+      "target": "illuminate_database_migrations_migration",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "database_migrations_2026_08_29_000014_add_account_number_to_accounts",
+      "target": "illuminate_database_schema_blueprint",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "database_migrations_2026_08_29_000014_add_account_number_to_accounts",
+      "target": "illuminate_support_facades_schema",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php",
       "source_location": "L5",
       "weight": 1.0
     },
@@ -26294,6 +26521,42 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tests/Feature/ErrorPageTest.php",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_flashtest",
+      "target": "app_models_user_user",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_flashtest",
+      "target": "illuminate_foundation_testing_refreshdatabase",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_flashtest",
+      "target": "tests_testcase_testcase",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "tests/Feature/FlashTest.php",
       "source_location": "L7",
       "weight": 1.0
     },
@@ -29942,7 +30205,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -30218,7 +30481,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L148",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -30230,7 +30493,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L179",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -31496,7 +31759,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -32750,6 +33013,28 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "database/migrations/2026_08_29_000013_add_rate_idr_to_transactions.php",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "database_migrations_2026_08_29_000014_add_account_number_to_accounts",
+      "target": "database_migrations_2026_08_29_000014_add_account_number_to_accounts_down",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "database_migrations_2026_08_29_000014_add_account_number_to_accounts",
+      "target": "database_migrations_2026_08_29_000014_add_account_number_to_accounts_up",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php",
       "source_location": "L9",
       "weight": 1.0
     },
@@ -36061,7 +36346,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -36072,7 +36357,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -36083,7 +36368,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L37",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -36094,7 +36379,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L46",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -36105,7 +36390,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L53",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -36116,7 +36401,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L68",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -36127,7 +36412,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L74",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -36138,7 +36423,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "resources/js/pages/Accounts.vue",
-      "source_location": "L76",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
@@ -37793,6 +38078,28 @@
     },
     {
       "source": "resources_js_types_index",
+      "target": "resources_js_types_index_inertiajs_core",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "resources/js/types/index.ts",
+      "source_location": "L141",
+      "weight": 1.0
+    },
+    {
+      "source": "resources_js_types_index",
+      "target": "resources_js_types_index_inertiaconfig",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "resources/js/types/index.ts",
+      "source_location": "L142",
+      "weight": 1.0
+    },
+    {
+      "source": "resources_js_types_index",
       "target": "resources_js_types_index_trade",
       "relation": "contains",
       "_origin": "ast",
@@ -37965,6 +38272,17 @@
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ErrorPageTest.php",
       "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_flashtest",
+      "target": "tests_feature_flashtest_flashtest",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -38426,7 +38744,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -38614,6 +38932,17 @@
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ErrorPageTest.php",
       "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_flashtest_flashtest",
+      "target": "tests_testcase_testcase",
+      "relation": "inherits",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -39570,7 +39899,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -40252,7 +40581,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L148",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -40263,7 +40592,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L170",
+      "source_location": "L171",
       "weight": 1.0
     },
     {
@@ -40274,7 +40603,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L179",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -40285,7 +40614,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L190",
+      "source_location": "L191",
       "weight": 1.0
     },
     {
@@ -40759,6 +41088,17 @@
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ErrorPageTest.php",
       "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_flashtest_flashtest",
+      "target": "tests_feature_flashtest_flashtest_test_pesan_sesaat_dikirim_di_luar_props",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -41313,13 +41653,24 @@
     },
     {
       "source": "tests_feature_reporttest_reporttest",
+      "target": "tests_feature_reporttest_reporttest_test_nomor_akun_broker_tercetak_di_laporan",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L345",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest",
       "target": "tests_feature_reporttest_reporttest_test_akun_milik_pengguna_lain_tidak_ikut_dilaporkan",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L340",
+      "source_location": "L357",
       "weight": 1.0
     },
     {
@@ -41785,6 +42136,17 @@
       "weight": 1.0
     },
     {
+      "source": "tests_feature_flashtest_flashtest",
+      "target": "illuminate_foundation_testing_refreshdatabase",
+      "relation": "mixes_in",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Feature/FlashTest.php",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
       "source": "tests_feature_geminikeytest_geminikeytest",
       "target": "illuminate_foundation_testing_refreshdatabase",
       "relation": "mixes_in",
@@ -42056,7 +42418,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L98",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -42080,7 +42442,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L182",
+      "source_location": "L183",
       "weight": 1.0
     },
     {
@@ -42092,7 +42454,7 @@
       "confidence_score": 0.85,
       "context": "call",
       "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L173",
+      "source_location": "L174",
       "weight": 1.0
     },
     {
@@ -43347,5 +43709,5 @@
       "source_file": "public/icons/icon-512.png"
     }
   ],
-  "built_at_commit": "dc5aa4cfcf1950d5222d29a358b1dbc86c5f2623"
+  "built_at_commit": "10111178ecaa377c8279e94f0377ec59d747106f"
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -12,6 +13,14 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $account = $request->currentAccount();
+
+        // Pesan sesaat dikirim lewat kanal flash Inertia, bukan prop biasa: prop
+        // ikut tersimpan di state history browser, jadi toast lama tampil lagi
+        // setiap kali halaman dipulihkan dengan tombol kembali — termasuk waktu
+        // chat AI ditutup. Flash Inertia sengaja tidak ikut disimpan ke history.
+        if ($flash = array_filter($request->session()->only(['success', 'error', 'info']))) {
+            Inertia::flash($flash);
+        }
 
         return [
             ...parent::share($request),
@@ -28,12 +37,6 @@ class HandleInertiaRequests extends Middleware
             // Inertia — respons biner tidak bisa ditangani Inertia. Form itu butuh
             // `_token`, dan cookie XSRF-TOKEN sudah terenkripsi jadi tidak terbaca JS.
             'csrf' => fn () => csrf_token(),
-
-            'flash' => [
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
-                'info' => fn () => $request->session()->get('info'),
-            ],
         ];
     }
 }

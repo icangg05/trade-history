@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['name', 'broker', 'currency', 'initial_balance', 'started_at', 'is_archived'])]
+#[Fillable(['name', 'broker', 'account_number', 'currency', 'initial_balance', 'started_at', 'is_archived'])]
 class Account extends Model
 {
     protected function casts(): array
