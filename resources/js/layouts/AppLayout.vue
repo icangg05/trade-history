@@ -7,6 +7,7 @@ import {
   CalendarDays,
   ChevronDown,
   Ellipsis,
+  FileText,
   LayoutDashboard,
   ListOrdered,
   LogOut,
@@ -40,6 +41,7 @@ const NAV = [
   { href: '/transactions', label: 'Dana', icon: Wallet },
   { href: '/rules', label: 'Aturan', icon: ScrollText },
   { href: '/analysis', label: 'Analisa', icon: Sparkles },
+  { href: '/reports', label: 'Laporan', icon: FileText },
 ]
 
 // Admin adalah peran pengelola, bukan trader: satu-satunya halamannya /admin.

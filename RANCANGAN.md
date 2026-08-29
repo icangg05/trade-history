@@ -499,3 +499,29 @@ supaya compiler SFC bisa membaca tipe props dari reka-ui.
 | `Transaction::signedAmount()`, `Account::ruleOrNew()`, dan suite `Unit` di phpunit.xml dihapus | nol pemanggil; direktori `tests/Unit` yang tidak ada membuat `php artisan test` gagal sebelum satu tes pun jalan |
 | Dashboard "10 trade terakhir" ikut `COALESCE(closed_at, opened_at)` | satu-satunya tempat yang masih mengurut `opened_at`, jadi daftarnya bisa berbeda dari baris teratas /trades |
 
+
+---
+
+## 14. Laporan tahunan untuk pajak
+
+Fitur ini tidak ada di rancangan awal. Pemicunya di luar aplikasi: perlu satu berkas
+yang bisa diserahkan saat pajak meminta klarifikasi penghasilan dari trading.
+
+| Perubahan | Alasan |
+|---|---|
+| `AnnualReport` + `resources/views/reports/annual.blade.php` → PDF A4 landscape | seluruh angkanya sudah ada di `AccountStats`; yang belum ada cuma bentuk yang bisa diserahkan ke orang lain. Service mengembalikan array polos supaya angkanya bisa diuji tanpa membongkar byte PDF |
+| `dompdf/dompdf`, bukan Browsershot/Snappy | container `app` punya `dom`, `mbstring`, `gd`, tapi tidak punya Chromium, Node, maupun satu pun font sistem. dompdf jalan tanpa mengubah Dockerfile dan memakai font DejaVu bawaannya |
+| Nomor halaman lewat `page_text()` di controller, bukan `counter(pages)` di CSS | dompdf menghitung counter saat menyusun tata letak, ketika jumlah halaman belum diketahui — hasilnya selalu "dari 0". API kanvas mengisinya setelah dokumen jadi, tanpa perlu menyalakan `isPhpEnabled` |
+| `monthlyPnl()` dapat parameter `$endingAt` | jangkarnya `now()` mati, jadi tidak bisa melayani tahun pajak yang sudah lewat |
+| `AccountStats::trades()` jadi publik | lampiran butuh barisnya satu per satu; tanpa ini `COALESCE(closed_at, opened_at)` jadi salinan ketiga |
+| Laporan menarik akun langsung dari tabel, bukan dari `$request->accountList()` | middleware itu membuang akun arsip, padahal trade tahun itu tetap penghasilan tahun itu — laporannya akan mengecilkan angka |
+| Setor/tarik memakai `rate_idr` masing-masing baris, laba/rugi memakai satu kurs tahunan | mutasi dana punya kurs hari transaksinya dan ada bukti transfernya; laba/rugi trading tidak punya kurs per transaksi. Bedanya dinyatakan di catatan kaki laporan, bukan disamarkan |
+| Unduhan lewat `<form method="POST">` biasa, bukan `useForm().post()` | Inertia tidak bisa menerima respons biner. Karena itu `csrf` ikut dibagikan di `HandleInertiaRequests` — NPWP tidak perlu menginap di query string dan log akses |
+| `by_setup` tidak dipakai di laporan | trade bertag `"BOS, FVG"` masuk dua bucket sehingga jumlahnya melebihi total transaksi — aman untuk evaluasi strategi, menyesatkan di dokumen pajak |
+| PDF memakai Helvetica, bukan DejaVu | font inti PDF: tidak ikut ditanam ke berkas (82 KB → 50 KB) dan metrikanya lebih ramping, jadi lampiran muat 33 baris per halaman, bukan 19. Konsekuensinya `−` (U+2212) diganti `-` biasa karena WinAnsi tidak punya glifnya |
+| Kurs wajib disertai tanggal berlakunya | kurs tanpa tanggal tidak bisa diperiksa ulang oleh siapa pun. Tanggalnya ikut bergeser otomatis saat tahun pajak diganti — tanggal tahun lalu yang tersimpan di peramban akan tercetak diam-diam kalau tidak |
+| Harga instrumen di lampiran dipangkas nol ekornya | `decimal(18,5)` selalu kembali `4.523,13000`; sama seperti `price()` di useFormat.ts, minimal dua desimal tetap disisakan |
+| Kolom bukti jadi tautan ke `transactions.proof` | dompdf menulisnya sebagai anotasi `/URI` sungguhan, jadi bisa diklik dari dalam PDF. Route-nya sudah mengecek kepemilikan, jadi tautannya aman ikut tercetak |
+| Kolom kurs menerima koma desimal (`17.757,40`) | `input[type=number]` menolak koma dan `numeric` Laravel menolak `17757,40`. Koma hanya bisa berarti desimal, jadi begitu ia muncul titik pasti pemisah ribuan; tanpa koma angkanya dibiarkan apa adanya. Halaman laporan menampilkan hasil bacaannya kembali supaya salah tafsir ketahuan sebelum PDF diunduh |
+| Kurs dicetak dua desimal, bukan lewat `$rp()` | `$rp()` membulatkan ke rupiah penuh, sehingga kurs 17.757,40 tercetak "Rp17.757" dan tidak lagi cocok dengan angka yang dipakai menghitung. Kolom kurs di tabel mutasi kena hal yang sama: `rate_idr` 17.719,64 sempat tampil "Rp17.720" |
+| Tabel pendek diberi `page-break-inside: avoid` | dompdf mengulang `<thead>` saat tabel terbelah, kecuali kalau baris badan pertamanya sudah tidak muat di halaman yang sama — barisnya lalu lahir tanpa kepala. Lampiran sengaja dibiarkan terbelah, di sana pengulangannya jalan |

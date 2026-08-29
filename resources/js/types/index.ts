@@ -133,6 +133,7 @@ export interface PageProps {
   auth: { user: { id: number; name: string; email: string; is_admin: boolean } | null }
   accounts: AccountBrief[]
   currentAccount: CurrentAccount | null
+  csrf: string
   flash: { success: string | null; error: string | null; info: string | null }
   [key: string]: unknown
 }

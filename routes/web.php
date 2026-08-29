@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RuleController;
 use App\Http\Controllers\TradeController;
 use App\Http\Controllers\TradeImportController;
@@ -77,6 +78,11 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/rules', [RuleController::class, 'edit'])->name('rules.edit');
             Route::put('/rules', [RuleController::class, 'update'])->name('rules.update');
+
+            // POST, bukan GET: NPWP dan alamat tidak perlu mampir ke query string
+            // maupun log akses. Unduhannya lewat form biasa, bukan kunjungan Inertia.
+            Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+            Route::post('/reports/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
 
             Route::get('/analysis', [AnalysisController::class, 'index'])->name('analysis.index');
             Route::post('/analysis', [AnalysisController::class, 'generate'])

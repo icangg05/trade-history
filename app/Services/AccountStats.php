@@ -112,10 +112,16 @@ class AccountStats
         return $points;
     }
 
-    /** @return list<array{month: string, pnl: float, profit: float, loss: float}> */
-    public function monthlyPnl(int $months = 12): array
+    /**
+     * `$endingAt` menentukan bulan terakhir yang ikut — bawaannya bulan berjalan.
+     * Laporan tahunan mengisinya dengan 31 Desember tahun pajak supaya dapat
+     * Januari–Desember tahun itu, bukan 12 bulan terakhir dari hari ini.
+     *
+     * @return list<array{month: string, pnl: float, profit: float, loss: float}>
+     */
+    public function monthlyPnl(int $months = 12, ?CarbonInterface $endingAt = null): array
     {
-        $start = CarbonImmutable::now()->startOfMonth()->subMonths($months - 1);
+        $start = CarbonImmutable::parse($endingAt ?? CarbonImmutable::now())->startOfMonth()->subMonths($months - 1);
 
         // Dikelompokkan di PHP agar portabel antara MySQL & SQLite.
         $grouped = $this->closedTrades()
@@ -322,10 +328,7 @@ class AccountStats
      */
     public function summary(CarbonInterface $from, CarbonInterface $to): array
     {
-        $trades = $this->closedTrades()
-            ->whereRaw(self::TRADE_DATE.' BETWEEN ? AND ?', [$from->copy()->startOfDay(), $to->copy()->endOfDay()])
-            ->orderByRaw(self::TRADE_DATE)
-            ->get();
+        $trades = $this->trades($from, $to);
 
         $wins = $trades->where('status', 'win');
         $losses = $trades->where('status', 'loss');
@@ -372,6 +375,21 @@ class AccountStats
                 : '(tanpa setup)'),
             'violations' => $this->violations($from, $to),
         ];
+    }
+
+    /**
+     * Trade satu periode, urut kronologis menurut hari efektifnya. Dipakai
+     * `summary()` untuk semua agregatnya dan oleh laporan tahunan yang memang
+     * butuh barisnya satu per satu — bukan cuma angka jadinya.
+     *
+     * @return Collection<int, Trade>
+     */
+    public function trades(CarbonInterface $from, CarbonInterface $to): Collection
+    {
+        return $this->closedTrades()
+            ->whereRaw(self::TRADE_DATE.' BETWEEN ? AND ?', [$from->copy()->startOfDay(), $to->copy()->endOfDay()])
+            ->orderByRaw(self::TRADE_DATE)
+            ->get();
     }
 
     // ------------------------------------------------------------------ internal
