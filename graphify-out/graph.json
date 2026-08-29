@@ -267,19 +267,6 @@
       "source_location": "L7"
     },
     {
-      "id": "app_models_accountrule_accountrule",
-      "label": "AccountRule",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "accountrule",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L9"
-    },
-    {
       "id": "app_models_transaction_transaction",
       "label": "Transaction",
       "_callable": true,
@@ -319,6 +306,19 @@
       "source_location": "L20"
     },
     {
+      "id": "app_services_uploads_uploads",
+      "label": "Uploads",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "uploads",
+      "source_file": "app/Services/Uploads.php",
+      "source_location": "L17"
+    },
+    {
       "id": "resources_js_components_analysischat_message",
       "label": "Message",
       "_callable": true,
@@ -330,6 +330,19 @@
       "norm_label": "message",
       "source_file": "resources/js/components/AnalysisChat.vue",
       "source_location": "L12"
+    },
+    {
+      "id": "app_models_accountrule_accountrule",
+      "label": "AccountRule",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": "accountrule",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L9"
     },
     {
       "id": "app_http_middleware_ensureadmin_ensureadmin",
@@ -358,19 +371,6 @@
       "source_location": "L13"
     },
     {
-      "id": "app_http_middleware_handleinertiarequests_handleinertiarequests",
-      "label": "HandleInertiaRequests",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "bootstrap/app.php",
-      "file_type": "code",
-      "norm_label": "handleinertiarequests",
-      "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L8"
-    },
-    {
       "id": "app_http_middleware_requireaccount_requireaccount",
       "label": "RequireAccount",
       "_callable": true,
@@ -397,17 +397,17 @@
       "source_location": "L13"
     },
     {
-      "id": "resources_js_components_ui_badge_index_badgevariants",
-      "label": "BadgeVariants",
+      "id": "resources_js_composables_usegroupframe_groupable",
+      "label": "Groupable",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 27,
       "community_name": "Dashboard.vue",
       "file_type": "code",
-      "norm_label": "badgevariants",
-      "source_file": "resources/js/components/ui/badge/index.ts",
-      "source_location": "L26"
+      "norm_label": "groupable",
+      "source_file": "resources/js/composables/useGroupFrame.ts",
+      "source_location": "L1"
     },
     {
       "id": "resources_js_types_index_equitypoint",
@@ -475,17 +475,17 @@
       "source_location": "L40"
     },
     {
-      "id": "resources_js_composables_usegroupframe_groupable",
-      "label": "Groupable",
+      "id": "resources_js_components_ui_badge_index_badgevariants",
+      "label": "BadgeVariants",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 33,
-      "community_name": "Index.vue",
+      "community": 31,
+      "community_name": "Calendar.vue",
       "file_type": "code",
-      "norm_label": "groupable",
-      "source_file": "resources/js/composables/useGroupFrame.ts",
-      "source_location": "L1"
+      "norm_label": "badgevariants",
+      "source_file": "resources/js/components/ui/badge/index.ts",
+      "source_location": "L26"
     },
     {
       "id": "app_models_user_user",
@@ -592,6 +592,19 @@
       "source_location": "L1"
     },
     {
+      "id": "resources_js_types_index_pageprops",
+      "label": "PageProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "types/index.ts",
+      "file_type": "code",
+      "norm_label": "pageprops",
+      "source_file": "resources/js/types/index.ts",
+      "source_location": "L132"
+    },
+    {
       "id": "resources_js_types_index_paginated",
       "label": "Paginated",
       "_callable": true,
@@ -616,19 +629,6 @@
       "norm_label": "stopstate",
       "source_file": "resources/js/types/index.ts",
       "source_location": "L4"
-    },
-    {
-      "id": "resources_js_types_index_trade",
-      "label": "Trade",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "types/index.ts",
-      "file_type": "code",
-      "norm_label": "trade",
-      "source_file": "resources/js/types/index.ts",
-      "source_location": "L18"
     },
     {
       "id": "resources_js_types_index_tradestatus",
@@ -696,6 +696,19 @@
       "source_location": "L16"
     },
     {
+      "id": "resources_js_types_index_trade",
+      "label": "Trade",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "Form.vue",
+      "file_type": "code",
+      "norm_label": "trade",
+      "source_file": "resources/js/types/index.ts",
+      "source_location": "L18"
+    },
+    {
       "id": "app_models_account_account",
       "label": "Account",
       "_callable": true,
@@ -735,19 +748,6 @@
       "source_location": "L18"
     },
     {
-      "id": "app_http_controllers_accountcontroller_accountcontroller",
-      "label": "AccountController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Illuminate\\Http\\RedirectResponse",
-      "file_type": "code",
-      "norm_label": "accountcontroller",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L12"
-    },
-    {
       "id": "app_http_controllers_admincontroller_admincontroller",
       "label": "AdminController",
       "_callable": true,
@@ -759,6 +759,19 @@
       "norm_label": "admincontroller",
       "source_file": "app/Http/Controllers/AdminController.php",
       "source_location": "L24"
+    },
+    {
+      "id": "app_http_controllers_profilecontroller_profilecontroller",
+      "label": "ProfileController",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "Illuminate\\Http\\RedirectResponse",
+      "file_type": "code",
+      "norm_label": "profilecontroller",
+      "source_file": "app/Http/Controllers/ProfileController.php",
+      "source_location": "L13"
     },
     {
       "id": "resources_js_pages_accounts_row",
@@ -774,69 +787,17 @@
       "source_location": "L19"
     },
     {
-      "id": "resources_js_types_index_pageprops",
-      "label": "PageProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "Error.vue",
-      "file_type": "code",
-      "norm_label": "pageprops",
-      "source_file": "resources/js/types/index.ts",
-      "source_location": "L132"
-    },
-    {
       "id": "app_http_controllers_auth_logincontroller_logincontroller",
       "label": "LoginController",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "Controller",
+      "community_name": "LoginController",
       "file_type": "code",
       "norm_label": "logincontroller",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
       "source_location": "L21"
-    },
-    {
-      "id": "app_http_controllers_auth_registercontroller_registercontroller",
-      "label": "RegisterController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": "registercontroller",
-      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L15"
-    },
-    {
-      "id": "app_http_controllers_controller_controller",
-      "label": "Controller",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": "controller",
-      "source_file": "app/Http/Controllers/Controller.php",
-      "source_location": "L5"
-    },
-    {
-      "id": "app_http_controllers_profilecontroller_profilecontroller",
-      "label": "ProfileController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": "profilecontroller",
-      "source_file": "app/Http/Controllers/ProfileController.php",
-      "source_location": "L13"
     },
     {
       "id": "app_console_commands_backupdatabase_backupdatabase",
@@ -878,6 +839,19 @@
       "source_location": "L112"
     },
     {
+      "id": "app_http_controllers_accountcontroller_accountcontroller",
+      "label": "AccountController",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": "accountcontroller",
+      "source_file": "app/Http/Controllers/AccountController.php",
+      "source_location": "L12"
+    },
+    {
       "id": "app_http_controllers_analysiscontroller_analysiscontroller",
       "label": "AnalysisController",
       "_callable": true,
@@ -891,17 +865,17 @@
       "source_location": "L16"
     },
     {
-      "id": "app_models_aianalysis_aianalysis",
-      "label": "AiAnalysis",
+      "id": "app_http_middleware_handleinertiarequests_handleinertiarequests",
+      "label": "HandleInertiaRequests",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 80,
       "community_name": "Illuminate\\Http\\Request",
       "file_type": "code",
-      "norm_label": "aianalysis",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L9"
+      "norm_label": "handleinertiarequests",
+      "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
+      "source_location": "L8"
     },
     {
       "id": "tests_feature_tradeimporttest_tradeimporttest",
@@ -917,30 +891,17 @@
       "source_location": "L20"
     },
     {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller",
-      "label": "TransactionController",
+      "id": "app_http_controllers_auth_registercontroller_registercontroller",
+      "label": "RegisterController",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
+      "community": 86,
+      "community_name": "Controller",
       "file_type": "code",
-      "norm_label": "transactioncontroller",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L17"
-    },
-    {
-      "id": "app_services_uploads_uploads",
-      "label": "Uploads",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
-      "file_type": "code",
-      "norm_label": "uploads",
-      "source_file": "app/Services/Uploads.php",
-      "source_location": "L17"
+      "norm_label": "registercontroller",
+      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L15"
     },
     {
       "id": "app_http_controllers_calendarcontroller_calendarcontroller",
@@ -949,11 +910,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": "calendarcontroller",
       "source_file": "app/Http/Controllers/CalendarController.php",
       "source_location": "L12"
+    },
+    {
+      "id": "app_http_controllers_controller_controller",
+      "label": "Controller",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": "controller",
+      "source_file": "app/Http/Controllers/Controller.php",
+      "source_location": "L5"
     },
     {
       "id": "app_http_controllers_dashboardcontroller_dashboardcontroller",
@@ -962,7 +936,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": "dashboardcontroller",
       "source_file": "app/Http/Controllers/DashboardController.php",
@@ -975,11 +949,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": "rulecontroller",
       "source_file": "app/Http/Controllers/RuleController.php",
       "source_location": "L15"
+    },
+    {
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller",
+      "label": "TransactionController",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": "transactioncontroller",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L17"
     },
     {
       "id": "app_http_requests_traderequest_traderequest",
@@ -1034,13 +1021,26 @@
       "source_location": "L13"
     },
     {
+      "id": "app_models_aianalysis_aianalysis",
+      "label": "AiAnalysis",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 92,
+      "community_name": "AiAnalysis",
+      "file_type": "code",
+      "norm_label": "aianalysis",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L9"
+    },
+    {
       "id": "tests_feature_analysistest_analysistest",
       "label": "AnalysisTest",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AnalysisTest",
+      "community_name": "AiAnalysis",
       "file_type": "code",
       "norm_label": "analysistest",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -1172,54 +1172,6 @@
       "source_location": "L78"
     },
     {
-      "id": "app_services_annualreport_annualreport_account",
-      "label": ".account()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L54"
-    },
-    {
-      "id": "app_services_annualreport_annualreport_build",
-      "label": ".build()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".build()",
-      "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L32"
-    },
-    {
-      "id": "app_services_annualreport_annualreport_mutationidr",
-      "label": ".mutationIdr()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".mutationidr()",
-      "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L179"
-    },
-    {
-      "id": "app_services_annualreport_annualreport_withidr",
-      "label": ".withIdr()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".withidr()",
-      "source_file": "app/Services/AnnualReport.php",
-      "source_location": "L170"
-    },
-    {
       "id": "app_services_gemini_gemini_configured",
       "label": ".configured()",
       "_callable": true,
@@ -1242,18 +1194,6 @@
       "norm_label": ".test_kunci_dari_database_yang_dipakai_memanggil_gemini()",
       "source_file": "tests/Feature/AdminTest.php",
       "source_location": "L88"
-    },
-    {
-      "id": "tests_feature_analysischattest_analysischattest_setup",
-      "label": ".setUp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": ".setup()",
-      "source_file": "tests/Feature/AnalysisChatTest.php",
-      "source_location": "L22"
     },
     {
       "id": "tests_feature_tradeimporttest_tradeimporttest_setup",
@@ -1904,88 +1844,16 @@
       "source_location": "L78"
     },
     {
-      "id": "app_models_account_account_user",
-      "label": ".user()",
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller_proof",
+      "label": ".proof()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": ".user()",
-      "source_file": "app/Models/Account.php",
-      "source_location": "L23"
-    },
-    {
-      "id": "app_models_accountrule_accountrule_account",
-      "label": ".account()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L31"
-    },
-    {
-      "id": "app_models_accountrule_accountrule_casts",
-      "label": ".casts()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": ".casts()",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L22"
-    },
-    {
-      "id": "app_models_accountrule_accountrule_dailylosslimit",
-      "label": ".dailyLossLimit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": ".dailylosslimit()",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L40"
-    },
-    {
-      "id": "app_models_accountrule_accountrule_dailyprofitgoal",
-      "label": ".dailyProfitGoal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": ".dailyprofitgoal()",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L51"
-    },
-    {
-      "id": "app_models_trade_trade_account",
-      "label": ".account()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/Trade.php",
-      "source_location": "L49"
-    },
-    {
-      "id": "app_models_transaction_transaction_account",
-      "label": ".account()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/Transaction.php",
-      "source_location": "L21"
+      "norm_label": ".proof()",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L110"
     },
     {
       "id": "app_models_transaction_transaction_casts",
@@ -2300,6 +2168,30 @@
       "source_location": "L148"
     },
     {
+      "id": "app_services_uploads_uploads_delete",
+      "label": ".delete()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".delete()",
+      "source_file": "app/Services/Uploads.php",
+      "source_location": "L30"
+    },
+    {
+      "id": "app_services_uploads_uploads_store",
+      "label": ".store()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": ".store()",
+      "source_file": "app/Services/Uploads.php",
+      "source_location": "L21"
+    },
+    {
       "id": "resources_js_components_analysischat_clear",
       "label": "clear()",
       "_callable": true,
@@ -2444,16 +2336,88 @@
       "source_location": "L110"
     },
     {
-      "id": "resources_js_pages_profile_save",
-      "label": "save()",
+      "id": "app_models_account_account_user",
+      "label": ".user()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
-      "community_name": "Profile.vue",
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
       "file_type": "code",
-      "norm_label": "save()",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L30"
+      "norm_label": ".user()",
+      "source_file": "app/Models/Account.php",
+      "source_location": "L23"
+    },
+    {
+      "id": "app_models_accountrule_accountrule_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L31"
+    },
+    {
+      "id": "app_models_accountrule_accountrule_casts",
+      "label": ".casts()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": ".casts()",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L22"
+    },
+    {
+      "id": "app_models_accountrule_accountrule_dailylosslimit",
+      "label": ".dailyLossLimit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": ".dailylosslimit()",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L40"
+    },
+    {
+      "id": "app_models_accountrule_accountrule_dailyprofitgoal",
+      "label": ".dailyProfitGoal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": ".dailyprofitgoal()",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L51"
+    },
+    {
+      "id": "app_models_trade_trade_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/Trade.php",
+      "source_location": "L49"
+    },
+    {
+      "id": "app_models_transaction_transaction_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/Transaction.php",
+      "source_location": "L21"
     },
     {
       "id": "app_http_middleware_ensureadmin_ensureadmin_handle",
@@ -2480,18 +2444,6 @@
       "source_location": "L15"
     },
     {
-      "id": "app_http_middleware_handleinertiarequests_handleinertiarequests_share",
-      "label": ".share()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "bootstrap/app.php",
-      "file_type": "code",
-      "norm_label": ".share()",
-      "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L12"
-    },
-    {
       "id": "app_http_middleware_requireaccount_requireaccount_handle",
       "label": ".handle()",
       "_callable": true,
@@ -2514,6 +2466,78 @@
       "norm_label": ".handle()",
       "source_file": "app/Http/Middleware/SetCurrentAccount.php",
       "source_location": "L15"
+    },
+    {
+      "id": "resources_js_composables_usegroupframe_frameclass",
+      "label": "frameClass()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "Dashboard.vue",
+      "file_type": "code",
+      "norm_label": "frameclass()",
+      "source_file": "resources/js/composables/useGroupFrame.ts",
+      "source_location": "L35"
+    },
+    {
+      "id": "resources_js_composables_usegroupframe_framegap",
+      "label": "frameGap()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "Dashboard.vue",
+      "file_type": "code",
+      "norm_label": "framegap()",
+      "source_file": "resources/js/composables/useGroupFrame.ts",
+      "source_location": "L56"
+    },
+    {
+      "id": "resources_js_composables_usegroupframe_frametop",
+      "label": "frameTop()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "Dashboard.vue",
+      "file_type": "code",
+      "norm_label": "frametop()",
+      "source_file": "resources/js/composables/useGroupFrame.ts",
+      "source_location": "L24"
+    },
+    {
+      "id": "resources_js_pages_trades_index_dayedge",
+      "label": "dayEdge()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "Dashboard.vue",
+      "file_type": "code",
+      "norm_label": "dayedge()",
+      "source_file": "resources/js/pages/Trades/Index.vue",
+      "source_location": "L228"
+    },
+    {
+      "id": "resources_js_pages_trades_index_separated",
+      "label": "separated()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "Dashboard.vue",
+      "file_type": "code",
+      "norm_label": "separated()",
+      "source_file": "resources/js/pages/Trades/Index.vue",
+      "source_location": "L227"
+    },
+    {
+      "id": "resources_js_composables_useformat_usecurrency",
+      "label": "useCurrency()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Rules.vue",
+      "file_type": "code",
+      "norm_label": "usecurrency()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L7"
     },
     {
       "id": "resources_js_pages_rules_estimate",
@@ -2948,6 +2972,18 @@
       "source_location": "L129"
     },
     {
+      "id": "resources_js_composables_useformat_pnlclass",
+      "label": "pnlClass()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Calendar.vue",
+      "file_type": "code",
+      "norm_label": "pnlclass()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L142"
+    },
+    {
       "id": "resources_js_pages_calendar_openedlabel",
       "label": "openedLabel()",
       "_callable": true,
@@ -2972,40 +3008,52 @@
       "source_location": "L40"
     },
     {
-      "id": "resources_js_composables_usegroupframe_frameclass",
-      "label": "frameClass()",
+      "id": "resources_js_pages_profile_save",
+      "label": "save()",
       "_callable": true,
       "_origin": "ast",
-      "community": 33,
-      "community_name": "Index.vue",
+      "community": 32,
+      "community_name": "input/index.ts",
       "file_type": "code",
-      "norm_label": "frameclass()",
-      "source_file": "resources/js/composables/useGroupFrame.ts",
-      "source_location": "L35"
+      "norm_label": "save()",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L30"
     },
     {
-      "id": "resources_js_composables_usegroupframe_framegap",
-      "label": "frameGap()",
+      "id": "resources_js_composables_useformat_datetime",
+      "label": "dateTime()",
       "_callable": true,
       "_origin": "ast",
       "community": 33,
       "community_name": "Index.vue",
       "file_type": "code",
-      "norm_label": "framegap()",
-      "source_file": "resources/js/composables/useGroupFrame.ts",
-      "source_location": "L56"
+      "norm_label": "datetime()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L120"
     },
     {
-      "id": "resources_js_composables_usegroupframe_frametop",
-      "label": "frameTop()",
+      "id": "resources_js_composables_useformat_longdate",
+      "label": "longDate()",
       "_callable": true,
       "_origin": "ast",
       "community": 33,
       "community_name": "Index.vue",
       "file_type": "code",
-      "norm_label": "frametop()",
-      "source_file": "resources/js/composables/useGroupFrame.ts",
-      "source_location": "L24"
+      "norm_label": "longdate()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L113"
+    },
+    {
+      "id": "resources_js_composables_useformat_price",
+      "label": "price()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "Index.vue",
+      "file_type": "code",
+      "norm_label": "price()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L83"
     },
     {
       "id": "resources_js_pages_trades_index_atgroupedge",
@@ -3044,16 +3092,16 @@
       "source_location": "L54"
     },
     {
-      "id": "resources_js_pages_trades_index_dayedge",
-      "label": "dayEdge()",
+      "id": "resources_js_pages_trades_index_daykey",
+      "label": "dayKey()",
       "_callable": true,
       "_origin": "ast",
       "community": 33,
       "community_name": "Index.vue",
       "file_type": "code",
-      "norm_label": "dayedge()",
+      "norm_label": "daykey()",
       "source_file": "resources/js/pages/Trades/Index.vue",
-      "source_location": "L228"
+      "source_location": "L207"
     },
     {
       "id": "resources_js_pages_trades_index_destroy",
@@ -3138,18 +3186,6 @@
       "norm_label": "savegroupdetail()",
       "source_file": "resources/js/pages/Trades/Index.vue",
       "source_location": "L166"
-    },
-    {
-      "id": "resources_js_pages_trades_index_separated",
-      "label": "separated()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "Index.vue",
-      "file_type": "code",
-      "norm_label": "separated()",
-      "source_file": "resources/js/pages/Trades/Index.vue",
-      "source_location": "L227"
     },
     {
       "id": "resources_js_pages_trades_index_stopgrouping",
@@ -3245,7 +3281,7 @@
       "file_type": "code",
       "norm_label": ".test_akun_milik_pengguna_lain_tidak_ikut_dilaporkan()",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L310"
+      "source_location": "L340"
     },
     {
       "id": "tests_feature_reporttest_reporttest_test_akun_sen_dikonversi_dengan_pembagi_seratus",
@@ -3293,7 +3329,7 @@
       "file_type": "code",
       "norm_label": ".test_bukti_transfer_jadi_tautan_yang_bisa_diklik()",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L209"
+      "source_location": "L213"
     },
     {
       "id": "tests_feature_reporttest_reporttest_test_halaman_laporan_menawarkan_tahun_sejak_akun_tertua",
@@ -3317,7 +3353,7 @@
       "file_type": "code",
       "norm_label": ".test_harga_lampiran_membuang_nol_di_belakang_koma()",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L174"
+      "source_location": "L178"
     },
     {
       "id": "tests_feature_reporttest_reporttest_test_kurs_dicetak_bersama_tanggal_berlakunya",
@@ -3329,7 +3365,7 @@
       "file_type": "code",
       "norm_label": ".test_kurs_dicetak_bersama_tanggal_berlakunya()",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L201"
+      "source_location": "L205"
     },
     {
       "id": "tests_feature_reporttest_reporttest_test_kurs_menerima_koma_desimal",
@@ -3341,7 +3377,7 @@
       "file_type": "code",
       "norm_label": ".test_kurs_menerima_koma_desimal()",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L255"
+      "source_location": "L259"
     },
     {
       "id": "tests_feature_reporttest_reporttest_test_kurs_yang_bukan_angka_ditolak",
@@ -3353,7 +3389,7 @@
       "file_type": "code",
       "norm_label": ".test_kurs_yang_bukan_angka_ditolak()",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L293"
+      "source_location": "L297"
     },
     {
       "id": "tests_feature_reporttest_reporttest_test_realisasi_kas_memakai_penarikan_dikurangi_setoran",
@@ -3401,7 +3437,19 @@
       "file_type": "code",
       "norm_label": ".test_unduh_menghasilkan_berkas_pdf()",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L227"
+      "source_location": "L231"
+    },
+    {
+      "id": "tests_feature_reporttest_reporttest_test_watermark_dan_logo_ikut_tertanam_di_pdf",
+      "label": ".test_watermark_dan_logo_ikut_tertanam_di_pdf()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "User",
+      "file_type": "code",
+      "norm_label": ".test_watermark_dan_logo_ikut_tertanam_di_pdf()",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L318"
     },
     {
       "id": "tests_feature_reporttest_reporttest_trade",
@@ -3426,6 +3474,18 @@
       "norm_label": "monthlabel()",
       "source_file": "resources/js/composables/useFormat.ts",
       "source_location": "L135"
+    },
+    {
+      "id": "resources_js_composables_useformat_ratecurrency",
+      "label": "rateCurrency()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "Transactions.vue",
+      "file_type": "code",
+      "norm_label": "ratecurrency()",
+      "source_file": "resources/js/composables/useFormat.ts",
+      "source_location": "L65"
     },
     {
       "id": "resources_js_composables_useformat_toidr",
@@ -3498,6 +3558,78 @@
       "norm_label": "submit()",
       "source_file": "resources/js/pages/Transactions.vue",
       "source_location": "L131"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_close",
+      "label": "close()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "close()",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L103"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_csrf",
+      "label": "csrf()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "csrf()",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L56"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_ondrop",
+      "label": "onDrop()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "ondrop()",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L47"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_onpaste",
+      "label": "onPaste()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "onpaste()",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L51"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_pick",
+      "label": "pick()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "pick()",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L32"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_submit",
+      "label": "submit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "submit()",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L62"
     },
     {
       "id": "app_http_controllers_tradecontroller_tradecontroller_adjacent",
@@ -4304,78 +4436,6 @@
       "source_location": "L245"
     },
     {
-      "id": "resources_js_components_aiimportdialog_close",
-      "label": "close()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "close()",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L103"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_csrf",
-      "label": "csrf()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "csrf()",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L56"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_ondrop",
-      "label": "onDrop()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "ondrop()",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L47"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_onpaste",
-      "label": "onPaste()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "onpaste()",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L51"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_pick",
-      "label": "pick()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "pick()",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L32"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_submit",
-      "label": "submit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "submit()",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L62"
-    },
-    {
       "id": "resources_js_pages_trades_form_applyai",
       "label": "applyAi()",
       "_callable": true,
@@ -4580,6 +4640,18 @@
       "source_location": "L35"
     },
     {
+      "id": "tests_feature_analysischattest_analysischattest_setup",
+      "label": ".setUp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "AnalysisChatTest",
+      "file_type": "code",
+      "norm_label": ".setup()",
+      "source_file": "tests/Feature/AnalysisChatTest.php",
+      "source_location": "L22"
+    },
+    {
       "id": "tests_feature_analysischattest_analysischattest_test_chat_butuh_login",
       "label": ".test_chat_butuh_login()",
       "_callable": true,
@@ -4640,78 +4712,6 @@
       "source_location": "L49"
     },
     {
-      "id": "app_http_controllers_accountcontroller_accountcontroller_destroy",
-      "label": ".destroy()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Illuminate\\Http\\RedirectResponse",
-      "file_type": "code",
-      "norm_label": ".destroy()",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L52"
-    },
-    {
-      "id": "app_http_controllers_accountcontroller_accountcontroller_index",
-      "label": ".index()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Illuminate\\Http\\RedirectResponse",
-      "file_type": "code",
-      "norm_label": ".index()",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L14"
-    },
-    {
-      "id": "app_http_controllers_accountcontroller_accountcontroller_store",
-      "label": ".store()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Illuminate\\Http\\RedirectResponse",
-      "file_type": "code",
-      "norm_label": ".store()",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L36"
-    },
-    {
-      "id": "app_http_controllers_accountcontroller_accountcontroller_switch",
-      "label": ".switch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Illuminate\\Http\\RedirectResponse",
-      "file_type": "code",
-      "norm_label": ".switch()",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L63"
-    },
-    {
-      "id": "app_http_controllers_accountcontroller_accountcontroller_update",
-      "label": ".update()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Illuminate\\Http\\RedirectResponse",
-      "file_type": "code",
-      "norm_label": ".update()",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L45"
-    },
-    {
-      "id": "app_http_controllers_accountcontroller_accountcontroller_validated",
-      "label": ".validated()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Illuminate\\Http\\RedirectResponse",
-      "file_type": "code",
-      "norm_label": ".validated()",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L70"
-    },
-    {
       "id": "app_http_controllers_admincontroller_admincontroller_backup",
       "label": ".backup()",
       "_callable": true,
@@ -4746,6 +4746,18 @@
       "norm_label": ".destroyuser()",
       "source_file": "app/Http/Controllers/AdminController.php",
       "source_location": "L81"
+    },
+    {
+      "id": "app_http_controllers_admincontroller_admincontroller_downloadbackup",
+      "label": ".downloadBackup()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "Illuminate\\Http\\RedirectResponse",
+      "file_type": "code",
+      "norm_label": ".downloadbackup()",
+      "source_file": "app/Http/Controllers/AdminController.php",
+      "source_location": "L155"
     },
     {
       "id": "app_http_controllers_admincontroller_admincontroller_islastadmin",
@@ -4796,6 +4808,30 @@
       "source_location": "L61"
     },
     {
+      "id": "app_http_controllers_profilecontroller_profilecontroller_destroy",
+      "label": ".destroy()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "Illuminate\\Http\\RedirectResponse",
+      "file_type": "code",
+      "norm_label": ".destroy()",
+      "source_file": "app/Http/Controllers/ProfileController.php",
+      "source_location": "L59"
+    },
+    {
+      "id": "app_http_controllers_profilecontroller_profilecontroller_edit",
+      "label": ".edit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "Illuminate\\Http\\RedirectResponse",
+      "file_type": "code",
+      "norm_label": ".edit()",
+      "source_file": "app/Http/Controllers/ProfileController.php",
+      "source_location": "L15"
+    },
+    {
       "id": "app_http_controllers_profilecontroller_profilecontroller_update",
       "label": ".update()",
       "_callable": true,
@@ -4806,6 +4842,18 @@
       "norm_label": ".update()",
       "source_file": "app/Http/Controllers/ProfileController.php",
       "source_location": "L28"
+    },
+    {
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller_store",
+      "label": ".store()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "Illuminate\\Http\\RedirectResponse",
+      "file_type": "code",
+      "norm_label": ".store()",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L85"
     },
     {
       "id": "app_models_account_account_rule",
@@ -4842,18 +4890,6 @@
       "norm_label": "main()",
       "source_file": "scripts/make-icons.py",
       "source_location": "L66"
-    },
-    {
-      "id": "resources_js_composables_useformat_pnlclass",
-      "label": "pnlClass()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "Accounts.vue",
-      "file_type": "code",
-      "norm_label": "pnlclass()",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L142"
     },
     {
       "id": "resources_js_pages_accounts_create",
@@ -4933,7 +4969,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "Controller",
+      "community_name": "LoginController",
       "file_type": "code",
       "norm_label": ".create()",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
@@ -4945,7 +4981,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "Controller",
+      "community_name": "LoginController",
       "file_type": "code",
       "norm_label": ".destroy()",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
@@ -4957,7 +4993,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "Controller",
+      "community_name": "LoginController",
       "file_type": "code",
       "norm_label": ".store()",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
@@ -4969,71 +5005,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "Controller",
+      "community_name": "LoginController",
       "file_type": "code",
       "norm_label": ".throttlekey()",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
       "source_location": "L85"
-    },
-    {
-      "id": "app_http_controllers_auth_registercontroller_registercontroller_closed",
-      "label": ".closed()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".closed()",
-      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L51"
-    },
-    {
-      "id": "app_http_controllers_auth_registercontroller_registercontroller_create",
-      "label": ".create()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".create()",
-      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L17"
-    },
-    {
-      "id": "app_http_controllers_auth_registercontroller_registercontroller_store",
-      "label": ".store()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".store()",
-      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
-      "source_location": "L24"
-    },
-    {
-      "id": "app_http_controllers_profilecontroller_profilecontroller_destroy",
-      "label": ".destroy()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".destroy()",
-      "source_file": "app/Http/Controllers/ProfileController.php",
-      "source_location": "L59"
-    },
-    {
-      "id": "app_http_controllers_profilecontroller_profilecontroller_edit",
-      "label": ".edit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": ".edit()",
-      "source_file": "app/Http/Controllers/ProfileController.php",
-      "source_location": "L15"
     },
     {
       "id": "app_console_commands_backupdatabase_backupdatabase_dir",
@@ -5096,6 +5072,66 @@
       "source_location": "L99"
     },
     {
+      "id": "app_http_controllers_admincontroller_admincontroller_index",
+      "label": ".index()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "BackupDatabase",
+      "file_type": "code",
+      "norm_label": ".index()",
+      "source_file": "app/Http/Controllers/AdminController.php",
+      "source_location": "L26"
+    },
+    {
+      "id": "app_services_annualreport_annualreport_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "BackupDatabase",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Services/AnnualReport.php",
+      "source_location": "L54"
+    },
+    {
+      "id": "app_services_annualreport_annualreport_build",
+      "label": ".build()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "BackupDatabase",
+      "file_type": "code",
+      "norm_label": ".build()",
+      "source_file": "app/Services/AnnualReport.php",
+      "source_location": "L32"
+    },
+    {
+      "id": "app_services_annualreport_annualreport_mutationidr",
+      "label": ".mutationIdr()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "BackupDatabase",
+      "file_type": "code",
+      "norm_label": ".mutationidr()",
+      "source_file": "app/Services/AnnualReport.php",
+      "source_location": "L179"
+    },
+    {
+      "id": "app_services_annualreport_annualreport_withidr",
+      "label": ".withIdr()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "BackupDatabase",
+      "file_type": "code",
+      "norm_label": ".withidr()",
+      "source_file": "app/Services/AnnualReport.php",
+      "source_location": "L170"
+    },
+    {
       "id": "resources_js_components_monthlypnlchart_nicestep",
       "label": "niceStep()",
       "_callable": true,
@@ -5156,42 +5192,6 @@
       "source_location": "L108"
     },
     {
-      "id": "resources_js_composables_useformat_price",
-      "label": "price()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "useFormat.ts",
-      "file_type": "code",
-      "norm_label": "price()",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L83"
-    },
-    {
-      "id": "resources_js_composables_useformat_ratecurrency",
-      "label": "rateCurrency()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "useFormat.ts",
-      "file_type": "code",
-      "norm_label": "ratecurrency()",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L65"
-    },
-    {
-      "id": "resources_js_composables_useformat_usecurrency",
-      "label": "useCurrency()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "useFormat.ts",
-      "file_type": "code",
-      "norm_label": "usecurrency()",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L7"
-    },
-    {
       "id": "public_sw_offlinepage",
       "label": "offlinePage()",
       "_callable": true,
@@ -5202,6 +5202,78 @@
       "norm_label": "offlinepage()",
       "source_file": "public/sw.js",
       "source_location": "L53"
+    },
+    {
+      "id": "app_http_controllers_accountcontroller_accountcontroller_destroy",
+      "label": ".destroy()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": ".destroy()",
+      "source_file": "app/Http/Controllers/AccountController.php",
+      "source_location": "L52"
+    },
+    {
+      "id": "app_http_controllers_accountcontroller_accountcontroller_index",
+      "label": ".index()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": ".index()",
+      "source_file": "app/Http/Controllers/AccountController.php",
+      "source_location": "L14"
+    },
+    {
+      "id": "app_http_controllers_accountcontroller_accountcontroller_store",
+      "label": ".store()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": ".store()",
+      "source_file": "app/Http/Controllers/AccountController.php",
+      "source_location": "L36"
+    },
+    {
+      "id": "app_http_controllers_accountcontroller_accountcontroller_switch",
+      "label": ".switch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": ".switch()",
+      "source_file": "app/Http/Controllers/AccountController.php",
+      "source_location": "L63"
+    },
+    {
+      "id": "app_http_controllers_accountcontroller_accountcontroller_update",
+      "label": ".update()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": ".update()",
+      "source_file": "app/Http/Controllers/AccountController.php",
+      "source_location": "L45"
+    },
+    {
+      "id": "app_http_controllers_accountcontroller_accountcontroller_validated",
+      "label": ".validated()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": ".validated()",
+      "source_file": "app/Http/Controllers/AccountController.php",
+      "source_location": "L70"
     },
     {
       "id": "app_http_controllers_analysiscontroller_analysiscontroller_chat",
@@ -5264,27 +5336,15 @@
       "source_location": "L139"
     },
     {
-      "id": "app_models_aianalysis_aianalysis_account",
-      "label": ".account()",
+      "id": "app_http_middleware_handleinertiarequests_handleinertiarequests_share",
+      "label": ".share()",
       "_callable": true,
       "_origin": "ast",
       "community": 80,
       "community_name": "Illuminate\\Http\\Request",
       "file_type": "code",
-      "norm_label": ".account()",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L20"
-    },
-    {
-      "id": "app_models_aianalysis_aianalysis_casts",
-      "label": ".casts()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "Illuminate\\Http\\Request",
-      "file_type": "code",
-      "norm_label": ".casts()",
-      "source_file": "app/Models/AiAnalysis.php",
+      "norm_label": ".share()",
+      "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
       "source_location": "L12"
     },
     {
@@ -5384,88 +5444,40 @@
       "source_location": "L56"
     },
     {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller_destroy",
-      "label": ".destroy()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
-      "file_type": "code",
-      "norm_label": ".destroy()",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L117"
-    },
-    {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller_index",
-      "label": ".index()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
-      "file_type": "code",
-      "norm_label": ".index()",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L21"
-    },
-    {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller_proof",
-      "label": ".proof()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
-      "file_type": "code",
-      "norm_label": ".proof()",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L110"
-    },
-    {
-      "id": "app_http_controllers_transactioncontroller_transactioncontroller_store",
-      "label": ".store()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
-      "file_type": "code",
-      "norm_label": ".store()",
-      "source_file": "app/Http/Controllers/TransactionController.php",
-      "source_location": "L85"
-    },
-    {
-      "id": "app_services_uploads_uploads_delete",
-      "label": ".delete()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
-      "file_type": "code",
-      "norm_label": ".delete()",
-      "source_file": "app/Services/Uploads.php",
-      "source_location": "L30"
-    },
-    {
-      "id": "app_services_uploads_uploads_store",
-      "label": ".store()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
-      "file_type": "code",
-      "norm_label": ".store()",
-      "source_file": "app/Services/Uploads.php",
-      "source_location": "L21"
-    },
-    {
-      "id": "app_http_controllers_admincontroller_admincontroller_index",
-      "label": ".index()",
+      "id": "app_http_controllers_auth_registercontroller_registercontroller_closed",
+      "label": ".closed()",
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
-      "norm_label": ".index()",
-      "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L26"
+      "norm_label": ".closed()",
+      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L51"
+    },
+    {
+      "id": "app_http_controllers_auth_registercontroller_registercontroller_create",
+      "label": ".create()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": ".create()",
+      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L17"
+    },
+    {
+      "id": "app_http_controllers_auth_registercontroller_registercontroller_store",
+      "label": ".store()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": ".store()",
+      "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L24"
     },
     {
       "id": "app_http_controllers_calendarcontroller_calendarcontroller_invoke",
@@ -5473,7 +5485,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".__invoke()",
       "source_file": "app/Http/Controllers/CalendarController.php",
@@ -5485,7 +5497,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".month()",
       "source_file": "app/Http/Controllers/CalendarController.php",
@@ -5497,7 +5509,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".__invoke()",
       "source_file": "app/Http/Controllers/DashboardController.php",
@@ -5509,7 +5521,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".row()",
       "source_file": "app/Http/Controllers/DashboardController.php",
@@ -5521,7 +5533,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".edit()",
       "source_file": "app/Http/Controllers/RuleController.php",
@@ -5533,7 +5545,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".num()",
       "source_file": "app/Http/Controllers/RuleController.php",
@@ -5545,23 +5557,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": ".update()",
       "source_file": "app/Http/Controllers/RuleController.php",
       "source_location": "L46"
     },
     {
-      "id": "app_http_controllers_admincontroller_admincontroller_downloadbackup",
-      "label": ".downloadBackup()",
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller_destroy",
+      "label": ".destroy()",
       "_callable": true,
       "_origin": "ast",
-      "community": 87,
-      "community_name": "AdminController.php",
+      "community": 86,
+      "community_name": "Controller",
       "file_type": "code",
-      "norm_label": ".downloadbackup()",
-      "source_file": "app/Http/Controllers/AdminController.php",
-      "source_location": "L155"
+      "norm_label": ".destroy()",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L117"
+    },
+    {
+      "id": "app_http_controllers_transactioncontroller_transactioncontroller_index",
+      "label": ".index()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "Controller",
+      "file_type": "code",
+      "norm_label": ".index()",
+      "source_file": "app/Http/Controllers/TransactionController.php",
+      "source_location": "L21"
     },
     {
       "id": "app_http_requests_traderequest_traderequest_after",
@@ -5744,12 +5768,36 @@
       "source_location": "L17"
     },
     {
+      "id": "app_models_aianalysis_aianalysis_account",
+      "label": ".account()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 92,
+      "community_name": "AiAnalysis",
+      "file_type": "code",
+      "norm_label": ".account()",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L20"
+    },
+    {
+      "id": "app_models_aianalysis_aianalysis_casts",
+      "label": ".casts()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 92,
+      "community_name": "AiAnalysis",
+      "file_type": "code",
+      "norm_label": ".casts()",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L12"
+    },
+    {
       "id": "tests_feature_analysistest_analysistest_account",
       "label": ".account()",
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AnalysisTest",
+      "community_name": "AiAnalysis",
       "file_type": "code",
       "norm_label": ".account()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5761,7 +5809,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AnalysisTest",
+      "community_name": "AiAnalysis",
       "file_type": "code",
       "norm_label": ".test_analisa_tetap_tampil_dan_ditandai_usang_saat_statistik_berubah()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5773,7 +5821,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AnalysisTest",
+      "community_name": "AiAnalysis",
       "file_type": "code",
       "norm_label": ".test_klik_kedua_dalam_10_detik_ditolak_tanpa_memanggil_ai()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5785,7 +5833,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AnalysisTest",
+      "community_name": "AiAnalysis",
       "file_type": "code",
       "norm_label": ".test_perbarui_tetap_memanggil_ai_walau_statistik_tidak_berubah()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5797,7 +5845,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 92,
-      "community_name": "AnalysisTest",
+      "community_name": "AiAnalysis",
       "file_type": "code",
       "norm_label": ".withtrade()",
       "source_file": "tests/Feature/AnalysisTest.php",
@@ -5813,7 +5861,19 @@
       "file_type": "code",
       "norm_label": ".accounts()",
       "source_file": "app/Http/Controllers/ReportController.php",
-      "source_location": "L116"
+      "source_location": "L158"
+    },
+    {
+      "id": "app_http_controllers_reportcontroller_reportcontroller_datauri",
+      "label": ".dataUri()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 94,
+      "community_name": "ReportController.php",
+      "file_type": "code",
+      "norm_label": ".datauri()",
+      "source_file": "app/Http/Controllers/ReportController.php",
+      "source_location": "L101"
     },
     {
       "id": "app_http_controllers_reportcontroller_reportcontroller_decimal",
@@ -5825,7 +5885,7 @@
       "file_type": "code",
       "norm_label": ".decimal()",
       "source_file": "app/Http/Controllers/ReportController.php",
-      "source_location": "L102"
+      "source_location": "L144"
     },
     {
       "id": "app_http_controllers_reportcontroller_reportcontroller_index",
@@ -5852,27 +5912,15 @@
       "source_location": "L35"
     },
     {
-      "id": "resources_js_composables_useformat_datetime",
-      "label": "dateTime()",
+      "id": "app_http_controllers_reportcontroller_reportcontroller_watermark",
+      "label": ".watermark()",
       "_callable": true,
       "_origin": "ast",
-      "community": 95,
-      "community_name": "Analysis.vue",
+      "community": 94,
+      "community_name": "ReportController.php",
       "file_type": "code",
-      "norm_label": "datetime()",
-      "source_file": "resources/js/composables/useFormat.ts",
-      "source_location": "L120"
-    },
-    {
-      "id": "resources_js_composables_useformat_longdate",
-      "label": "longDate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 95,
-      "community_name": "Analysis.vue",
-      "file_type": "code",
-      "norm_label": "longdate()",
-      "source_file": "resources/js/composables/useFormat.ts",
+      "norm_label": ".watermark()",
+      "source_file": "app/Http/Controllers/ReportController.php",
       "source_location": "L113"
     },
     {
@@ -5898,18 +5946,6 @@
       "norm_label": "top()",
       "source_file": "resources/js/pages/Analysis.vue",
       "source_location": "L47"
-    },
-    {
-      "id": "resources_js_pages_trades_index_daykey",
-      "label": "dayKey()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 95,
-      "community_name": "Analysis.vue",
-      "file_type": "code",
-      "norm_label": "daykey()",
-      "source_file": "resources/js/pages/Trades/Index.vue",
-      "source_location": "L207"
     },
     {
       "id": "resources_js_pages_report_endofyear",
@@ -5948,61 +5984,6 @@
       "source_location": "L15"
     },
     {
-      "id": "app_services_annualreport_php_carbonimmutable",
-      "label": "CarbonImmutable",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": "carbonimmutable",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "app_services_gemini",
-      "label": "Gemini.php",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": "gemini.php",
-      "source_file": "app/Services/Gemini.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "illuminate_http_client_connectionexception",
-      "label": "Illuminate\\Http\\Client\\ConnectionException",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": "illuminate\\http\\client\\connectionexception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_http_client_requestexception",
-      "label": "Illuminate\\Http\\Client\\RequestException",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": "illuminate\\http\\client\\requestexception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "self",
-      "label": "self",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "GeminiKey",
-      "file_type": "code",
-      "norm_label": "self",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "app_http_controllers_tradeimportcontroller",
       "label": "TradeImportController.php",
       "_origin": "ast",
@@ -6014,13 +5995,35 @@
       "source_location": "L1"
     },
     {
-      "id": "illuminate_http_jsonresponse",
-      "label": "Illuminate\\Http\\JsonResponse",
+      "id": "app_services_gemini",
+      "label": "Gemini.php",
       "_origin": "ast",
       "community": 1,
       "community_name": "Gemini",
       "file_type": "code",
-      "norm_label": "illuminate\\http\\jsonresponse",
+      "norm_label": "gemini.php",
+      "source_file": "app/Services/Gemini.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "illuminate_http_client_connectionexception",
+      "label": "Illuminate\\Http\\Client\\ConnectionException",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Gemini",
+      "file_type": "code",
+      "norm_label": "illuminate\\http\\client\\connectionexception",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_http_client_requestexception",
+      "label": "Illuminate\\Http\\Client\\RequestException",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "Gemini",
+      "file_type": "code",
+      "norm_label": "illuminate\\http\\client\\requestexception",
       "source_file": "",
       "source_location": ""
     },
@@ -6408,6 +6411,39 @@
       "norm_label": "card/index.ts",
       "source_file": "resources/js/components/ui/card/index.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_label_label",
+      "label": "Label.vue",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "label.vue",
+      "source_file": "resources/js/components/ui/label/Label.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_label_label_delegatedprops",
+      "label": "delegatedProps",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "delegatedprops",
+      "source_file": "resources/js/components/ui/label/Label.vue",
+      "source_location": "L10"
+    },
+    {
+      "id": "resources_js_components_ui_label_label_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "utils.ts",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/label/Label.vue",
+      "source_location": "L8"
     },
     {
       "id": "resources_js_components_ui_sonner_index",
@@ -7235,6 +7271,17 @@
       "source_location": ""
     },
     {
+      "id": "illuminate_support_facades_file",
+      "label": "Illuminate\\Support\\Facades\\File",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "TestCase",
+      "file_type": "code",
+      "norm_label": "illuminate\\support\\facades\\file",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "illuminate_support_facades_http",
       "label": "Illuminate\\Support\\Facades\\Http",
       "_origin": "ast",
@@ -7242,17 +7289,6 @@
       "community_name": "TestCase",
       "file_type": "code",
       "norm_label": "illuminate\\support\\facades\\http",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_support_facades_storage",
-      "label": "Illuminate\\Support\\Facades\\Storage",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": "illuminate\\support\\facades\\storage",
       "source_file": "",
       "source_location": ""
     },
@@ -7276,17 +7312,6 @@
       "file_type": "code",
       "norm_label": "analysischattest.php",
       "source_file": "tests/Feature/AnalysisChatTest.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "tests_feature_analysistest",
-      "label": "AnalysisTest.php",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "TestCase",
-      "file_type": "code",
-      "norm_label": "analysistest.php",
-      "source_file": "tests/Feature/AnalysisTest.php",
       "source_location": "L1"
     },
     {
@@ -7345,14 +7370,14 @@
       "source_location": "L1"
     },
     {
-      "id": "tests_feature_tradeimporttest",
-      "label": "TradeImportTest.php",
+      "id": "tests_feature_tradegrouptest",
+      "label": "TradeGroupTest.php",
       "_origin": "ast",
       "community": 17,
       "community_name": "TestCase",
       "file_type": "code",
-      "norm_label": "tradeimporttest.php",
-      "source_file": "tests/Feature/TradeImportTest.php",
+      "norm_label": "tradegrouptest.php",
+      "source_file": "tests/Feature/TradeGroupTest.php",
       "source_location": "L1"
     },
     {
@@ -7367,69 +7392,14 @@
       "source_location": "L1"
     },
     {
-      "id": "app_models_account",
-      "label": "Account.php",
+      "id": "app_http_controllers_transactioncontroller",
+      "label": "TransactionController.php",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "account.php",
-      "source_file": "app/Models/Account.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_accountrule",
-      "label": "AccountRule.php",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "accountrule.php",
-      "source_file": "app/Models/AccountRule.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_aianalysis",
-      "label": "AiAnalysis.php",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "aianalysis.php",
-      "source_file": "app/Models/AiAnalysis.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_geminikey",
-      "label": "GeminiKey.php",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "geminikey.php",
-      "source_file": "app/Models/GeminiKey.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_trade",
-      "label": "Trade.php",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "trade.php",
-      "source_file": "app/Models/Trade.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_models_transaction",
-      "label": "Transaction.php",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "AccountStats",
-      "file_type": "code",
-      "norm_label": "transaction.php",
-      "source_file": "app/Models/Transaction.php",
+      "norm_label": "transactioncontroller.php",
+      "source_file": "app/Http/Controllers/TransactionController.php",
       "source_location": "L1"
     },
     {
@@ -7466,6 +7436,17 @@
       "source_location": "L1"
     },
     {
+      "id": "app_services_uploads",
+      "label": "Uploads.php",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "uploads.php",
+      "source_file": "app/Services/Uploads.php",
+      "source_location": "L1"
+    },
+    {
       "id": "bootstrap_providers",
       "label": "providers.php",
       "_origin": "ast",
@@ -7475,6 +7456,17 @@
       "norm_label": "providers.php",
       "source_file": "bootstrap/providers.php",
       "source_location": "L1"
+    },
+    {
+      "id": "carbon_carbonimmutable",
+      "label": "Carbon\\CarbonImmutable",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "carbon\\carbonimmutable",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "id": "carbon_carboninterface",
@@ -7488,46 +7480,46 @@
       "source_location": ""
     },
     {
-      "id": "illuminate_database_eloquent_attributes_fillable",
-      "label": "Illuminate\\Database\\Eloquent\\Attributes\\Fillable",
+      "id": "config_cache",
+      "label": "cache.php",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\attributes\\fillable",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "cache.php",
+      "source_file": "config/cache.php",
+      "source_location": "L1"
     },
     {
-      "id": "illuminate_database_eloquent_model",
-      "label": "Illuminate\\Database\\Eloquent\\Model",
+      "id": "config_database",
+      "label": "database.php",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\model",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "database.php",
+      "source_file": "config/database.php",
+      "source_location": "L1"
     },
     {
-      "id": "illuminate_database_eloquent_relations_belongsto",
-      "label": "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+      "id": "config_session",
+      "label": "session.php",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\relations\\belongsto",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "session.php",
+      "source_file": "config/session.php",
+      "source_location": "L1"
     },
     {
-      "id": "illuminate_database_eloquent_relations_hasone",
-      "label": "Illuminate\\Database\\Eloquent\\Relations\\HasOne",
+      "id": "illuminate_http_uploadedfile",
+      "label": "Illuminate\\Http\\UploadedFile",
       "_origin": "ast",
       "community": 18,
       "community_name": "AccountStats",
       "file_type": "code",
-      "norm_label": "illuminate\\database\\eloquent\\relations\\hasone",
+      "norm_label": "illuminate\\http\\uploadedfile",
       "source_file": "",
       "source_location": ""
     },
@@ -7554,6 +7546,17 @@
       "source_location": ""
     },
     {
+      "id": "illuminate_support_facades_storage",
+      "label": "Illuminate\\Support\\Facades\\Storage",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "illuminate\\support\\facades\\storage",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "illuminate_support_serviceprovider",
       "label": "Illuminate\\Support\\ServiceProvider",
       "_origin": "ast",
@@ -7563,6 +7566,61 @@
       "norm_label": "illuminate\\support\\serviceprovider",
       "source_file": "",
       "source_location": ""
+    },
+    {
+      "id": "illuminate_support_str",
+      "label": "Illuminate\\Support\\Str",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "illuminate\\support\\str",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "pdo_mysql",
+      "label": "Pdo\\Mysql",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "pdo\\mysql",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "symfony_component_httpfoundation_streamedresponse",
+      "label": "Symfony\\Component\\HttpFoundation\\StreamedResponse",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "symfony\\component\\httpfoundation\\streamedresponse",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "tests_feature_journaltest",
+      "label": "JournalTest.php",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "journaltest.php",
+      "source_file": "tests/Feature/JournalTest.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_feature_tradeimporttest",
+      "label": "TradeImportTest.php",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AccountStats",
+      "file_type": "code",
+      "norm_label": "tradeimporttest.php",
+      "source_file": "tests/Feature/TradeImportTest.php",
+      "source_location": "L1"
     },
     {
       "id": "package_dependencies",
@@ -7587,15 +7645,15 @@
       "source_location": "L29"
     },
     {
-      "id": "package_dependencies_inertiajs_vue3",
-      "label": "@inertiajs/vue3",
+      "id": "package_dependencies_clsx",
+      "label": "clsx",
       "_origin": "ast",
       "community": 19,
       "community_name": "dependencies",
       "file_type": "code",
-      "norm_label": "@inertiajs/vue3",
+      "norm_label": "clsx",
       "source_file": "package.json",
-      "source_location": "L26"
+      "source_location": "L30"
     },
     {
       "id": "package_dependencies_lucide_vue",
@@ -7686,15 +7744,15 @@
       "source_location": "L29"
     },
     {
-      "id": "inertiajs_vue3",
-      "label": "@inertiajs/vue3",
+      "id": "clsx",
+      "label": "clsx",
       "_origin": "ast",
       "community": 19,
       "community_name": "dependencies",
       "file_type": "concept",
-      "norm_label": "@inertiajs/vue3",
+      "norm_label": "clsx",
       "source_file": "package.json",
-      "source_location": "L26"
+      "source_location": "L30"
     },
     {
       "id": "lucide_vue",
@@ -8049,59 +8107,103 @@
       "source_location": "L1"
     },
     {
-      "id": "resources_js_pages_profile",
-      "label": "Profile.vue",
+      "id": "app_models_account",
+      "label": "Account.php",
       "_origin": "ast",
       "community": 21,
-      "community_name": "Profile.vue",
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
       "file_type": "code",
-      "norm_label": "profile.vue",
-      "source_file": "resources/js/pages/Profile.vue",
+      "norm_label": "account.php",
+      "source_file": "app/Models/Account.php",
       "source_location": "L1"
     },
     {
-      "id": "resources_js_pages_profile_confirming",
-      "label": "confirming",
+      "id": "app_models_accountrule",
+      "label": "AccountRule.php",
       "_origin": "ast",
       "community": 21,
-      "community_name": "Profile.vue",
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
       "file_type": "code",
-      "norm_label": "confirming",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L27"
+      "norm_label": "accountrule.php",
+      "source_file": "app/Models/AccountRule.php",
+      "source_location": "L1"
     },
     {
-      "id": "resources_js_pages_profile_profile",
-      "label": "profile",
+      "id": "app_models_aianalysis",
+      "label": "AiAnalysis.php",
       "_origin": "ast",
       "community": 21,
-      "community_name": "Profile.vue",
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
       "file_type": "code",
-      "norm_label": "profile",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L16"
+      "norm_label": "aianalysis.php",
+      "source_file": "app/Models/AiAnalysis.php",
+      "source_location": "L1"
     },
     {
-      "id": "resources_js_pages_profile_removal",
-      "label": "removal",
+      "id": "app_models_geminikey",
+      "label": "GeminiKey.php",
       "_origin": "ast",
       "community": 21,
-      "community_name": "Profile.vue",
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
       "file_type": "code",
-      "norm_label": "removal",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L28"
+      "norm_label": "geminikey.php",
+      "source_file": "app/Models/GeminiKey.php",
+      "source_location": "L1"
     },
     {
-      "id": "resources_js_pages_profile_takesoverlogin",
-      "label": "takesOverLogin",
+      "id": "app_models_trade",
+      "label": "Trade.php",
       "_origin": "ast",
       "community": 21,
-      "community_name": "Profile.vue",
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
       "file_type": "code",
-      "norm_label": "takesoverlogin",
-      "source_file": "resources/js/pages/Profile.vue",
-      "source_location": "L25"
+      "norm_label": "trade.php",
+      "source_file": "app/Models/Trade.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_models_transaction",
+      "label": "Transaction.php",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": "transaction.php",
+      "source_file": "app/Models/Transaction.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "illuminate_database_eloquent_attributes_fillable",
+      "label": "Illuminate\\Database\\Eloquent\\Attributes\\Fillable",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": "illuminate\\database\\eloquent\\attributes\\fillable",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_database_eloquent_model",
+      "label": "Illuminate\\Database\\Eloquent\\Model",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": "illuminate\\database\\eloquent\\model",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "illuminate_database_eloquent_relations_belongsto",
+      "label": "Illuminate\\Database\\Eloquent\\Relations\\BelongsTo",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "Illuminate\\Database\\Eloquent\\Model",
+      "file_type": "code",
+      "norm_label": "illuminate\\database\\eloquent\\relations\\belongsto",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "id": "components",
@@ -8500,17 +8602,6 @@
       "source_location": "L1"
     },
     {
-      "id": "app_http_middleware_handleinertiarequests",
-      "label": "HandleInertiaRequests.php",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "bootstrap/app.php",
-      "file_type": "code",
-      "norm_label": "handleinertiarequests.php",
-      "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
-      "source_location": "L1"
-    },
-    {
       "id": "app_http_middleware_requireaccount",
       "label": "RequireAccount.php",
       "_origin": "ast",
@@ -8584,17 +8675,6 @@
       "community_name": "bootstrap/app.php",
       "file_type": "code",
       "norm_label": "illuminate\\foundation\\configuration\\middleware",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "inertia_middleware",
-      "label": "Inertia\\Middleware",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "bootstrap/app.php",
-      "file_type": "code",
-      "norm_label": "inertia\\middleware",
       "source_file": "",
       "source_location": ""
     },
@@ -8797,69 +8877,14 @@
       "source_location": "L8"
     },
     {
-      "id": "resources_js_components_statcard",
-      "label": "StatCard.vue",
+      "id": "resources_js_composables_usegroupframe",
+      "label": "useGroupFrame.ts",
       "_origin": "ast",
       "community": 27,
       "community_name": "Dashboard.vue",
       "file_type": "code",
-      "norm_label": "statcard.vue",
-      "source_file": "resources/js/components/StatCard.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_statcard_tones",
-      "label": "tones",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "Dashboard.vue",
-      "file_type": "code",
-      "norm_label": "tones",
-      "source_file": "resources/js/components/StatCard.vue",
-      "source_location": "L9"
-    },
-    {
-      "id": "resources_js_components_ui_badge_badge",
-      "label": "Badge.vue",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "Dashboard.vue",
-      "file_type": "code",
-      "norm_label": "badge.vue",
-      "source_file": "resources/js/components/ui/badge/Badge.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_badge_badge_delegatedprops",
-      "label": "delegatedProps",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "Dashboard.vue",
-      "file_type": "code",
-      "norm_label": "delegatedprops",
-      "source_file": "resources/js/components/ui/badge/Badge.vue",
-      "source_location": "L15"
-    },
-    {
-      "id": "resources_js_components_ui_badge_badge_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "Dashboard.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/ui/badge/Badge.vue",
-      "source_location": "L10"
-    },
-    {
-      "id": "resources_js_components_ui_badge_index",
-      "label": "badge/index.ts",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "Dashboard.vue",
-      "file_type": "code",
-      "norm_label": "badge/index.ts",
-      "source_file": "resources/js/components/ui/badge/index.ts",
+      "norm_label": "usegroupframe.ts",
+      "source_file": "resources/js/composables/useGroupFrame.ts",
       "source_location": "L1"
     },
     {
@@ -9215,39 +9240,6 @@
       "source_location": "L1"
     },
     {
-      "id": "resources_js_components_markdown",
-      "label": "Markdown.vue",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "Rules.vue",
-      "file_type": "code",
-      "norm_label": "markdown.vue",
-      "source_file": "resources/js/components/Markdown.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_markdown_html",
-      "label": "html",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "Rules.vue",
-      "file_type": "code",
-      "norm_label": "html",
-      "source_file": "resources/js/components/Markdown.vue",
-      "source_location": "L9"
-    },
-    {
-      "id": "resources_js_components_markdown_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "Rules.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/Markdown.vue",
-      "source_location": "L5"
-    },
-    {
       "id": "resources_js_pages_rules",
       "label": "Rules.vue",
       "_origin": "ast",
@@ -9589,6 +9581,50 @@
       "source_location": "L1"
     },
     {
+      "id": "resources_js_components_ui_badge_badge",
+      "label": "Badge.vue",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Calendar.vue",
+      "file_type": "code",
+      "norm_label": "badge.vue",
+      "source_file": "resources/js/components/ui/badge/Badge.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_badge_badge_delegatedprops",
+      "label": "delegatedProps",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Calendar.vue",
+      "file_type": "code",
+      "norm_label": "delegatedprops",
+      "source_file": "resources/js/components/ui/badge/Badge.vue",
+      "source_location": "L15"
+    },
+    {
+      "id": "resources_js_components_ui_badge_badge_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Calendar.vue",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/badge/Badge.vue",
+      "source_location": "L10"
+    },
+    {
+      "id": "resources_js_components_ui_badge_index",
+      "label": "badge/index.ts",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Calendar.vue",
+      "file_type": "code",
+      "norm_label": "badge/index.ts",
+      "source_file": "resources/js/components/ui/badge/index.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "resources_js_pages_calendar",
       "label": "Calendar.vue",
       "_origin": "ast",
@@ -9765,6 +9801,17 @@
       "source_location": "L1"
     },
     {
+      "id": "resources_js_components_ui_label_index",
+      "label": "label/index.ts",
+      "_origin": "ast",
+      "community": 32,
+      "community_name": "input/index.ts",
+      "file_type": "code",
+      "norm_label": "label/index.ts",
+      "source_file": "resources/js/components/ui/label/index.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "resources_js_pages_login",
       "label": "Login.vue",
       "_origin": "ast",
@@ -9809,6 +9856,61 @@
       "source_location": "L18"
     },
     {
+      "id": "resources_js_pages_profile",
+      "label": "Profile.vue",
+      "_origin": "ast",
+      "community": 32,
+      "community_name": "input/index.ts",
+      "file_type": "code",
+      "norm_label": "profile.vue",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_pages_profile_confirming",
+      "label": "confirming",
+      "_origin": "ast",
+      "community": 32,
+      "community_name": "input/index.ts",
+      "file_type": "code",
+      "norm_label": "confirming",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L27"
+    },
+    {
+      "id": "resources_js_pages_profile_profile",
+      "label": "profile",
+      "_origin": "ast",
+      "community": 32,
+      "community_name": "input/index.ts",
+      "file_type": "code",
+      "norm_label": "profile",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L16"
+    },
+    {
+      "id": "resources_js_pages_profile_removal",
+      "label": "removal",
+      "_origin": "ast",
+      "community": 32,
+      "community_name": "input/index.ts",
+      "file_type": "code",
+      "norm_label": "removal",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L28"
+    },
+    {
+      "id": "resources_js_pages_profile_takesoverlogin",
+      "label": "takesOverLogin",
+      "_origin": "ast",
+      "community": 32,
+      "community_name": "input/index.ts",
+      "file_type": "code",
+      "norm_label": "takesoverlogin",
+      "source_file": "resources/js/pages/Profile.vue",
+      "source_location": "L25"
+    },
+    {
       "id": "resources_js_pages_register",
       "label": "Register.vue",
       "_origin": "ast",
@@ -9829,17 +9931,6 @@
       "norm_label": "form",
       "source_file": "resources/js/pages/Register.vue",
       "source_location": "L11"
-    },
-    {
-      "id": "resources_js_composables_usegroupframe",
-      "label": "useGroupFrame.ts",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "Index.vue",
-      "file_type": "code",
-      "norm_label": "usegroupframe.ts",
-      "source_file": "resources/js/composables/useGroupFrame.ts",
-      "source_location": "L1"
     },
     {
       "id": "resources_js_pages_trades_index",
@@ -9873,6 +9964,17 @@
       "norm_label": "currency",
       "source_file": "resources/js/pages/Trades/Index.vue",
       "source_location": "L27"
+    },
+    {
+      "id": "resources_js_pages_trades_index_detail",
+      "label": "detail",
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "Index.vue",
+      "file_type": "code",
+      "norm_label": "detail",
+      "source_file": "resources/js/pages/Trades/Index.vue",
+      "source_location": "L242"
     },
     {
       "id": "resources_js_pages_trades_index_direction",
@@ -9961,6 +10063,17 @@
       "norm_label": "props",
       "source_file": "resources/js/pages/Trades/Index.vue",
       "source_location": "L20"
+    },
+    {
+      "id": "resources_js_pages_trades_index_rows",
+      "label": "rows",
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "Index.vue",
+      "file_type": "code",
+      "norm_label": "rows",
+      "source_file": "resources/js/pages/Trades/Index.vue",
+      "source_location": "L209"
     },
     {
       "id": "resources_js_pages_trades_index_selected",
@@ -10282,103 +10395,147 @@
       "source_location": "L23"
     },
     {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenusub",
-      "label": "DropdownMenuSub.vue",
+      "id": "resources_js_components_aiimportdialog",
+      "label": "AiImportDialog.vue",
       "_origin": "ast",
       "community": 39,
-      "community_name": "DropdownMenuSub.vue",
+      "community_name": "AiImportDialog.vue",
       "file_type": "code",
-      "norm_label": "dropdownmenusub.vue",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuSub.vue",
+      "norm_label": "aiimportdialog.vue",
+      "source_file": "resources/js/components/AiImportDialog.vue",
       "source_location": "L1"
     },
     {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenusub_emits",
-      "label": "emits",
+      "id": "resources_js_components_aiimportdialog_busy",
+      "label": "busy",
       "_origin": "ast",
       "community": 39,
-      "community_name": "DropdownMenuSub.vue",
+      "community_name": "AiImportDialog.vue",
       "file_type": "code",
-      "norm_label": "emits",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuSub.vue",
-      "source_location": "L9"
+      "norm_label": "busy",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L27"
     },
     {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenusub_forwarded",
-      "label": "forwarded",
+      "id": "resources_js_components_aiimportdialog_emit",
+      "label": "emit",
       "_origin": "ast",
       "community": 39,
-      "community_name": "DropdownMenuSub.vue",
+      "community_name": "AiImportDialog.vue",
       "file_type": "code",
-      "norm_label": "forwarded",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuSub.vue",
-      "source_location": "L11"
-    },
-    {
-      "id": "resources_js_components_ui_dropdown_menu_dropdownmenusub_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "DropdownMenuSub.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuSub.vue",
-      "source_location": "L8"
-    },
-    {
-      "id": "app_http_controllers_tradecontroller",
-      "label": "TradeController.php",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "TradeController",
-      "file_type": "code",
-      "norm_label": "tradecontroller.php",
-      "source_file": "app/Http/Controllers/TradeController.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_select_selecttrigger",
-      "label": "SelectTrigger.vue",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "SelectTrigger.vue",
-      "file_type": "code",
-      "norm_label": "selecttrigger.vue",
-      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_select_selecttrigger_delegatedprops",
-      "label": "delegatedProps",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "SelectTrigger.vue",
-      "file_type": "code",
-      "norm_label": "delegatedprops",
-      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
-      "source_location": "L14"
-    },
-    {
-      "id": "resources_js_components_ui_select_selecttrigger_forwardedprops",
-      "label": "forwardedProps",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "SelectTrigger.vue",
-      "file_type": "code",
-      "norm_label": "forwardedprops",
-      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "norm_label": "emit",
+      "source_file": "resources/js/components/AiImportDialog.vue",
       "source_location": "L15"
     },
     {
-      "id": "resources_js_components_ui_select_selecttrigger_props",
+      "id": "resources_js_components_aiimportdialog_error",
+      "label": "error",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "error",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L28"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_file",
+      "label": "file",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "file",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L30"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_open",
+      "label": "open",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "open",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L26"
+    },
+    {
+      "id": "resources_js_components_aiimportdialog_preview",
+      "label": "preview",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "AiImportDialog.vue",
+      "file_type": "code",
+      "norm_label": "preview",
+      "source_file": "resources/js/components/AiImportDialog.vue",
+      "source_location": "L29"
+    },
+    {
+      "id": "resources_js_components_setuppicker",
+      "label": "SetupPicker.vue",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "SetupPicker.vue",
+      "file_type": "code",
+      "norm_label": "setuppicker.vue",
+      "source_file": "resources/js/components/SetupPicker.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_setuppicker_emit",
+      "label": "emit",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "SetupPicker.vue",
+      "file_type": "code",
+      "norm_label": "emit",
+      "source_file": "resources/js/components/SetupPicker.vue",
+      "source_location": "L43"
+    },
+    {
+      "id": "resources_js_components_setuppicker_options",
+      "label": "options",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "SetupPicker.vue",
+      "file_type": "code",
+      "norm_label": "options",
+      "source_file": "resources/js/components/SetupPicker.vue",
+      "source_location": "L50"
+    },
+    {
+      "id": "resources_js_components_setuppicker_props",
       "label": "props",
       "_origin": "ast",
       "community": 40,
-      "community_name": "SelectTrigger.vue",
+      "community_name": "SetupPicker.vue",
       "file_type": "code",
       "norm_label": "props",
-      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
-      "source_location": "L9"
+      "source_file": "resources/js/components/SetupPicker.vue",
+      "source_location": "L42"
+    },
+    {
+      "id": "resources_js_components_setuppicker_selected",
+      "label": "selected",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "SetupPicker.vue",
+      "file_type": "code",
+      "norm_label": "selected",
+      "source_file": "resources/js/components/SetupPicker.vue",
+      "source_location": "L45"
+    },
+    {
+      "id": "resources_js_components_setuppicker_setups",
+      "label": "SETUPS",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "SetupPicker.vue",
+      "file_type": "code",
+      "norm_label": "setups",
+      "source_file": "resources/js/components/SetupPicker.vue",
+      "source_location": "L10"
     },
     {
       "id": "resources_js_components_pagination",
@@ -10456,160 +10613,6 @@
       "norm_label": "types/index.ts",
       "source_file": "resources/js/types/index.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "tests_feature_journaltest",
-      "label": "JournalTest.php",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "Trade",
-      "file_type": "code",
-      "norm_label": "journaltest.php",
-      "source_file": "tests/Feature/JournalTest.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog",
-      "label": "AiImportDialog.vue",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "aiimportdialog.vue",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_busy",
-      "label": "busy",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "busy",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L27"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_emit",
-      "label": "emit",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "emit",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L15"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_error",
-      "label": "error",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "error",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L28"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_file",
-      "label": "file",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "file",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L30"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_open",
-      "label": "open",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "open",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L26"
-    },
-    {
-      "id": "resources_js_components_aiimportdialog_preview",
-      "label": "preview",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "preview",
-      "source_file": "resources/js/components/AiImportDialog.vue",
-      "source_location": "L29"
-    },
-    {
-      "id": "resources_js_components_setuppicker",
-      "label": "SetupPicker.vue",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "setuppicker.vue",
-      "source_file": "resources/js/components/SetupPicker.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_setuppicker_emit",
-      "label": "emit",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "emit",
-      "source_file": "resources/js/components/SetupPicker.vue",
-      "source_location": "L43"
-    },
-    {
-      "id": "resources_js_components_setuppicker_options",
-      "label": "options",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "options",
-      "source_file": "resources/js/components/SetupPicker.vue",
-      "source_location": "L50"
-    },
-    {
-      "id": "resources_js_components_setuppicker_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/SetupPicker.vue",
-      "source_location": "L42"
-    },
-    {
-      "id": "resources_js_components_setuppicker_selected",
-      "label": "selected",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "selected",
-      "source_file": "resources/js/components/SetupPicker.vue",
-      "source_location": "L45"
-    },
-    {
-      "id": "resources_js_components_setuppicker_setups",
-      "label": "SETUPS",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "Form.vue",
-      "file_type": "code",
-      "norm_label": "setups",
-      "source_file": "resources/js/components/SetupPicker.vue",
-      "source_location": "L10"
     },
     {
       "id": "resources_js_components_ui_textarea_index",
@@ -11107,6 +11110,50 @@
       "source_location": "L5"
     },
     {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenusub",
+      "label": "DropdownMenuSub.vue",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "dropdownmenusub.vue",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuSub.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenusub_emits",
+      "label": "emits",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "emits",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuSub.vue",
+      "source_location": "L9"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenusub_forwarded",
+      "label": "forwarded",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "forwarded",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuSub.vue",
+      "source_location": "L11"
+    },
+    {
+      "id": "resources_js_components_ui_dropdown_menu_dropdownmenusub_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dropdown-menu/index.ts",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/dropdown-menu/DropdownMenuSub.vue",
+      "source_location": "L8"
+    },
+    {
       "id": "resources_js_components_ui_dropdown_menu_dropdownmenusubtrigger",
       "label": "DropdownMenuSubTrigger.vue",
       "_origin": "ast",
@@ -11349,17 +11396,6 @@
       "source_location": "L1"
     },
     {
-      "id": "tests_feature_tradegrouptest",
-      "label": "TradeGroupTest.php",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": "Account",
-      "file_type": "code",
-      "norm_label": "tradegrouptest.php",
-      "source_file": "tests/Feature/TradeGroupTest.php",
-      "source_location": "L1"
-    },
-    {
       "id": "resources_js_components_ui_dropdown_menu_dropdownmenucontent",
       "label": "DropdownMenuContent.vue",
       "_origin": "ast",
@@ -11459,15 +11495,15 @@
       "source_location": "L6"
     },
     {
-      "id": "app_http_controllers_accountcontroller",
-      "label": "AccountController.php",
+      "id": "illuminate_database_eloquent_relations_hasone",
+      "label": "Illuminate\\Database\\Eloquent\\Relations\\HasOne",
       "_origin": "ast",
       "community": 57,
       "community_name": "Illuminate\\Http\\RedirectResponse",
       "file_type": "code",
-      "norm_label": "accountcontroller.php",
-      "source_file": "app/Http/Controllers/AccountController.php",
-      "source_location": "L1"
+      "norm_label": "illuminate\\database\\eloquent\\relations\\hasone",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "id": "illuminate_http_redirectresponse",
@@ -11477,6 +11513,17 @@
       "community_name": "Illuminate\\Http\\RedirectResponse",
       "file_type": "code",
       "norm_label": "illuminate\\http\\redirectresponse",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "symfony_component_httpfoundation_binaryfileresponse",
+      "label": "Symfony\\Component\\HttpFoundation\\BinaryFileResponse",
+      "_origin": "ast",
+      "community": 57,
+      "community_name": "Illuminate\\Http\\RedirectResponse",
+      "file_type": "code",
+      "norm_label": "symfony\\component\\httpfoundation\\binaryfileresponse",
       "source_file": "",
       "source_location": ""
     },
@@ -11701,28 +11748,6 @@
       "source_location": "L52"
     },
     {
-      "id": "app_http_controllers_controller",
-      "label": "Controller.php",
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": "controller.php",
-      "source_file": "app/Http/Controllers/Controller.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "routes_web",
-      "label": "web.php",
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "Controller",
-      "file_type": "code",
-      "norm_label": "web.php",
-      "source_file": "routes/web.php",
-      "source_location": "L1"
-    },
-    {
       "id": "package_devdependencies_types_node",
       "label": "@types/node",
       "_origin": "ast",
@@ -11899,6 +11924,17 @@
       "source_location": "L1"
     },
     {
+      "id": "app_services_annualreport_php_carbonimmutable",
+      "label": "CarbonImmutable",
+      "_origin": "ast",
+      "community": 66,
+      "community_name": "BackupDatabase",
+      "file_type": "code",
+      "norm_label": "carbonimmutable",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "illuminate_console_command",
       "label": "Illuminate\\Console\\Command",
       "_origin": "ast",
@@ -11906,17 +11942,6 @@
       "community_name": "BackupDatabase",
       "file_type": "code",
       "norm_label": "illuminate\\console\\command",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_foundation_inspiring",
-      "label": "Illuminate\\Foundation\\Inspiring",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "BackupDatabase",
-      "file_type": "code",
-      "norm_label": "illuminate\\foundation\\inspiring",
       "source_file": "",
       "source_location": ""
     },
@@ -11932,28 +11957,6 @@
       "source_location": ""
     },
     {
-      "id": "illuminate_support_facades_artisan",
-      "label": "Illuminate\\Support\\Facades\\Artisan",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "BackupDatabase",
-      "file_type": "code",
-      "norm_label": "illuminate\\support\\facades\\artisan",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "illuminate_support_facades_file",
-      "label": "Illuminate\\Support\\Facades\\File",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "BackupDatabase",
-      "file_type": "code",
-      "norm_label": "illuminate\\support\\facades\\file",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "illuminate_support_facades_process",
       "label": "Illuminate\\Support\\Facades\\Process",
       "_origin": "ast",
@@ -11965,26 +11968,15 @@
       "source_location": ""
     },
     {
-      "id": "illuminate_support_facades_schedule",
-      "label": "Illuminate\\Support\\Facades\\Schedule",
+      "id": "self",
+      "label": "self",
       "_origin": "ast",
       "community": 66,
       "community_name": "BackupDatabase",
       "file_type": "code",
-      "norm_label": "illuminate\\support\\facades\\schedule",
+      "norm_label": "self",
       "source_file": "",
       "source_location": ""
-    },
-    {
-      "id": "routes_console",
-      "label": "console.php",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "BackupDatabase",
-      "file_type": "code",
-      "norm_label": "console.php",
-      "source_file": "routes/console.php",
-      "source_location": "L1"
     },
     {
       "id": "resources_js_components_ui_dialog_dialogcontent",
@@ -12238,17 +12230,6 @@
       "norm_label": "digits",
       "source_file": "resources/js/composables/useFormat.ts",
       "source_location": "L21"
-    },
-    {
-      "id": "resources_js_pages_trades_index_detail",
-      "label": "detail",
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "useFormat.ts",
-      "file_type": "code",
-      "norm_label": "detail",
-      "source_file": "resources/js/pages/Trades/Index.vue",
-      "source_location": "L242"
     },
     {
       "id": "resources_js_components_ui_select_index",
@@ -12535,6 +12516,50 @@
       "norm_label": "props",
       "source_file": "resources/js/components/ui/select/SelectSeparator.vue",
       "source_location": "L8"
+    },
+    {
+      "id": "resources_js_components_ui_select_selecttrigger",
+      "label": "SelectTrigger.vue",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "select/index.ts",
+      "file_type": "code",
+      "norm_label": "selecttrigger.vue",
+      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_ui_select_selecttrigger_delegatedprops",
+      "label": "delegatedProps",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "select/index.ts",
+      "file_type": "code",
+      "norm_label": "delegatedprops",
+      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "source_location": "L14"
+    },
+    {
+      "id": "resources_js_components_ui_select_selecttrigger_forwardedprops",
+      "label": "forwardedProps",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "select/index.ts",
+      "file_type": "code",
+      "norm_label": "forwardedprops",
+      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "source_location": "L15"
+    },
+    {
+      "id": "resources_js_components_ui_select_selecttrigger_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "select/index.ts",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/ui/select/SelectTrigger.vue",
+      "source_location": "L9"
     },
     {
       "id": "resources_js_components_ui_select_selectvalue",
@@ -13010,6 +13035,28 @@
       "source_location": "L1"
     },
     {
+      "id": "app_http_middleware_handleinertiarequests",
+      "label": "HandleInertiaRequests.php",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": "handleinertiarequests.php",
+      "source_file": "app/Http/Middleware/HandleInertiaRequests.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "illuminate_http_jsonresponse",
+      "label": "Illuminate\\Http\\JsonResponse",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": "illuminate\\http\\jsonresponse",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "illuminate_http_request",
       "label": "Illuminate\\Http\\Request",
       "_origin": "ast",
@@ -13017,6 +13064,17 @@
       "community_name": "Illuminate\\Http\\Request",
       "file_type": "code",
       "norm_label": "illuminate\\http\\request",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "inertia_middleware",
+      "label": "Inertia\\Middleware",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Illuminate\\Http\\Request",
+      "file_type": "code",
+      "norm_label": "inertia\\middleware",
       "source_file": "",
       "source_location": ""
     },
@@ -13186,47 +13244,47 @@
       "source_location": "L18"
     },
     {
-      "id": "app_services_uploads",
-      "label": "Uploads.php",
+      "id": "illuminate_foundation_inspiring",
+      "label": "Illuminate\\Foundation\\Inspiring",
       "_origin": "ast",
       "community": 85,
-      "community_name": "TransactionController",
+      "community_name": "console.php",
       "file_type": "code",
-      "norm_label": "uploads.php",
-      "source_file": "app/Services/Uploads.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "illuminate_http_uploadedfile",
-      "label": "Illuminate\\Http\\UploadedFile",
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "TransactionController",
-      "file_type": "code",
-      "norm_label": "illuminate\\http\\uploadedfile",
+      "norm_label": "illuminate\\foundation\\inspiring",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "symfony_component_httpfoundation_streamedresponse",
-      "label": "Symfony\\Component\\HttpFoundation\\StreamedResponse",
+      "id": "illuminate_support_facades_artisan",
+      "label": "Illuminate\\Support\\Facades\\Artisan",
       "_origin": "ast",
       "community": 85,
-      "community_name": "TransactionController",
+      "community_name": "console.php",
       "file_type": "code",
-      "norm_label": "symfony\\component\\httpfoundation\\streamedresponse",
+      "norm_label": "illuminate\\support\\facades\\artisan",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "app_http_controllers_calendarcontroller",
-      "label": "CalendarController.php",
+      "id": "illuminate_support_facades_schedule",
+      "label": "Illuminate\\Support\\Facades\\Schedule",
       "_origin": "ast",
-      "community": 86,
-      "community_name": "Inertia\\Response",
+      "community": 85,
+      "community_name": "console.php",
       "file_type": "code",
-      "norm_label": "calendarcontroller.php",
-      "source_file": "app/Http/Controllers/CalendarController.php",
+      "norm_label": "illuminate\\support\\facades\\schedule",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "routes_console",
+      "label": "console.php",
+      "_origin": "ast",
+      "community": 85,
+      "community_name": "console.php",
+      "file_type": "code",
+      "norm_label": "console.php",
+      "source_file": "routes/console.php",
       "source_location": "L1"
     },
     {
@@ -13234,62 +13292,51 @@
       "label": "CarbonImmutable",
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
       "norm_label": "carbonimmutable",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "app_http_controllers_dashboardcontroller",
-      "label": "DashboardController.php",
+      "id": "app_http_controllers_controller",
+      "label": "Controller.php",
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
-      "norm_label": "dashboardcontroller.php",
-      "source_file": "app/Http/Controllers/DashboardController.php",
+      "norm_label": "controller.php",
+      "source_file": "app/Http/Controllers/Controller.php",
       "source_location": "L1"
     },
     {
-      "id": "app_http_controllers_rulecontroller",
-      "label": "RuleController.php",
+      "id": "routes_web",
+      "label": "web.php",
       "_origin": "ast",
       "community": 86,
-      "community_name": "Inertia\\Response",
+      "community_name": "Controller",
       "file_type": "code",
-      "norm_label": "rulecontroller.php",
-      "source_file": "app/Http/Controllers/RuleController.php",
+      "norm_label": "web.php",
+      "source_file": "routes/web.php",
       "source_location": "L1"
     },
     {
-      "id": "carbon_carbonimmutable",
-      "label": "Carbon\\CarbonImmutable",
+      "id": "app_http_controllers_accountcontroller",
+      "label": "AccountController.php",
       "_origin": "ast",
-      "community": 86,
+      "community": 87,
       "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": "carbon\\carbonimmutable",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "inertia_response",
-      "label": "Inertia\\Response",
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "Inertia\\Response",
-      "file_type": "code",
-      "norm_label": "inertia\\response",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "accountcontroller.php",
+      "source_file": "app/Http/Controllers/AccountController.php",
+      "source_location": "L1"
     },
     {
       "id": "app_http_controllers_admincontroller",
       "label": "AdminController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "admincontroller.php",
       "source_file": "app/Http/Controllers/AdminController.php",
@@ -13300,7 +13347,7 @@
       "label": "LoginController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "logincontroller.php",
       "source_file": "app/Http/Controllers/Auth/LoginController.php",
@@ -13311,10 +13358,32 @@
       "label": "RegisterController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "registercontroller.php",
       "source_file": "app/Http/Controllers/Auth/RegisterController.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_http_controllers_calendarcontroller",
+      "label": "CalendarController.php",
+      "_origin": "ast",
+      "community": 87,
+      "community_name": "Inertia\\Response",
+      "file_type": "code",
+      "norm_label": "calendarcontroller.php",
+      "source_file": "app/Http/Controllers/CalendarController.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_http_controllers_dashboardcontroller",
+      "label": "DashboardController.php",
+      "_origin": "ast",
+      "community": 87,
+      "community_name": "Inertia\\Response",
+      "file_type": "code",
+      "norm_label": "dashboardcontroller.php",
+      "source_file": "app/Http/Controllers/DashboardController.php",
       "source_location": "L1"
     },
     {
@@ -13322,21 +13391,32 @@
       "label": "ProfileController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "profilecontroller.php",
       "source_file": "app/Http/Controllers/ProfileController.php",
       "source_location": "L1"
     },
     {
-      "id": "app_http_controllers_transactioncontroller",
-      "label": "TransactionController.php",
+      "id": "app_http_controllers_rulecontroller",
+      "label": "RuleController.php",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": "transactioncontroller.php",
-      "source_file": "app/Http/Controllers/TransactionController.php",
+      "norm_label": "rulecontroller.php",
+      "source_file": "app/Http/Controllers/RuleController.php",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_http_controllers_tradecontroller",
+      "label": "TradeController.php",
+      "_origin": "ast",
+      "community": 87,
+      "community_name": "Inertia\\Response",
+      "file_type": "code",
+      "norm_label": "tradecontroller.php",
+      "source_file": "app/Http/Controllers/TradeController.php",
       "source_location": "L1"
     },
     {
@@ -13344,7 +13424,7 @@
       "label": "Illuminate\\Auth\\Events\\Lockout",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "illuminate\\auth\\events\\lockout",
       "source_file": "",
@@ -13355,7 +13435,7 @@
       "label": "Illuminate\\Support\\Facades\\Auth",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "illuminate\\support\\facades\\auth",
       "source_file": "",
@@ -13366,7 +13446,7 @@
       "label": "Illuminate\\Support\\Facades\\RateLimiter",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "illuminate\\support\\facades\\ratelimiter",
       "source_file": "",
@@ -13377,7 +13457,7 @@
       "label": "Illuminate\\Validation\\Rule",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "illuminate\\validation\\rule",
       "source_file": "",
@@ -13388,7 +13468,7 @@
       "label": "Illuminate\\Validation\\Rules\\Password",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "illuminate\\validation\\rules\\password",
       "source_file": "",
@@ -13399,7 +13479,7 @@
       "label": "Illuminate\\Validation\\ValidationException",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "illuminate\\validation\\validationexception",
       "source_file": "",
@@ -13410,20 +13490,20 @@
       "label": "Inertia\\Inertia",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
       "norm_label": "inertia\\inertia",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "symfony_component_httpfoundation_binaryfileresponse",
-      "label": "Symfony\\Component\\HttpFoundation\\BinaryFileResponse",
+      "id": "inertia_response",
+      "label": "Inertia\\Response",
       "_origin": "ast",
       "community": 87,
-      "community_name": "AdminController.php",
+      "community_name": "Inertia\\Response",
       "file_type": "code",
-      "norm_label": "symfony\\component\\httpfoundation\\binaryfileresponse",
+      "norm_label": "inertia\\response",
       "source_file": "",
       "source_location": ""
     },
@@ -13758,6 +13838,17 @@
       "source_location": "L1"
     },
     {
+      "id": "tests_feature_analysistest",
+      "label": "AnalysisTest.php",
+      "_origin": "ast",
+      "community": 92,
+      "community_name": "AiAnalysis",
+      "file_type": "code",
+      "norm_label": "analysistest.php",
+      "source_file": "tests/Feature/AnalysisTest.php",
+      "source_location": "L1"
+    },
+    {
       "id": "package_devdependencies_vitejs_plugin_vue",
       "label": "@vitejs/plugin-vue",
       "_origin": "ast",
@@ -13788,39 +13879,6 @@
       "file_type": "code",
       "norm_label": "reportcontroller.php",
       "source_file": "app/Http/Controllers/ReportController.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "config_cache",
-      "label": "cache.php",
-      "_origin": "ast",
-      "community": 94,
-      "community_name": "ReportController.php",
-      "file_type": "code",
-      "norm_label": "cache.php",
-      "source_file": "config/cache.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "config_database",
-      "label": "database.php",
-      "_origin": "ast",
-      "community": 94,
-      "community_name": "ReportController.php",
-      "file_type": "code",
-      "norm_label": "database.php",
-      "source_file": "config/database.php",
-      "source_location": "L1"
-    },
-    {
-      "id": "config_session",
-      "label": "session.php",
-      "_origin": "ast",
-      "community": 94,
-      "community_name": "ReportController.php",
-      "file_type": "code",
-      "norm_label": "session.php",
-      "source_file": "config/session.php",
       "source_location": "L1"
     },
     {
@@ -13857,26 +13915,59 @@
       "source_location": ""
     },
     {
-      "id": "illuminate_support_str",
-      "label": "Illuminate\\Support\\Str",
+      "id": "resources_js_components_markdown",
+      "label": "Markdown.vue",
       "_origin": "ast",
-      "community": 94,
-      "community_name": "ReportController.php",
+      "community": 95,
+      "community_name": "Analysis.vue",
       "file_type": "code",
-      "norm_label": "illuminate\\support\\str",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "markdown.vue",
+      "source_file": "resources/js/components/Markdown.vue",
+      "source_location": "L1"
     },
     {
-      "id": "pdo_mysql",
-      "label": "Pdo\\Mysql",
+      "id": "resources_js_components_markdown_html",
+      "label": "html",
       "_origin": "ast",
-      "community": 94,
-      "community_name": "ReportController.php",
+      "community": 95,
+      "community_name": "Analysis.vue",
       "file_type": "code",
-      "norm_label": "pdo\\mysql",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "html",
+      "source_file": "resources/js/components/Markdown.vue",
+      "source_location": "L9"
+    },
+    {
+      "id": "resources_js_components_markdown_props",
+      "label": "props",
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "Analysis.vue",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "resources/js/components/Markdown.vue",
+      "source_location": "L5"
+    },
+    {
+      "id": "resources_js_components_statcard",
+      "label": "StatCard.vue",
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "Analysis.vue",
+      "file_type": "code",
+      "norm_label": "statcard.vue",
+      "source_file": "resources/js/components/StatCard.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "resources_js_components_statcard_tones",
+      "label": "tones",
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "Analysis.vue",
+      "file_type": "code",
+      "norm_label": "tones",
+      "source_file": "resources/js/components/StatCard.vue",
+      "source_location": "L9"
     },
     {
       "id": "resources_js_pages_analysis",
@@ -13932,17 +14023,6 @@
       "norm_label": "props",
       "source_file": "resources/js/pages/Analysis.vue",
       "source_location": "L12"
-    },
-    {
-      "id": "resources_js_pages_trades_index_rows",
-      "label": "rows",
-      "_origin": "ast",
-      "community": 95,
-      "community_name": "Analysis.vue",
-      "file_type": "code",
-      "norm_label": "rows",
-      "source_file": "resources/js/pages/Trades/Index.vue",
-      "source_location": "L209"
     },
     {
       "id": "resources_js_pages_report",
@@ -14088,50 +14168,6 @@
       "source_location": "L25"
     },
     {
-      "id": "resources_js_components_ui_label_index",
-      "label": "label/index.ts",
-      "_origin": "ast",
-      "community": 97,
-      "community_name": "ConfirmDestroy.vue",
-      "file_type": "code",
-      "norm_label": "label/index.ts",
-      "source_file": "resources/js/components/ui/label/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_label_label",
-      "label": "Label.vue",
-      "_origin": "ast",
-      "community": 97,
-      "community_name": "ConfirmDestroy.vue",
-      "file_type": "code",
-      "norm_label": "label.vue",
-      "source_file": "resources/js/components/ui/label/Label.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "resources_js_components_ui_label_label_delegatedprops",
-      "label": "delegatedProps",
-      "_origin": "ast",
-      "community": 97,
-      "community_name": "ConfirmDestroy.vue",
-      "file_type": "code",
-      "norm_label": "delegatedprops",
-      "source_file": "resources/js/components/ui/label/Label.vue",
-      "source_location": "L10"
-    },
-    {
-      "id": "resources_js_components_ui_label_label_props",
-      "label": "props",
-      "_origin": "ast",
-      "community": 97,
-      "community_name": "ConfirmDestroy.vue",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "resources/js/components/ui/label/Label.vue",
-      "source_location": "L8"
-    },
-    {
       "id": "database_seeders_databaseseeder",
       "label": "DatabaseSeeder.php",
       "_origin": "ast",
@@ -14165,26 +14201,26 @@
       "source_location": ""
     },
     {
-      "id": "package_dependencies_clsx",
-      "label": "clsx",
+      "id": "package_dependencies_inertiajs_vue3",
+      "label": "@inertiajs/vue3",
       "_origin": "ast",
       "community": 99,
-      "community_name": "clsx",
+      "community_name": "@inertiajs/vue3",
       "file_type": "code",
-      "norm_label": "clsx",
+      "norm_label": "@inertiajs/vue3",
       "source_file": "package.json",
-      "source_location": "L30"
+      "source_location": "L26"
     },
     {
-      "id": "clsx",
-      "label": "clsx",
+      "id": "inertiajs_vue3",
+      "label": "@inertiajs/vue3",
       "_origin": "ast",
       "community": 99,
-      "community_name": "clsx",
+      "community_name": "@inertiajs/vue3",
       "file_type": "concept",
-      "norm_label": "clsx",
+      "norm_label": "@inertiajs/vue3",
       "source_file": "package.json",
-      "source_location": "L30"
+      "source_location": "L26"
     },
     {
       "id": "rancangan_ai_import_flow",
@@ -15674,7 +15710,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "app/Http/Controllers/ReportController.php",
-      "source_location": "L118",
+      "source_location": "L160",
       "weight": 1.0
     },
     {
@@ -18026,7 +18062,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L168",
+      "source_location": "L171",
       "weight": 1.0
     },
     {
@@ -18038,7 +18074,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L312",
+      "source_location": "L342",
       "weight": 1.0
     },
     {
@@ -18050,7 +18086,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L313",
+      "source_location": "L343",
       "weight": 1.0
     },
     {
@@ -18062,7 +18098,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L314",
+      "source_location": "L344",
       "weight": 1.0
     },
     {
@@ -18074,7 +18110,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L319",
+      "source_location": "L349",
       "weight": 1.0
     },
     {
@@ -18086,7 +18122,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L320",
+      "source_location": "L350",
       "weight": 1.0
     },
     {
@@ -18230,7 +18266,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L211",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
@@ -18242,7 +18278,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L212",
+      "source_location": "L216",
       "weight": 1.0
     },
     {
@@ -18254,7 +18290,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L217",
+      "source_location": "L221",
       "weight": 1.0
     },
     {
@@ -18290,7 +18326,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L176",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -18302,7 +18338,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L177",
+      "source_location": "L181",
       "weight": 1.0
     },
     {
@@ -18314,7 +18350,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L192",
+      "source_location": "L196",
       "weight": 1.0
     },
     {
@@ -18326,7 +18362,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L203",
+      "source_location": "L207",
       "weight": 1.0
     },
     {
@@ -18338,7 +18374,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L204",
+      "source_location": "L208",
       "weight": 1.0
     },
     {
@@ -18350,7 +18386,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L206",
+      "source_location": "L210",
       "weight": 1.0
     },
     {
@@ -18362,7 +18398,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L265",
+      "source_location": "L269",
       "weight": 1.0
     },
     {
@@ -18374,7 +18410,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L266",
+      "source_location": "L270",
       "weight": 1.0
     },
     {
@@ -18386,7 +18422,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L267",
+      "source_location": "L271",
       "weight": 1.0
     },
     {
@@ -18398,7 +18434,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L282",
+      "source_location": "L286",
       "weight": 1.0
     },
     {
@@ -18410,7 +18446,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L287",
+      "source_location": "L291",
       "weight": 1.0
     },
     {
@@ -18422,7 +18458,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L295",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -18434,7 +18470,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L296",
+      "source_location": "L300",
       "weight": 1.0
     },
     {
@@ -18578,7 +18614,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L229",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -18590,7 +18626,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L230",
+      "source_location": "L234",
       "weight": 1.0
     },
     {
@@ -18602,7 +18638,43 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L231",
+      "source_location": "L235",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest_test_watermark_dan_logo_ikut_tertanam_di_pdf",
+      "target": "app_models_user_user",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L320",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest_test_watermark_dan_logo_ikut_tertanam_di_pdf",
+      "target": "tests_feature_reporttest_reporttest_account",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L321",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest_test_watermark_dan_logo_ikut_tertanam_di_pdf",
+      "target": "tests_feature_reporttest_reporttest_trade",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L322",
       "weight": 1.0
     },
     {
@@ -39118,13 +39190,35 @@
     },
     {
       "source": "app_http_controllers_reportcontroller_reportcontroller",
+      "target": "app_http_controllers_reportcontroller_reportcontroller_datauri",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/Http/Controllers/ReportController.php",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "app_http_controllers_reportcontroller_reportcontroller",
+      "target": "app_http_controllers_reportcontroller_reportcontroller_watermark",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/Http/Controllers/ReportController.php",
+      "source_location": "L113",
+      "weight": 1.0
+    },
+    {
+      "source": "app_http_controllers_reportcontroller_reportcontroller",
       "target": "app_http_controllers_reportcontroller_reportcontroller_decimal",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Http/Controllers/ReportController.php",
-      "source_location": "L102",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -39135,7 +39229,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/Http/Controllers/ReportController.php",
-      "source_location": "L116",
+      "source_location": "L158",
       "weight": 1.0
     },
     {
@@ -41126,7 +41220,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L174",
+      "source_location": "L178",
       "weight": 1.0
     },
     {
@@ -41137,18 +41231,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L201",
-      "weight": 1.0
-    },
-    {
-      "source": "tests_feature_reporttest_reporttest",
-      "target": "tests_feature_reporttest_reporttest_test_bukti_transfer_jadi_tautan_yang_bisa_diklik",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L209",
+      "source_location": "L205",
       "weight": 1.0
     },
     {
@@ -41164,13 +41247,24 @@
     },
     {
       "source": "tests_feature_reporttest_reporttest",
+      "target": "tests_feature_reporttest_reporttest_test_bukti_transfer_jadi_tautan_yang_bisa_diklik",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L213",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest",
       "target": "tests_feature_reporttest_reporttest_test_unduh_menghasilkan_berkas_pdf",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L227",
+      "source_location": "L231",
       "weight": 1.0
     },
     {
@@ -41181,7 +41275,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L255",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -41192,18 +41286,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L293",
+      "source_location": "L297",
       "weight": 1.0
     },
     {
       "source": "tests_feature_reporttest_reporttest",
-      "target": "tests_feature_reporttest_reporttest_test_akun_milik_pengguna_lain_tidak_ikut_dilaporkan",
+      "target": "tests_feature_reporttest_reporttest_test_watermark_dan_logo_ikut_tertanam_di_pdf",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ReportTest.php",
-      "source_location": "L310",
+      "source_location": "L318",
       "weight": 1.0
     },
     {
@@ -41215,6 +41309,17 @@
       "confidence_score": 1.0,
       "source_file": "tests/Feature/ReportTest.php",
       "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "tests_feature_reporttest_reporttest",
+      "target": "tests_feature_reporttest_reporttest_test_akun_milik_pengguna_lain_tidak_ikut_dilaporkan",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tests/Feature/ReportTest.php",
+      "source_location": "L340",
       "weight": 1.0
     },
     {
@@ -43242,5 +43347,5 @@
       "source_file": "public/icons/icon-512.png"
     }
   ],
-  "built_at_commit": "f87a4b8bef8f1a41bd66a08d3cda4ff9a8e13737"
+  "built_at_commit": "dc5aa4cfcf1950d5222d29a358b1dbc86c5f2623"
 }

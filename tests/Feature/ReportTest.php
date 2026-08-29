@@ -164,8 +164,12 @@ class ReportTest extends TestCase
     /** Blade-nya dirender langsung: memeriksa HTML jauh lebih murah daripada byte PDF. */
     private function html(User $user, array $identity = [], float $rate = 16000): string
     {
+        // PNG 1×1 transparan: view-nya cuma perlu URI yang sah, bukan watermark asli.
+        $pixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
         return view('reports.annual', [
             'report' => AnnualReport::build($user->accounts()->get(), 2025, $rate, '2025-12-31'),
+            'brand' => ['name' => config('app.name'), 'logo' => $pixel, 'watermark' => $pixel],
             'identity' => [...['name' => 'Nama Uji', 'npwp' => null, 'address' => null], ...$identity],
             'printedAt' => CarbonImmutable::parse('2026-01-10 09:00'),
         ])->render();
@@ -305,6 +309,32 @@ class ReportTest extends TestCase
                 'name' => 'Nama Uji',
             ])
             ->assertSessionHasErrors('rate');
+    }
+
+    /**
+     * Watermark digambar GD dengan font bawaan dompdf: container ini tidak punya
+     * satu pun font sistem, jadi kalau jalurnya bergeser gambarnya lahir kosong.
+     */
+    public function test_watermark_dan_logo_ikut_tertanam_di_pdf(): void
+    {
+        $user = User::factory()->create();
+        $account = $this->account($user);
+        $this->trade($account, '2025-05-05 12:00', 100);
+
+        $pdf = $this
+            ->actingAs($user)
+            ->withSession(['current_account_id' => $account->id])
+            ->post('/reports/pdf', [
+                'year' => 2025,
+                'rate' => '16000',
+                'rate_date' => '2025-12-31',
+                'name' => 'Nama Uji',
+            ])
+            ->assertOk()
+            ->getContent();
+
+        // Logo + watermark keduanya masuk sebagai XObject gambar.
+        $this->assertGreaterThanOrEqual(2, substr_count($pdf, '/Subtype /Image'));
     }
 
     public function test_akun_milik_pengguna_lain_tidak_ikut_dilaporkan(): void

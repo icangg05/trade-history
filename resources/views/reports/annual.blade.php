@@ -37,85 +37,122 @@
     <meta charset="utf-8">
     <title>Laporan Tahunan Hasil Trading {{ $year }}</title>
     <style>
-        @page { margin: 15mm 8mm 12mm 8mm; }
+        @page { margin: 16mm 8mm 13mm 8mm; }
 
-        /* Helvetica: font inti PDF — tidak ditanam ke berkas, metrikanya lebih ramping
-           dari DejaVu, dan bentuknya netral seperti dokumen resmi pada umumnya. */
+        /* Warna diambil dari tema aplikasi (resources/css/app.css), digelapkan
+           seperlunya supaya tetap terbaca di atas kertas putih. */
+        /* Helvetica: font inti PDF, jadi tidak ikut ditanam ke berkas dan bentuknya
+           sama dengan yang dipakai lembar rekening koran pada umumnya. */
         body {
             font-family: Helvetica, Arial, sans-serif;
             font-size: 7.5pt;
-            color: #111;
+            color: #151B28;
             line-height: 1.25;
+            /* Watermark diulang sebagai latar tiap halaman. Harus menempel di `body`:
+               dompdf mengabaikan latar pada `html`. Sel data sengaja dibiarkan tembus
+               supaya polanya utuh; hanya kepala tabel yang menutupinya. */
+            background-image: url('{{ $brand['watermark'] }}');
+            background-repeat: repeat;
         }
 
-        #header, #footer {
-            position: fixed;
-            left: 0;
-            right: 0;
-            color: #555;
-            font-size: 6.5pt;
-        }
-        #header { top: -10mm; border-bottom: 0.5pt solid #bbb; padding-bottom: 2mm; }
-        #footer { bottom: -8mm; border-top: 0.5pt solid #bbb; padding-top: 2mm; }
+        #header, #footer { position: fixed; left: 0; right: 0; font-size: 6.5pt; color: #5A6679; }
+        #header { top: -13mm; border-bottom: 0.5pt solid #C9CFDA; padding-bottom: 1.5mm; }
+        #footer { bottom: -9mm; border-top: 0.5pt solid #C9CFDA; padding-top: 1.5mm; }
         #header td, #footer td { border: none; padding: 0; }
         .right { text-align: right; }
         .center { text-align: center; }
 
-        h1 { font-size: 13pt; margin: 0 0 1mm; }
-        h2 { font-size: 10pt; margin: 4.5mm 0 1.5mm; border-bottom: 1pt solid #333; padding-bottom: 1mm; }
-        h3 { font-size: 8.5pt; margin: 3mm 0 1mm; color: #333; }
+        /* Kop halaman pertama */
+        .masthead td { border: none; padding: 0; vertical-align: middle; }
+        .masthead .logo { width: 15mm; }
+        .masthead .logo img { width: 13mm; height: 13mm; }
+        .brand { font-size: 12pt; font-weight: bold; letter-spacing: 0.4pt; }
+        .brand-sub { font-size: 6.5pt; color: #5A6679; }
+        .doctitle { font-size: 11.5pt; font-weight: bold; }
+        .rule { border-bottom: 2pt solid #E9AA0C; margin: 2mm 0 3mm; }
+
+        h2 {
+            font-size: 9.5pt;
+            margin: 4.5mm 0 1.5mm;
+            padding: 1mm 0 1mm 2mm;
+            border-left: 2.5pt solid #E9AA0C;
+            background: #F4F6F9;
+        }
+        h3 { font-size: 8.5pt; margin: 3mm 0 1mm; page-break-after: avoid; }
         p { margin: 0 0 1.5mm; }
 
+        /* Terjemahan Inggris di bawah label Indonesia, seperti lembar resmi bank. */
+        .en { display: block; font-style: italic; font-weight: normal; color: #7A8698; font-size: 6pt; }
+
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 0.5pt solid #999; padding: 0.8mm 1.1mm; vertical-align: top; }
+        th, td { border: 0.5pt solid #C9CFDA; padding: 0.8mm 1.1mm; vertical-align: top; }
         thead { display: table-header-group; }
-        th { background: #e8e8e8; font-weight: bold; text-align: left; }
+        th { background: #FEF3D7; font-weight: bold; text-align: left; }
         tr { page-break-inside: avoid; }
         td.num, th.num { text-align: right; }
         td.nowrap { white-space: nowrap; }
-        a { color: #14477d; }
-        tbody tr.total td { background: #f0f0f0; font-weight: bold; }
-
-        .plain, .plain td { border: none; padding: 0.4mm 0; }
-        .pos { color: #14663a; }
-        .neg { color: #a01b1b; }
-        .muted { color: #666; }
-        .note { font-size: 6.5pt; color: #555; margin-top: 1.5mm; }
-        .break { page-break-before: always; }
-        /* dompdf mengulang <thead> saat tabel terbelah, kecuali kalau baris badan
-           pertamanya sudah tidak muat di halaman yang sama — barisnya lalu lahir tanpa
-           kepala. Tabel pendek karena itu dipindah utuh ke halaman berikutnya. */
+        a { color: #1B5FA8; }
+        tbody tr.total td { background: #F4F6F9; font-weight: bold; }
         .keep { page-break-inside: avoid; }
-        h3 { page-break-after: avoid; }
 
-        .headline { border: 1pt solid #333; padding: 2.2mm; margin: 2.5mm 0; }
-        .headline .label { font-size: 7pt; color: #444; }
+        .plain, .plain td { border: none; padding: 0.4mm 0; background: transparent; }
+        .pos { color: #18774B; }
+        .neg { color: #BA1C1C; }
+        .muted { color: #7A8698; }
+        .note { font-size: 6.5pt; color: #4A5566; margin-top: 1.5mm; }
+        .break { page-break-before: always; }
+
+        .headline { border: 0.5pt solid #C9CFDA; border-top: 2pt solid #E9AA0C; padding: 2.2mm; }
+        .headline .label { font-size: 7pt; color: #4A5566; }
         .headline .value { font-size: 14pt; font-weight: bold; }
 
-        .warn { border: 1pt solid #a01b1b; color: #a01b1b; padding: 1.5mm; margin: 1.5mm 0; }
+        .warn { border: 1pt solid #BA1C1C; color: #BA1C1C; padding: 1.5mm; margin: 1.5mm 0; }
+
+        /* Catatan penutup: butir Indonesia dengan terjemahan miring di bawahnya. */
+        .terms { margin-top: 2mm; }
+        .terms td { border: none; padding: 0.6mm 0 1.6mm; background: transparent; }
+        .terms .id { font-size: 7pt; }
+        .terms .en { font-size: 6.2pt; }
     </style>
 </head>
 <body>
 
 <div id="header">
     <table class="plain"><tr>
-        <td>Laporan Tahunan Hasil Transaksi Perdagangan Berjangka (Trading) — Tahun Pajak {{ $year }}</td>
-        <td class="right">{{ $identity['name'] }}@if ($identity['npwp']) — NPWP {{ $identity['npwp'] }}@endif</td>
+        <td>Laporan Tahunan Hasil Trading Tahun Pajak {{ $year }}</td>
+        <td class="right">{{ $identity['name'] }}@if ($identity['npwp']), NPWP {{ $identity['npwp'] }}@endif</td>
     </tr></table>
 </div>
 
 <div id="footer">
     {{-- Nomor halaman tidak di sini: jumlah halaman baru diketahui setelah seluruh
          dokumen tersusun, jadi ditulis ReportController lewat API kanvas dompdf. --}}
-    Dihasilkan otomatis dari basis data jurnal trading pribadi pada {{ $printedAt->translatedFormat('j F Y, H:i') }} WITA.
+    Dokumen dihasilkan otomatis dari basis data {{ $brand['name'] }} pada {{ $printedAt->translatedFormat('j F Y, H:i') }} WITA.
 </div>
 
 {{-- ---------------------------------------------------------------- halaman 1 --}}
 
-<h1>Laporan Tahunan Hasil Transaksi Perdagangan Berjangka (Trading)</h1>
-<p><strong>Tahun Pajak {{ $year }}</strong> — periode 1 Januari s.d. 31 Desember {{ $year }}</p>
+<table class="masthead">
+    <tr>
+        <td class="logo"><img src="{{ $brand['logo'] }}" alt=""></td>
+        <td>
+            <div class="brand">{{ mb_strtoupper($brand['name']) }}</div>
+            <div class="brand-sub">Jurnal trading pribadi <span style="font-style: italic">/ Personal trading journal</span></div>
+        </td>
+        <td class="right">
+            <div class="doctitle">LAPORAN TAHUNAN HASIL TRADING</div>
+            <div class="brand-sub" style="font-style: italic">ANNUAL TRADING RESULT REPORT</div>
+        </td>
+    </tr>
+</table>
+<div class="rule"></div>
 
-<h2>Identitas Wajib Pajak</h2>
+<table class="plain"><tr>
+    <td><strong>Tahun Pajak {{ $year }}</strong> <span class="muted">/ Tax Year {{ $year }}</span></td>
+    <td class="right">Periode 1 Januari s.d. 31 Desember {{ $year }} <span class="muted">/ Period</span></td>
+</tr></table>
+
+<h2>Identitas Wajib Pajak<span class="en">Taxpayer Identity</span></h2>
 <table>
     <tr>
         <th style="width: 18%">Nama</th>
@@ -129,24 +166,24 @@
     </tr>
     <tr>
         <th>Kurs yang dipakai</th>
-        <td>{{ $kurs($report['rate']) }} per 1 USD &middot; kurs tanggal {{ $tgl($report['rate_date']) }}</td>
+        <td>{{ $kurs($report['rate']) }} per 1 USD, kurs tanggal {{ $tgl($report['rate_date']) }}</td>
         <th>Jumlah akun dilaporkan</th>
         <td>{{ count($report['accounts']) }} akun, {{ $n((float) $total['total_trades'], 0) }} transaksi trade</td>
     </tr>
 </table>
 
-<h2>Ringkasan Konsolidasi Seluruh Akun (dalam Rupiah)</h2>
+<h2>Ringkasan Konsolidasi Seluruh Akun (dalam Rupiah)<span class="en">Consolidated Summary of All Accounts (in Rupiah)</span></h2>
 <table>
     <thead>
         <tr>
-            <th style="width: 16%">Akun</th>
-            <th style="width: 14%">Broker</th>
-            <th style="width: 6%">Mata Uang</th>
-            <th class="num">Saldo Awal</th>
-            <th class="num">Setoran</th>
-            <th class="num">Penarikan</th>
-            <th class="num">Laba/Rugi Bersih</th>
-            <th class="num">Saldo Akhir</th>
+            <th style="width: 16%">Akun<span class="en">Account</span></th>
+            <th style="width: 14%">Broker<span class="en">Broker</span></th>
+            <th style="width: 6%">Mata Uang<span class="en">Currency</span></th>
+            <th class="num">Saldo Awal<span class="en">Opening Balance</span></th>
+            <th class="num">Setoran<span class="en">Deposits</span></th>
+            <th class="num">Penarikan<span class="en">Withdrawals</span></th>
+            <th class="num">Laba/Rugi Bersih<span class="en">Net Profit/Loss</span></th>
+            <th class="num">Saldo Akhir<span class="en">Closing Balance</span></th>
         </tr>
     </thead>
     <tbody>
@@ -191,26 +228,37 @@
     </td>
 </tr></table>
 
-<p class="note">
-    <strong>Catatan angka.</strong>
-    (1) Laba/rugi bersih adalah hasil transaksi yang sudah ditutup; sebagiannya masih
-    mengendap sebagai saldo di akun broker dan belum tentu sudah ditarik ke rekening bank.
-    Karena itu kedua angka di atas ditampilkan berdampingan.
-    (2) Setoran dan penarikan dikonversi memakai kurs yang tercatat pada hari transaksinya
-    masing-masing — angka yang sama dengan bukti transfernya. Laba/rugi trading tidak punya
-    kurs per transaksi, sehingga dikonversi memakai satu kurs tunggal
-    {{ $kurs($report['rate']) }} per USD yang berlaku pada
-    {{ CarbonImmutable::parse($report['rate_date'])->translatedFormat('j F Y') }}.
-    (3) Saldo awal akun pada tahun pertamanya adalah modal awal yang tercatat saat akun
-    dibuat, dan karena itu tidak muncul sebagai baris setoran.
-</p>
+<table class="terms">
+    <tr><td>
+        <div class="id">1. Laba/rugi bersih adalah hasil seluruh transaksi yang sudah ditutup. Sebagiannya masih
+            mengendap sebagai saldo di akun broker dan belum tentu sudah ditarik ke rekening bank, sehingga kedua
+            angka di atas ditampilkan berdampingan.</div>
+        <div class="en">Net profit/loss covers all closed positions. Part of it may still sit as broker account
+            balance and has not necessarily been withdrawn to a bank account, hence both figures are shown side by side.</div>
+    </td></tr>
+    <tr><td>
+        <div class="id">2. Setoran dan penarikan dikonversi memakai kurs yang tercatat pada hari transaksinya
+            masing-masing, yaitu angka yang sama dengan bukti transfernya. Laba/rugi trading tidak punya kurs per
+            transaksi sehingga dikonversi memakai satu kurs tunggal {{ $kurs($report['rate']) }} per USD yang berlaku
+            pada {{ CarbonImmutable::parse($report['rate_date'])->translatedFormat('j F Y') }}.</div>
+        <div class="en">Deposits and withdrawals are converted at the rate recorded on their own transaction date,
+            matching the transfer receipts. Trading results carry no per-transaction rate and are therefore converted
+            at a single rate as stated above.</div>
+    </td></tr>
+    <tr><td>
+        <div class="id">3. Saldo awal akun pada tahun pertamanya adalah modal awal yang tercatat saat akun dibuat,
+            sehingga tidak muncul sebagai baris setoran.</div>
+        <div class="en">An account's opening balance in its first year is the initial capital recorded at account
+            creation, and therefore does not appear as a deposit entry.</div>
+    </td></tr>
+</table>
 
 {{-- ------------------------------------------------------------ rincian per akun --}}
 
 @foreach ($report['accounts'] as $a)
     @php $c = $a['currency']; $s = $a['summary']; @endphp
 
-    <h2 class="break">Rincian Akun: {{ $a['name'] }}@if ($a['is_archived']) (diarsipkan)@endif</h2>
+    <h2 class="break">Rincian Akun: {{ $a['name'] }}@if ($a['is_archived']) (diarsipkan)@endif<span class="en">Account Detail</span></h2>
 
     <table class="keep">
         <tr>
@@ -223,7 +271,7 @@
         </tr>
     </table>
 
-    <h3>Rekonsiliasi Saldo Tahun {{ $year }}</h3>
+    <h3>Rekonsiliasi Saldo Tahun {{ $year }} <span class="muted" style="font-style: italic; font-weight: normal">/ Balance Reconciliation</span></h3>
     <table class="keep">
         <thead>
             <tr>
@@ -263,12 +311,12 @@
 
     @if ($a['reconciliation_gap'] != 0.0)
         <div class="warn">
-            Selisih rekonsiliasi {{ $cur($a['reconciliation_gap'], $c) }} — periksa kembali
+            Selisih rekonsiliasi {{ $cur($a['reconciliation_gap'], $c) }}. Periksa kembali
             catatan akun ini sebelum laporan diserahkan.
         </div>
     @endif
 
-    <h3>Ringkasan Kinerja Tahun {{ $year }}</h3>
+    <h3>Ringkasan Kinerja Tahun {{ $year }} <span class="muted" style="font-style: italic; font-weight: normal">/ Performance Summary</span></h3>
     <table class="keep">
         <tr>
             <th style="width: 17%">Jumlah transaksi</th>
@@ -304,7 +352,7 @@
         </tr>
     </table>
 
-    <h3>Rekap Bulanan Tahun {{ $year }}</h3>
+    <h3>Rekap Bulanan Tahun {{ $year }} <span class="muted" style="font-style: italic; font-weight: normal">/ Monthly Recap</span></h3>
     <table class="keep">
         <thead>
             <tr>
@@ -335,7 +383,7 @@
         </tbody>
     </table>
 
-    <h3>Mutasi Dana (Setoran &amp; Penarikan)</h3>
+    <h3>Mutasi Dana (Setoran &amp; Penarikan) <span class="muted" style="font-style: italic; font-weight: normal">/ Fund Movements</span></h3>
     @if ($a['mutations'])
         <table class="keep">
             <thead>
@@ -371,7 +419,7 @@
                     </tr>
                 @endforeach
                 <tr class="total">
-                    <td colspan="2">Setoran {{ $cur($a['deposit'], $c) }} — Penarikan {{ $cur($a['withdrawal'], $c) }}</td>
+                    <td colspan="2">Jumlah setoran {{ $cur($a['deposit'], $c) }}, penarikan {{ $cur($a['withdrawal'], $c) }}</td>
                     <td class="num">{{ $cur($a['deposit'] - $a['withdrawal'], $c) }}</td>
                     <td></td>
                     <td class="num">{{ $rp($a['deposit_idr'] - $a['withdrawal_idr']) }}</td>
@@ -391,7 +439,7 @@
     @endif
 
     @if ($a['by_symbol'])
-        <h3>Rincian per Instrumen</h3>
+        <h3>Rincian per Instrumen <span class="muted" style="font-style: italic; font-weight: normal">/ Breakdown by Instrument</span></h3>
         <table class="keep">
             <thead>
                 <tr>
@@ -427,7 +475,7 @@
 
     {{-- ----------------------------------------------------------- lampiran akun --}}
 
-    <h2 class="break">Lampiran — Seluruh Transaksi Trade Akun {{ $a['name'] }} Tahun {{ $year }}</h2>
+    <h2 class="break">Lampiran: Seluruh Transaksi Trade Akun {{ $a['name'] }} Tahun {{ $year }}<span class="en">Appendix: All Trade Transactions</span></h2>
     @if ($a['trades'])
         <table>
             <thead>
@@ -450,7 +498,7 @@
             <tbody>
                 @foreach ($a['trades'] as $i => $t)
                     <tr>
-                        <td class="num">{{ $i + 1 }}</td>
+                        <td class="num">{{ $i + 1 }}.</td>
                         <td class="nowrap">{{ $t['opened_at'] }}</td>
                         <td class="nowrap">{{ $t['closed_at'] ?: '—' }}</td>
                         <td>{{ $t['symbol'] }}</td>
@@ -482,25 +530,37 @@
 
 {{-- ------------------------------------------------------------------- penutup --}}
 
-<h2 class="break">Pernyataan</h2>
-<p>
-    Data dalam laporan ini bersumber dari catatan jurnal trading pribadi yang saya
-    rekam sendiri pada saat atau segera setelah setiap transaksi terjadi. Seluruh
-    angka ringkasan dihitung langsung dari catatan tersebut dan dapat ditelusuri ke
-    baris transaksinya pada bagian Lampiran.
-</p>
-<p>
-    Setiap setoran dan penarikan dana disertai bukti transfer yang tersimpan dan dapat
-    ditunjukkan apabila diperlukan. Laba/rugi trading dikonversi ke rupiah memakai satu
-    kurs sebesar {{ $kurs($report['rate']) }} per USD yang berlaku pada
-    {{ CarbonImmutable::parse($report['rate_date'])->translatedFormat('j F Y') }},
-    sementara setoran dan penarikan memakai kurs yang berlaku pada hari transaksinya
-    masing-masing.
-</p>
-<p>
-    Demikian laporan ini saya buat dengan sebenarnya. Apabila di kemudian hari terdapat
-    data yang perlu diperbaiki, saya bersedia melakukan pembetulan.
-</p>
+<h2 class="break">Pernyataan<span class="en">Statement</span></h2>
+
+<table class="terms">
+    <tr><td>
+        <div class="id">1. Data dalam laporan ini bersumber dari catatan jurnal trading pribadi yang saya rekam
+            sendiri pada saat atau segera setelah setiap transaksi terjadi. Seluruh angka ringkasan dihitung langsung
+            dari catatan tersebut dan dapat ditelusuri ke baris transaksinya pada bagian Lampiran.</div>
+        <div class="en">The data in this report comes from a personal trading journal recorded at, or immediately
+            after, each transaction. Every summary figure is computed directly from those records and can be traced
+            to its underlying entry in the Appendix.</div>
+    </td></tr>
+    <tr><td>
+        <div class="id">2. Setiap setoran dan penarikan dana disertai bukti transfer yang tersimpan dan dapat
+            ditunjukkan apabila diperlukan.</div>
+        <div class="en">Each deposit and withdrawal is backed by a stored transfer receipt that can be produced on request.</div>
+    </td></tr>
+    <tr><td>
+        <div class="id">3. Laporan ini dihasilkan otomatis oleh aplikasi {{ $brand['name'] }} milik saya sendiri,
+            bukan terbitan bank, broker, maupun instansi mana pun. Berkas ini merupakan salinan catatan pribadi yang
+            saya sampaikan untuk keperluan klarifikasi.</div>
+        <div class="en">This report is generated automatically by the author's own {{ $brand['name'] }} application.
+            It is not issued by any bank, broker, or institution, and constitutes a copy of personal records submitted
+            for clarification purposes.</div>
+    </td></tr>
+    <tr><td>
+        <div class="id">4. Demikian laporan ini saya buat dengan sebenarnya. Apabila di kemudian hari terdapat data
+            yang perlu diperbaiki, saya bersedia melakukan pembetulan.</div>
+        <div class="en">This report is made truthfully. Should any data later require correction, the undersigned is
+            prepared to submit an amendment.</div>
+    </td></tr>
+</table>
 
 <table class="plain" style="margin-top: 10mm">
     <tr>

@@ -61,6 +61,11 @@ class ReportController extends Controller
         $dompdf->setPaper('a4', 'landscape');
         $dompdf->loadHtml(view('reports.annual', [
             'report' => $report,
+            'brand' => [
+                'name' => config('app.name'),
+                'logo' => self::dataUri(public_path('icons/icon-192.png'), 'image/png'),
+                'watermark' => self::watermark(config('app.name')),
+            ],
             'identity' => [
                 'name' => $data['name'],
                 'npwp' => $data['npwp'] ?? null,
@@ -91,6 +96,43 @@ class ReportController extends Controller
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
+
+    /** Berkas lokal jadi data URI: dompdf jalan dengan `isRemoteEnabled` mati. */
+    private static function dataUri(string $path, string $mime): string
+    {
+        return 'data:'.$mime.';base64,'.base64_encode(file_get_contents($path));
+    }
+
+    /**
+     * Ubin watermark yang diulang sebagai latar tiap halaman. Digambar dengan GD
+     * memakai font bawaan dompdf — container ini tidak punya satu pun font sistem.
+     *
+     * Sengaja sangat pudar: penanda asal dokumen, bukan hiasan yang mengganggu
+     * angka di atasnya.
+     */
+    private static function watermark(string $text): string
+    {
+        $tile = imagecreatetruecolor(self::TILE_W, self::TILE_H);
+        imagesavealpha($tile, true);
+        imagefill($tile, 0, 0, imagecolorallocatealpha($tile, 255, 255, 255, 127));
+
+        // Emas tema, dipudarkan sampai hampir menyatu dengan kertas.
+        $ink = imagecolorallocatealpha($tile, 233, 170, 12, 112);
+        $font = base_path('vendor/dompdf/dompdf/lib/fonts/DejaVuSans-Bold.ttf');
+
+        imagettftext($tile, 9, 24, 6, self::TILE_H - 14, $ink, $font, mb_strtoupper($text));
+
+        ob_start();
+        imagepng($tile);
+        imagedestroy($tile);
+
+        return 'data:image/png;base64,'.base64_encode((string) ob_get_clean());
+    }
+
+    /** Ukuran ubin watermark dalam piksel; makin kecil makin rapat pengulangannya. */
+    private const TILE_W = 190;
+
+    private const TILE_H = 96;
 
     /**
      * Kurs boleh ditulis dengan gaya Indonesia (`17.757,40`) maupun gaya mesin
