@@ -238,7 +238,7 @@ class ReportTest extends TestCase
         $this->assertStringContainsString('Tidak ada', $html);
     }
 
-    public function test_tautan_dokumen_menerbitkan_alamat_pandang_berumur_60_detik(): void
+    public function test_tautan_dokumen_menerbitkan_alamat_pandang_berumur_15_detik(): void
     {
         $link = $this->proofUrl($this->tautanBukti());
 
@@ -253,10 +253,10 @@ class ReportTest extends TestCase
         $this->get($view)->assertOk();
 
         // Masih di dalam jendelanya — memuat ulang alamat yang sama tetap boleh.
-        $this->travel(59)->seconds();
+        $this->travel(14)->seconds();
         $this->get($view)->assertOk();
 
-        // Lewat 60 detik alamat itu benar-benar mati, dan matinya 404 bukan 403.
+        // Lewat 15 detik alamat itu benar-benar mati, dan matinya 404 bukan 403.
         $this->travel(2)->seconds();
         $this->get($view)->assertNotFound();
     }
@@ -266,15 +266,31 @@ class ReportTest extends TestCase
         $link = $this->proofUrl($this->tautanBukti());
 
         $lama = $this->get($link)->assertRedirect()->headers->get('Location');
-        $this->travel(61)->seconds();
+        $this->travel(16)->seconds();
         $this->get($lama)->assertNotFound();
 
         // Inilah bedanya dengan alamat pandang: tautan di dokumen tidak pernah
-        // hangus. Pemegang laporan mengklik lagi dan dapat 60 detik yang baru.
+        // hangus. Pemegang laporan mengklik lagi dan dapat 15 detik yang baru.
         $baru = $this->get($link)->assertRedirect()->headers->get('Location');
 
         $this->assertNotSame($lama, $baru);
         $this->get($baru)->assertOk();
+    }
+
+    public function test_bukti_disajikan_di_halaman_bukan_sebagai_berkas_telanjang(): void
+    {
+        $link = $this->proofUrl($this->tautanBukti());
+        $view = $this->get($link)->assertRedirect()->headers->get('Location');
+
+        $html = $this->get($view)->assertOk()->assertHeader('content-type', 'text/html; charset=UTF-8')->getContent();
+
+        // Gambarnya ditanam ke halaman, jadi tidak ada alamat berkas kedua yang
+        // bisa dibuka atau dibagikan lepas dari halaman ini.
+        $this->assertStringContainsString('<img src="data:', $html);
+        $this->assertStringContainsString(base64_encode('isi berkas'), $html);
+
+        // Penghalang klik kanan & seret. Kosmetik — bukan yang menahan sebaran.
+        $this->assertStringContainsString("'contextmenu', 'dragstart'", $html);
     }
 
     public function test_alamat_pandang_tidak_bisa_dikarang_sendiri(): void

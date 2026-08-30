@@ -78,9 +78,9 @@
     "semantic_hash": ""
   },
   "app/Http/Controllers/TransactionController.php": {
-    "mtime": 1788059122.629647,
-    "seen": 1788059246.9633098,
-    "ast_hash": "ab50edda424b5ece741ba2c0b9f0340f",
+    "mtime": 1788060299.7670486,
+    "seen": 1788060342.108858,
+    "ast_hash": "31fc692b043b4e2038f2f75e38822b88",
     "semantic_hash": ""
   },
   "app/Http/Middleware/EnsureAdmin.php": {
@@ -1056,9 +1056,9 @@
     "semantic_hash": "82efb97a359f5c7290bf2513d14686be"
   },
   "RANCANGAN.md": {
-    "mtime": 1788059243.2592487,
-    "seen": 1788059246.963448,
-    "ast_hash": "2183079e748dcef1be0ca29eb101eeb3",
+    "mtime": 1788060338.363878,
+    "seen": 1788060342.1090872,
+    "ast_hash": "77b05f619e22d6b2fd2c22f608cdd8e4",
     "semantic_hash": ""
   },
   "README.md": {
@@ -1308,15 +1308,15 @@
     "semantic_hash": ""
   },
   "resources/views/reports/annual.blade.php": {
-    "mtime": 1788059206.0311818,
-    "seen": 1788059246.963431,
-    "ast_hash": "e7bd84d55762b25957a0b2beea47d691",
+    "mtime": 1788060299.767242,
+    "seen": 1788060342.109057,
+    "ast_hash": "75a42a36b6638dd8bc5dc56ffa445663",
     "semantic_hash": ""
   },
   "tests/Feature/ReportTest.php": {
-    "mtime": 1788059174.1369548,
-    "seen": 1788059246.9634414,
-    "ast_hash": "141f50aaca50c82f7533c286c399a2c2",
+    "mtime": 1788060310.925345,
+    "seen": 1788060342.1090748,
+    "ast_hash": "5e5e9887720b4eb613506507fff0f652",
     "semantic_hash": ""
   },
   "database/migrations/2026_08_29_000014_add_account_number_to_accounts.php": {
@@ -1341,6 +1341,12 @@
     "mtime": 1788057492.8184702,
     "seen": 1788057853.127258,
     "ast_hash": "cfc511a8838308c1f179cfa8bd6fc09d",
+    "semantic_hash": ""
+  },
+  "resources/views/proofs/view.blade.php": {
+    "mtime": 1788060276.404427,
+    "seen": 1788060342.1090555,
+    "ast_hash": "2300b3b367f2fa7f08a5165b87e7977c",
     "semantic_hash": ""
   }
 }

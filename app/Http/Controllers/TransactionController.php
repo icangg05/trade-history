@@ -9,6 +9,7 @@ use App\Support\Hashid;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
@@ -140,16 +141,33 @@ class TransactionController extends Controller
     }
 
     /**
-     * Berkasnya sendiri. Kedaluwarsanya dijaga tanda tangan berbatas waktu milik
-     * Laravel — tidak ada jam yang perlu kami simpan dan cocokkan sendiri.
+     * Buktinya, disajikan di dalam halaman — bukan sebagai berkas gambar telanjang.
+     * Kedaluwarsanya dijaga tanda tangan berbatas waktu milik Laravel, jadi tidak
+     * ada jam yang perlu kami simpan dan cocokkan sendiri.
+     *
+     * Halaman itu mencegat klik kanan dan seret-keluar. Perlu jujur soal ini:
+     * itu penghalang kosmetik, BUKAN pengaman. Ctrl+S, tab Network di DevTools,
+     * dan screenshot tetap bisa mengambil gambarnya, dan memang tidak ada cara
+     * mencegahnya — byte-nya sudah sampai di komputer yang menampilkannya.
+     * Yang benar-benar menahan sebaran tetap dua hal lain: umur alamat ini yang
+     * cuma 15 detik, dan tanda tangan yang tidak bisa dikarang.
      */
-    public function proofView(string $proof): StreamedResponse
+    public function proofView(string $proof): HttpResponse
     {
-        return $this->proof(Transaction::findOrFail(Hashid::decode($proof)));
+        $transaction = Transaction::findOrFail(Hashid::decode($proof));
+
+        abort_if(blank($transaction->proof_path), 404);
+
+        $disk = Storage::disk(Uploads::DISK);
+
+        return response()->view('proofs.view', [
+            'image' => 'data:'.($disk->mimeType($transaction->proof_path) ?: 'application/octet-stream')
+                .';base64,'.base64_encode($disk->get($transaction->proof_path)),
+        ]);
     }
 
     /** Umur alamat pandang, dihitung sejak tautan di dokumen diklik. */
-    private const VIEW_SECONDS = 60;
+    private const VIEW_SECONDS = 15;
 
     public function destroy(Transaction $transaction): RedirectResponse
     {

@@ -448,7 +448,7 @@
         <p class="note">
             Tautan "Lihat bukti" membuka berkas bukti transfer baris tersebut langsung dari
             aplikasi tanpa perlu masuk. Setiap kali diklik, tautan ini memberi akses selama
-            60 detik; lewat dari itu alamat yang terbuka kedaluwarsa, dan berkasnya dibuka
+            15 detik; lewat dari itu alamat yang terbuka kedaluwarsa, dan berkasnya dibuka
             kembali dengan mengklik ulang tautan di dokumen ini. Berkasnya dapat dicetak
             terpisah bila diminta.
             @unless ($isRp)
