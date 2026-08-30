@@ -75,6 +75,44 @@ class TradeDayTest extends TestCase
         $this->assertSame(['CCC'], $symbols('status=win&stop=sl_plus&direction=buy'));
     }
 
+    public function test_filter_setup_dan_pencarian_catatan(): void
+    {
+        $account = User::factory()->create()->accounts()->create([
+            'name' => 'Uji',
+            'currency' => 'USD',
+            'initial_balance' => 1000,
+            'started_at' => '2026-01-01',
+        ]);
+
+        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+
+        $account->trades()->createMany([
+            ['symbol' => 'AAA', 'direction' => 'buy', 'entry_price' => 100, 'pnl' => 10, 'setup' => 'FVG, Order Block', 'notes' => 'Entry setelah sweep likuiditas.', 'opened_at' => '2026-01-02 09:00', 'closed_at' => '2026-01-02 10:00'],
+            ['symbol' => 'BBB', 'direction' => 'buy', 'entry_price' => 100, 'pnl' => 10, 'setup' => 'Order Block', 'notes' => 'Sabar menunggu retest.', 'opened_at' => '2026-01-02 09:00', 'closed_at' => '2026-01-02 10:00'],
+            ['symbol' => 'CCC', 'direction' => 'buy', 'entry_price' => 100, 'pnl' => 10, 'setup' => null, 'notes' => null, 'opened_at' => '2026-01-02 09:00', 'closed_at' => '2026-01-02 10:00'],
+        ]);
+
+        $symbols = fn (string $query) => array_column(
+            $this->get('/trades?'.$query)->viewData('page')['props']['trades']['data'],
+            'symbol',
+        );
+
+        // Setup disimpan sebagai daftar dipisah koma, jadi yang dicocokkan sebagian.
+        $this->assertSame(['AAA'], $symbols('setup=FVG'));
+        $this->assertSame(['BBB', 'AAA'], $symbols('setup=Order+Block'));
+        $this->assertSame(['AAA'], $symbols('q=sweep'));
+        $this->assertSame(['AAA'], $symbols('setup=Order+Block&q=sweep'));
+
+        // `%` di kata kunci adalah karakter biasa, bukan wildcard yang cocok semua.
+        $this->assertSame([], $symbols('q=%'));
+
+        // Daftar strategi yang ditawarkan filter datang dari trade akun ini sendiri.
+        $this->assertSame(
+            ['FVG', 'Order Block'],
+            $this->get('/trades')->viewData('page')['props']['setups'],
+        );
+    }
+
     private function trade(Account $account, string $opened, string $closed, float $pnl): void
     {
         $account->trades()->create([

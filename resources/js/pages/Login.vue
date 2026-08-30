@@ -39,10 +39,7 @@ onUnmounted(() => clearInterval(timer))
   <Head title="Masuk" />
 
   <AuthShell title="Masuk" subtitle="Masuk untuk melanjutkan jurnal tradingmu.">
-    <!-- showProgress: false, karena bar tipis di puncak layar cuma berkedip
-         sekejap saat login dan justru terbaca seperti halaman gagal dimuat.
-         Umpan baliknya sudah dipegang tombol yang berputar di bawah. -->
-    <form class="space-y-5" @submit.prevent="form.post('/login', { showProgress: false })">
+    <form class="space-y-5" @submit.prevent="form.post('/login')">
       <div class="space-y-2">
         <Label for="email">Email</Label>
         <Input

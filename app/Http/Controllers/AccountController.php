@@ -29,6 +29,21 @@ class AccountController extends Controller
 
         return Inertia::render('Accounts', [
             'items' => $accounts,
+            // Satu-satunya tempat yang menjumlahkan seluruh akun: layar lain
+            // selalu mengikuti akun aktif. Dikelompokkan per mata uang, karena
+            // USD, USC (akun sen), dan IDR bukan satuan yang sama — laporan
+            // pajaklah yang mengubah semuanya jadi rupiah, dengan kurs yang
+            // diisi sendiri dan tanggal berlakunya.
+            'totals' => $accounts->groupBy('currency')
+                ->map(fn ($rows, $currency) => [
+                    'currency' => $currency,
+                    'accounts' => $rows->count(),
+                    'balance' => round($rows->sum('balance'), 2),
+                    'net_pnl' => round($rows->sum('net_pnl'), 2),
+                    'trades' => $rows->sum('trades'),
+                ])
+                ->sortKeys()
+                ->values(),
             'activeId' => $request->currentAccount()?->id,
         ]);
     }

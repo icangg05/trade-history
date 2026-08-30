@@ -91,6 +91,10 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
             Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+            // POST, bukan PUT seperti sumber daya lain: bukti transfer ikut dikirim,
+            // dan multipart hanya berjalan lewat POST. Menyamarkannya dengan
+            // `_method` cuma menambah satu lapisan tanpa menambah arti.
+            Route::post('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
             Route::get('/transactions/{transaction}/proof', [TransactionController::class, 'proof'])->name('transactions.proof');
             Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
 

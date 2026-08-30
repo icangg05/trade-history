@@ -37,10 +37,7 @@ const form = useForm({ period: props.period })
 function generate() {
   form.period = props.period
 
-  // Tanpa progress bar: permintaan ini bisa berjalan puluhan detik, dan bar
-  // yang menggantung di atas halaman selama itu terbaca seperti macet.
-  // Umpan baliknya dipegang tombol yang berputar dan panel di bawahnya.
-  form.post('/analysis', { preserveScroll: true, showProgress: false })
+  form.post('/analysis', { preserveScroll: true })
 }
 
 /** Ambil beberapa baris teratas dari sebuah breakdown untuk ditampilkan. */

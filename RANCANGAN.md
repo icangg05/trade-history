@@ -217,11 +217,11 @@ data seeder tetap valid). Disimpan di disk privat, keluar lewat
 | direction | enum(buy,sell) | |
 | lot | decimal(10,2) null | |
 | entry_price / sl_price / tp_price / exit_price | decimal(18,5) null | |
-| pnl | decimal(18,2) null | hasil akhir dalam mata uang akun; null = masih open |
+| pnl | decimal(18,2) | hasil akhir dalam mata uang akun; wajib — lihat §16 |
 | pips | decimal(10,1) null | |
 | rr_planned | decimal(6,2) null | dihitung: \|entry−tp\| / \|entry−sl\| |
 | rr_realized | decimal(6,2) null | |
-| status | enum(open,win,loss,be) | derived saat simpan |
+| status | enum(win,loss,be) | derived saat simpan |
 | opened_at | datetime | |
 | closed_at | datetime null | |
 | setup | string(50) null | nama strategi/setup |
@@ -533,3 +533,81 @@ yang bisa diserahkan saat pajak meminta klarifikasi penghasilan dari trading.
 | Catatan angka & pernyataan jadi butir bernomor dwibahasa, tanpa tanda pisah | permintaan langsung: tanda `—` dihapus dari seluruh kalimat laporan dan halaman /reports |
 | Kolom `accounts.account_number` ditambahkan | laporan ini catatan sendiri, jadi kekuatannya bergantung pada bisa-tidaknya dicocokkan ke statement resmi broker. Nomor akun adalah satu-satunya penanda yang menyambungkan keduanya; tanpa itu pemeriksa tidak bisa memastikan dua dokumen membicarakan akun yang sama |
 | Tabel pendek diberi `page-break-inside: avoid` | dompdf mengulang `<thead>` saat tabel terbelah, kecuali kalau baris badan pertamanya sudah tidak muat di halaman yang sama — barisnya lalu lahir tanpa kepala. Lampiran sengaja dibiarkan terbelah, di sana pengulangannya jalan |
+
+---
+
+## 15. Analisa kekurangan fitur (30 Agustus 2026)
+
+Tinjauan atas sistem yang sudah jalan: 15 halaman, 16 berkas uji, 101 tes lulus.
+Bagian ini **belum mengubah satu baris kode pun** — isinya daftar yang kurang,
+diurutkan dari yang paling sering menghalangi pemakaian sehari-hari. Tiap butir
+menyebut tempat pembuktiannya supaya tinjauan berikutnya tidak mulai dari nol.
+
+> Empat butir di bawah sudah dikerjakan sesudahnya — lihat §16. Yang lain masih terbuka.
+
+### 15.1 Yang hilang dan terasa
+
+| Kekurangan | Buktinya | Dampak | Jalan termurah |
+|---|---|---|---|
+| **Impor massal riwayat broker** | `TradeImportController.php:34` menerima satu `screenshot` per permintaan | Memindahkan riwayat setahun berarti ratusan unggahan satu per satu. Ini penghalang terbesar saat akun baru dipasang, dan satu-satunya butir di sini yang benar-benar mahal dibangun | Pembaca statement CSV/HTML MT4/MT5 → tabel pratinjau → satu kali simpan. Validasinya tetap `TradeRequest` yang sama, seperti jalur AI |
+| **Ekspor trade** | tidak ada rute `export`; satu-satunya keluaran data adalah PDF pajak (`ReportController`) | Baris trade tidak bisa ditarik ke spreadsheet, dan tidak ada jalan pindah kalau aplikasi ini ditinggalkan. Cadangan `.sql` bukan penggantinya: itu untuk memulihkan, bukan untuk dibaca | `GET /trades/export` yang mengalirkan CSV memakai query dan filter yang sama persis dengan `index()` |
+| **Transaksi dana tidak bisa diubah** | `routes/web.php` hanya punya `store` dan `destroy` untuk transaksi | Salah ketik nominal atau kurs hanya bisa diperbaiki dengan menghapus lalu mengunggah ulang bukti — dan `destroy()` memang ikut membuang berkas buktinya | `PUT /transactions/{id}` dengan bukti opsional; kalau tidak diunggah ulang, `proof_path` lama dipertahankan |
+| **Filter setup & pencarian catatan** | filter `/trades` berhenti di symbol/status/stop/direction/tanggal (`TradeController.php:24-31`) | Analisa sudah memecah hasil per setup (`by_setup`), tapi daftar tradenya tidak bisa dibuka. "Tunjukkan semua BOS yang loss" tidak terjawab di layar mana pun | Dua `when()` tambahan di query yang sudah ada, plus dua kolom di baris filter |
+| **Tidak ada pandangan lintas akun** | Dashboard, kalender, dan analisa semuanya mengikuti akun aktif dari `SetCurrentAccount` | Dengan lebih dari satu akun tidak ada satu layar pun yang menjawab "total tahun ini berapa" — hanya laporan pajak yang menjumlahkan semuanya, dan itu setahun sekali | `/accounts` sudah menampilkan kartu per akun; yang kurang satu baris total di atasnya |
+| **Lama posisi ditahan tidak pernah dihitung** | `opened_at` dan `closed_at` tersimpan, tapi tidak ada satu pun `diffIn*` di seluruh `AccountStats` | Rata-rata durasi win dibanding loss adalah sinyal termurah untuk "profit ditutup terlalu cepat, loss ditahan terlalu lama" — pola yang justru tidak kelihatan dari winrate maupun profit factor | Dua baris di `summary()`; datanya sudah ada di koleksi yang sama |
+| **Riwayat analisa AI tidak bisa dibuka** | `AnalysisController::index()` hanya mengambil yang cocok atau yang terbaru | Barisnya sebenarnya tersimpan per `stats_hash`, jadi sejarahnya ada di tabel tapi tidak punya pintu. Nasihat bulan lalu tidak bisa dibandingkan dengan yang sekarang | Daftar sederhana di halaman analisa yang menunjuk baris lama. Chat memang sengaja tidak disimpan (sudah ditandai `ponytail:` di controller) |
+
+### 15.2 Operasional — jarang terasa, mahal saat kejadian
+
+| Kekurangan | Buktinya | Dampak | Jalan termurah |
+|---|---|---|---|
+| **Tidak ada jalur pulih sandi** | tabel `password_reset_tokens` ada di migrasi bawaan, tapi tidak ada rutenya dan halaman login tidak punya tautan "lupa sandi" | Admin bisa mengganti sandi pengguna lain (`AdminController::updateUser`), tapi kalau admin satu-satunya yang lupa, satu-satunya jalan masuk adalah `tinker` di server | Satu perintah artisan `user:password`, bukan seluruh alur email. Aplikasi ini tidak punya pengirim surel dan tidak perlu punya |
+| **Cadangan tidak mencakup bukti transfer** | `BackupDatabase::dump()` hanya `mysqldump`; bukti hidup di `storage/app/private/proofs` (`Uploads::DISK = local`) | Kalau disk hilang, baris transaksinya pulih tapi lampiran laporan pajaknya tidak. Justru berkas inilah satu-satunya yang tidak bisa dibuat ulang | Ikutkan direktori bukti ke dalam berkas cadangan yang sama |
+| **Cadangan tidak pernah keluar dari mesin** | empat berkas terakhir ditulis ke `storage/app/backups` di host yang sama dengan databasenya | Cadangan yang mati bersama mesinnya bukan cadangan | Tombol unduh di `/admin` sudah ada sebagai jalur manual; salinan otomatis ke luar (rsync/objek storage) baru perlu kalau jadwal mingguan itu memang diandalkan |
+| **Tiga halaman tanpa uji** | tidak ada `CalendarTest`, `DashboardTest`, maupun uji CRUD/pengalih akun | Risikonya kecil — ketiganya cuma memanggil `AccountStats` yang sudah diuji dari sisi lain — tapi bukan nol: yang belum terjaga adalah perakitan propsnya, bukan angkanya | Satu uji "halaman terbuka dan propsnya lengkap" per halaman |
+
+### 15.3 Sisa desain yang sudah tidak dipakai
+
+Bukan fitur yang kurang, tapi sisa yang akan menyesatkan pembaca berikutnya:
+
+- `trades.status` masih punya nilai `open` dan `pnl` masih `nullable`
+  (migrasi `:28`), padahal `TradeRequest` mewajibkan `pnl` **dan** `closed_at`
+  (`:22-23`), dan `computeStatus()` tidak akan pernah mengembalikan `open` —
+  `pnl` null menjadi `0.0` lalu terbaca `be`. Cabang `pnl === null` di
+  `DashboardController.php:56` dan di `TradeController::present()` ikut mati.
+- Bagian §4 dokumen ini masih menulis `pnl` "null = masih open". Salah satu dari
+  dua harus mengalah: kalau posisi berjalan memang mau dicatat, itu fitur baru
+  (form tanpa hasil + semua agregat harus tetap mengecualikannya); kalau tidak,
+  buang nilai enumnya, jadikan `pnl` NOT NULL, dan hapus cabang matinya.
+
+### 15.4 Yang sengaja tidak ada
+
+Dicatat di sini supaya tinjauan berikutnya tidak menghitungnya sebagai kekurangan:
+screenshot trade tidak disimpan (§11), posisi berjalan tidak dicatat (§15.3),
+aturan hanya menandai dan tidak pernah memblokir input (§4), tidak ada queue,
+Redis, maupun websocket (§1), dan temanya gelap saja. Dua lapis autentikasi dan
+verifikasi surel juga belum ada: pendaftaran mandiri sudah dikunci
+`REGISTER_TOKEN` dan login dibatasi `throttle:10,1`, jadi permukaannya kecil —
+tapi ini pilihan, bukan sesuatu yang sudah terpasang.
+
+
+---
+
+## 16. Revisi keempat (menindaklanjuti §15)
+
+Empat butir dari daftar kekurangan dikerjakan. Yang lain — impor massal, ekspor
+CSV, holding time, riwayat analisa, pulih sandi, cadangan bukti transfer —
+tetap terbuka di §15.
+
+| Perubahan | Alasan |
+|---|---|
+| `trades.pnl` jadi NOT NULL dan nilai `open` dibuang dari enum `status` | keadaan yang tidak mungkin lahir tapi tetap harus dijaga di tiap query. `TradeRequest` sudah mewajibkan `pnl` dan `closed_at`, dan `computeStatus()` tidak pernah bisa mengembalikan `open` — `pnl` null menjadi `0.0` lalu terbaca `be`. Sekarang aturannya dipegang basis data, bukan cuma satu form |
+| Tiga `whereNotNull('pnl')` dan dua cabang `pnl === null` ikut dihapus | penyaring yang tidak menyaring apa pun lebih buruk daripada tidak ada: ia menjanjikan ada trade terbuka yang disembunyikan. Ikut turun: `Trade.pnl` di TypeScript jadi `number`, bukan `number \| null` |
+| `closed_at` sengaja **tidak** ikut dijadikan NOT NULL | idiom `COALESCE(closed_at, opened_at)` dipakai di lima berkas sebagai penentu "hari efektif" sebuah trade. Menghapusnya menyentuh jauh lebih banyak baris daripada yang dibayar kembali, dan sebagai penjaga ia tidak merugikan |
+| `POST /transactions/{id}` untuk memperbaiki transaksi dana | salah ketik nominal atau kurs dulu hanya bisa dibetulkan dengan menghapus barisnya lalu mengunggah ulang bukti — dan menghapus berarti buktinya ikut hilang. Buktinya opsional di jalur ini: yang lama dipertahankan selama tidak ada berkas baru, dan kalau diganti, berkas lamanya dibuang di transaksi yang sama |
+| POST, bukan PUT seperti sumber daya lain | bukti transfer ikut dikirim, dan multipart hanya berjalan lewat POST. Menyamarkannya dengan `_method` menambah satu lapisan tanpa menambah arti |
+| Aturan validasi transaksi dipakai bersama `store()` dan `update()` | bedanya cuma satu baris: bukti wajib saat lahir, opsional saat diperbaiki. Menyalin sepuluh baris lainnya berarti dua tempat yang harus ingat kurs wajib untuk akun non-rupiah |
+| Kartu total per mata uang di `/accounts` | seluruh layar lain mengikuti akun aktif, jadi tidak ada satu pun yang menjawab "semua akun jumlahnya berapa". Dikelompokkan per mata uang karena USD, USC, dan IDR bukan satuan yang sama — hanya laporan pajak yang berhak menyatukannya, dan itu pun dengan kurs yang diisi sendiri beserta tanggal berlakunya. Dihitung dari koleksi yang sudah ada di memori, jadi nol query tambahan, dan disembunyikan kalau akunnya cuma satu |
+| Filter `setup` dan pencarian `q` di `/trades` | analisa sudah memecah hasil per setup, tapi daftar tradenya tidak bisa dibuka. `setup` disimpan sebagai daftar dipisah koma sehingga dicocokkan sebagian; `%` dan `_` di kata kunci di-escape supaya tetap jadi karakter biasa, bukan wildcard yang mencocokkan semuanya |
+| Daftar strategi di filter datang dari trade akun itu sendiri | daftar bawaan `SetupPicker` berisi 29 nama; menawarkan filter untuk strategi yang tidak pernah dipakai cuma memperbesar daftar tanpa menambah jawaban |
+| Lima uji baru (106 lulus, dari 101) | yang menyentuh uang dijaga: transaksi bisa diperbaiki tanpa unggah ulang, bukti pengganti membuang berkas lamanya, transaksi akun lain tetap 404, dolar dan rupiah tidak pernah dijumlahkan jadi satu angka, dan `%` di kolom pencarian tidak mengembalikan seluruh isi tabel |

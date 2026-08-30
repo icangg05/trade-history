@@ -397,11 +397,10 @@ class AccountStats
 
     // ------------------------------------------------------------------ internal
 
+    /** Semua trade akun ini. Sejak `pnl` wajib, tidak ada lagi yang terbuka. */
     private function closedTrades()
     {
-        return Trade::query()
-            ->where('account_id', $this->account->id)
-            ->whereNotNull('pnl');
+        return Trade::query()->where('account_id', $this->account->id);
     }
 
     /**

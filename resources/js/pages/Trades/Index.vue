@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { Head, Link, router, useForm } from '@inertiajs/vue3'
-import { Layers, Pencil, Plus, Sparkles, Trash2 } from '@lucide/vue'
+import { ChevronDown, Layers, Pencil, Plus, SlidersHorizontal, Sparkles, Trash2, X } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
 
 import Pagination from '@/components/Pagination.vue'
@@ -22,6 +22,7 @@ const props = defineProps<{
   daily: Record<string, number>
   filters: Record<string, string | null>
   symbols: string[]
+  setups: string[]
 }>()
 
 const currency = useCurrency()
@@ -31,9 +32,24 @@ const filters = reactive({
   status: props.filters.status ?? '',
   stop: props.filters.stop ?? '',
   direction: props.filters.direction ?? '',
+  setup: props.filters.setup ?? '',
+  q: props.filters.q ?? '',
   from: props.filters.from ?? '',
   to: props.filters.to ?? '',
 })
+
+/**
+ * Delapan kolom filter memakan seluruh layar ponsel sebelum satu trade pun
+ * terlihat, jadi di sana panelnya tertutup dulu. Di layar lebar tidak ada yang
+ * perlu disembunyikan — tiga per baris tetap muat.
+ */
+const filtersOpen = ref(false)
+const activeFilters = computed(() => Object.values(filters).filter(Boolean).length)
+
+/** Kosongkan semuanya; `watch` di bawah yang mengantar perubahannya ke server. */
+function resetFilters() {
+  Object.keys(filters).forEach((key) => (filters[key as keyof typeof filters] = ''))
+}
 
 const apply = useDebounceFn(() => {
   router.get('/trades', Object.fromEntries(Object.entries(filters).filter(([, v]) => v)), {
@@ -294,50 +310,81 @@ const detail = computed(() => {
       </Button>
     </div>
 
-    <div class="glass-card grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3">
-      <Input v-model="filters.symbol" placeholder="Cari simbol — XAUUSD" list="symbols" class="h-9" />
-      <datalist id="symbols">
-        <option v-for="symbol in symbols" :key="symbol" :value="symbol" />
-      </datalist>
+    <div class="glass-card p-3">
+      <button
+        type="button"
+        class="flex w-full items-center justify-between gap-2 lg:hidden"
+        :aria-expanded="filtersOpen"
+        @click="filtersOpen = !filtersOpen"
+      >
+        <span class="flex items-center gap-1.5 text-sm">
+          <SlidersHorizontal class="size-4 text-muted-foreground" /> Filter
+          <span v-if="activeFilters" class="rounded-full bg-gold/15 px-1.5 text-[11px] text-gold">
+            {{ activeFilters }}
+          </span>
+        </span>
+        <ChevronDown class="size-4 text-muted-foreground transition-transform" :class="filtersOpen && 'rotate-180'" />
+      </button>
 
-      <Select v-model="status">
-        <SelectTrigger class="h-9 w-full" aria-label="Status"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem :value="ALL">Semua status</SelectItem>
-          <SelectItem value="win">Win</SelectItem>
-          <SelectItem value="loss">Loss</SelectItem>
-          <SelectItem value="be">Breakeven</SelectItem>
-        </SelectContent>
-      </Select>
+      <div
+        class="gap-2 sm:grid-cols-2 lg:grid lg:grid-cols-3"
+        :class="filtersOpen ? 'mt-3 grid lg:mt-0' : 'hidden'"
+      >
+        <Input v-model="filters.symbol" placeholder="Cari simbol — XAUUSD" list="symbols" class="h-9" />
+        <datalist id="symbols">
+          <option v-for="symbol in symbols" :key="symbol" :value="symbol" />
+        </datalist>
 
-      <!-- Sumbu kedua: letak stop loss terhadap entry, bukan hasil trade-nya. -->
-      <Select v-model="stop">
-        <SelectTrigger class="h-9 w-full" aria-label="Posisi stop"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem :value="ALL">Semua posisi stop</SelectItem>
-          <SelectItem value="risk">Stop masih berisiko</SelectItem>
-          <SelectItem value="breakeven">BE — stop di harga entry</SelectItem>
-          <SelectItem value="sl_plus">SL+ — profit terkunci</SelectItem>
-        </SelectContent>
-      </Select>
+        <Input v-model="filters.setup" placeholder="Cari strategi — FVG" list="setups" class="h-9" />
+        <datalist id="setups">
+          <option v-for="item in setups" :key="item" :value="item" />
+        </datalist>
 
-      <Select v-model="direction">
-        <SelectTrigger class="h-9 w-full" aria-label="Arah"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          <SelectItem :value="ALL">Buy &amp; sell</SelectItem>
-          <SelectItem value="buy">Buy</SelectItem>
-          <SelectItem value="sell">Sell</SelectItem>
-        </SelectContent>
-      </Select>
+        <Input v-model="filters.q" placeholder="Cari di catatan" class="h-9" />
 
-      <label class="flex items-center gap-2 text-xs text-muted-foreground">
-        <span class="shrink-0">Dari</span>
-        <Input v-model="filters.from" type="date" class="h-9" placeholder="Tanggal awal" aria-label="Tanggal awal" />
-      </label>
-      <label class="flex items-center gap-2 text-xs text-muted-foreground">
-        <span class="shrink-0">Sampai</span>
-        <Input v-model="filters.to" type="date" class="h-9" placeholder="Tanggal akhir" aria-label="Tanggal akhir" />
-      </label>
+        <Select v-model="status">
+          <SelectTrigger class="h-9 w-full" aria-label="Status"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem :value="ALL">Semua status</SelectItem>
+            <SelectItem value="win">Win</SelectItem>
+            <SelectItem value="loss">Loss</SelectItem>
+            <SelectItem value="be">Breakeven</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <!-- Sumbu kedua: letak stop loss terhadap entry, bukan hasil trade-nya. -->
+        <Select v-model="stop">
+          <SelectTrigger class="h-9 w-full" aria-label="Posisi stop"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem :value="ALL">Semua posisi stop</SelectItem>
+            <SelectItem value="risk">Stop masih berisiko</SelectItem>
+            <SelectItem value="breakeven">BE — stop di harga entry</SelectItem>
+            <SelectItem value="sl_plus">SL+ — profit terkunci</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select v-model="direction">
+          <SelectTrigger class="h-9 w-full" aria-label="Arah"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem :value="ALL">Buy &amp; sell</SelectItem>
+            <SelectItem value="buy">Buy</SelectItem>
+            <SelectItem value="sell">Sell</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <label class="flex items-center gap-2 text-xs text-muted-foreground">
+          <span class="shrink-0">Dari</span>
+          <Input v-model="filters.from" type="date" class="h-9" placeholder="Tanggal awal" aria-label="Tanggal awal" />
+        </label>
+        <label class="flex items-center gap-2 text-xs text-muted-foreground">
+          <span class="shrink-0">Sampai</span>
+          <Input v-model="filters.to" type="date" class="h-9" placeholder="Tanggal akhir" aria-label="Tanggal akhir" />
+        </label>
+
+        <Button v-if="activeFilters" variant="ghost" class="h-9 gap-1.5 text-muted-foreground" @click="resetFilters">
+          <X class="size-4" /> Bersihkan {{ activeFilters }} filter
+        </Button>
+      </div>
     </div>
 
     <!-- Ponsel: satu baris ringkas per trade, sebentuk dengan "Trade terakhir"

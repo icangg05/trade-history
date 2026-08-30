@@ -26,6 +26,8 @@ class TradeController extends Controller
             'status' => ['nullable', 'in:win,loss,be'],
             'stop' => ['nullable', 'in:risk,breakeven,sl_plus'],
             'direction' => ['nullable', 'in:buy,sell'],
+            'setup' => ['nullable', 'string', 'max:50'],
+            'q' => ['nullable', 'string', 'max:60'],
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date'],
         ]);
@@ -42,6 +44,9 @@ class TradeController extends Controller
                 default => $q->whereRaw("((direction = 'buy' AND sl_price < entry_price) OR (direction = 'sell' AND sl_price > entry_price))"),
             })
             ->when($filters['direction'] ?? null, fn ($q, $v) => $q->where('direction', $v))
+            // `setup` disimpan sebagai daftar dipisah koma, jadi cocokkan sebagian.
+            ->when($filters['setup'] ?? null, fn ($q, $v) => $q->where('setup', 'like', '%'.self::escapeLike($v).'%'))
+            ->when($filters['q'] ?? null, fn ($q, $v) => $q->where('notes', 'like', '%'.self::escapeLike($v).'%'))
             ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereRaw(self::TRADE_DATE.' >= ?', [$v.' 00:00:00']))
             ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereRaw(self::TRADE_DATE.' <= ?', [$v.' 23:59:59']));
 
@@ -57,7 +62,22 @@ class TradeController extends Controller
             'daily' => $this->dailyPnl($query, $trades->items()),
             'filters' => $filters,
             'symbols' => $account->trades()->distinct()->orderBy('symbol')->pluck('symbol'),
+            // Strategi yang benar-benar dipakai akun ini, bukan daftar bawaan
+            // SetupPicker — memfilter nama yang tidak pernah muncul tidak ada gunanya.
+            'setups' => $account->trades()->whereNotNull('setup')->distinct()->pluck('setup')
+                ->flatMap(fn (string $setup) => explode(',', $setup))
+                ->map(fn (string $item) => trim($item))
+                ->filter()
+                ->unique()
+                ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+                ->values(),
         ]);
+    }
+
+    /** `%` dan `_` di kata kunci adalah karakter biasa, bukan wildcard LIKE. */
+    private static function escapeLike(string $value): string
+    {
+        return addcslashes($value, '%_\\');
     }
 
     public function create(): Response
@@ -300,7 +320,6 @@ class TradeController extends Controller
         }
 
         return (clone $query)
-            ->whereNotNull('pnl')
             ->whereRaw('DATE('.self::TRADE_DATE.') BETWEEN ? AND ?', [$days->min(), $days->max()])
             ->selectRaw('DATE('.self::TRADE_DATE.') as d, SUM(pnl) as total')
             ->groupBy('d')

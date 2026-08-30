@@ -30,7 +30,9 @@ createInertiaApp({
       .mount(el)
   },
 
-  progress: { color: 'hsl(43 96% 56%)', showSpinner: false },
+  // Tanpa bar progres: umpan balik pemuatan sudah dipegang tombol yang
+  // berputar di tiap form, dan bar tipis di puncak layar cuma berkedip sekejap.
+  progress: false,
 })
 
 // Didaftarkan di dev juga: tanpa service worker aktif, browser tidak pernah

@@ -36,7 +36,7 @@ class JournalTest extends TestCase
         $account = $this->account();
         $trade = $account->trades()->create([
             'symbol' => 'XAUUSD', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
-            'opened_at' => '2026-01-05 09:00',
+            'opened_at' => '2026-01-05 09:00', 'closed_at' => '2026-01-05 11:00', 'pnl' => 50,
         ]);
 
         $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
@@ -56,7 +56,7 @@ class JournalTest extends TestCase
     {
         $milikOrangLain = $this->account()->trades()->create([
             'symbol' => 'XAUUSD', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
-            'opened_at' => '2026-01-05 09:00',
+            'opened_at' => '2026-01-05 09:00', 'closed_at' => '2026-01-05 11:00', 'pnl' => 50,
         ]);
 
         $saya = $this->account();
@@ -296,6 +296,118 @@ class JournalTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $this->assertNotNull($account->transactions()->sole()->proof_path);
+    }
+
+    public function test_transaksi_bisa_diperbaiki_tanpa_mengunggah_bukti_lagi(): void
+    {
+        Storage::fake('local');
+
+        $account = $this->account();
+        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+
+        $this->post('/transactions', [
+            'type' => 'deposit',
+            'amount' => 500,
+            'rate_idr' => 16250,
+            'occurred_at' => '2026-01-05',
+            'proof' => UploadedFile::fake()->image('bukti.jpg'),
+        ])->assertSessionHasNoErrors();
+
+        $transaksi = $account->transactions()->sole();
+        $bukti = $transaksi->proof_path;
+
+        // Salah ketik nominal & kurs: dibetulkan tanpa menyentuh buktinya.
+        $this->post('/transactions/'.$transaksi->getRouteKey(), [
+            'type' => 'deposit',
+            'amount' => 550,
+            'rate_idr' => 16300,
+            'occurred_at' => '2026-01-06',
+            'note' => 'Koreksi',
+        ])->assertSessionHasNoErrors();
+
+        $transaksi->refresh();
+
+        $this->assertSame('550.00', $transaksi->amount);
+        $this->assertSame('16300.00', $transaksi->rate_idr);
+        $this->assertSame($bukti, $transaksi->proof_path);
+        Storage::disk('local')->assertExists($bukti);
+    }
+
+    public function test_bukti_yang_diganti_membuang_berkas_lamanya(): void
+    {
+        Storage::fake('local');
+
+        $account = $this->account();
+        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+
+        $this->post('/transactions', [
+            'type' => 'withdrawal',
+            'amount' => 100,
+            'rate_idr' => 16250,
+            'occurred_at' => '2026-01-05',
+            'proof' => UploadedFile::fake()->image('lama.jpg'),
+        ])->assertSessionHasNoErrors();
+
+        $transaksi = $account->transactions()->sole();
+        $lama = $transaksi->proof_path;
+
+        $this->post('/transactions/'.$transaksi->getRouteKey(), [
+            'type' => 'withdrawal',
+            'amount' => 100,
+            'rate_idr' => 16250,
+            'occurred_at' => '2026-01-05',
+            'proof' => UploadedFile::fake()->image('baru.jpg'),
+        ])->assertSessionHasNoErrors();
+
+        $baru = $transaksi->refresh()->proof_path;
+
+        $this->assertNotSame($lama, $baru);
+        Storage::disk('local')->assertExists($baru);
+        Storage::disk('local')->assertMissing($lama);
+    }
+
+    public function test_transaksi_akun_orang_lain_tidak_bisa_diubah(): void
+    {
+        Storage::fake('local');
+
+        $milikOrangLain = $this->account()->transactions()->create([
+            'type' => 'deposit', 'amount' => 100, 'occurred_at' => '2026-01-05',
+        ]);
+
+        $saya = $this->account();
+        $this->actingAs($saya->user)->withSession(['current_account_id' => $saya->id]);
+
+        $this->post('/transactions/'.$milikOrangLain->getRouteKey(), [
+            'type' => 'deposit',
+            'amount' => 999,
+            'rate_idr' => 16250,
+            'occurred_at' => '2026-01-05',
+        ])->assertNotFound();
+
+        $this->assertSame('100.00', $milikOrangLain->refresh()->amount);
+    }
+
+    public function test_total_lintas_akun_dipisah_menurut_mata_uang(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([['USD', 1000], ['USD', 500], ['IDR', 2_000_000]] as [$mataUang, $modal]) {
+            $user->accounts()->create([
+                'name' => $mataUang.' '.$modal,
+                'currency' => $mataUang,
+                'initial_balance' => $modal,
+                'started_at' => CarbonImmutable::parse('2026-01-01'),
+            ]);
+        }
+
+        $totals = collect(
+            $this->actingAs($user)->get('/accounts')->assertOk()->viewData('page')['props']['totals']
+        )->keyBy('currency');
+
+        // Dolar dan rupiah tidak pernah dijumlahkan jadi satu angka.
+        $this->assertSame(1500.0, $totals['USD']['balance']);
+        $this->assertSame(2, $totals['USD']['accounts']);
+        $this->assertSame(2_000_000.0, $totals['IDR']['balance']);
     }
 
     public function test_withdrawal_tidak_menggeser_dasar_persentase_dashboard(): void

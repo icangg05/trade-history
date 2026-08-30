@@ -24,7 +24,6 @@ class CalendarController extends Controller
         $gridEnd = $month->endOfMonth()->endOfWeek(CarbonImmutable::SUNDAY);
 
         $trades = Trade::where('account_id', $account->id)
-            ->whereNotNull('pnl')
             ->whereRaw('COALESCE(closed_at, opened_at) BETWEEN ? AND ?', [$gridStart, $gridEnd])
             ->orderByRaw('COALESCE(closed_at, opened_at) DESC')
             ->orderByDesc('id')

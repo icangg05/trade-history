@@ -90,17 +90,8 @@ class TransactionController extends Controller
     {
         $account = $request->currentAccount();
 
-        $data = $request->validate([
-            'type' => ['required', 'in:deposit,withdrawal'],
-            'amount' => ['required', 'numeric', 'gt:0'],
-            // Kurs wajib untuk akun non-rupiah: kurs hari transaksi tidak bisa
-            // direkonstruksi belakangan, jadi harus ikut tercatat saat itu juga.
-            'rate_idr' => [Rule::requiredIf($account->currency !== 'IDR'), 'nullable', 'numeric', 'gt:0'],
-            'occurred_at' => ['required', 'date'],
-            // Bukti transfer wajib — ini catatan uang sungguhan, bukan tebakan.
-            'proof' => ['required', 'image', 'max:8192'],
-            'note' => ['nullable', 'string', 'max:255'],
-        ]);
+        // Bukti transfer wajib saat dicatat — ini catatan uang sungguhan.
+        $data = $request->validate($this->rules($account, ['required', 'image', 'max:8192']));
 
         $data['proof_path'] = Uploads::store($request->file('proof'), $account, self::FOLDER);
         unset($data['proof']);
@@ -108,6 +99,53 @@ class TransactionController extends Controller
         $account->transactions()->create($data);
 
         return back()->with('success', $data['type'] === 'deposit' ? 'Deposit dicatat.' : 'Withdrawal dicatat.');
+    }
+
+    /**
+     * Perbaiki baris yang sudah tercatat. Salah ketik nominal atau kurs dulu
+     * hanya bisa dibetulkan dengan menghapus lalu mengunggah ulang buktinya.
+     *
+     * Buktinya sendiri opsional di sini: yang lama dipertahankan selama tidak
+     * ada berkas baru, jadi memperbaiki angka tidak menuntut unggah ulang.
+     */
+    public function update(Request $request, Transaction $transaction): RedirectResponse
+    {
+        $account = $request->currentAccount();
+
+        $data = $request->validate($this->rules($account, ['nullable', 'image', 'max:8192']));
+
+        if ($request->hasFile('proof')) {
+            $lama = $transaction->proof_path;
+            $data['proof_path'] = Uploads::store($request->file('proof'), $account, self::FOLDER);
+            Uploads::delete($lama);
+        }
+
+        unset($data['proof']);
+
+        $transaction->update($data);
+
+        return back()->with('success', 'Transaksi diperbarui.');
+    }
+
+    /**
+     * Aturan yang sama untuk mencatat dan memperbaiki; yang berbeda hanya bukti
+     * transfernya — wajib saat lahir, opsional saat diperbaiki.
+     *
+     * @param  list<string>  $proof
+     * @return array<string, mixed>
+     */
+    private function rules($account, array $proof): array
+    {
+        return [
+            'type' => ['required', 'in:deposit,withdrawal'],
+            'amount' => ['required', 'numeric', 'gt:0'],
+            // Kurs wajib untuk akun non-rupiah: kurs hari transaksi tidak bisa
+            // direkonstruksi belakangan, jadi harus ikut tercatat saat itu juga.
+            'rate_idr' => [Rule::requiredIf($account->currency !== 'IDR'), 'nullable', 'numeric', 'gt:0'],
+            'occurred_at' => ['required', 'date'],
+            'proof' => $proof,
+            'note' => ['nullable', 'string', 'max:255'],
+        ];
     }
 
     /** Bukti hanya keluar lewat route ini, setelah kepemilikan dicek. */

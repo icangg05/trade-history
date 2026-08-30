@@ -32,7 +32,8 @@ export interface Trade {
   stop_state?: StopState
   tp_price: number | null
   exit_price: number | null
-  pnl: number | null
+  /** Selalu terisi: aplikasi hanya mencatat trade yang sudah ditutup. */
+  pnl: number
   rr_planned: number | null
   rr_realized: number | null
   opened_at: string

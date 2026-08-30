@@ -4,6 +4,7 @@ import { Head, router, useForm } from '@inertiajs/vue3'
 import { Pencil, Plus, Trash2 } from '@lucide/vue'
 
 import ConfirmDestroy from '@/components/ConfirmDestroy.vue'
+import StatCard from '@/components/StatCard.vue'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -30,7 +31,15 @@ interface Row {
   trades: number
 }
 
-defineProps<{ items: Row[]; activeId: number | null }>()
+interface Total {
+  currency: string
+  accounts: number
+  balance: number
+  net_pnl: number
+  trades: number
+}
+
+defineProps<{ items: Row[]; totals: Total[]; activeId: number | null }>()
 
 const open = ref(false)
 const editing = ref<Row | null>(null)
@@ -96,6 +105,18 @@ function destroy() {
     <p v-if="!items.length" class="glass-card p-8 text-center text-sm text-muted-foreground">
       Belum ada akun. Buat satu untuk mulai mencatat trade.
     </p>
+
+    <!-- Satu-satunya angka lintas akun di seluruh aplikasi. Dengan satu akun
+         kartunya cuma mengulang kartu di bawah, jadi tidak ditampilkan. -->
+    <div v-if="items.length > 1" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <StatCard
+        v-for="total in totals"
+        :key="total.currency"
+        :label="`Total ${total.currency}`"
+        :value="money(total.balance, total.currency)"
+        :hint="`${money(total.net_pnl, total.currency, true)} dari trading · ${total.trades} trade · ${total.accounts} akun`"
+      />
+    </div>
 
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       <div

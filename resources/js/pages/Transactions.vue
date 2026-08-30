@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { useEventListener } from '@vueuse/core'
-import { ImageUp, Plus, Trash2 } from '@lucide/vue'
+import { ImageUp, Pencil, Plus, Trash2 } from '@lucide/vue'
 
 import ConfirmDestroy from '@/components/ConfirmDestroy.vue'
 import Pagination from '@/components/Pagination.vue'
@@ -120,6 +120,9 @@ const form = useForm({
 
 const proofPreview = ref<string | null>(null)
 
+/** Baris yang sedang diperbaiki; null berarti dialognya mencatat yang baru. */
+const editing = ref<Row | null>(null)
+
 function pickProof(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0] ?? null
 
@@ -129,14 +132,49 @@ function pickProof(event: Event) {
   proofPreview.value = file ? URL.createObjectURL(file) : null
 }
 
+function edit(row: Row) {
+  form.defaults({
+    type: row.type,
+    amount: row.amount,
+    rate_idr: row.rate_idr,
+    occurred_at: row.occurred_at,
+    proof: null,
+    note: row.note ?? '',
+  })
+  form.reset()
+  form.clearErrors()
+
+  if (proofPreview.value) URL.revokeObjectURL(proofPreview.value)
+  proofPreview.value = null
+
+  editing.value = row
+  open.value = true
+}
+
+/** Tutup dialog: bawaan form dikembalikan ke "catat baru" apa pun jalannya. */
+watch(open, (value) => {
+  if (value) return
+
+  editing.value = null
+  form.defaults({
+    type: 'withdrawal',
+    amount: null,
+    rate_idr: null,
+    occurred_at: new Date().toISOString().slice(0, 10),
+    proof: null,
+    note: '',
+  })
+  form.reset()
+  form.clearErrors()
+
+  if (proofPreview.value) URL.revokeObjectURL(proofPreview.value)
+  proofPreview.value = null
+})
+
 function submit() {
-  form.post('/transactions', {
+  form.post(editing.value ? `/transactions/${editing.value.id}` : '/transactions', {
     preserveScroll: true,
-    onSuccess: () => {
-      form.reset()
-      proofPreview.value = null
-      open.value = false
-    },
+    onSuccess: () => (open.value = false),
   })
 }
 </script>
@@ -222,6 +260,9 @@ function submit() {
           </p>
         </div>
 
+        <Button size="icon-xs" variant="ghost" class="shrink-0" title="Ubah" @click="edit(row)">
+          <Pencil class="size-3.5" />
+        </Button>
         <Button size="icon-xs" variant="ghost" class="shrink-0" title="Hapus" @click="removing = row">
           <Trash2 class="size-3.5 text-destructive" />
         </Button>
@@ -275,6 +316,9 @@ function submit() {
               </span>
             </td>
             <td class="p-3 text-right">
+              <Button size="icon-xs" variant="ghost" title="Ubah" @click="edit(row)">
+                <Pencil class="size-3.5" />
+              </Button>
               <Button size="icon-xs" variant="ghost" title="Hapus" @click="removing = row">
                 <Trash2 class="size-3.5 text-destructive" />
               </Button>
@@ -312,7 +356,7 @@ function submit() {
     <Dialog v-model:open="open">
       <DialogContent class="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Catat transaksi</DialogTitle>
+          <DialogTitle>{{ editing ? 'Ubah transaksi' : 'Catat transaksi' }}</DialogTitle>
         </DialogHeader>
 
         <form class="space-y-4" @submit.prevent="submit">
@@ -356,17 +400,26 @@ function submit() {
           </div>
 
           <div class="space-y-2">
-            <Label for="proof">Bukti transfer <span class="text-gold">*</span></Label>
+            <Label for="proof">Bukti transfer <span v-if="!editing" class="text-gold">*</span></Label>
             <label
               class="flex cursor-pointer flex-col items-center gap-1.5 rounded-md border border-dashed p-4 text-center transition-colors hover:border-gold/50"
             >
-              <input id="proof" type="file" accept="image/*" class="hidden" required @change="pickProof" />
+              <input id="proof" type="file" accept="image/*" class="hidden" :required="!editing" @change="pickProof" />
               <img v-if="proofPreview" :src="proofPreview" alt="" class="max-h-40 rounded object-contain" />
+              <img
+                v-else-if="editing?.has_proof"
+                :src="`/transactions/${editing.id}/proof`"
+                alt="Bukti transfer yang tersimpan"
+                class="max-h-40 rounded object-contain"
+              />
               <template v-else>
                 <ImageUp class="size-5 text-muted-foreground" />
                 <span class="text-xs">Pilih tangkapan layar mutasi</span>
               </template>
             </label>
+            <p v-if="editing" class="text-xs text-muted-foreground">
+              Biarkan apa adanya kalau buktinya tidak berubah.
+            </p>
             <p v-if="form.errors.proof" class="text-xs text-destructive">{{ form.errors.proof }}</p>
           </div>
 
@@ -377,7 +430,7 @@ function submit() {
 
           <div class="flex justify-end gap-2">
             <Button type="button" variant="ghost" @click="open = false">Batal</Button>
-            <Button type="submit" :disabled="form.processing || !form.proof">Simpan</Button>
+            <Button type="submit" :disabled="form.processing || (!editing && !form.proof)">Simpan</Button>
           </div>
         </form>
       </DialogContent>

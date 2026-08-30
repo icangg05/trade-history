@@ -53,7 +53,7 @@ class DashboardController extends Controller
             'id' => $trade->getRouteKey(),
             'group_id' => $trade->group_id === null ? null : Hashid::encode($trade->group_id),
             'stop_state' => $trade->stopState(),
-            'pnl' => $trade->pnl === null ? null : (float) $trade->pnl,
+            'pnl' => (float) $trade->pnl,
             'rr_planned' => $trade->rr_planned === null ? null : (float) $trade->rr_planned,
             'opened_at' => $trade->opened_at->toIso8601String(),
         ];
