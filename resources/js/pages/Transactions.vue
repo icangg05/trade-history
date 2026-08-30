@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
-import { useEventListener } from '@vueuse/core'
 import { ImageUp, Pencil, Plus, Trash2 } from '@lucide/vue'
 
 import ConfirmDestroy from '@/components/ConfirmDestroy.vue'
@@ -12,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useBackClose } from '@/composables/useBackClose'
 import { longDate, money, monthLabel, price, rateCurrency, toIdr, useCurrency } from '@/composables/useFormat'
 import type { Paginated } from '@/types'
 
@@ -81,20 +81,7 @@ const needsRate = computed(() => currency.value !== 'IDR')
 // tab baru selalu berarti kehilangan tempat di daftar.
 const viewing = ref<Row | null>(null)
 
-/**
- * Tombol kembali menutup gambarnya, bukan meninggalkan halaman — di ponsel itu
- * gerakan refleks untuk keluar dari tampilan penuh layar. Caranya satu entri
- * riwayat semu saat dibuka, dan dipulangkan lagi saat ditutup dengan cara lain.
- *
- * State Inertia ikut disalin supaya entri ini tidak mengosongkan data halaman
- * kalau riwayatnya berhenti di sini.
- */
-watch(viewing, (row) => {
-  if (row) history.pushState({ ...history.state, proof: true }, '')
-  else if (history.state?.proof) history.back()
-})
-
-useEventListener('popstate', () => (viewing.value = null))
+useBackClose(viewing)
 
 const inIdr = (row: Row) => toIdr(row.amount, row.rate_idr, currency.value)
 

@@ -1,63 +1,63 @@
 # Graph Report - trade-history  (2026-08-30)
 
 ## Corpus Check
-- 216 files · ~67,846 words
+- 217 files · ~68,193 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1359 nodes · 2535 edges · 105 communities (87 shown, 18 thin omitted)
+- 1367 nodes · 2548 edges · 95 communities (83 shown, 12 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 51 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `deff8788`
+- Built from commit: `4ac97527`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- Analysis.vue
-- Gemini
+- utils.ts
+- GeminiKey
 - composer.json
 - Illuminate\Database\Migrations\Migration
 - TradeController
 - dropdown-menu/index.ts
-- Illuminate\Database\Eloquent\Model
+- Inertia\Response
 - select/index.ts
 - compilerOptions
 - scripts
 - AppLayout.vue
-- utils.ts
+- cn
 - require-dev
 - useFormat.ts
 - setup
 - EquityChart.vue
 - Admin.vue
 - TestCase
-- AccountStats
+- Account
 - dependencies
 - AnalysisChat.vue
-- Profile.vue
+- ReportController
 - components.json
 - devDependencies
 - bootstrap/app.php
 - Tabs.vue
 - Alur import trade dari screenshot
-- input/index.ts
+- button/index.ts
 - dialog/index.ts
 - Rules.vue
 - DropdownMenuContent.vue
 - Calendar.vue
 - Accounts.vue
 - Index.vue
-- User
+- ReportTest
 - Transactions.vue
 - package.json
 - App Icon 512 (rounded squircle, rising-chart mark)
 - Tabel trades
 - AiImportDialog.vue
-- Transaction
+- TransactionController.php
 - types/index.ts
-- DropdownMenuSubContent.vue
+- Badge.vue
 - shadcn-vue (reka-ui)
 - Trade
 - Form.vue
@@ -68,46 +68,36 @@
 - PWA (manifest + service worker tulis tangan)
 - logging.php
 - config
-- Account
-- User.php
+- DemoSeeder.php
+- User
 - Input.vue
 - BackupDatabase
-- Illuminate\Http\Request
+- Illuminate\Http\RedirectResponse
 - require
 - draw_icon
 - LoginThrottleTest
-- Inertia\Response
+- Hashid
 - @types/node
 - Progress.vue
 - psr-4
 - Separator.vue
-- Dashboard.vue
+- DropdownMenuRadioItem.vue
 - DialogContent.vue
 - @tailwindcss/vite
 - Controller
 - post-create-project-cmd
 - PnlCalendar.vue
 - DropdownMenuCheckboxItem.vue
-- DropdownMenuSub.vue
-- SelectContent.vue
+- DropdownMenuLabel.vue
+- DropdownMenuSubTrigger.vue
 - RuleLimitTest
-- HandleInertiaRequests.php
-- AdminController.php
-- ConfirmDestroy.vue
+- Illuminate\Http\Request
+- Inertia\Inertia
+- extra
 - TradeRequest
-- SelectTrigger.vue
-- AdminTest
-- AnalysisChatTest
 - @vitejs/plugin-vue
-- SetupPicker.vue
-- GeminiKey
 - Report.vue
-- TradeDayTest
 - TradeImportTest
-- AppServiceProvider.php
-- button/index.ts
-- Illuminate\Support\Str
-- autoload-dev
 - @inertiajs/vue3
 
 ## God Nodes (most connected - your core abstractions)
@@ -144,19 +134,19 @@
 - **Maskable-Purpose Icon Variants** — public_icons_maskable_512_maskable_icon, public_icons_maskable_192_maskable_icon, public_icons_maskable_512_safe_zone [INFERRED 0.85]
 - **PWA / Web App Manifest Icon Set** — public_icons_icon_512_app_icon, public_icons_icon_192_app_icon, public_icons_icon_32_favicon, public_icons_apple_touch_icon_icon, public_icons_maskable_512_maskable_icon, public_icons_maskable_192_maskable_icon [INFERRED 0.95]
 
-## Communities (105 total, 18 thin omitted)
+## Communities (95 total, 12 thin omitted)
 
-### Community 0 - "Analysis.vue"
+### Community 0 - "utils.ts"
 Cohesion: 0.14
-Nodes (9): html, props, tones, currency, form, PERIODS, props, Breakdown (+1 more)
+Nodes (8): props, props, props, props, props, props, props, props
 
-### Community 1 - "Gemini"
-Cohesion: 0.14
-Nodes (9): AnalysisController, TradeImportController, Gemini, Illuminate\Http\Client\ConnectionException, Illuminate\Http\Client\RequestException, Illuminate\Http\JsonResponse, Illuminate\Support\Facades\Log, RuntimeException (+1 more)
+### Community 1 - "GeminiKey"
+Cohesion: 0.08
+Nodes (8): GeminiKey, Gemini, Illuminate\Http\Client\ConnectionException, Illuminate\Http\Client\RequestException, Illuminate\Support\Facades\Http, AdminTest, AnalysisChatTest, GeminiKeyTest
 
 ### Community 2 - "composer.json"
 Cohesion: 0.14
-Nodes (13): description, extra, laravel, keywords, dont-discover, license, minimum-stability, name (+5 more)
+Nodes (13): autoload-dev, psr-4, description, keywords, license, minimum-stability, name, prefer-stable (+5 more)
 
 ### Community 3 - "Illuminate\Database\Migrations\Migration"
 Cohesion: 0.06
@@ -164,15 +154,15 @@ Nodes (4): Illuminate\Database\Migrations\Migration, Illuminate\Database\Schema\
 
 ### Community 5 - "dropdown-menu/index.ts"
 Cohesion: 0.06
-Nodes (25): emits, forwarded, props, props, delegatedProps, forwardedProps, props, delegatedProps (+17 more)
+Nodes (22): emits, forwarded, props, props, delegatedProps, forwardedProps, props, emits (+14 more)
 
-### Community 6 - "Illuminate\Database\Eloquent\Model"
-Cohesion: 0.16
-Nodes (6): AccountRule, AiAnalysis, Illuminate\Database\Eloquent\Attributes\Fillable, Illuminate\Database\Eloquent\Model, Illuminate\Database\Eloquent\Relations\BelongsTo, Illuminate\Database\Eloquent\Relations\HasOne
+### Community 6 - "Inertia\Response"
+Cohesion: 0.25
+Nodes (3): DashboardController, RuleController, Inertia\Response
 
 ### Community 7 - "select/index.ts"
-Cohesion: 0.07
-Nodes (18): emits, forwarded, props, props, delegatedProps, forwardedProps, props, props (+10 more)
+Cohesion: 0.05
+Nodes (25): emits, forwarded, props, delegatedProps, emits, forwarded, props, props (+17 more)
 
 ### Community 8 - "compilerOptions"
 Cohesion: 0.07
@@ -186,17 +176,17 @@ Nodes (14): scripts, dev, post-autoload-dump, post-update-cmd, pre-package-unins
 Cohesion: 0.10
 Nodes (20): BARE_PAGES, deferred, installed, InstallPromptEvent, isIos(), isStandalone(), listenForInstall(), useInstall() (+12 more)
 
-### Community 11 - "utils.ts"
-Cohesion: 0.09
-Nodes (19): props, props, props, props, props, props, props, props (+11 more)
+### Community 11 - "cn"
+Cohesion: 0.14
+Nodes (11): props, props, props, props, delegatedProps, props, props, props (+3 more)
 
 ### Community 12 - "require-dev"
 Cohesion: 0.25
 Nodes (8): require-dev, fakerphp/faker, laravel/pail, laravel/pao, laravel/pint, mockery/mockery, nunomaduro/collision, phpunit/phpunit
 
 ### Community 13 - "useFormat.ts"
-Cohesion: 0.12
-Nodes (21): axis, bars, changePct, niceStep(), props, totals, breached, lossPct (+13 more)
+Cohesion: 0.13
+Nodes (20): axis, bars, changePct, niceStep(), props, totals, breached, lossPct (+12 more)
 
 ### Community 14 - "setup"
 Cohesion: 0.25
@@ -211,24 +201,20 @@ Cohesion: 0.09
 Nodes (17): backingUp, Backup, csrf(), editing, gemini, GeminiKey, now, open (+9 more)
 
 ### Community 17 - "TestCase"
-Cohesion: 0.10
-Nodes (9): Illuminate\Foundation\Testing\RefreshDatabase, Illuminate\Foundation\Testing\TestCase, Illuminate\Support\Facades\Http, BackupTest, ErrorPageTest, FlashTest, GeminiKeyTest, RegisterTest (+1 more)
+Cohesion: 0.11
+Nodes (9): Illuminate\Foundation\Testing\RefreshDatabase, Illuminate\Foundation\Testing\TestCase, Illuminate\Http\UploadedFile, Illuminate\Support\Facades\Storage, BackupTest, ErrorPageTest, FlashTest, RegisterTest (+1 more)
 
-### Community 18 - "AccountStats"
-Cohesion: 0.21
-Nodes (3): AccountStats, Carbon\CarbonInterface, Illuminate\Support\Collection
+### Community 18 - "Account"
+Cohesion: 0.06
+Nodes (17): Account, AccountRule, AiAnalysis, Transaction, AppServiceProvider, AccountStats, Carbon\CarbonInterface, Illuminate\Database\Eloquent\Attributes\Fillable (+9 more)
 
 ### Community 19 - "dependencies"
 Cohesion: 0.11
 Nodes (19): class-variance-authority, clsx, @lucide/vue, marked, dependencies, class-variance-authority, clsx, @lucide/vue (+11 more)
 
 ### Community 20 - "AnalysisChat.vue"
-Cohesion: 0.12
-Nodes (20): busy, clear(), close(), closing, confirming, csrf(), draft, error (+12 more)
-
-### Community 21 - "Profile.vue"
-Cohesion: 0.14
-Nodes (9): message, MESSAGES, props, signedIn, confirming, profile, removal, takesOverLogin (+1 more)
+Cohesion: 0.11
+Nodes (22): busy, clear(), close(), closing, confirming, csrf(), draft, error (+14 more)
 
 ### Community 22 - "components.json"
 Cohesion: 0.12
@@ -250,17 +236,17 @@ Nodes (11): delegatedProps, emits, forwarded, props, delegatedProps, props, dele
 Cohesion: 0.15
 Nodes (15): Alur kerja graphify untuk repo ini, robots.txt mengizinkan seluruh crawler, Alur import trade dari screenshot, AiImportDialog, Urutan pengerjaan 7 fase, Gemini::extractTrade(), Gemini API (gemini-3.5-flash), App\Services\Gemini (+7 more)
 
-### Community 27 - "input/index.ts"
-Cohesion: 0.21
-Nodes (7): FEATURES, model, shown, form, props, sisaKunci, form
+### Community 27 - "button/index.ts"
+Cohesion: 0.09
+Nodes (19): FEATURES, code, emit, props, typed, model, shown, Props (+11 more)
 
 ### Community 28 - "dialog/index.ts"
 Cohesion: 0.08
 Nodes (17): emits, forwarded, props, props, delegatedProps, forwardedProps, props, props (+9 more)
 
 ### Community 29 - "Rules.vue"
-Cohesion: 0.15
-Nodes (12): AmountKey, currency, dailyLoss, dailyTarget, estimate(), form, limit(), PctKey (+4 more)
+Cohesion: 0.14
+Nodes (13): useCurrency(), AmountKey, currency, dailyLoss, dailyTarget, estimate(), form, limit() (+5 more)
 
 ### Community 30 - "DropdownMenuContent.vue"
 Cohesion: 0.40
@@ -268,23 +254,19 @@ Nodes (4): delegatedProps, emits, forwarded, props
 
 ### Community 31 - "Calendar.vue"
 Cohesion: 0.12
-Nodes (14): delegatedProps, props, BadgeVariants, clock(), currency, dayLots, dayStat, dayTrades (+6 more)
+Nodes (18): useBackClose(), clock(), currency, dayLots, dayStat, dayTrades, dayWinRate, grid (+10 more)
 
 ### Community 32 - "Accounts.vue"
-Cohesion: 0.15
-Nodes (8): CURRENCIES, pnlClass(), editing, form, open, removing, Row, Total
+Cohesion: 0.13
+Nodes (9): tones, CURRENCIES, pnlClass(), editing, form, open, removing, Row (+1 more)
 
 ### Community 33 - "Index.vue"
-Cohesion: 0.07
-Nodes (26): dateTime(), longDate(), activeFilters, apply, blockRange(), currency, dayKey(), direction (+18 more)
-
-### Community 34 - "User"
-Cohesion: 0.19
-Nodes (4): User, AnnualReport, Illuminate\Foundation\Auth\User, ReportTest
+Cohesion: 0.06
+Nodes (38): dateTime(), longDate(), frameClass(), frameGap(), frameTop(), Groupable, currency, growthPct (+30 more)
 
 ### Community 35 - "Transactions.vue"
-Cohesion: 0.10
-Nodes (17): monthLabel(), toIdr(), currency, editing, form, inIdr(), month, MONTHS (+9 more)
+Cohesion: 0.08
+Nodes (20): pages, props, monthLabel(), toIdr(), currency, editing, form, inIdr() (+12 more)
 
 ### Community 36 - "package.json"
 Cohesion: 0.20
@@ -302,17 +284,17 @@ Nodes (10): Kolom ai_raw (jejak bacaan Gemini), Font self-host via bunny() larav
 Cohesion: 0.22
 Nodes (12): busy, close(), csrf(), emit, error, file, onDrop(), onPaste() (+4 more)
 
-### Community 40 - "Transaction"
-Cohesion: 0.18
-Nodes (6): TransactionController, Transaction, Uploads, Illuminate\Http\Response, Illuminate\Support\Facades\URL, Symfony\Component\HttpFoundation\StreamedResponse
+### Community 40 - "TransactionController.php"
+Cohesion: 0.23
+Nodes (3): TransactionController, Uploads, Symfony\Component\HttpFoundation\StreamedResponse
 
 ### Community 41 - "types/index.ts"
-Cohesion: 0.14
-Nodes (13): pages, props, props, TAG, AccountBrief, CurrentAccount, Direction, EquityPoint (+5 more)
+Cohesion: 0.11
+Nodes (16): props, TAG, currency, form, PERIODS, props, AccountBrief, Breakdown (+8 more)
 
-### Community 42 - "DropdownMenuSubContent.vue"
-Cohesion: 0.40
-Nodes (4): delegatedProps, emits, forwarded, props
+### Community 42 - "Badge.vue"
+Cohesion: 0.50
+Nodes (3): delegatedProps, props, BadgeVariants
 
 ### Community 43 - "shadcn-vue (reka-ui)"
 Cohesion: 0.32
@@ -323,8 +305,8 @@ Cohesion: 0.10
 Nodes (3): Trade, JournalTest, TradeGroupTest
 
 ### Community 45 - "Form.vue"
-Cohesion: 0.13
-Nodes (11): aiFields, aiPreview, currency, editing, form, inGroup, lowConfidence, plannedRr (+3 more)
+Cohesion: 0.10
+Nodes (16): emit, options, props, selected, SETUPS, aiFields, aiPreview, currency (+8 more)
 
 ### Community 46 - "App\Services\AccountStats"
 Cohesion: 0.38
@@ -354,25 +336,25 @@ Nodes (4): Monolog\Handler\NullHandler, Monolog\Handler\StreamHandler, Monolog\H
 Cohesion: 0.29
 Nodes (7): pestphp/pest-plugin, php-http/discovery, config, allow-plugins, optimize-autoloader, preferred-install, sort-packages
 
-### Community 53 - "Account"
-Cohesion: 0.14
-Nodes (8): Account, Carbon\CarbonImmutable, DatabaseSeeder, DemoSeeder, Illuminate\Database\Eloquent\Relations\HasMany, Illuminate\Database\Seeder, Illuminate\Http\UploadedFile, Illuminate\Support\Facades\Storage
+### Community 53 - "DemoSeeder.php"
+Cohesion: 0.38
+Nodes (3): DatabaseSeeder, DemoSeeder, Illuminate\Database\Seeder
 
-### Community 54 - "User.php"
+### Community 54 - "User"
 Cohesion: 0.14
-Nodes (8): UserFactory, Illuminate\Database\Eloquent\Attributes\Hidden, Illuminate\Database\Eloquent\Factories\Factory, Illuminate\Database\Eloquent\Factories\HasFactory, Illuminate\Notifications\Notifiable, Illuminate\Support\Facades\Hash, static, ProfileTest
+Nodes (8): User, Illuminate\Database\Eloquent\Attributes\Hidden, Illuminate\Database\Eloquent\Factories\HasFactory, Illuminate\Foundation\Auth\User, Illuminate\Notifications\Notifiable, Illuminate\Support\Facades\Hash, ProfileTest, TradeDayTest
 
 ### Community 55 - "Input.vue"
 Cohesion: 0.50
 Nodes (3): emits, modelValue, props
 
 ### Community 56 - "BackupDatabase"
-Cohesion: 0.11
-Nodes (10): BackupDatabase, CarbonImmutable, Illuminate\Console\Command, Illuminate\Foundation\Inspiring, Illuminate\Support\Carbon, Illuminate\Support\Facades\Artisan, Illuminate\Support\Facades\File, Illuminate\Support\Facades\Process (+2 more)
+Cohesion: 0.07
+Nodes (15): BackupDatabase, CarbonImmutable, UserFactory, Illuminate\Console\Command, Illuminate\Database\Eloquent\Factories\Factory, Illuminate\Foundation\Inspiring, Illuminate\Support\Carbon, Illuminate\Support\Facades\Artisan (+7 more)
 
-### Community 57 - "Illuminate\Http\Request"
-Cohesion: 0.16
-Nodes (6): AccountController, AdminController, LoginController, ProfileController, Illuminate\Http\RedirectResponse, Illuminate\Http\Request
+### Community 57 - "Illuminate\Http\RedirectResponse"
+Cohesion: 0.22
+Nodes (4): AdminController, Illuminate\Http\JsonResponse, Illuminate\Http\RedirectResponse, Symfony\Component\HttpFoundation\BinaryFileResponse
 
 ### Community 58 - "require"
 Cohesion: 0.25
@@ -382,25 +364,25 @@ Nodes (8): require, dompdf/dompdf, hashids/hashids, inertiajs/inertia-laravel, l
 Cohesion: 0.67
 Nodes (3): Image, draw_icon(), main()
 
-### Community 61 - "Inertia\Response"
+### Community 61 - "Hashid"
 Cohesion: 0.16
-Nodes (7): CalendarController, CarbonImmutable, DashboardController, getRouteKey(), Hashid, Hashids\Hashids, Inertia\Response
+Nodes (9): CalendarController, CarbonImmutable, getRouteKey(), Hashid, Carbon\CarbonImmutable, Hashids\Hashids, Illuminate\Support\Facades\Log, RuntimeException (+1 more)
 
 ### Community 64 - "psr-4"
 Cohesion: 0.40
 Nodes (5): autoload, psr-4, App\\, Database\\Factories\\, Database\\Seeders\\
 
-### Community 66 - "Dashboard.vue"
-Cohesion: 0.20
-Nodes (12): frameClass(), frameGap(), frameTop(), Groupable, currency, growthPct, mode, props (+4 more)
+### Community 66 - "DropdownMenuRadioItem.vue"
+Cohesion: 0.40
+Nodes (4): delegatedProps, emits, forwarded, props
 
 ### Community 67 - "DialogContent.vue"
 Cohesion: 0.25
 Nodes (6): delegatedProps, emits, forwarded, props, delegatedProps, props
 
 ### Community 69 - "Controller"
-Cohesion: 0.14
-Nodes (5): RegisterController, Controller, ReportController, RuleController, Illuminate\Support\Facades\Route
+Cohesion: 0.15
+Nodes (5): LoginController, RegisterController, Controller, ProfileController, TradeImportController
 
 ### Community 70 - "post-create-project-cmd"
 Cohesion: 0.50
@@ -414,65 +396,57 @@ Nodes (8): emit, iso(), maxAbs, props, today, WEEKDAYS, weeks, DayStat
 Cohesion: 0.40
 Nodes (4): delegatedProps, emits, forwarded, props
 
-### Community 82 - "DropdownMenuSub.vue"
+### Community 82 - "DropdownMenuLabel.vue"
 Cohesion: 0.50
-Nodes (3): emits, forwarded, props
+Nodes (3): delegatedProps, forwardedProps, props
 
-### Community 83 - "SelectContent.vue"
-Cohesion: 0.40
-Nodes (4): delegatedProps, emits, forwarded, props
+### Community 83 - "DropdownMenuSubTrigger.vue"
+Cohesion: 0.50
+Nodes (3): delegatedProps, forwardedProps, props
 
-### Community 86 - "AdminController.php"
-Cohesion: 0.18
-Nodes (10): Dompdf\Dompdf, Illuminate\Auth\Events\Lockout, Illuminate\Database\Eloquent\Collection, Illuminate\Support\Facades\Auth, Illuminate\Support\Facades\RateLimiter, Illuminate\Validation\Rule, Illuminate\Validation\Rules\Password, Illuminate\Validation\ValidationException (+2 more)
+### Community 85 - "Illuminate\Http\Request"
+Cohesion: 0.20
+Nodes (5): AccountController, AnalysisController, HandleInertiaRequests, Illuminate\Http\Request, Inertia\Middleware
 
-### Community 87 - "ConfirmDestroy.vue"
-Cohesion: 0.22
-Nodes (6): code, emit, props, typed, delegatedProps, props
+### Community 86 - "Inertia\Inertia"
+Cohesion: 0.20
+Nodes (9): Dompdf\Dompdf, Illuminate\Auth\Events\Lockout, Illuminate\Database\Eloquent\Collection, Illuminate\Support\Facades\Auth, Illuminate\Support\Facades\RateLimiter, Illuminate\Validation\Rule, Illuminate\Validation\Rules\Password, Illuminate\Validation\ValidationException (+1 more)
+
+### Community 87 - "extra"
+Cohesion: 0.67
+Nodes (3): extra, laravel, dont-discover
 
 ### Community 88 - "TradeRequest"
 Cohesion: 0.32
 Nodes (3): TradeRequest, Illuminate\Contracts\Validation\Validator, Illuminate\Foundation\Http\FormRequest
 
-### Community 89 - "SelectTrigger.vue"
-Cohesion: 0.50
-Nodes (3): delegatedProps, forwardedProps, props
-
-### Community 94 - "SetupPicker.vue"
-Cohesion: 0.40
-Nodes (5): emit, options, props, selected, SETUPS
-
 ### Community 96 - "Report.vue"
-Cohesion: 0.14
-Nodes (10): emits, modelValue, props, errors, foreign, form, page, parsedRate (+2 more)
-
-### Community 103 - "autoload-dev"
-Cohesion: 0.67
-Nodes (3): autoload-dev, psr-4, Tests\\
+Cohesion: 0.09
+Nodes (15): emits, modelValue, props, message, MESSAGES, props, signedIn, errors (+7 more)
 
 ## Ambiguous Edges - Review These
 - `robots.txt mengizinkan seluruh crawler` → `REGISTER_TOKEN penjaga pendaftaran mandiri`  [AMBIGUOUS]
   public/robots.txt · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **435 isolated node(s):** `$schema`, `style`, `typescript`, `config`, `css` (+430 more)
+- **438 isolated node(s):** `$schema`, `style`, `typescript`, `config`, `css` (+433 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `robots.txt mengizinkan seluruh crawler` and `REGISTER_TOKEN penjaga pendaftaran mandiri`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `User` connect `User` to `TradeDayTest`, `TradeImportTest`, `Controller`, `Trade`, `LoginThrottleTest`, `TestCase`, `RuleLimitTest`, `Account`, `User.php`, `AdminController.php`, `Illuminate\Http\Request`, `AdminTest`, `AnalysisChatTest`, `Inertia\Response`, `GeminiKey`?**
-  _High betweenness centrality (0.038) - this node is a cross-community bridge._
-- **Why does `Account` connect `Account` to `TradeDayTest`, `User`, `AppServiceProvider.php`, `TradeImportTest`, `Controller`, `Illuminate\Database\Eloquent\Model`, `Transaction`, `Trade`, `TestCase`, `AccountStats`, `RuleLimitTest`, `AdminController.php`, `Illuminate\Http\Request`, `AnalysisChatTest`, `GeminiKey`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `cn()` connect `utils.ts` to `Report.vue`, `Separator.vue`, `DialogContent.vue`, `button/index.ts`, `dropdown-menu/index.ts`, `select/index.ts`, `DropdownMenuSubContent.vue`, `DropdownMenuCheckboxItem.vue`, `SelectContent.vue`, `Tabs.vue`, `ConfirmDestroy.vue`, `Input.vue`, `SelectTrigger.vue`, `dialog/index.ts`, `Progress.vue`, `DropdownMenuContent.vue`, `Calendar.vue`?**
+- **Why does `User` connect `User` to `GeminiKey`, `ReportTest`, `TradeImportTest`, `Controller`, `Inertia\Response`, `Trade`, `TestCase`, `Account`, `RuleLimitTest`, `DemoSeeder.php`, `Inertia\Inertia`, `BackupDatabase`, `Illuminate\Http\RedirectResponse`, `LoginThrottleTest`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+- **Why does `Account` connect `Account` to `GeminiKey`, `ReportTest`, `TradeImportTest`, `TransactionController.php`, `Trade`, `TestCase`, `RuleLimitTest`, `ReportController`, `Illuminate\Http\Request`, `Inertia\Inertia`, `BackupDatabase`, `Illuminate\Http\RedirectResponse`, `DemoSeeder.php`, `User`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `utils.ts`, `Separator.vue`, `DropdownMenuRadioItem.vue`, `DialogContent.vue`, `Report.vue`, `dropdown-menu/index.ts`, `select/index.ts`, `Badge.vue`, `DropdownMenuCheckboxItem.vue`, `DropdownMenuLabel.vue`, `DropdownMenuSubTrigger.vue`, `Input.vue`, `Tabs.vue`, `button/index.ts`, `dialog/index.ts`, `DropdownMenuContent.vue`, `Progress.vue`?**
   _High betweenness centrality (0.026) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `typescript` to the rest of the system?**
-  _435 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Analysis.vue` be split into smaller, more focused modules?**
-  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
-- **Should `Gemini` be split into smaller, more focused modules?**
-  _Cohesion score 0.1402116402116402 - nodes in this community are weakly interconnected._
+  _438 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `utils.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.14035087719298245 - nodes in this community are weakly interconnected._
+- **Should `GeminiKey` be split into smaller, more focused modules?**
+  _Cohesion score 0.08194905869324474 - nodes in this community are weakly interconnected._

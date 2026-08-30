@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
+import { useSwipe } from '@vueuse/core'
 import { ChevronDown } from '@lucide/vue'
 
 import PnlCalendar from '@/components/PnlCalendar.vue'
@@ -8,6 +9,7 @@ import StopBadge from '@/components/StopBadge.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useBackClose } from '@/composables/useBackClose'
 import { clock, longDate, money, monthLabel, num, pnlClass, useCurrency } from '@/composables/useFormat'
 import { frameClass, frameGap } from '@/composables/useGroupFrame'
 import type { DayStat, Trade } from '@/types'
@@ -24,6 +26,8 @@ const props = defineProps<{
 
 const currency = useCurrency()
 const selected = ref<string | null>(null)
+
+useBackClose(selected)
 
 const totals = computed(() => {
   const list = Object.values(props.monthTotal)
@@ -42,8 +46,47 @@ function shift(offset: number) {
   const target = new Date(year, month - 1 + offset, 1)
   const value = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}`
 
-  router.get('/calendar', { month: value }, { preserveState: true, preserveScroll: true })
+  router.get('/calendar', { month: value }, {
+    preserveState: true,
+    preserveScroll: true,
+    onError: () => (slide.value = 0),
+  })
 }
+
+/**
+ * Geser kiri/kanan untuk ganti bulan. Kartunya ikut jari sewaktu digeser, lalu
+ * terlempar keluar ke arah geseran dan bulan barunya masuk dari sisi seberang —
+ * tanpa itu, layarnya cuma berkedip dan tidak jelas ada yang berpindah.
+ */
+const grid = ref<HTMLElement | null>(null)
+const slide = ref(0)
+/** Lompatan ke posisi awal animasi masuk tidak boleh ikut dianimasikan. */
+const snap = ref(false)
+
+const width = () => grid.value?.offsetWidth ?? 320
+
+const { lengthX } = useSwipe(grid, {
+  threshold: 40,
+  onSwipe: () => (slide.value = Math.max(-width(), Math.min(width(), -lengthX.value))),
+  onSwipeEnd: (_event, direction) => {
+    if (direction !== 'left' && direction !== 'right') return (slide.value = 0)
+
+    slide.value = direction === 'left' ? -width() : width()
+    shift(direction === 'left' ? 1 : -1)
+  },
+})
+
+watch(() => props.month, async () => {
+  if (!slide.value) return
+
+  snap.value = true
+  slide.value = -slide.value
+  await nextTick()
+  requestAnimationFrame(() => {
+    snap.value = false
+    slide.value = 0
+  })
+})
 
 const dayTrades = computed(() => (selected.value ? (props.trades[selected.value] ?? []) : []))
 const dayStat = computed(() => (selected.value ? props.days[selected.value] : undefined))
@@ -75,7 +118,9 @@ const dayWinRate = computed(() => {
 <template>
   <Head title="Kalender" />
 
-  <div class="space-y-4">
+  <!-- Kartu yang tergeser keluar tetap menambah area gulir mendatar halaman;
+       tanpa clip di sini scrollbar muncul-hilang dan seluruh layout melompat. -->
+  <div class="space-y-4 overflow-x-clip">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="text-xl font-semibold">{{ monthLabel(month) }}</h1>
@@ -98,15 +143,28 @@ const dayWinRate = computed(() => {
       </div>
     </div>
 
-    <PnlCalendar
-      :month="month"
-      :grid-start="gridStart"
-      :grid-end="gridEnd"
-      :days="days"
-      :violations="violations"
-      :currency="currency"
-      @select="selected = $event"
-    />
+    <!-- Geser mendatar untuk ganti bulan. Geseran yang jadi ganti bulan tetap
+         memicu click di selnya, jadi kartu yang sudah terlempar (slide != 0)
+         dipakai sebagai tanda itu bukan ketukan. -->
+    <div
+      ref="grid"
+      class="touch-pan-y"
+      :style="{
+        transform: `translateX(${slide}px)`,
+        opacity: 1 - Math.min(Math.abs(slide) / width(), 0.7),
+        transition: snap ? 'none' : 'transform .25s ease-out, opacity .25s ease-out',
+      }"
+    >
+      <PnlCalendar
+        :month="month"
+        :grid-start="gridStart"
+        :grid-end="gridEnd"
+        :days="days"
+        :violations="violations"
+        :currency="currency"
+        @select="slide === 0 && (selected = $event)"
+      />
+    </div>
 
     <p class="text-[11px] text-muted-foreground">
       Titik emas di pojok sel menandai hari yang melanggar aturan akun ini.
