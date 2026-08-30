@@ -185,8 +185,11 @@ class AccountStats
 
         $lossLimit = $rule?->dailyLossLimit($openingBalance);
         $profitGoal = $rule?->dailyProfitGoal($openingBalance);
-        $peak = $this->peakBalance();
-        $drawdownPct = $peak > 0 ? round((1 - $this->latestBalance() / $peak) * 100, 2) : 0.0;
+        // Diukur dari kurva trading, bukan saldo: menarik untung keluar tidak boleh
+        // dibaca sebagai kerugian dan menyalakan peringatan batas rugi total.
+        $trading = $this->tradingCurve();
+        $peak = max($trading);
+        $drawdownPct = $peak > 0 ? round((1 - end($trading) / $peak) * 100, 2) : 0.0;
 
         // Trade yang stopnya sudah digeser ke BE/SL+ punya rr_planned null dan
         // memang tidak ikut dinilai — risiko awalnya tidak tercatat di mana pun.
@@ -401,19 +404,6 @@ class AccountStats
             ->whereNotNull('pnl');
     }
 
-    private function peakBalance(): float
-    {
-        return collect($this->equityCurve())->max('balance') ?: (float) $this->account->initial_balance;
-    }
-
-    /** Saldo sekarang menurut kurva — sama dengan balance(), tanpa query tambahan. */
-    private function latestBalance(): float
-    {
-        $curve = $this->equityCurve();
-
-        return (float) end($curve)['balance'];
-    }
-
     /**
      * Saldo pembukaan sejumlah tanggal sekaligus: saldo di titik kurva terakhir
      * sebelum hari itu. Satu kali telusur atas kurva yang urut kronologis, bukan
@@ -443,16 +433,42 @@ class AccountStats
         return $out;
     }
 
-    /** Penurunan terdalam dari puncak saldo, dalam mata uang & persen. */
+    /**
+     * Saldo seandainya tidak pernah ada setor maupun tarik: mulai dari modal awal,
+     * lalu hanya laba/rugi yang menggerakkannya.
+     *
+     * Kurva saldo biasa tidak bisa dipakai mengukur drawdown. Menarik untung ke
+     * rekening bank menurunkan saldo persis seperti rugi, padahal itu justru hasil
+     * yang berhasil diamankan — dan menyetor modal baru akan tampak seperti
+     * pemulihan dari kerugian yang tidak pernah terjadi.
+     *
+     * @return list<float>
+     */
+    private function tradingCurve(): array
+    {
+        $balance = (float) $this->account->initial_balance;
+        $out = [];
+
+        foreach ($this->equityCurve() as $point) {
+            $out[] = $balance += $point['pnl'];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Penurunan terdalam dari puncak, dalam mata uang & persen. Diukur di atas
+     * kurva trading, jadi yang terbaca murni hasil trading — bukan arus dana.
+     */
     private function maxDrawdown(): array
     {
         $peak = null;
         $worst = 0.0;
         $worstPct = 0.0;
 
-        foreach ($this->equityCurve() as $point) {
-            $peak = $peak === null ? $point['balance'] : max($peak, $point['balance']);
-            $drop = $peak - $point['balance'];
+        foreach ($this->tradingCurve() as $balance) {
+            $peak = $peak === null ? $balance : max($peak, $balance);
+            $drop = $peak - $balance;
 
             if ($drop > $worst) {
                 $worst = $drop;

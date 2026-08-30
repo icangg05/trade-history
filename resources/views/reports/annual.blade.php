@@ -233,10 +233,10 @@
 <table class="terms">
     <tr><td>
         <div class="id">1. Laba/rugi bersih adalah hasil seluruh transaksi yang sudah ditutup. Sebagiannya masih
-            mengendap sebagai saldo di akun broker dan belum tentu sudah ditarik ke rekening bank, sehingga kedua
+            mengendap sebagai saldo di akun broker dan belum ditarik ke rekening bank, sehingga kedua
             angka di atas ditampilkan berdampingan.</div>
-        <div class="en">Net profit/loss covers all closed positions. Part of it may still sit as broker account
-            balance and has not necessarily been withdrawn to a bank account, hence both figures are shown side by side.</div>
+        <div class="en">Net profit/loss covers all closed positions. Part of it still sits as broker account
+            balance and has not been withdrawn to a bank account, hence both figures are shown side by side.</div>
     </td></tr>
     <tr><td>
         <div class="id">2. Setoran dan penarikan dikonversi memakai kurs yang tercatat pada hari transaksinya
@@ -258,7 +258,15 @@
 {{-- ------------------------------------------------------------ rincian per akun --}}
 
 @foreach ($report['accounts'] as $a)
-    @php $c = $a['currency']; $s = $a['summary']; @endphp
+    @php
+        $c = $a['currency'];
+        $s = $a['summary'];
+        // Akun rupiah: kolom mata uang akun dan kolom rupiahnya berisi angka yang
+        // persis sama. Kolom kedua dibuang, yang tersisa diformat sebagai rupiah.
+        $isRp = $c === 'IDR';
+        $u = $isRp ? 'Rp' : $c;
+        $v = $isRp ? $rp : fn (?float $x) => $cur($x, $c);
+    @endphp
 
     <h2 class="break">Rincian Akun: {{ $a['name'] }}@if ($a['is_archived']) (diarsipkan)@endif<span class="en">Account Detail</span></h2>
 
@@ -280,34 +288,34 @@
         <thead>
             <tr>
                 <th>Komponen</th>
-                <th class="num" style="width: 22%">{{ $c }}</th>
+                @unless ($isRp)<th class="num" style="width: 22%">{{ $c }}</th>@endunless
                 <th class="num" style="width: 22%">Rupiah</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>Saldo awal per 31 Desember {{ $year - 1 }}</td>
-                <td class="num">{{ $cur($a['opening_balance'], $c) }}</td>
+                @unless ($isRp)<td class="num">{{ $cur($a['opening_balance'], $c) }}</td>@endunless
                 <td class="num">{{ $rp($a['opening_balance_idr']) }}</td>
             </tr>
             <tr>
                 <td>(+) Setoran modal sepanjang tahun</td>
-                <td class="num">{{ $cur($a['deposit'], $c) }}</td>
+                @unless ($isRp)<td class="num">{{ $cur($a['deposit'], $c) }}</td>@endunless
                 <td class="num">{{ $rp($a['deposit_idr']) }}</td>
             </tr>
             <tr>
                 <td>(-) Penarikan dana sepanjang tahun</td>
-                <td class="num">{{ $cur($a['withdrawal'], $c) }}</td>
+                @unless ($isRp)<td class="num">{{ $cur($a['withdrawal'], $c) }}</td>@endunless
                 <td class="num">{{ $rp($a['withdrawal_idr']) }}</td>
             </tr>
             <tr>
                 <td>(+) Laba/rugi bersih hasil trading</td>
-                <td class="num {{ $sign($a['net_pnl']) }}">{{ $cur($a['net_pnl'], $c) }}</td>
+                @unless ($isRp)<td class="num {{ $sign($a['net_pnl']) }}">{{ $cur($a['net_pnl'], $c) }}</td>@endunless
                 <td class="num {{ $sign($a['net_pnl_idr']) }}">{{ $rp($a['net_pnl_idr']) }}</td>
             </tr>
             <tr class="total">
                 <td>(=) Saldo akhir per 31 Desember {{ $year }}</td>
-                <td class="num">{{ $cur($a['closing_balance'], $c) }}</td>
+                @unless ($isRp)<td class="num">{{ $cur($a['closing_balance'], $c) }}</td>@endunless
                 <td class="num">{{ $rp($a['closing_balance_idr']) }}</td>
             </tr>
         </tbody>
@@ -315,7 +323,7 @@
 
     @if ($a['reconciliation_gap'] != 0.0)
         <div class="warn">
-            Selisih rekonsiliasi {{ $cur($a['reconciliation_gap'], $c) }}. Periksa kembali
+            Selisih rekonsiliasi {{ $v($a['reconciliation_gap']) }}. Periksa kembali
             catatan akun ini sebelum laporan diserahkan.
         </div>
     @endif
@@ -326,25 +334,25 @@
             <th style="width: 17%">Jumlah transaksi</th>
             <td class="num" style="width: 16%">{{ $n((float) $s['total_trades'], 0) }}</td>
             <th style="width: 17%">Laba kotor</th>
-            <td class="num pos" style="width: 16%">{{ $cur($s['gross_profit'], $c) }}</td>
+            <td class="num pos" style="width: 16%">{{ $v($s['gross_profit']) }}</td>
             <th style="width: 17%">Rugi terbesar</th>
-            <td class="num neg">{{ $cur($s['largest_loss'], $c) }}</td>
+            <td class="num neg">{{ $v($s['largest_loss']) }}</td>
         </tr>
         <tr>
             <th>Untung / Rugi / Impas</th>
             <td class="num">{{ $s['wins'] }} / {{ $s['losses'] }} / {{ $s['breakeven'] }}</td>
             <th>Rugi kotor</th>
-            <td class="num neg">{{ $cur(-$s['gross_loss'], $c) }}</td>
+            <td class="num neg">{{ $v(-$s['gross_loss']) }}</td>
             <th>Untung terbesar</th>
-            <td class="num pos">{{ $cur($s['largest_win'], $c) }}</td>
+            <td class="num pos">{{ $v($s['largest_win']) }}</td>
         </tr>
         <tr>
             <th>Tingkat keberhasilan</th>
             <td class="num">{{ $n($s['win_rate_pct'], 1) }}%</td>
             <th>Laba/rugi bersih</th>
-            <td class="num {{ $sign($s['net_pnl']) }}">{{ $cur($s['net_pnl'], $c) }}</td>
+            <td class="num {{ $sign($s['net_pnl']) }}">{{ $v($s['net_pnl']) }}</td>
             <th>Rata-rata per transaksi</th>
-            <td class="num {{ $sign($s['expectancy']) }}">{{ $cur($s['expectancy'], $c) }}</td>
+            <td class="num {{ $sign($s['expectancy']) }}">{{ $v($s['expectancy']) }}</td>
         </tr>
         <tr>
             <th>Faktor profit</th>
@@ -352,7 +360,7 @@
             <th>Rentetan untung / rugi</th>
             <td class="num">{{ $s['longest_win_streak'] }} / {{ $s['longest_loss_streak'] }}</td>
             <th>Penurunan saldo terdalam</th>
-            <td class="num">{{ $cur($s['max_drawdown']['amount'], $c) }} <span class="muted">(sepanjang riwayat akun)</span></td>
+            <td class="num">{{ $v($s['max_drawdown']['amount']) }} <span class="muted">(sepanjang riwayat akun, di luar setor/tarik)</span></td>
         </tr>
     </table>
 
@@ -361,28 +369,28 @@
         <thead>
             <tr>
                 <th>Bulan</th>
-                <th class="num">Laba Kotor ({{ $c }})</th>
-                <th class="num">Rugi Kotor ({{ $c }})</th>
-                <th class="num">Laba/Rugi Bersih ({{ $c }})</th>
-                <th class="num">Laba/Rugi Bersih (Rp)</th>
+                <th class="num">Laba Kotor ({{ $u }})</th>
+                <th class="num">Rugi Kotor ({{ $u }})</th>
+                <th class="num">Laba/Rugi Bersih ({{ $u }})</th>
+                @unless ($isRp)<th class="num">Laba/Rugi Bersih (Rp)</th>@endunless
             </tr>
         </thead>
         <tbody>
             @foreach ($a['monthly'] as $m)
                 <tr>
                     <td>{{ CarbonImmutable::parse($m['month'].'-01')->translatedFormat('F Y') }}</td>
-                    <td class="num">{{ $cur($m['profit'], $c) }}</td>
-                    <td class="num">{{ $cur($m['loss'], $c) }}</td>
-                    <td class="num {{ $sign($m['pnl']) }}">{{ $cur($m['pnl'], $c) }}</td>
-                    <td class="num {{ $sign($m['pnl_idr']) }}">{{ $rp($m['pnl_idr']) }}</td>
+                    <td class="num">{{ $v($m['profit']) }}</td>
+                    <td class="num">{{ $v($m['loss']) }}</td>
+                    <td class="num {{ $sign($m['pnl']) }}">{{ $v($m['pnl']) }}</td>
+                    @unless ($isRp)<td class="num {{ $sign($m['pnl_idr']) }}">{{ $rp($m['pnl_idr']) }}</td>@endunless
                 </tr>
             @endforeach
             <tr class="total">
                 <td>Jumlah setahun</td>
-                <td class="num">{{ $cur($s['gross_profit'], $c) }}</td>
-                <td class="num">{{ $cur(-$s['gross_loss'], $c) }}</td>
-                <td class="num {{ $sign($s['net_pnl']) }}">{{ $cur($s['net_pnl'], $c) }}</td>
-                <td class="num {{ $sign($a['net_pnl_idr']) }}">{{ $rp($a['net_pnl_idr']) }}</td>
+                <td class="num">{{ $v($s['gross_profit']) }}</td>
+                <td class="num">{{ $v(-$s['gross_loss']) }}</td>
+                <td class="num {{ $sign($s['net_pnl']) }}">{{ $v($s['net_pnl']) }}</td>
+                @unless ($isRp)<td class="num {{ $sign($a['net_pnl_idr']) }}">{{ $rp($a['net_pnl_idr']) }}</td>@endunless
             </tr>
         </tbody>
     </table>
@@ -394,8 +402,10 @@
                 <tr>
                     <th style="width: 12%">Tanggal</th>
                     <th style="width: 10%">Jenis</th>
-                    <th class="num" style="width: 14%">Jumlah ({{ $c }})</th>
-                    <th class="num" style="width: 12%">Kurs (Rp/USD)</th>
+                    @unless ($isRp)
+                        <th class="num" style="width: 14%">Jumlah ({{ $c }})</th>
+                        <th class="num" style="width: 12%">Kurs (Rp/USD)</th>
+                    @endunless
                     <th class="num" style="width: 15%">Jumlah (Rp)</th>
                     <th style="width: 10%">Bukti</th>
                     <th>Catatan</th>
@@ -406,11 +416,13 @@
                     <tr>
                         <td>{{ $tgl($m['occurred_at']) }}</td>
                         <td>{{ $m['type'] === 'deposit' ? 'Setoran' : 'Penarikan' }}</td>
-                        <td class="num">{{ $cur($m['amount'], $c) }}</td>
-                        <td class="num">
-                            {{ $kurs($m['rate_idr'] ?? $report['rate']) }}
-                            @if ($m['rate_idr'] === null)<span class="muted">*</span>@endif
-                        </td>
+                        @unless ($isRp)
+                            <td class="num">{{ $cur($m['amount'], $c) }}</td>
+                            <td class="num">
+                                {{ $kurs($m['rate_idr'] ?? $report['rate']) }}
+                                @if ($m['rate_idr'] === null)<span class="muted">*</span>@endif
+                            </td>
+                        @endunless
                         <td class="num">{{ $rp($m['amount_idr']) }}</td>
                         <td>
                             @if ($m['proof_url'])
@@ -423,20 +435,26 @@
                     </tr>
                 @endforeach
                 <tr class="total">
-                    <td colspan="2">Jumlah setoran {{ $cur($a['deposit'], $c) }}, penarikan {{ $cur($a['withdrawal'], $c) }}</td>
-                    <td class="num">{{ $cur($a['deposit'] - $a['withdrawal'], $c) }}</td>
-                    <td></td>
+                    <td colspan="2">Jumlah setoran {{ $v($a['deposit']) }}, penarikan {{ $v($a['withdrawal']) }}</td>
+                    @unless ($isRp)
+                        <td class="num">{{ $cur($a['deposit'] - $a['withdrawal'], $c) }}</td>
+                        <td></td>
+                    @endunless
                     <td class="num">{{ $rp($a['deposit_idr'] - $a['withdrawal_idr']) }}</td>
                     <td colspan="2"></td>
                 </tr>
             </tbody>
         </table>
         <p class="note">
-            Tautan "Lihat bukti" membuka berkas bukti transfer baris tersebut langsung
-            dari aplikasi; perlu masuk sebagai pemilik akun, jadi hanya berfungsi di
-            perangkat yang sudah login. Berkasnya dapat dicetak terpisah bila diminta.
-            Tanda <span class="muted">*</span> berarti kurs harian baris itu tidak tercatat
-            sehingga dipakai kurs tahunan.
+            Tautan "Lihat bukti" membuka berkas bukti transfer baris tersebut langsung dari
+            aplikasi tanpa perlu masuk. Setiap kali diklik, tautan ini memberi akses selama
+            60 detik; lewat dari itu alamat yang terbuka kedaluwarsa, dan berkasnya dibuka
+            kembali dengan mengklik ulang tautan di dokumen ini. Berkasnya dapat dicetak
+            terpisah bila diminta.
+            @unless ($isRp)
+                Tanda <span class="muted">*</span> berarti kurs harian baris itu tidak tercatat
+                sehingga dipakai kurs tahunan.
+            @endunless
         </p>
     @else
         <p class="muted">Tidak ada setoran maupun penarikan pada tahun {{ $year }}.</p>
@@ -450,7 +468,7 @@
                     <th>Instrumen</th>
                     <th class="num" style="width: 12%">Transaksi</th>
                     <th class="num" style="width: 14%">Keberhasilan</th>
-                    <th class="num" style="width: 18%">Laba/Rugi ({{ $c }})</th>
+                    @unless ($isRp)<th class="num" style="width: 18%">Laba/Rugi ({{ $c }})</th>@endunless
                     <th class="num" style="width: 18%">Laba/Rugi (Rp)</th>
                 </tr>
             </thead>
@@ -460,7 +478,7 @@
                         <td>{{ $symbol }}</td>
                         <td class="num">{{ $row['trades'] }}</td>
                         <td class="num">{{ $n($row['win_rate_pct'], 1) }}%</td>
-                        <td class="num {{ $sign($row['pnl']) }}">{{ $cur($row['pnl'], $c) }}</td>
+                        @unless ($isRp)<td class="num {{ $sign($row['pnl']) }}">{{ $cur($row['pnl'], $c) }}</td>@endunless
                         <td class="num {{ $sign($row['pnl_idr']) }}">{{ $rp($row['pnl_idr']) }}</td>
                     </tr>
                 @endforeach
@@ -469,7 +487,7 @@
                         <td>Arah: {{ $arah($dir) }}</td>
                         <td class="num">{{ $row['trades'] }}</td>
                         <td class="num">{{ $n($row['win_rate_pct'], 1) }}%</td>
-                        <td class="num {{ $sign($row['pnl']) }}">{{ $cur($row['pnl'], $c) }}</td>
+                        @unless ($isRp)<td class="num {{ $sign($row['pnl']) }}">{{ $cur($row['pnl'], $c) }}</td>@endunless
                         <td class="num {{ $sign($row['pnl_idr']) }}">{{ $rp($row['pnl_idr']) }}</td>
                     </tr>
                 @endforeach
@@ -494,7 +512,7 @@
                     <th class="num" style="width: 7%">Harga Keluar</th>
                     <th class="num" style="width: 7%">Stop Loss</th>
                     <th class="num" style="width: 7%">Take Profit</th>
-                    <th class="num" style="width: 10%">Laba/Rugi ({{ $c }})</th>
+                    @unless ($isRp)<th class="num" style="width: 10%">Laba/Rugi ({{ $c }})</th>@endunless
                     <th class="num" style="width: 11%">Laba/Rugi (Rp)</th>
                     <th style="width: 6%">Hasil</th>
                 </tr>
@@ -514,14 +532,14 @@
                         <td class="num">{{ $harga($t['tp_price']) }}</td>
                         {{-- Satuannya sudah ada di kepala kolom; mengulangnya tiap baris
                              membuat kolomnya melipat dan lampiran jadi dua kali lebih tebal. --}}
-                        <td class="num {{ $sign($t['pnl']) }}">{{ $n($t['pnl']) }}</td>
+                        @unless ($isRp)<td class="num {{ $sign($t['pnl']) }}">{{ $n($t['pnl']) }}</td>@endunless
                         <td class="num {{ $sign($t['pnl_idr']) }}">{{ $rp($t['pnl_idr']) }}</td>
                         <td>{{ $hasil($t['status']) }}</td>
                     </tr>
                 @endforeach
                 <tr class="total">
                     <td colspan="10">Jumlah {{ count($a['trades']) }} transaksi</td>
-                    <td class="num {{ $sign($a['net_pnl']) }}">{{ $n($a['net_pnl']) }}</td>
+                    @unless ($isRp)<td class="num {{ $sign($a['net_pnl']) }}">{{ $n($a['net_pnl']) }}</td>@endunless
                     <td class="num {{ $sign($a['net_pnl_idr']) }}">{{ $rp($a['net_pnl_idr']) }}</td>
                     <td></td>
                 </tr>

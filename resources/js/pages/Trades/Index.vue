@@ -76,7 +76,7 @@ const STATUS = {
  * cuma baris tepat di atas atau di bawah pilihan sekarang.
  */
 const grouping = ref(false)
-const picked = ref<number[]>([])
+const picked = ref<string[]>([])
 
 const pickedRange = computed(() => {
   const list = props.trades.data
@@ -91,7 +91,7 @@ const pickedGroups = computed(
     new Set(
       picked.value
         .map((id) => props.trades.data.find((row) => row.id === id)?.group_id)
-        .filter(Boolean) as number[],
+        .filter(Boolean) as string[],
     ),
 )
 

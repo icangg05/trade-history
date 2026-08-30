@@ -1,5 +1,6 @@
 interface Groupable {
-  group_id?: number | null
+  /** Hanya dibandingkan sama/tidak sama, jadi bentuk id-nya tidak penting. */
+  group_id?: string | null
 }
 
 /*

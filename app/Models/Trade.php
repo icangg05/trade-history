@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class Trade extends Model
 {
+    use Concerns\HasHashid;
+
     protected function casts(): array
     {
         return [

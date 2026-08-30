@@ -79,14 +79,31 @@ class ReportController extends Controller
         // letak, ketika jumlah halaman belum diketahui. `page_text` mengisinya setelah
         // dokumen jadi — lewat API kanvas, bukan <script type="text/php"> yang
         // mengharuskan eksekusi PHP di dalam HTML dinyalakan.
+        //
+        // Karena digambar di luar alur HTML, posisinya harus disamakan sendiri dengan
+        // baris "Dokumen dihasilkan…" di #footer: ukuran, warna, dan garis dasar yang
+        // sama, lalu rata kanan ke margin halaman. Angka 19pt di bawah adalah hasil
+        // ukur — page_text menaruh puncak huruf sedikit di bawah y yang diberikan.
         $canvas = $dompdf->getCanvas();
+        $font = $dompdf->getFontMetrics()->getFont('Helvetica');
+        $text = 'Halaman {PAGE_NUM} dari {PAGE_COUNT}';
+
+        // Lebar teks diukur dengan nomor halaman terbesar, satu-satunya yang bisa
+        // melebar; selisih digitnya di halaman awal jauh di bawah satu spasi.
+        $width = $dompdf->getFontMetrics()->getTextWidth(
+            str_replace(['{PAGE_NUM}', '{PAGE_COUNT}'], $canvas->get_page_count(), $text),
+            $font,
+            self::FOOTER_SIZE,
+        );
+
         $canvas->page_text(
-            $canvas->get_width() - 130,
-            $canvas->get_height() - 25,
-            'Halaman {PAGE_NUM} dari {PAGE_COUNT}',
-            $dompdf->getFontMetrics()->getFont('Helvetica'),
-            7,
-            [0.33, 0.33, 0.33],
+            $canvas->get_width() - self::MARGIN - $width,
+            $canvas->get_height() - 19,
+            $text,
+            $font,
+            self::FOOTER_SIZE,
+            // #5A6679, warna #footer di reports/annual.blade.php.
+            [90 / 255, 102 / 255, 121 / 255],
         );
 
         $filename = 'laporan-trading-'.$data['year'].'-'.Str::slug($data['name']).'.pdf';
@@ -128,6 +145,11 @@ class ReportController extends Controller
 
         return 'data:image/png;base64,'.base64_encode((string) ob_get_clean());
     }
+
+    /** Sepasang dengan #footer di reports/annual.blade.php: 6.5pt dan margin 8mm. */
+    private const FOOTER_SIZE = 6.5;
+
+    private const MARGIN = 8 / 25.4 * 72;
 
     /** Ukuran ubin watermark dalam piksel; makin kecil makin rapat pengulangannya. */
     private const TILE_W = 190;

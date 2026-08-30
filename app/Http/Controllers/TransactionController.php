@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use App\Services\AccountStats;
 use App\Services\Uploads;
+use App\Support\Hashid;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -65,7 +67,8 @@ class TransactionController extends Controller
                 ->paginate(30)
                 ->withQueryString()
                 ->through(fn (Transaction $t) => [
-                    ...$t->only('id', 'type', 'note'),
+                    ...$t->only('type', 'note'),
+                    'id' => $t->getRouteKey(),
                     'amount' => (float) $t->amount,
                     'rate_idr' => $t->rate_idr === null ? null : (float) $t->rate_idr,
                     'occurred_at' => $t->occurred_at->toDateString(),
@@ -113,6 +116,40 @@ class TransactionController extends Controller
 
         return Storage::disk(Uploads::DISK)->response($transaction->proof_path);
     }
+
+    /**
+     * Tautan bukti yang tercetak di laporan. Tidak menyajikan berkasnya sendiri:
+     * ia menerbitkan alamat pandang berumur pendek lalu melempar ke sana.
+     *
+     * Tautan ini sengaja tidak berbatas waktu. Yang memegang dokumen memang
+     * berhak membukanya kapan pun, dan laporan pajak bisa saja baru dibaca
+     * berbulan-bulan kemudian. Yang dibatasi umurnya adalah alamat hasil
+     * lemparan — alamat itulah yang mendarat di riwayat browser dan gampang
+     * tersalin ke mana-mana.
+     *
+     * Tidak dijaga sesi login: tanda tangan URL yang jadi izinnya, diperiksa
+     * middleware `signed` sebelum sampai ke sini.
+     */
+    public function proofLink(string $proof): RedirectResponse
+    {
+        return redirect()->to(URL::temporarySignedRoute(
+            'proofs.view',
+            CarbonImmutable::now()->addSeconds(self::VIEW_SECONDS),
+            ['proof' => $proof],
+        ));
+    }
+
+    /**
+     * Berkasnya sendiri. Kedaluwarsanya dijaga tanda tangan berbatas waktu milik
+     * Laravel — tidak ada jam yang perlu kami simpan dan cocokkan sendiri.
+     */
+    public function proofView(string $proof): StreamedResponse
+    {
+        return $this->proof(Transaction::findOrFail(Hashid::decode($proof)));
+    }
+
+    /** Umur alamat pandang, dihitung sejak tautan di dokumen diklik. */
+    private const VIEW_SECONDS = 60;
 
     public function destroy(Transaction $transaction): RedirectResponse
     {

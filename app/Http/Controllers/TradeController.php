@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TradeRequest;
 use App\Models\Trade;
 use App\Services\Gemini;
+use App\Support\Hashid;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -120,11 +121,12 @@ class TradeController extends Controller
     {
         $data = $request->validate([
             'ids' => ['required', 'array', 'min:2', 'max:50'],
-            'ids.*' => ['integer'],
+            'ids.*' => ['string'],
         ]);
 
         $account = $request->currentAccount();
-        $trades = $account->trades()->whereIn('id', $data['ids'])->orderByRaw(self::TRADE_DATE)->orderBy('id')->get();
+        $ids = array_map(Hashid::decode(...), $data['ids']);
+        $trades = $account->trades()->whereIn('id', $ids)->orderByRaw(self::TRADE_DATE)->orderBy('id')->get();
 
         if ($trades->count() !== count($data['ids'])) {
             return back()->with('error', 'Ada trade yang tidak ditemukan di akun ini.');
@@ -167,14 +169,16 @@ class TradeController extends Controller
     }
 
     /** Setup dan catatan grup: satu form untuk semua anggotanya. */
-    public function updateGroup(Request $request, int $group): RedirectResponse
+    public function updateGroup(Request $request, string $group): RedirectResponse
     {
         $data = $request->validate([
             'setup' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
 
-        $members = $request->currentAccount()->trades()->where('group_id', $group)->get();
+        // `{group}` bukan model, jadi tidak lewat Route::bind — didekode di sini.
+        // Kepemilikannya tetap terjaga: querynya dibatasi ke akun yang aktif.
+        $members = $request->currentAccount()->trades()->where('group_id', Hashid::decode($group))->get();
 
         if ($members->isEmpty()) {
             return back()->with('error', 'Grup tidak ditemukan.');
@@ -308,7 +312,10 @@ class TradeController extends Controller
     private function present(Trade $trade, bool $full = false): array
     {
         $base = [
-            ...$trade->only('id', 'symbol', 'direction', 'status', 'setup', 'group_id', 'source', 'notes'),
+            ...$trade->only('symbol', 'direction', 'status', 'setup', 'source', 'notes'),
+            // Id tidak pernah keluar apa adanya — lihat App\Support\Hashid.
+            'id' => $trade->getRouteKey(),
+            'group_id' => $trade->group_id === null ? null : Hashid::encode($trade->group_id),
             'lot' => $this->num($trade->lot),
             'entry_price' => $this->num($trade->entry_price),
             'sl_price' => $this->num($trade->sl_price),

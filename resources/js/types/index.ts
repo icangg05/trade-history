@@ -16,13 +16,14 @@ export interface CurrentAccount extends AccountBrief {
 }
 
 export interface Trade {
-  id: number
+  /** Id yang sudah di-hash — lihat App\Support\Hashid. Jangan diurutkan sebagai angka. */
+  id: string
   symbol: string
   direction: Direction
   status: TradeStatus
   setup: string | null
-  /** Kunci grup: penanda beberapa trade berurutan lahir dari satu ide. */
-  group_id?: number | null
+  /** Kunci grup (id trade pertama, ikut di-hash): penanda beberapa trade berurutan lahir dari satu ide. */
+  group_id?: string | null
   notes?: string | null
   source?: 'manual' | 'ai'
   lot: number | null

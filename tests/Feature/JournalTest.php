@@ -31,6 +31,41 @@ class JournalTest extends TestCase
         ]);
     }
 
+    public function test_id_baris_tidak_pernah_keluar_apa_adanya(): void
+    {
+        $account = $this->account();
+        $trade = $account->trades()->create([
+            'symbol' => 'XAUUSD', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
+            'opened_at' => '2026-01-05 09:00',
+        ]);
+
+        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+
+        $props = $this->get('/trades')->assertOk()->viewData('page')['props'];
+
+        $this->assertSame($trade->getRouteKey(), $props['trades']['data'][0]['id']);
+        $this->assertNotSame((string) $trade->id, $props['trades']['data'][0]['id']);
+
+        // Hash itu yang diterima route; id mentah dan hash karangan sama-sama 404.
+        $this->get('/trades/'.$trade->getRouteKey().'/edit')->assertOk();
+        $this->get('/trades/'.$trade->id.'/edit')->assertNotFound();
+        $this->get('/trades/bukan-hash-sama-sekali/edit')->assertNotFound();
+    }
+
+    public function test_hash_akun_lain_tetap_tidak_bisa_dibuka(): void
+    {
+        $milikOrangLain = $this->account()->trades()->create([
+            'symbol' => 'XAUUSD', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
+            'opened_at' => '2026-01-05 09:00',
+        ]);
+
+        $saya = $this->account();
+        $this->actingAs($saya->user)->withSession(['current_account_id' => $saya->id]);
+
+        // Hash menyamarkan, bukan mengizinkan: pagar kepemilikannya tetap yang menahan.
+        $this->get('/trades/'.$milikOrangLain->getRouteKey().'/edit')->assertNotFound();
+    }
+
     public function test_rr_dan_status_diturunkan_saat_menyimpan_posisi_buy(): void
     {
         $trade = $this->account()->trades()->create([

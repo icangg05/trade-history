@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Trade;
 use App\Services\AccountStats;
+use App\Support\Hashid;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -30,7 +31,9 @@ class CalendarController extends Controller
             ->get()
             ->groupBy(fn (Trade $t) => ($t->closed_at ?? $t->opened_at)->toDateString())
             ->map(fn ($group) => $group->map(fn (Trade $t) => [
-                ...$t->only('id', 'symbol', 'direction', 'status', 'setup', 'group_id'),
+                ...$t->only('symbol', 'direction', 'status', 'setup'),
+                'id' => $t->getRouteKey(),
+                'group_id' => $t->group_id === null ? null : Hashid::encode($t->group_id),
                 'stop_state' => $t->stopState(),
                 'lot' => $t->lot === null ? null : (float) $t->lot,
                 'pnl' => (float) $t->pnl,

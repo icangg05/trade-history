@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Account;
 use App\Models\Trade;
 use App\Models\Transaction;
+use App\Support\Hashid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -36,16 +37,19 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Satu pagar untuk semua route: model hanya bisa di-resolve kalau memang
      * milik user yang login. Tidak perlu cek kepemilikan di tiap controller.
+     *
+     * Di sini pula hash dari URL dikembalikan jadi id. Hash yang tidak sah
+     * mendekode ke 0 dan berakhir sebagai 404, sama seperti id yang tidak ada.
      */
     private function registerScopedRouteBindings(): void
     {
         Route::bind('account', fn ($id) => Account::where('user_id', Auth::id())->findOrFail($id));
 
         foreach (['trade' => Trade::class, 'transaction' => Transaction::class] as $key => $model) {
-            Route::bind($key, fn ($id) => $model::whereHas(
+            Route::bind($key, fn ($hash) => $model::whereHas(
                 'account',
                 fn ($q) => $q->where('user_id', Auth::id())
-            )->findOrFail($id));
+            )->findOrFail(Hashid::decode($hash)));
         }
     }
 }

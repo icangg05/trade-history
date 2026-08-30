@@ -42,6 +42,62 @@ class RuleLimitTest extends TestCase
         $this->assertSame(1300.0, $this->get('/rules')->viewData('page')['props']['basis']);
     }
 
+    public function test_penarikan_dan_setoran_tidak_dihitung_sebagai_drawdown(): void
+    {
+        $account = User::factory()->create()->accounts()->create([
+            'name' => 'Uji',
+            'currency' => 'IDR',
+            'initial_balance' => 10_000_000,
+            'started_at' => '2026-01-01',
+        ]);
+
+        // Trading hanya pernah turun 400rb; 7jt yang keluar adalah untung yang
+        // ditarik ke rekening bank, bukan kerugian.
+        $account->trades()->createMany([
+            ['symbol' => 'XAUUSD', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
+                'pnl' => 2_000_000, 'opened_at' => '2026-02-01 09:00', 'closed_at' => '2026-02-01 10:00'],
+            ['symbol' => 'XAUUSD', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
+                'pnl' => -400_000, 'opened_at' => '2026-03-01 09:00', 'closed_at' => '2026-03-01 10:00'],
+        ]);
+        $account->transactions()->createMany([
+            ['type' => 'withdrawal', 'amount' => 7_000_000, 'occurred_at' => '2026-04-01'],
+            ['type' => 'deposit', 'amount' => 3_000_000, 'occurred_at' => '2026-05-01'],
+        ]);
+
+        $summary = (new AccountStats($account))->summary(
+            CarbonImmutable::parse('2026-01-01'),
+            CarbonImmutable::parse('2026-12-31'),
+        );
+
+        $this->assertSame(400_000.0, $summary['max_drawdown']['amount']);
+
+        // Persennya diukur dari puncak kurva trading (12jt), bukan saldo berjalan.
+        $this->assertSame(3.33, $summary['max_drawdown']['pct']);
+    }
+
+    public function test_menarik_untung_tidak_menyalakan_peringatan_batas_rugi(): void
+    {
+        $account = User::factory()->create()->accounts()->create([
+            'name' => 'Uji',
+            'currency' => 'IDR',
+            'initial_balance' => 10_000_000,
+            'started_at' => '2026-01-01',
+        ]);
+        $account->rule()->create(['max_total_loss_pct' => 10]);
+
+        $account->trades()->create([
+            'symbol' => 'XAUUSD', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
+            'pnl' => 2_000_000, 'opened_at' => '2026-02-01 09:00', 'closed_at' => '2026-02-01 10:00',
+        ]);
+        // Separuh saldo ditarik keluar: dulu ini terbaca sebagai drawdown 50%.
+        $account->transactions()->create(['type' => 'withdrawal', 'amount' => 6_000_000, 'occurred_at' => '2026-04-01']);
+
+        $status = (new AccountStats($account))->ruleStatus(CarbonImmutable::parse('2026-04-02'));
+
+        $this->assertSame(0.0, $status['drawdown_pct']);
+        $this->assertFalse($status['drawdown_breached']);
+    }
+
     public function test_batas_harian_tersimpan_dalam_satu_satuan_saja(): void
     {
         $account = User::factory()->create()->accounts()->create([

@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['account_id', 'type', 'amount', 'rate_idr', 'occurred_at', 'proof_path', 'note'])]
 class Transaction extends Model
 {
+    use Concerns\HasHashid;
+
     protected function casts(): array
     {
         return [

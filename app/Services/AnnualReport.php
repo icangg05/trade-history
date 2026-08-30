@@ -7,6 +7,7 @@ use App\Models\Trade;
 use App\Models\Transaction;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Bahan laporan tahunan untuk klarifikasi pajak. Mengembalikan array polos —
@@ -120,9 +121,13 @@ class AnnualReport
                 'rate_idr' => $t->rate_idr === null ? null : (float) $t->rate_idr,
                 'amount_idr' => self::idr((float) $t->amount, (float) ($t->rate_idr ?? $rate), $currency),
                 'has_proof' => filled($t->proof_path),
-                // Bukti dibuka lewat route yang sudah mengecek kepemilikan; tautannya
-                // absolut supaya tetap bisa diklik dari dalam PDF.
-                'proof_url' => filled($t->proof_path) ? route('transactions.proof', $t) : null,
+                // Siapa pun yang memegang PDF-nya bisa membuka bukti ini tanpa login —
+                // tanda tangan URL yang jadi izinnya, bukan sesi. Tautan ini abadi dan
+                // hanya jadi pintu masuk: yang berumur 60 detik adalah alamat yang
+                // diterbitkannya (lihat TransactionController::proofLink).
+                'proof_url' => filled($t->proof_path)
+                    ? URL::signedRoute('proofs.link', $t->getRouteKey())
+                    : null,
                 'note' => $t->note,
             ])->all(),
             'trades' => $stats->trades($from, $to)->map(fn (Trade $t) => [

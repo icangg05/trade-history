@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\AccountStats;
+use App\Support\Hashid;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -48,7 +49,9 @@ class DashboardController extends Controller
     private function row($trade): array
     {
         return [
-            ...$trade->only('id', 'symbol', 'direction', 'status', 'setup', 'group_id'),
+            ...$trade->only('symbol', 'direction', 'status', 'setup'),
+            'id' => $trade->getRouteKey(),
+            'group_id' => $trade->group_id === null ? null : Hashid::encode($trade->group_id),
             'stop_state' => $trade->stopState(),
             'pnl' => $trade->pnl === null ? null : (float) $trade->pnl,
             'rr_planned' => $trade->rr_planned === null ? null : (float) $trade->rr_planned,

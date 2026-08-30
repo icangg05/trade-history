@@ -9,8 +9,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -38,6 +40,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Tanda tangan yang kedaluwarsa atau diutak-atik dijawab 404, bukan 403.
+        // Bagi yang membuka, tautan yang sudah mati dan berkas yang memang tidak
+        // ada sama saja — dan jawaban itu tidak menegaskan barisnya benar ada.
+        $exceptions->map(fn (InvalidSignatureException $e) => new NotFoundHttpException(previous: $e));
+
         $wantsJson = fn (Request $request) => $request->is('api/*') || $request->expectsJson();
 
         $exceptions->shouldRenderJsonWhen($wantsJson);

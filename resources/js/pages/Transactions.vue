@@ -16,7 +16,7 @@ import { longDate, money, monthLabel, price, rateCurrency, toIdr, useCurrency } 
 import type { Paginated } from '@/types'
 
 interface Row {
-  id: number
+  id: string
   type: 'deposit' | 'withdrawal'
   amount: number
   rate_idr: number | null
@@ -109,7 +109,8 @@ function destroy() {
 }
 
 const form = useForm({
-  type: 'deposit' as 'deposit' | 'withdrawal',
+  // Withdrawal jadi bawaan: setoran hanya sesekali di awal, penarikan yang rutin dicatat.
+  type: 'withdrawal' as 'deposit' | 'withdrawal',
   amount: null as number | null,
   rate_idr: null as number | null,
   occurred_at: new Date().toISOString().slice(0, 10),

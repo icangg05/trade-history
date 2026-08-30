@@ -23,6 +23,24 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:5,1');
 });
 
+// Bukti transfer dari PDF laporan, dua tahap.
+//
+// `proofs.link` yang tercetak di dokumen tidak pernah kedaluwarsa — pemegang
+// laporan harus selalu bisa membukanya. Yang ia lakukan cuma menerbitkan
+// `proofs.view` berumur 60 detik lalu melempar ke sana. Jadi yang mati adalah
+// alamat yang mendarat di riwayat browser dan bisa disalin ke mana-mana, bukan
+// tautan di dokumennya; mengklik ulang dari dokumen memberi jendela baru.
+//
+// Nama parameternya sengaja bukan `transaction`: binding global untuk nama itu
+// menyaring lewat Auth::id(), yang di sini kosong.
+Route::get('/proofs/{proof}', [TransactionController::class, 'proofLink'])
+    ->middleware('signed')
+    ->name('proofs.link');
+
+Route::get('/proofs/{proof}/view', [TransactionController::class, 'proofView'])
+    ->middleware('signed')
+    ->name('proofs.view');
+
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 

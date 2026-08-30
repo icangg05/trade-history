@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Models\Account;
 use App\Models\User;
 use App\Services\AnnualReport;
+use App\Services\Uploads;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -220,12 +222,127 @@ class ReportTest extends TestCase
 
         $html = $this->html($user);
 
-        $this->assertStringContainsString('href="'.route('transactions.proof', $berbukti).'"', $html);
+        // Tautan bertanda tangan, bukan route bersesi: yang memegang PDF-nya boleh
+        // membuka tanpa punya akun di aplikasi ini. Tidak ada `expires` di URL —
+        // hitungan mundurnya baru mulai saat tautannya dibuka.
+        $this->assertMatchesRegularExpression(
+            '#href="https?://[^"]+/proofs/'.$berbukti->getRouteKey().'\?signature=[0-9a-f]+"#',
+            $html,
+        );
         $this->assertStringContainsString('Lihat bukti', $html);
+        // Id berurutan tidak boleh terbaca dari dokumen yang berpindah tangan.
+        $this->assertStringNotContainsString('/proofs/'.$berbukti->id.'/', $html);
         // Baris tanpa bukti tidak boleh ikut punya tautan (teks yang sama juga muncul
         // di catatan kaki, jadi yang dihitung tautannya — bukan kalimatnya).
         $this->assertSame(1, substr_count($html, '>Lihat bukti</a>'));
         $this->assertStringContainsString('Tidak ada', $html);
+    }
+
+    public function test_tautan_dokumen_menerbitkan_alamat_pandang_berumur_60_detik(): void
+    {
+        $link = $this->proofUrl($this->tautanBukti());
+
+        // Laporan yang baru dibaca sebulan kemudian tetap harus bisa dibuka.
+        $this->travel(30)->days();
+
+        // Tidak ada actingAs di sini: persis posisi petugas yang cuma pegang PDF-nya.
+        // Tautan di dokumen tidak menyajikan berkasnya, ia melempar ke alamat pandang.
+        $view = $this->get($link)->assertRedirect()->headers->get('Location');
+
+        $this->assertStringContainsString('/view?expires=', $view);
+        $this->get($view)->assertOk();
+
+        // Masih di dalam jendelanya — memuat ulang alamat yang sama tetap boleh.
+        $this->travel(59)->seconds();
+        $this->get($view)->assertOk();
+
+        // Lewat 60 detik alamat itu benar-benar mati, dan matinya 404 bukan 403.
+        $this->travel(2)->seconds();
+        $this->get($view)->assertNotFound();
+    }
+
+    public function test_klik_ulang_dari_dokumen_memberi_jendela_yang_baru(): void
+    {
+        $link = $this->proofUrl($this->tautanBukti());
+
+        $lama = $this->get($link)->assertRedirect()->headers->get('Location');
+        $this->travel(61)->seconds();
+        $this->get($lama)->assertNotFound();
+
+        // Inilah bedanya dengan alamat pandang: tautan di dokumen tidak pernah
+        // hangus. Pemegang laporan mengklik lagi dan dapat 60 detik yang baru.
+        $baru = $this->get($link)->assertRedirect()->headers->get('Location');
+
+        $this->assertNotSame($lama, $baru);
+        $this->get($baru)->assertOk();
+    }
+
+    public function test_alamat_pandang_tidak_bisa_dikarang_sendiri(): void
+    {
+        $user = $this->tautanBukti();
+        $hash = $user->accounts()->sole()->transactions()->sole()->getRouteKey();
+
+        // Tanpa tanda tangan, atau dengan tanda tangan asal-asalan: tetap 404.
+        $this->get('/proofs/'.$hash.'/view')->assertNotFound();
+        $this->get('/proofs/'.$hash.'/view?expires=99999999999&signature=abc')->assertNotFound();
+    }
+
+    /** Satu akun dengan satu mutasi berbukti, berkasnya benar-benar ada di disk. */
+    private function tautanBukti(): User
+    {
+        Storage::fake(Uploads::DISK);
+        Storage::disk(Uploads::DISK)->put('proofs/a.jpg', 'isi berkas');
+
+        $user = User::factory()->create();
+        $this->account($user)->transactions()->create(['type' => 'deposit', 'amount' => 100, 'rate_idr' => 16000, 'occurred_at' => '2025-02-01', 'proof_path' => 'proofs/a.jpg']);
+
+        return $user;
+    }
+
+    /** Tautan "Lihat bukti" seperti yang benar-benar tercetak di laporan. */
+    private function proofUrl(User $user): string
+    {
+        preg_match('#href="([^"]+/proofs/[^"]+)"#', $this->html($user), $m);
+
+        return html_entity_decode($m[1]);
+    }
+
+    public function test_akun_rupiah_tidak_mencetak_kolom_mata_uang_kembar(): void
+    {
+        $user = User::factory()->create();
+        $account = $this->account($user, ['currency' => 'IDR', 'initial_balance' => 5000000]);
+        $this->trade($account, '2025-05-05 12:00', 250000);
+        $account->transactions()->create(['type' => 'withdrawal', 'amount' => 1000000, 'occurred_at' => '2025-06-01']);
+
+        $html = $this->html($user);
+
+        // `$cur()` menempelkan kode mata uang di belakang angka. Untuk akun rupiah
+        // kolom itu kembar dengan kolom Rupiah, jadi tidak boleh tercetak sama sekali.
+        $this->assertStringNotContainsString(' IDR', $html);
+        $this->assertStringNotContainsString('(IDR)', $html);
+        // Rekap bulanan tinggal satu kolom laba/rugi bersih, bukan dua yang sebangun.
+        $this->assertSame(1, substr_count($html, 'Laba/Rugi Bersih (Rp)'));
+        // Kurs juga tidak berarti apa-apa untuk akun yang memang sudah rupiah.
+        $this->assertStringNotContainsString('Kurs (Rp/USD)', $html);
+
+        // Yang tersisa tetap kolom rupiahnya, dengan angka yang utuh.
+        $this->assertStringContainsString('Rp5.000.000', $html);
+        $this->assertStringContainsString('Rp250.000', $html);
+        $this->assertStringContainsString('-Rp1.000.000', $html);
+    }
+
+    public function test_akun_valuta_asing_tetap_punya_dua_kolom(): void
+    {
+        $user = User::factory()->create();
+        $account = $this->account($user);
+        $this->trade($account, '2025-05-05 12:00', 120);
+        $account->transactions()->create(['type' => 'deposit', 'amount' => 100, 'rate_idr' => 16000, 'occurred_at' => '2025-02-01']);
+
+        $html = $this->html($user);
+
+        $this->assertStringContainsString('120,00 USD', $html);
+        $this->assertStringContainsString('Rp1.920.000', $html);
+        $this->assertStringContainsString('Kurs (Rp/USD)', $html);
     }
 
     public function test_unduh_menghasilkan_berkas_pdf(): void
