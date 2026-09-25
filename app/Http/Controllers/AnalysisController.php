@@ -5,19 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\AiAnalysis;
 use App\Services\AccountStats;
 use App\Services\Gemini;
+use App\Support\Period;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
 
 class AnalysisController extends Controller
 {
-    private const PERIODS = ['30d' => 30, '90d' => 90, '1y' => 365];
-
-    public function index(Request $request, Gemini $gemini): Response
+    public function index(Request $request, Gemini $gemini): Response|JsonResponse
     {
         $account = $request->currentAccount();
         [$from, $to, $period] = $this->period($request);
@@ -31,7 +29,7 @@ class AnalysisController extends Controller
         $saved = AiAnalysis::where('account_id', $account->id)->latest();
         $analysis = (clone $saved)->where('stats_hash', $hash)->first() ?? $saved->first();
 
-        return Inertia::render('Analysis', [
+        return $this->page('Analysis', [
             'period' => $period,
             'summary' => $stats,
             'aiEnabled' => $gemini->configured(),
@@ -49,7 +47,7 @@ class AnalysisController extends Controller
         ]);
     }
 
-    public function generate(Request $request, Gemini $gemini): RedirectResponse
+    public function generate(Request $request, Gemini $gemini): RedirectResponse|JsonResponse
     {
         $account = $request->currentAccount();
         [$from, $to] = $this->period($request);
@@ -57,7 +55,7 @@ class AnalysisController extends Controller
         $stats = (new AccountStats($account))->summary($from, $to);
 
         if ($stats['total_trades'] === 0) {
-            return back()->with('error', 'Belum ada trade tertutup di periode ini.');
+            return $this->failed('Belum ada trade tertutup di periode ini.');
         }
 
         // Tombol ini selalu memanggil Gemini: diam-diam memakai ulang hasil lama
@@ -66,7 +64,7 @@ class AnalysisController extends Controller
         try {
             $markdown = $gemini->analyze($stats, $account->rule?->notes);
         } catch (RuntimeException $e) {
-            return back()->with('error', $e->getMessage());
+            return $this->failed($e->getMessage(), 502);
         }
 
         AiAnalysis::updateOrCreate(
@@ -79,15 +77,15 @@ class AnalysisController extends Controller
             ],
         )->touch();
 
-        return back()->with('success', 'Analisa selesai.');
+        return $this->done('Analisa selesai.');
     }
 
     /** Layar chat penuh, terpisah dari halaman analisa supaya muat sampai ujung. */
-    public function chatPage(Request $request, Gemini $gemini): Response
+    public function chatPage(Request $request, Gemini $gemini): Response|JsonResponse
     {
         [, , $period] = $this->period($request);
 
-        return Inertia::render('Analysis/Chat', [
+        return $this->page('Analysis/Chat', [
             'period' => $period,
             'aiEnabled' => $gemini->configured(),
         ]);
@@ -138,16 +136,7 @@ class AnalysisController extends Controller
     /** @return array{0: CarbonImmutable, 1: CarbonImmutable, 2: string} */
     private function period(Request $request): array
     {
-        $period = $request->string('period')->toString() ?: '30d';
-        $to = CarbonImmutable::now()->endOfDay();
-
-        if ($period === 'all') {
-            return [CarbonImmutable::parse($request->currentAccount()->started_at), $to, 'all'];
-        }
-
-        $days = self::PERIODS[$period] ?? 30;
-
-        return [$to->subDays($days)->startOfDay(), $to, array_key_exists($period, self::PERIODS) ? $period : '30d'];
+        return Period::resolve($request->currentAccount(), $request->string('period')->toString());
     }
 
     /**

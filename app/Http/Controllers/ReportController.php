@@ -7,16 +7,16 @@ use App\Services\AnnualReport;
 use Carbon\CarbonImmutable;
 use Dompdf\Dompdf;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 
 class ReportController extends Controller
 {
-    public function index(Request $request): InertiaResponse
+    public function index(Request $request): InertiaResponse|JsonResponse
     {
         $accounts = $this->accounts();
         $now = CarbonImmutable::now();
@@ -25,7 +25,7 @@ class ReportController extends Controller
         // jadi tidak ada query tambahan untuk daftar ini.
         $oldest = (int) ($accounts->min('started_at')?->year ?: $now->year);
 
-        return Inertia::render('Report', [
+        return $this->page('Report', [
             'years' => range($now->year, min($oldest, $now->year)),
             'defaultName' => $request->user()->name,
             'accounts' => $accounts->map->only('id', 'name', 'broker', 'currency', 'is_archived')->values(),

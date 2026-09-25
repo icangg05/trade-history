@@ -6,13 +6,13 @@ use App\Models\Trade;
 use App\Services\AccountStats;
 use App\Support\Hashid;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Inertia\Response;
 
 class CalendarController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): Response|JsonResponse
     {
         $account = $request->currentAccount();
         $month = $this->month($request->string('month')->toString());
@@ -40,7 +40,7 @@ class CalendarController extends Controller
                 'opened_at' => $t->opened_at->toIso8601String(),
             ])->values());
 
-        return Inertia::render('Calendar', [
+        return $this->page('Calendar', [
             'month' => $month->format('Y-m'),
             'gridStart' => $gridStart->toDateString(),
             'gridEnd' => $gridEnd->toDateString(),

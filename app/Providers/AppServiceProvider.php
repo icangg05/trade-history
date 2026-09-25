@@ -32,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
             /** @var Request $this */
             return $this->attributes->get('account_list') ?? collect();
         });
+
+        // Permintaan dari aplikasi mobile: dijawab JSON, tanpa sesi maupun flash.
+        Request::macro('isApi', function (): bool {
+            /** @var Request $this */
+            return $this->is('api/*');
+        });
     }
 
     /**

@@ -20,10 +20,10 @@ use Inertia\Response;
  */
 class LoginController extends Controller
 {
-    /** Empat percobaan gagal, lalu kunci selama satu menit. */
-    private const MAX_ATTEMPTS = 4;
+    /** Empat percobaan gagal, lalu kunci selama satu menit. Berlaku juga di API. */
+    public const MAX_ATTEMPTS = 4;
 
-    private const LOCKOUT_SECONDS = 60;
+    public const LOCKOUT_SECONDS = 60;
 
     public function create(): Response
     {
@@ -47,7 +47,7 @@ class LoginController extends Controller
         // Kuncinya email+IP, bukan IP saja: penebak kata sandi kehabisan jatah
         // di email yang diincarnya tanpa ikut mengunci orang lain di IP yang
         // sama. Rotasi email dari satu IP masih dibatasi throttle di route.
-        $key = $this->throttleKey($request);
+        $key = self::throttleKey($request);
 
         if (RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
             event(new Lockout($request));
@@ -82,7 +82,7 @@ class LoginController extends Controller
         return redirect()->route('login');
     }
 
-    private function throttleKey(Request $request): string
+    public static function throttleKey(Request $request): string
     {
         return Str::transliterate(Str::lower($request->string('email')).'|'.$request->ip());
     }
