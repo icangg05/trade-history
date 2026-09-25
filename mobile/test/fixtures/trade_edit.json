@@ -1,0 +1,25 @@
+{
+    "trade": {
+        "symbol": "XAUUSD",
+        "direction": "sell",
+        "status": "win",
+        "setup": "Order block",
+        "source": "manual",
+        "notes": null,
+        "id": "KnEAz8yeadbx",
+        "group_id": null,
+        "lot": 0.02,
+        "entry_price": 2361.92,
+        "sl_price": 2369.71434,
+        "tp_price": 2344.77246,
+        "exit_price": 2344.77246,
+        "pnl": 194,
+        "stop_state": "risk",
+        "rr_planned": 2.2,
+        "rr_realized": 2.2,
+        "opened_at": "2026-09-24T18:24",
+        "closed_at": "2026-09-25T00:24",
+        "ai_raw": null
+    },
+    "aiEnabled": false
+}

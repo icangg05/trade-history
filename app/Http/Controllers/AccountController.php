@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use App\Services\AccountStats;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Inertia\Response;
 
 class AccountController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): Response|JsonResponse
     {
         $accounts = $request->user()->accounts()->orderBy('is_archived')->orderBy('name')->get()
             ->map(function (Account $account) {
@@ -27,7 +27,7 @@ class AccountController extends Controller
                 ];
             });
 
-        return Inertia::render('Accounts', [
+        return $this->page('Accounts', [
             'items' => $accounts,
             // Satu-satunya tempat yang menjumlahkan seluruh akun: layar lain
             // selalu mengikuti akun aktif. Dikelompokkan per mata uang, karena
@@ -48,31 +48,40 @@ class AccountController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $account = $request->user()->accounts()->create($this->validated($request));
 
-        $request->session()->put('current_account_id', $account->id);
+        // Aplikasi mobile tidak punya sesi: akun yang dibuka ikut di alamatnya,
+        // jadi yang perlu ia tahu cukup id akun barunya.
+        if ($request->hasSession()) {
+            $request->session()->put('current_account_id', $account->id);
+        }
 
-        return redirect()->route('dashboard')->with('success', 'Akun "'.$account->name.'" dibuat.');
+        return $this->done(
+            'Akun "'.$account->name.'" dibuat.',
+            to: route('dashboard'),
+            data: ['id' => $account->id],
+            status: 201,
+        );
     }
 
-    public function update(Request $request, Account $account): RedirectResponse
+    public function update(Request $request, Account $account): RedirectResponse|JsonResponse
     {
         $account->update($this->validated($request));
 
-        return back()->with('success', 'Akun diperbarui.');
+        return $this->done('Akun diperbarui.');
     }
 
-    public function destroy(Request $request, Account $account): RedirectResponse
+    public function destroy(Request $request, Account $account): RedirectResponse|JsonResponse
     {
         $account->delete();
 
-        if ($request->session()->get('current_account_id') === $account->id) {
+        if ($request->hasSession() && $request->session()->get('current_account_id') === $account->id) {
             $request->session()->forget('current_account_id');
         }
 
-        return redirect()->route('accounts.index')->with('success', 'Akun dihapus beserta seluruh riwayatnya.');
+        return $this->done('Akun dihapus beserta seluruh riwayatnya.', to: route('accounts.index'));
     }
 
     public function switch(Request $request, Account $account): RedirectResponse

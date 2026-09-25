@@ -1,0 +1,427 @@
+{
+    "month": "2026-09",
+    "gridStart": "2026-08-31",
+    "gridEnd": "2026-10-04",
+    "days": {
+        "2026-09-05": {
+            "pnl": 151,
+            "trades": 2,
+            "wins": 1,
+            "losses": 1
+        },
+        "2026-09-08": {
+            "pnl": 450,
+            "trades": 2,
+            "wins": 2,
+            "losses": 0
+        },
+        "2026-09-01": {
+            "pnl": 521,
+            "trades": 2,
+            "wins": 2,
+            "losses": 0
+        },
+        "2026-09-09": {
+            "pnl": 466,
+            "trades": 2,
+            "wins": 2,
+            "losses": 0
+        },
+        "2026-09-21": {
+            "pnl": 73,
+            "trades": 2,
+            "wins": 1,
+            "losses": 1
+        },
+        "2026-09-11": {
+            "pnl": -355,
+            "trades": 2,
+            "wins": 0,
+            "losses": 2
+        },
+        "2026-09-12": {
+            "pnl": -195,
+            "trades": 1,
+            "wins": 0,
+            "losses": 1
+        },
+        "2026-09-15": {
+            "pnl": -103,
+            "trades": 1,
+            "wins": 0,
+            "losses": 1
+        },
+        "2026-09-16": {
+            "pnl": -91,
+            "trades": 1,
+            "wins": 0,
+            "losses": 1
+        },
+        "2026-09-22": {
+            "pnl": 246,
+            "trades": 1,
+            "wins": 1,
+            "losses": 0
+        },
+        "2026-09-23": {
+            "pnl": 230,
+            "trades": 1,
+            "wins": 1,
+            "losses": 0
+        },
+        "2026-09-25": {
+            "pnl": 194,
+            "trades": 1,
+            "wins": 1,
+            "losses": 0
+        }
+    },
+    "violations": {
+        "2026-09-05": [
+            "RR di bawah minimum"
+        ],
+        "2026-09-11": [
+            "rugi satu trade melewati batas risiko"
+        ],
+        "2026-09-12": [
+            "rugi satu trade melewati batas risiko"
+        ],
+        "2026-09-23": [
+            "entry di luar sesi yang diizinkan"
+        ]
+    },
+    "trades": {
+        "2026-09-25": [
+            {
+                "symbol": "XAUUSD",
+                "direction": "sell",
+                "status": "win",
+                "setup": "Order block",
+                "id": "KnEAz8yeadbx",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.02,
+                "pnl": 194,
+                "rr_realized": 2.2,
+                "opened_at": "2026-09-24T18:24:00+08:00"
+            }
+        ],
+        "2026-09-23": [
+            {
+                "symbol": "USDJPY",
+                "direction": "sell",
+                "status": "win",
+                "setup": "Liquidity sweep",
+                "id": "Kp9QGKoXGRyg",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.14,
+                "pnl": 230,
+                "rr_realized": 1.9,
+                "opened_at": "2026-09-23T13:17:00+08:00"
+            }
+        ],
+        "2026-09-22": [
+            {
+                "symbol": "USDJPY",
+                "direction": "buy",
+                "status": "win",
+                "setup": "Break of structure",
+                "id": "01xgzbkqaO2N",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.2,
+                "pnl": 246,
+                "rr_realized": 1.9,
+                "opened_at": "2026-09-21T18:08:00+08:00"
+            }
+        ],
+        "2026-09-21": [
+            {
+                "symbol": "GBPUSD",
+                "direction": "buy",
+                "status": "loss",
+                "setup": "Break of structure",
+                "id": "mkl6zw04aMbK",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.07,
+                "pnl": -101,
+                "rr_realized": -1,
+                "opened_at": "2026-09-21T19:46:00+08:00"
+            },
+            {
+                "symbol": "USDJPY",
+                "direction": "buy",
+                "status": "win",
+                "setup": null,
+                "id": "Pr0pa1j6GYoV",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.11,
+                "pnl": 174,
+                "rr_realized": 3,
+                "opened_at": "2026-09-21T16:29:00+08:00"
+            }
+        ],
+        "2026-09-16": [
+            {
+                "symbol": "USDJPY",
+                "direction": "sell",
+                "status": "loss",
+                "setup": "Break of structure",
+                "id": "LNxXzmyNzMnA",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.08,
+                "pnl": -91,
+                "rr_realized": -1,
+                "opened_at": "2026-09-15T19:26:00+08:00"
+            }
+        ],
+        "2026-09-15": [
+            {
+                "symbol": "USDJPY",
+                "direction": "buy",
+                "status": "loss",
+                "setup": "Break of structure",
+                "id": "J4XvDyAqDk85",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.16,
+                "pnl": -103,
+                "rr_realized": -1,
+                "opened_at": "2026-09-15T18:33:00+08:00"
+            }
+        ],
+        "2026-09-12": [
+            {
+                "symbol": "USDJPY",
+                "direction": "sell",
+                "status": "loss",
+                "setup": "Liquidity sweep",
+                "id": "ArxlGEr7DqeW",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.14,
+                "pnl": -195,
+                "rr_realized": -1,
+                "opened_at": "2026-09-11T19:05:00+08:00"
+            }
+        ],
+        "2026-09-11": [
+            {
+                "symbol": "USDJPY",
+                "direction": "buy",
+                "status": "loss",
+                "setup": "Order block",
+                "id": "3NodDloeG9mZ",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.12,
+                "pnl": -158,
+                "rr_realized": -1,
+                "opened_at": "2026-09-11T18:11:00+08:00"
+            },
+            {
+                "symbol": "USDJPY",
+                "direction": "sell",
+                "status": "loss",
+                "setup": "Break of structure",
+                "id": "dKkMaQqQamw8",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.08,
+                "pnl": -197,
+                "rr_realized": -1,
+                "opened_at": "2026-09-11T19:33:00+08:00"
+            }
+        ],
+        "2026-09-09": [
+            {
+                "symbol": "USDJPY",
+                "direction": "buy",
+                "status": "win",
+                "setup": "Order block",
+                "id": "MNV3zNqwDZx0",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.1,
+                "pnl": 246,
+                "rr_realized": 2.1,
+                "opened_at": "2026-09-09T18:44:00+08:00"
+            },
+            {
+                "symbol": "GBPUSD",
+                "direction": "buy",
+                "status": "win",
+                "setup": "Break of structure",
+                "id": "R8jMDJ9rG1Ld",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.03,
+                "pnl": 220,
+                "rr_realized": 2.1,
+                "opened_at": "2026-09-09T20:40:00+08:00"
+            }
+        ],
+        "2026-09-08": [
+            {
+                "symbol": "USDJPY",
+                "direction": "sell",
+                "status": "win",
+                "setup": null,
+                "id": "POVMGWjpaEgX",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.06,
+                "pnl": 271,
+                "rr_realized": 1.7,
+                "opened_at": "2026-09-08T16:45:00+08:00"
+            },
+            {
+                "symbol": "EURUSD",
+                "direction": "buy",
+                "status": "win",
+                "setup": "Order block",
+                "id": "ZXj4a577D1Al",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.09,
+                "pnl": 179,
+                "rr_realized": 2.6,
+                "opened_at": "2026-09-08T17:57:00+08:00"
+            }
+        ],
+        "2026-09-05": [
+            {
+                "symbol": "USDJPY",
+                "direction": "buy",
+                "status": "win",
+                "setup": null,
+                "id": "6vbMG0eyDLqZ",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.13,
+                "pnl": 258,
+                "rr_realized": 3.3,
+                "opened_at": "2026-09-04T21:08:00+08:00"
+            },
+            {
+                "symbol": "EURUSD",
+                "direction": "sell",
+                "status": "loss",
+                "setup": null,
+                "id": "gAwRz7yWG1oV",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.17,
+                "pnl": -107,
+                "rr_realized": -1,
+                "opened_at": "2026-09-04T18:48:00+08:00"
+            }
+        ],
+        "2026-09-01": [
+            {
+                "symbol": "GBPUSD",
+                "direction": "sell",
+                "status": "win",
+                "setup": "Liquidity sweep",
+                "id": "yeAlGRqQa4oJ",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.14,
+                "pnl": 274,
+                "rr_realized": 3.5,
+                "opened_at": "2026-09-01T15:16:00+08:00"
+            },
+            {
+                "symbol": "XAUUSD",
+                "direction": "buy",
+                "status": "win",
+                "setup": null,
+                "id": "JLbna2B4apWZ",
+                "group_id": null,
+                "stop_state": "risk",
+                "lot": 0.12,
+                "pnl": 247,
+                "rr_realized": 2.8,
+                "opened_at": "2026-09-01T16:23:00+08:00"
+            }
+        ]
+    },
+    "monthTotal": {
+        "2026-09-05": {
+            "pnl": 151,
+            "trades": 2,
+            "wins": 1,
+            "losses": 1
+        },
+        "2026-09-08": {
+            "pnl": 450,
+            "trades": 2,
+            "wins": 2,
+            "losses": 0
+        },
+        "2026-09-01": {
+            "pnl": 521,
+            "trades": 2,
+            "wins": 2,
+            "losses": 0
+        },
+        "2026-09-09": {
+            "pnl": 466,
+            "trades": 2,
+            "wins": 2,
+            "losses": 0
+        },
+        "2026-09-21": {
+            "pnl": 73,
+            "trades": 2,
+            "wins": 1,
+            "losses": 1
+        },
+        "2026-09-11": {
+            "pnl": -355,
+            "trades": 2,
+            "wins": 0,
+            "losses": 2
+        },
+        "2026-09-12": {
+            "pnl": -195,
+            "trades": 1,
+            "wins": 0,
+            "losses": 1
+        },
+        "2026-09-15": {
+            "pnl": -103,
+            "trades": 1,
+            "wins": 0,
+            "losses": 1
+        },
+        "2026-09-16": {
+            "pnl": -91,
+            "trades": 1,
+            "wins": 0,
+            "losses": 1
+        },
+        "2026-09-22": {
+            "pnl": 246,
+            "trades": 1,
+            "wins": 1,
+            "losses": 0
+        },
+        "2026-09-23": {
+            "pnl": 230,
+            "trades": 1,
+            "wins": 1,
+            "losses": 0
+        },
+        "2026-09-25": {
+            "pnl": 194,
+            "trades": 1,
+            "wins": 1,
+            "losses": 0
+        }
+    }
+}

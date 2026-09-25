@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\AccountStats;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Inertia\Response;
 
 /**
@@ -14,13 +14,13 @@ use Inertia\Response;
  */
 class RuleController extends Controller
 {
-    public function edit(Request $request): Response
+    public function edit(Request $request): Response|JsonResponse
     {
         $account = $request->currentAccount();
         $rule = $account->rule;
         $stats = new AccountStats($account);
 
-        return Inertia::render('Rules', [
+        return $this->page('Rules', [
             'rule' => [
                 'max_daily_loss' => $this->num($rule?->max_daily_loss),
                 'max_daily_loss_pct' => $this->num($rule?->max_daily_loss_pct),
@@ -43,7 +43,7 @@ class RuleController extends Controller
         ]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'max_daily_loss' => ['nullable', 'numeric', 'gt:0'],
@@ -61,7 +61,7 @@ class RuleController extends Controller
 
         $request->currentAccount()->rule()->updateOrCreate([], $data);
 
-        return back()->with('success', 'Aturan tersimpan.');
+        return $this->done('Aturan tersimpan.');
     }
 
     private function num(mixed $value): ?float

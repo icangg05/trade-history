@@ -1,0 +1,15 @@
+{
+    "years": [
+        2026
+    ],
+    "defaultName": "Trader Demo",
+    "accounts": [
+        {
+            "id": 1,
+            "name": "Demo XAUUSD",
+            "broker": "Exness",
+            "currency": "USC",
+            "is_archived": false
+        }
+    ]
+}

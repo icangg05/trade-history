@@ -6,10 +6,10 @@ use App\Http\Requests\TradeRequest;
 use App\Models\Trade;
 use App\Services\Gemini;
 use App\Support\Hashid;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Inertia\Inertia;
 use Inertia\Response;
 
 class TradeController extends Controller
@@ -17,7 +17,7 @@ class TradeController extends Controller
     /** Sebuah trade dihitung di hari ia ditutup; yang masih terbuka di hari ia dibuka. */
     private const TRADE_DATE = 'COALESCE(closed_at, opened_at)';
 
-    public function index(Request $request): Response
+    public function index(Request $request): Response|JsonResponse
     {
         $account = $request->currentAccount();
 
@@ -57,7 +57,7 @@ class TradeController extends Controller
             ->withQueryString()
             ->through(fn (Trade $t) => $this->present($t));
 
-        return Inertia::render('Trades/Index', [
+        return $this->page('Trades/Index', [
             'trades' => $trades,
             'daily' => $this->dailyPnl($query, $trades->items()),
             'filters' => $filters,
@@ -80,15 +80,15 @@ class TradeController extends Controller
         return addcslashes($value, '%_\\');
     }
 
-    public function create(): Response
+    public function create(): Response|JsonResponse
     {
-        return Inertia::render('Trades/Form', [
+        return $this->page('Trades/Form', [
             'trade' => null,
             'aiEnabled' => app(Gemini::class)->configured(),
         ]);
     }
 
-    public function store(TradeRequest $request): RedirectResponse
+    public function store(TradeRequest $request): RedirectResponse|JsonResponse
     {
         $account = $request->currentAccount();
         $data = $request->validated();
@@ -96,20 +96,23 @@ class TradeController extends Controller
 
         $trade = $account->trades()->create($data);
 
-        return redirect()
-            ->route('trades.index')
-            ->with('success', 'Trade '.$trade->symbol.' tersimpan.');
+        return $this->done(
+            'Trade '.$trade->symbol.' tersimpan.',
+            to: route('trades.index'),
+            data: fn () => ['trade' => $this->present($trade->refresh(), full: true)],
+            status: 201,
+        );
     }
 
-    public function edit(Trade $trade): Response
+    public function edit(Trade $trade): Response|JsonResponse
     {
-        return Inertia::render('Trades/Form', [
+        return $this->page('Trades/Form', [
             'trade' => $this->present($trade, full: true),
             'aiEnabled' => app(Gemini::class)->configured(),
         ]);
     }
 
-    public function update(TradeRequest $request, Trade $trade): RedirectResponse
+    public function update(TradeRequest $request, Trade $trade): RedirectResponse|JsonResponse
     {
         $data = $request->validated();
         $data['source'] ??= $trade->source;
@@ -122,14 +125,18 @@ class TradeController extends Controller
 
         $trade->update($data);
 
-        return redirect()->route('trades.index')->with('success', 'Trade diperbarui.');
+        return $this->done(
+            'Trade diperbarui.',
+            to: route('trades.index'),
+            data: fn () => ['trade' => $this->present($trade->refresh(), full: true)],
+        );
     }
 
-    public function destroy(Trade $trade): RedirectResponse
+    public function destroy(Trade $trade): RedirectResponse|JsonResponse
     {
         $trade->delete();
 
-        return back()->with('success', 'Trade dihapus.');
+        return $this->done('Trade dihapus.');
     }
 
     /**
@@ -137,7 +144,7 @@ class TradeController extends Controller
      * baris yang hilang dan tidak ada nama grup: kuncinya id trade paling awal.
      * Setup dan catatan anggotanya digabung, lalu dikelola lewat grup.
      */
-    public function group(Request $request): RedirectResponse
+    public function group(Request $request): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'ids' => ['required', 'array', 'min:2', 'max:50'],
@@ -149,7 +156,7 @@ class TradeController extends Controller
         $trades = $account->trades()->whereIn('id', $ids)->orderByRaw(self::TRADE_DATE)->orderBy('id')->get();
 
         if ($trades->count() !== count($data['ids'])) {
-            return back()->with('error', 'Ada trade yang tidak ditemukan di akun ini.');
+            return $this->failed('Ada trade yang tidak ditemukan di akun ini.');
         }
 
         // Pilihan boleh menyentuh satu grup yang sudah ada — itu cara menambah
@@ -158,11 +165,11 @@ class TradeController extends Controller
         $existing = $trades->pluck('group_id')->filter()->unique();
 
         if ($existing->count() > 1) {
-            return back()->with('error', 'Pilihannya menyentuh dua grup — keluarkan dulu salah satunya.');
+            return $this->failed('Pilihannya menyentuh dua grup — keluarkan dulu salah satunya.');
         }
 
         if (! $this->adjacent($account, $trades->pluck('id')->all())) {
-            return back()->with('error', 'Hanya trade yang berurutan yang bisa digabung jadi satu grup.');
+            return $this->failed('Hanya trade yang berurutan yang bisa digabung jadi satu grup.');
         }
 
         $groupId = (int) ($existing->first() ?? $trades->first()->id);
@@ -185,11 +192,11 @@ class TradeController extends Controller
             $trade->update($data);
         }
 
-        return back()->with('success', $trades->count().' trade jadi satu grup.');
+        return $this->done($trades->count().' trade jadi satu grup.', data: ['group_id' => Hashid::encode($groupId)]);
     }
 
     /** Setup dan catatan grup: satu form untuk semua anggotanya. */
-    public function updateGroup(Request $request, string $group): RedirectResponse
+    public function updateGroup(Request $request, string $group): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'setup' => ['nullable', 'string', 'max:255'],
@@ -201,14 +208,14 @@ class TradeController extends Controller
         $members = $request->currentAccount()->trades()->where('group_id', Hashid::decode($group))->get();
 
         if ($members->isEmpty()) {
-            return back()->with('error', 'Grup tidak ditemukan.');
+            return $this->failed('Grup tidak ditemukan.', 404);
         }
 
         foreach ($members as $trade) {
             $trade->update($data);
         }
 
-        return back()->with('success', 'Grup diperbarui.');
+        return $this->done('Grup diperbarui.');
     }
 
     /**
@@ -218,12 +225,12 @@ class TradeController extends Controller
      *
      * Grup yang tinggal satu anggota bukan grup lagi, jadi sisanya ikut dilepas.
      */
-    public function ungroup(Request $request, Trade $trade): RedirectResponse
+    public function ungroup(Request $request, Trade $trade): RedirectResponse|JsonResponse
     {
         $group = $trade->group_id;
 
         if ($group === null) {
-            return back();
+            return $this->failed('Trade ini tidak berada di grup mana pun.');
         }
 
         $members = $request->currentAccount()
@@ -234,7 +241,7 @@ class TradeController extends Controller
             ->get();
 
         if ($members->first()->id !== $trade->id && $members->last()->id !== $trade->id) {
-            return back()->with('error', 'Hanya trade di ujung grup yang bisa dikeluarkan.');
+            return $this->failed('Hanya trade di ujung grup yang bisa dikeluarkan.');
         }
 
         $this->release($trade);
@@ -245,7 +252,7 @@ class TradeController extends Controller
             $left->each(fn (Trade $t) => $this->release($t));
         }
 
-        return back()->with('success', 'Trade dikeluarkan dari grup.');
+        return $this->done('Trade dikeluarkan dari grup.');
     }
 
     /** Lepas dari grup: setup & catatan sebelum bergrup dipulihkan. */

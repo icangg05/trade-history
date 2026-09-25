@@ -1,0 +1,27 @@
+{
+    "items": [
+        {
+            "id": 1,
+            "name": "Demo XAUUSD",
+            "broker": "Exness",
+            "account_number": null,
+            "currency": "USC",
+            "is_archived": false,
+            "initial_balance": 5000,
+            "started_at": "2026-01-01",
+            "balance": 17653,
+            "net_pnl": 11453,
+            "trades": 192
+        }
+    ],
+    "totals": [
+        {
+            "currency": "USC",
+            "accounts": 1,
+            "balance": 17653,
+            "net_pnl": 11453,
+            "trades": 192
+        }
+    ],
+    "activeId": null
+}

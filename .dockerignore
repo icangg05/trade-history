@@ -9,3 +9,5 @@ storage/framework/sessions/*
 storage/framework/views/*
 .env
 *.md
+# Aplikasi Flutter tidak ikut ke image server — ia klien, dibangun terpisah.
+mobile

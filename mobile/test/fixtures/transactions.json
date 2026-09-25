@@ -1,0 +1,70 @@
+{
+    "filters": {
+        "year": null,
+        "month": null
+    },
+    "years": [
+        2026
+    ],
+    "items": {
+        "current_page": 1,
+        "data": [
+            {
+                "type": "withdrawal",
+                "note": "Ambil profit",
+                "id": "01xgzbYDO2NK",
+                "amount": 800,
+                "rate_idr": null,
+                "occurred_at": "2026-07-25",
+                "has_proof": false
+            },
+            {
+                "type": "deposit",
+                "note": "Top up",
+                "id": "mkl6zwyGMbKN",
+                "amount": 2000,
+                "rate_idr": null,
+                "occurred_at": "2026-04-25",
+                "has_proof": false
+            }
+        ],
+        "first_page_url": "http://localhost:8000/api/v1/accounts/1/transactions?year=all&page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://localhost:8000/api/v1/accounts/1/transactions?year=all&page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "pagination.previous",
+                "page": null,
+                "active": false
+            },
+            {
+                "url": "http://localhost:8000/api/v1/accounts/1/transactions?year=all&page=1",
+                "label": "1",
+                "page": 1,
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "pagination.next",
+                "page": null,
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://localhost:8000/api/v1/accounts/1/transactions",
+        "per_page": 30,
+        "prev_page_url": null,
+        "to": 2,
+        "total": 2
+    },
+    "totals": {
+        "deposit": 2000,
+        "withdrawal": 800,
+        "deposit_idr": 0,
+        "withdrawal_idr": 0,
+        "balance": 17653,
+        "initial_balance": 5000
+    }
+}

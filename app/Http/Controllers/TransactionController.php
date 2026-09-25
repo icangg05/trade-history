@@ -7,13 +7,13 @@ use App\Services\AccountStats;
 use App\Services\Uploads;
 use App\Support\Hashid;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -21,7 +21,7 @@ class TransactionController extends Controller
 {
     private const FOLDER = 'proofs';
 
-    public function index(Request $request): Response
+    public function index(Request $request): Response|JsonResponse
     {
         $account = $request->currentAccount();
         $stats = new AccountStats($account);
@@ -59,7 +59,7 @@ class TransactionController extends Controller
         $newest = max((int) substr($span?->b ?? '', 0, 4), $now->year);
         $oldest = min((int) substr($span?->a ?? '', 0, 4) ?: $now->year, $now->year);
 
-        return Inertia::render('Transactions', [
+        return $this->page('Transactions', [
             'filters' => ['year' => $year, 'month' => $month],
             'years' => range($newest, $oldest),
             'items' => $scoped()
@@ -86,7 +86,7 @@ class TransactionController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $account = $request->currentAccount();
 
@@ -96,9 +96,13 @@ class TransactionController extends Controller
         $data['proof_path'] = Uploads::store($request->file('proof'), $account, self::FOLDER);
         unset($data['proof']);
 
-        $account->transactions()->create($data);
+        $transaction = $account->transactions()->create($data);
 
-        return back()->with('success', $data['type'] === 'deposit' ? 'Deposit dicatat.' : 'Withdrawal dicatat.');
+        return $this->done(
+            $data['type'] === 'deposit' ? 'Deposit dicatat.' : 'Withdrawal dicatat.',
+            data: ['id' => $transaction->getRouteKey()],
+            status: 201,
+        );
     }
 
     /**
@@ -108,7 +112,7 @@ class TransactionController extends Controller
      * Buktinya sendiri opsional di sini: yang lama dipertahankan selama tidak
      * ada berkas baru, jadi memperbaiki angka tidak menuntut unggah ulang.
      */
-    public function update(Request $request, Transaction $transaction): RedirectResponse
+    public function update(Request $request, Transaction $transaction): RedirectResponse|JsonResponse
     {
         $account = $request->currentAccount();
 
@@ -124,7 +128,7 @@ class TransactionController extends Controller
 
         $transaction->update($data);
 
-        return back()->with('success', 'Transaksi diperbarui.');
+        return $this->done('Transaksi diperbarui.');
     }
 
     /**
@@ -207,11 +211,11 @@ class TransactionController extends Controller
     /** Umur alamat pandang, dihitung sejak tautan di dokumen diklik. */
     private const VIEW_SECONDS = 15;
 
-    public function destroy(Transaction $transaction): RedirectResponse
+    public function destroy(Transaction $transaction): RedirectResponse|JsonResponse
     {
         Uploads::delete($transaction->proof_path);
         $transaction->delete();
 
-        return back()->with('success', 'Transaksi dihapus.');
+        return $this->done('Transaksi dihapus.');
     }
 }

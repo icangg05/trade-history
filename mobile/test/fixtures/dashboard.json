@@ -1,0 +1,500 @@
+{
+    "range": "30d",
+    "summary": {
+        "period": {
+            "from": "2026-08-26",
+            "to": "2026-09-25"
+        },
+        "currency": "USC",
+        "initial_balance": 5000,
+        "balance": 17653,
+        "net_flow": 1200,
+        "total_trades": 26,
+        "wins": 17,
+        "losses": 9,
+        "breakeven": 0,
+        "win_rate_pct": 65.4,
+        "net_pnl": 2435,
+        "gross_profit": 3702,
+        "gross_loss": 1267,
+        "profit_factor": 2.92,
+        "expectancy": 93.65,
+        "avg_win": 217.76,
+        "avg_loss": 140.78,
+        "payoff_ratio": 1.55,
+        "largest_win": 274,
+        "largest_loss": -219,
+        "avg_rr_planned": 2.39,
+        "avg_rr_realized": 1.2,
+        "max_drawdown": {
+            "amount": 840,
+            "pct": 6.64
+        },
+        "longest_win_streak": 5,
+        "longest_loss_streak": 5,
+        "by_symbol": {
+            "USDJPY": {
+                "trades": 14,
+                "pnl": 1172,
+                "win_rate_pct": 64.3
+            },
+            "XAUUSD": {
+                "trades": 5,
+                "pnl": 761,
+                "win_rate_pct": 80
+            },
+            "GBPUSD": {
+                "trades": 4,
+                "pnl": 526,
+                "win_rate_pct": 75
+            },
+            "EURUSD": {
+                "trades": 3,
+                "pnl": -24,
+                "win_rate_pct": 33.3
+            }
+        },
+        "by_direction": {
+            "buy": {
+                "trades": 14,
+                "pnl": 1642,
+                "win_rate_pct": 71.4
+            },
+            "sell": {
+                "trades": 12,
+                "pnl": 793,
+                "win_rate_pct": 58.3
+            }
+        },
+        "by_weekday": {
+            "Rabu": {
+                "trades": 6,
+                "pnl": 1092,
+                "win_rate_pct": 83.3
+            },
+            "Jumat": {
+                "trades": 6,
+                "pnl": -211,
+                "win_rate_pct": 33.3
+            },
+            "Selasa": {
+                "trades": 6,
+                "pnl": 1114,
+                "win_rate_pct": 83.3
+            },
+            "Sabtu": {
+                "trades": 4,
+                "pnl": 79,
+                "win_rate_pct": 50
+            },
+            "Kamis": {
+                "trades": 2,
+                "pnl": 288,
+                "win_rate_pct": 100
+            },
+            "Senin": {
+                "trades": 2,
+                "pnl": 73,
+                "win_rate_pct": 50
+            }
+        },
+        "by_hour": {
+            "18:00": {
+                "trades": 9,
+                "pnl": 500,
+                "win_rate_pct": 55.6
+            },
+            "19:00": {
+                "trades": 7,
+                "pnl": -325,
+                "win_rate_pct": 28.6
+            },
+            "16:00": {
+                "trades": 4,
+                "pnl": 825,
+                "win_rate_pct": 100
+            },
+            "20:00": {
+                "trades": 2,
+                "pnl": 494,
+                "win_rate_pct": 100
+            },
+            "15:00": {
+                "trades": 1,
+                "pnl": 274,
+                "win_rate_pct": 100
+            },
+            "21:00": {
+                "trades": 1,
+                "pnl": 258,
+                "win_rate_pct": 100
+            },
+            "17:00": {
+                "trades": 1,
+                "pnl": 179,
+                "win_rate_pct": 100
+            },
+            "13:00": {
+                "trades": 1,
+                "pnl": 230,
+                "win_rate_pct": 100
+            }
+        },
+        "by_setup": {
+            "(tanpa setup)": {
+                "trades": 8,
+                "pnl": 1021,
+                "win_rate_pct": 75
+            },
+            "Liquidity sweep": {
+                "trades": 8,
+                "pnl": 960,
+                "win_rate_pct": 75
+            },
+            "Break of structure": {
+                "trades": 7,
+                "pnl": 204,
+                "win_rate_pct": 42.9
+            },
+            "Order block": {
+                "trades": 5,
+                "pnl": 726,
+                "win_rate_pct": 80
+            }
+        },
+        "violations": {
+            "2026-09-05": [
+                "RR di bawah minimum"
+            ],
+            "2026-08-29": [
+                "RR di bawah minimum"
+            ],
+            "2026-09-11": [
+                "rugi satu trade melewati batas risiko"
+            ],
+            "2026-09-12": [
+                "rugi satu trade melewati batas risiko"
+            ],
+            "2026-09-23": [
+                "entry di luar sesi yang diizinkan"
+            ],
+            "2026-08-28": [
+                "rugi satu trade melewati batas risiko"
+            ]
+        }
+    },
+    "equity": [
+        {
+            "date": "2026-08-26",
+            "balance": 15705,
+            "pnl": 487,
+            "flow": 0
+        },
+        {
+            "date": "2026-08-27",
+            "balance": 15993,
+            "pnl": 288,
+            "flow": 0
+        },
+        {
+            "date": "2026-08-28",
+            "balance": 15943,
+            "pnl": -50,
+            "flow": 0
+        },
+        {
+            "date": "2026-08-29",
+            "balance": 16066,
+            "pnl": 123,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-01",
+            "balance": 16587,
+            "pnl": 521,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-05",
+            "balance": 16738,
+            "pnl": 151,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-08",
+            "balance": 17188,
+            "pnl": 450,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-09",
+            "balance": 17654,
+            "pnl": 466,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-11",
+            "balance": 17299,
+            "pnl": -355,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-12",
+            "balance": 17104,
+            "pnl": -195,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-15",
+            "balance": 17001,
+            "pnl": -103,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-16",
+            "balance": 16910,
+            "pnl": -91,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-21",
+            "balance": 16983,
+            "pnl": 73,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-22",
+            "balance": 17229,
+            "pnl": 246,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-23",
+            "balance": 17459,
+            "pnl": 230,
+            "flow": 0
+        },
+        {
+            "date": "2026-09-25",
+            "balance": 17653,
+            "pnl": 194,
+            "flow": 0
+        }
+    ],
+    "monthly": [
+        {
+            "month": "2025-10",
+            "pnl": 0,
+            "profit": 0,
+            "loss": 0
+        },
+        {
+            "month": "2025-11",
+            "pnl": 0,
+            "profit": 0,
+            "loss": 0
+        },
+        {
+            "month": "2025-12",
+            "pnl": 0,
+            "profit": 0,
+            "loss": 0
+        },
+        {
+            "month": "2026-01",
+            "pnl": 2270,
+            "profit": 3300,
+            "loss": -1030
+        },
+        {
+            "month": "2026-02",
+            "pnl": 2023,
+            "profit": 3280,
+            "loss": -1257
+        },
+        {
+            "month": "2026-03",
+            "pnl": 1110,
+            "profit": 2516,
+            "loss": -1406
+        },
+        {
+            "month": "2026-04",
+            "pnl": 1494,
+            "profit": 2498,
+            "loss": -1004
+        },
+        {
+            "month": "2026-05",
+            "pnl": 750,
+            "profit": 2096,
+            "loss": -1346
+        },
+        {
+            "month": "2026-06",
+            "pnl": -54,
+            "profit": 906,
+            "loss": -960
+        },
+        {
+            "month": "2026-07",
+            "pnl": 1180,
+            "profit": 2727,
+            "loss": -1547
+        },
+        {
+            "month": "2026-08",
+            "pnl": 1093,
+            "profit": 3403,
+            "loss": -2310
+        },
+        {
+            "month": "2026-09",
+            "pnl": 1587,
+            "profit": 2539,
+            "loss": -952
+        }
+    ],
+    "monthlyBase": 5000,
+    "ruleStatus": {
+        "date": "2026-09-25",
+        "pnl": 194,
+        "trades": 1,
+        "opening_balance": 17459,
+        "loss_limit": 523.77,
+        "loss_used": 0,
+        "loss_breached": false,
+        "profit_goal": 349.18,
+        "profit_reached": false,
+        "max_trades": 3,
+        "trades_breached": false,
+        "drawdown_pct": 0.01,
+        "max_drawdown_pct": 10,
+        "drawdown_breached": false,
+        "min_rr": 1.5,
+        "low_rr_trades": 0,
+        "has_rules": true
+    },
+    "recent": [
+        {
+            "symbol": "XAUUSD",
+            "direction": "sell",
+            "status": "win",
+            "setup": "Order block",
+            "id": "KnEAz8yeadbx",
+            "group_id": null,
+            "stop_state": "risk",
+            "pnl": 194,
+            "rr_planned": 2.2,
+            "opened_at": "2026-09-24T18:24:00+08:00"
+        },
+        {
+            "symbol": "USDJPY",
+            "direction": "sell",
+            "status": "win",
+            "setup": "Break of structure, Liquidity sweep",
+            "id": "Kp9QGKoXGRyg",
+            "group_id": "01xgzbkqaO2N",
+            "stop_state": "risk",
+            "pnl": 230,
+            "rr_planned": 1.9,
+            "opened_at": "2026-09-23T13:17:00+08:00"
+        },
+        {
+            "symbol": "USDJPY",
+            "direction": "buy",
+            "status": "win",
+            "setup": "Break of structure, Liquidity sweep",
+            "id": "01xgzbkqaO2N",
+            "group_id": "01xgzbkqaO2N",
+            "stop_state": "risk",
+            "pnl": 246,
+            "rr_planned": 1.9,
+            "opened_at": "2026-09-21T18:08:00+08:00"
+        },
+        {
+            "symbol": "GBPUSD",
+            "direction": "buy",
+            "status": "loss",
+            "setup": "Break of structure",
+            "id": "mkl6zw04aMbK",
+            "group_id": null,
+            "stop_state": "risk",
+            "pnl": -101,
+            "rr_planned": 2.2,
+            "opened_at": "2026-09-21T19:46:00+08:00"
+        },
+        {
+            "symbol": "USDJPY",
+            "direction": "buy",
+            "status": "win",
+            "setup": null,
+            "id": "Pr0pa1j6GYoV",
+            "group_id": null,
+            "stop_state": "risk",
+            "pnl": 174,
+            "rr_planned": 3,
+            "opened_at": "2026-09-21T16:29:00+08:00"
+        },
+        {
+            "symbol": "USDJPY",
+            "direction": "sell",
+            "status": "loss",
+            "setup": "Break of structure",
+            "id": "LNxXzmyNzMnA",
+            "group_id": null,
+            "stop_state": "risk",
+            "pnl": -91,
+            "rr_planned": 1.6,
+            "opened_at": "2026-09-15T19:26:00+08:00"
+        },
+        {
+            "symbol": "USDJPY",
+            "direction": "buy",
+            "status": "loss",
+            "setup": "Break of structure",
+            "id": "J4XvDyAqDk85",
+            "group_id": null,
+            "stop_state": "risk",
+            "pnl": -103,
+            "rr_planned": 2.8,
+            "opened_at": "2026-09-15T18:33:00+08:00"
+        },
+        {
+            "symbol": "USDJPY",
+            "direction": "sell",
+            "status": "loss",
+            "setup": "Liquidity sweep",
+            "id": "ArxlGEr7DqeW",
+            "group_id": null,
+            "stop_state": "risk",
+            "pnl": -195,
+            "rr_planned": 3.1,
+            "opened_at": "2026-09-11T19:05:00+08:00"
+        },
+        {
+            "symbol": "USDJPY",
+            "direction": "buy",
+            "status": "loss",
+            "setup": "Order block",
+            "id": "3NodDloeG9mZ",
+            "group_id": null,
+            "stop_state": "risk",
+            "pnl": -158,
+            "rr_planned": 3.4,
+            "opened_at": "2026-09-11T18:11:00+08:00"
+        },
+        {
+            "symbol": "USDJPY",
+            "direction": "sell",
+            "status": "loss",
+            "setup": "Break of structure",
+            "id": "dKkMaQqQamw8",
+            "group_id": null,
+            "stop_state": "risk",
+            "pnl": -197,
+            "rr_planned": 2.5,
+            "opened_at": "2026-09-11T19:33:00+08:00"
+        }
+    ]
+}
