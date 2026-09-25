@@ -1,11 +1,29 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
 import 'skeleton.dart';
+
+/// Jangkauan cache untuk halaman berisi (dashboard, aturan, analisa) — bukan
+/// daftar tak berujung. Bawaan ListView (250 px) membuang bagian yang keluar
+/// layar lalu membangunnya lagi saat kembali, jadi grafik dan markdown
+/// dibangun ulang di tengah scroll dan frame-nya patah. Dengan jangkauan ini
+/// semuanya tetap hidup; scroll tinggal menggeser lapisan yang sudah jadi.
+const kWholePageCache = ScrollCacheExtent.pixels(5000);
+
+/// Kaca tembus pandang seperti `.glass-card` di web, supaya cahaya latar
+/// (`Backdrop`) ikut terlihat. Tanpa blur: di belakangnya hanya latar yang
+/// sudah halus, jadi blur hanya memakan GPU tanpa beda yang terlihat.
+final kPanelColor = AppColors.glass.withValues(alpha: .6);
+
+ShapeBorder panelShape([Color? border]) => RoundedRectangleBorder(
+  borderRadius: BorderRadius.circular(kRadius),
+  side: BorderSide(color: border ?? AppColors.border),
+);
 
 /// Kartu permukaan standar — padanan `.glass-card` di web.
 class Panel extends StatelessWidget {
@@ -27,18 +45,11 @@ class Panel extends StatelessWidget {
   // Material, bukan DecoratedBox: ListTile & InkWell di dalam kartu melukis
   // efek sentuhnya di Material terdekat — di atas DecoratedBox berwarna,
   // efek itu tertutup.
-  //
-  // Kaca tembus pandang seperti `.glass-card` di web, supaya cahaya latar
-  // (`Backdrop`) ikut terlihat. Tanpa blur: di belakangnya hanya latar yang
-  // sudah halus, jadi blur hanya memakan GPU tanpa beda yang terlihat.
   @override
   Widget build(BuildContext context) => Material(
-    color: AppColors.glass.withValues(alpha: .6),
+    color: kPanelColor,
     clipBehavior: Clip.antiAlias,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(kRadius),
-      side: BorderSide(color: borderColor ?? AppColors.border),
-    ),
+    shape: panelShape(borderColor),
     child: Padding(
       padding: padding,
       child: title == null && trailing == null

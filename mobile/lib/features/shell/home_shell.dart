@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme.dart';
+import '../../widgets/backdrop.dart';
+
 /// Tab bar bawah, sama urutannya dengan tab bar mobile di web: Dashboard,
 /// Kalender, Trade di tengah, Dana, lalu Lainnya (aturan, analisa, laporan…).
 class HomeShell extends StatelessWidget {
@@ -8,37 +11,151 @@ class HomeShell extends StatelessWidget {
 
   final StatefulNavigationShell shell;
 
+  static const _tabs = [
+    (Icons.space_dashboard_outlined, Icons.space_dashboard, 'Dashboard'),
+    (Icons.calendar_month_outlined, Icons.calendar_month, 'Kalender'),
+    (Icons.format_list_numbered, Icons.format_list_numbered_rtl, 'Trade'),
+    (
+      Icons.account_balance_wallet_outlined,
+      Icons.account_balance_wallet,
+      'Dana',
+    ),
+    (Icons.more_horiz, Icons.more_horiz, 'Lainnya'),
+  ];
+
+  // Latar di sini juga: nav mengambang, jadi celah di sekelilingnya harus
+  // menampilkan latar yang sama dengan halaman di atasnya.
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: shell,
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: shell.currentIndex,
-      // Mengetuk tab yang sedang aktif kembali ke layar teratasnya.
-      onDestinationSelected: (index) =>
-          shell.goBranch(index, initialLocation: index == shell.currentIndex),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.space_dashboard_outlined),
-          selectedIcon: Icon(Icons.space_dashboard),
-          label: 'Dashboard',
+  Widget build(BuildContext context) => Backdrop(
+    child: Scaffold(
+      body: shell,
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+        // Pulau mengambang seperti tab bar web. Tanpa blur: yang ada di
+        // belakangnya hanya latar, bukan isi halaman yang sedang di-scroll.
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            color: AppColors.popover.withValues(alpha: .92),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+              side: BorderSide(
+                color: AppColors.foreground.withValues(alpha: .07),
+              ),
+            ),
+            shadows: const [
+              BoxShadow(
+                color: Color(0x66000000),
+                blurRadius: 24,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Row(
+              children: [
+                for (final (index, (icon, active, label)) in _tabs.indexed)
+                  Expanded(
+                    child: _Tab(
+                      icon: icon,
+                      activeIcon: active,
+                      label: label,
+                      selected: index == shell.currentIndex,
+                      // Mengetuk tab yang sedang aktif kembali ke layar
+                      // teratasnya.
+                      onTap: () => shell.goBranch(
+                        index,
+                        initialLocation: index == shell.currentIndex,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
-        NavigationDestination(
-          icon: Icon(Icons.calendar_month_outlined),
-          selectedIcon: Icon(Icons.calendar_month),
-          label: 'Kalender',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.format_list_numbered),
-          selectedIcon: Icon(Icons.format_list_numbered_rtl),
-          label: 'Trade',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.account_balance_wallet_outlined),
-          selectedIcon: Icon(Icons.account_balance_wallet),
-          label: 'Dana',
-        ),
-        NavigationDestination(icon: Icon(Icons.more_horiz), label: 'Lainnya'),
-      ],
+      ),
     ),
   );
+}
+
+/// Satu tab: ikon di kotak membulat yang menyala emas saat aktif — sama
+/// dengan `bg-gold/15 ring-1 ring-gold/25` di web. Hanya perubahan pilihan
+/// yang dianimasikan, dan tidak sama sekali kalau animasi dimatikan.
+class _Tab extends StatelessWidget {
+  const _Tab({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.gold : AppColors.mutedForeground;
+    final duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 180);
+
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: duration,
+                curve: Curves.easeOutCubic,
+                width: 44,
+                height: 34,
+                decoration: ShapeDecoration(
+                  color: selected
+                      ? AppColors.gold.withValues(alpha: .15)
+                      : Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    side: BorderSide(
+                      color: selected
+                          ? AppColors.gold.withValues(alpha: .25)
+                          : Colors.transparent,
+                    ),
+                  ),
+                ),
+                child: Icon(
+                  selected ? activeIcon : icon,
+                  size: 21,
+                  color: color,
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: duration,
+                style: TextStyle(
+                  fontFamily: kSans,
+                  fontSize: 10.5,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  color: color,
+                ),
+                child: Text(label, maxLines: 1),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -92,6 +92,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Grouping 1 trade'), findsOneWidget);
 
+    await tester.ensureVisible(row(next));
+    await tester.pumpAndSettle();
     await tester.tap(row(next));
     await tester.pumpAndSettle();
 

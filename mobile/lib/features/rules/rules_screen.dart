@@ -243,6 +243,7 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
     final drawdown = _estimate(_drawdown.text);
 
     return ListView(
+      scrollCacheExtent: kWholePageCache,
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
       children: [
         const Caption(

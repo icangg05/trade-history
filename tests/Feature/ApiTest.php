@@ -240,6 +240,36 @@ class ApiTest extends TestCase
         $this->get("{$url}/{$id}/proof", $headers)->assertOk();
     }
 
+    public function test_gambar_unggahan_dinormalkan_jadi_jpeg_berukuran_wajar(): void
+    {
+        Storage::fake('local');
+
+        $account = $this->account();
+        $headers = [...$this->token($account->user), 'Accept' => 'application/json'];
+        $url = "/api/v1/accounts/{$account->id}/transactions";
+        $fields = ['type' => 'deposit', 'amount' => 500, 'rate_idr' => 16000, 'occurred_at' => '2026-02-01'];
+
+        $this->post($url, [...$fields, 'proof' => UploadedFile::fake()->image('mutasi.png', 3000, 1500)], $headers)
+            ->assertCreated();
+
+        $proof = Storage::disk('local')->get($account->transactions()->sole()->proof_path);
+        [$width, $height, $type] = getimagesizefromstring($proof);
+        $this->assertSame([2000, 1000, IMAGETYPE_JPEG], [$width, $height, $type]);
+
+        $this->post('/api/v1/profile/avatar', ['avatar' => UploadedFile::fake()->image('a.png', 1000, 800)], $headers)
+            ->assertOk();
+        [$width, $height] = getimagesizefromstring(Storage::disk('local')->get($account->user->fresh()->avatar_path));
+        $this->assertSame([512, 410], [$width, $height]);
+
+        // Header PNG yang mengaku 10000 × 10000: ditolak dari dimensinya saja,
+        // sebelum GD sempat membongkarnya ke memori.
+        $giant = "\x89PNG\r\n\x1a\n".pack('N', 13).'IHDR'.pack('NN', 10000, 10000)."\x08\x02\x00\x00\x00".pack('N', 0);
+
+        $this->post($url, [...$fields, 'proof' => UploadedFile::fake()->createWithContent('raksasa.png', $giant)], $headers)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['proof' => 'megapiksel']);
+    }
+
     public function test_foto_profil_diganti_dan_dihapus_lewat_api(): void
     {
         Storage::fake('local');

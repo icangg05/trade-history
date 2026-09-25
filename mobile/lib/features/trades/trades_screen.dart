@@ -87,6 +87,11 @@ class TradesController extends AsyncNotifier<TradeList> {
     );
   }
 
+  /// Jeda sebelum halaman berikutnya ditempel: kerangka baris sempat terlihat
+  /// di ujung daftar, dan baris baru tidak menyerbu masuk di tengah gerakan
+  /// scroll. Permintaannya tetap langsung dikirim — jedanya berjalan bersamaan.
+  static const loadPause = Duration(milliseconds: 600);
+
   /// Halaman berikutnya ditempel di bawah — gulir tanpa tombol halaman.
   Future<void> loadMore() async {
     final current = state.value;
@@ -96,9 +101,10 @@ class TradesController extends AsyncNotifier<TradeList> {
     state = AsyncData(current.loading(true));
 
     try {
-      final next = await ref
-          .read(journalProvider)
-          .trades(query.$1, query.$2, current.page + 1);
+      final [next as TradePage, _] = await Future.wait<Object?>([
+        ref.read(journalProvider).trades(query.$1, query.$2, current.page + 1),
+        Future<void>.delayed(loadPause),
+      ]);
 
       if (ref.mounted) state = AsyncData(current.append(next));
     } on ApiException {
@@ -132,8 +138,10 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
   void initState() {
     super.initState();
 
+    // Dekat ujung, bukan jauh sebelumnya: kerangka pemuatnya memang untuk
+    // dilihat (lihat `TradesController.loadPause`).
     _scroll.addListener(() {
-      if (_query != null && _scroll.position.extentAfter < 600) {
+      if (_query != null && _scroll.position.extentAfter < 300) {
         ref.read(tradesProvider(_query!).notifier).loadMore();
       }
     });
@@ -225,7 +233,10 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
 
   Widget _list(TradeList list, AccountBrief account) {
     final rows = list.items;
-    final entries = <Widget>[];
+    // Pembangun, bukan widget jadi: baris (dan hitungan mode pilihnya) baru
+    // dibuat saat mendekati layar. Riwayat ratusan trade tidak lagi dibangun
+    // ulang seluruhnya setiap kali halaman berikutnya ditempel.
+    final entries = <Widget Function()>[];
 
     for (var i = 0; i < rows.length; i++) {
       final trade = rows[i];
@@ -234,21 +245,21 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
       // dan P/L-nya datang dari server supaya utuh walau terpotong halaman.
       if (i == 0 || rows[i - 1].dayKey != trade.dayKey) {
         entries.add(
-          _DayHeader(
+          () => _DayHeader(
             day: trade.day,
             pnl: list.daily[trade.dayKey],
             currency: account.currency,
           ),
         );
       } else if (groupGap(rows, i)) {
-        entries.add(const SizedBox(height: 6));
+        entries.add(() => const SizedBox(height: 6));
       }
 
-      final picked = _picked.contains(trade.id);
-      final pickable = _pickable(rows, trade);
+      entries.add(() {
+        final picked = _picked.contains(trade.id);
+        final pickable = _pickable(rows, trade);
 
-      entries.add(
-        DecoratedBox(
+        return DecoratedBox(
           decoration: groupFrame(rows, i) ?? const BoxDecoration(),
           child: TradeRow(
             trade: trade,
@@ -276,11 +287,11 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
                     rows: rows,
                   ),
           ),
-        ),
-      );
+        );
+      });
 
       if (rowDivider(rows, i) && rows[i + 1].dayKey == trade.dayKey) {
-        entries.add(const Divider(indent: 12, endIndent: 12));
+        entries.add(() => const Divider(indent: 12, endIndent: 12));
       }
     }
 
@@ -314,52 +325,74 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
             ),
           ),
         Expanded(
-          child: ListView(
+          child: CustomScrollView(
             controller: _scroll,
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(bottom: 96),
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Caption(
-                  '${list.total} trade tercatat'
-                  '${_filters.active > 0 ? ' · ${_filters.active} filter aktif' : ''}',
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Caption(
+                    '${list.total} trade tercatat'
+                    '${_filters.active > 0 ? ' · ${_filters.active} filter aktif' : ''}',
+                  ),
                 ),
               ),
               if (rows.isEmpty)
-                EmptyState(
-                  message: _filters.active > 0
-                      ? 'Tidak ada trade yang cocok.'
-                      : 'Belum ada trade.',
-                  action: _filters.active > 0
-                      ? TextButton(
-                          onPressed: () =>
-                              setState(() => _filters = noTradeFilters),
-                          child: const Text('Bersihkan filter'),
-                        )
-                      : null,
+                SliverToBoxAdapter(
+                  child: EmptyState(
+                    message: _filters.active > 0
+                        ? 'Tidak ada trade yang cocok.'
+                        : 'Belum ada trade.',
+                    action: _filters.active > 0
+                        ? TextButton(
+                            onPressed: () =>
+                                setState(() => _filters = noTradeFilters),
+                            child: const Text('Bersihkan filter'),
+                          )
+                        : null,
+                  ),
                 )
               else
-                Padding(
+                SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Panel(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Column(children: entries),
+                  // Satu kartu untuk seluruh riwayat, dilukis di belakang
+                  // daftar yang dibangun seperlunya. Jarak 8 px di atas dan
+                  // bawah menjauhkan pita tanggal dari sudut kartu yang
+                  // membulat — kartu ini tidak memotong isinya.
+                  sliver: DecoratedSliver(
+                    decoration: ShapeDecoration(
+                      color: kPanelColor,
+                      shape: panelShape(),
+                    ),
+                    sliver: SliverPadding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      sliver: SliverList.builder(
+                        itemCount: entries.length,
+                        itemBuilder: (_, index) => entries[index](),
+                      ),
+                    ),
                   ),
                 ),
               if (list.loadingMore)
-                const Padding(
+                const SliverPadding(
                   padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
-                  child: Shimmer(child: SkeletonRow()),
-                ),
-              if (rows.isNotEmpty && !list.hasMore)
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: Caption(
-                    'Tanda BE berarti stop loss sudah dipindah ke harga entry, sedangkan SL+ berarti sudah '
-                    'melewatinya. Risikonya sudah dilepas, jadi nilai R tidak lagi bisa dihitung.',
+                  sliver: SliverToBoxAdapter(
+                    child: Shimmer(child: SkeletonRow()),
                   ),
                 ),
+              if (rows.isNotEmpty && !list.hasMore)
+                const SliverPadding(
+                  padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: Caption(
+                      'Tanda BE berarti stop loss sudah dipindah ke harga entry, sedangkan SL+ berarti sudah '
+                      'melewatinya. Risikonya sudah dilepas, jadi nilai R tidak lagi bisa dihitung.',
+                    ),
+                  ),
+                ),
+              // Ruang untuk tombol "Trade" yang melayang.
+              const SliverToBoxAdapter(child: SizedBox(height: 96)),
             ],
           ),
         ),

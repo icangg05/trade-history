@@ -34,13 +34,10 @@ class JournalApi {
   Future<String> deleteProfile(String password) async =>
       _message(await client.delete('profile', {'password': password}));
 
-  /// Foto sudah dikecilkan di ponsel (lihat `compressImage`).
-  Future<String> uploadAvatar(Uint8List jpeg) async => _message(
+  Future<String> uploadAvatar(XFile photo) async => _message(
     await client.post(
       'profile/avatar',
-      FormData.fromMap({
-        'avatar': MultipartFile.fromBytes(jpeg, filename: 'avatar.jpg'),
-      }),
+      FormData.fromMap({'avatar': await _file(photo)}),
     ),
   );
 

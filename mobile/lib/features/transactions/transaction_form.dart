@@ -6,13 +6,11 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/api_client.dart';
 import '../../core/format.dart';
-import '../../core/images.dart';
 import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../models/account.dart';
 import '../../models/journal.dart';
 import '../../widgets/common.dart';
-import '../../widgets/skeleton.dart';
 import 'transactions_screen.dart';
 
 /// Catat atau perbaiki setoran/penarikan. Bukti transfer wajib saat dicatat —
@@ -52,10 +50,9 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   late final _note = TextEditingController(text: widget.editing?.note ?? '');
   late DateTime _date = widget.editing?.occurredAt ?? DateTime.now();
 
-  /// Bukti yang sudah dikecilkan — yang tampil di pratinjau sama persis
-  /// dengan yang dikirim.
+  /// Bukti yang sudah dikecilkan image_picker — yang tampil di pratinjau sama
+  /// persis dengan yang dikirim.
   Uint8List? _proof;
-  bool _compressing = false;
   Map<String, String> _errors = {};
   bool _busy = false;
 
@@ -80,20 +77,20 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   }
 
   Future<void> _pickProof(ImageSource source) async {
-    final file = await ImagePicker().pickImage(source: source);
+    // Hanya penghemat kuota: server tetap menormalkan ke JPEG 2000 px.
+    // Jangan lebih kecil — bukti ini masuk laporan pajak dan harus terbaca.
+    final file = await ImagePicker().pickImage(
+      source: source,
+      maxWidth: 2000,
+      maxHeight: 2000,
+      imageQuality: 85,
+    );
 
     if (file == null) return;
 
-    setState(() => _compressing = true);
+    final bytes = await file.readAsBytes();
 
-    final jpeg = await compressImage(file);
-
-    if (mounted) {
-      setState(() {
-        _proof = jpeg;
-        _compressing = false;
-      });
-    }
+    if (mounted) setState(() => _proof = bytes);
   }
 
   Future<void> _submit() async {
@@ -231,9 +228,7 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                     : AppColors.destructive,
               ),
             ),
-            child: _compressing
-                ? const Shimmer(child: Bone(width: 150, height: 150))
-                : _proof != null
+            child: _proof != null
                 ? Image.memory(_proof!, height: 180, fit: BoxFit.contain)
                 : (editing?.hasProof ?? false)
                 ? ProofThumbnail(
@@ -301,9 +296,7 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
               BusyButton(
                 busy: _busy,
                 label: 'Simpan',
-                onPressed: _compressing || (editing == null && _proof == null)
-                    ? null
-                    : _submit,
+                onPressed: editing == null && _proof == null ? null : _submit,
               ),
             ],
           ),

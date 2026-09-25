@@ -79,6 +79,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
     final currency = summary.currency;
 
     return ListView(
+      scrollCacheExtent: kWholePageCache,
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
       children: [
         const Caption(

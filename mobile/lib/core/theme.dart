@@ -212,29 +212,6 @@ ThemeData buildTheme() {
       padding: const EdgeInsets.symmetric(horizontal: 6),
       labelPadding: const EdgeInsets.symmetric(horizontal: 2),
     ),
-    navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: AppColors.card,
-      surfaceTintColor: Colors.transparent,
-      indicatorColor: AppColors.gold.withValues(alpha: .15),
-      height: 68,
-      labelTextStyle: WidgetStateProperty.resolveWith(
-        (states) => TextStyle(
-          fontFamily: kSans,
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: states.contains(WidgetState.selected)
-              ? AppColors.gold
-              : AppColors.mutedForeground,
-        ),
-      ),
-      iconTheme: WidgetStateProperty.resolveWith(
-        (states) => IconThemeData(
-          color: states.contains(WidgetState.selected)
-              ? AppColors.gold
-              : AppColors.mutedForeground,
-        ),
-      ),
-    ),
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: AppColors.popover,
       surfaceTintColor: Colors.transparent,

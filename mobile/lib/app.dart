@@ -56,6 +56,33 @@ GoRouterPageBuilder _page(Widget Function(GoRouterState state) child) =>
       child: Backdrop(child: child(state)),
     );
 
+/// Form trade naik dari bawah seperti lembar isian, bukan bergeser seperti
+/// halaman biasa: tandanya "isi lalu tutup", dan tombol kiri atasnya jadi ✕.
+/// Pengguna yang mematikan animasi di ponsel langsung melihat formnya.
+GoRouterPageBuilder _formPage(Widget Function(GoRouterState state) child) =>
+    (context, state) => CustomTransitionPage<void>(
+      key: state.pageKey,
+      name: state.name,
+      fullscreenDialog: true,
+      transitionDuration: const Duration(milliseconds: 340),
+      reverseTransitionDuration: const Duration(milliseconds: 260),
+      child: Backdrop(child: child(state)),
+      transitionsBuilder: (context, animation, _, page) =>
+          MediaQuery.disableAnimationsOf(context)
+          ? page
+          : SlideTransition(
+              position: Tween(begin: const Offset(0, 1), end: Offset.zero)
+                  .animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                      reverseCurve: Curves.easeInCubic,
+                    ),
+                  ),
+              child: page,
+            ),
+    );
+
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier(0);
 
@@ -162,12 +189,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/trade/new',
         parentNavigatorKey: _rootKey,
-        pageBuilder: _page((_) => const TradeFormScreen()),
+        pageBuilder: _formPage((_) => const TradeFormScreen()),
       ),
       GoRoute(
         path: '/trade/:id',
         parentNavigatorKey: _rootKey,
-        pageBuilder: _page(
+        pageBuilder: _formPage(
           (state) => TradeFormScreen(tradeId: state.pathParameters['id']),
         ),
       ),

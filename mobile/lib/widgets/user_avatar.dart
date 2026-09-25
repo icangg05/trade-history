@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../core/api_client.dart';
-import '../core/images.dart';
 import '../core/theme.dart';
 import '../data/journal_api.dart';
 import '../data/session.dart';
+import 'avatar_cropper.dart';
 import 'common.dart';
 
 /// Foto profil bulat; inisial nama selama belum ada foto atau fotonya gagal dimuat.
@@ -140,20 +140,35 @@ Future<void> showAvatarSheet(BuildContext context) =>
       ),
     );
 
-/// Foto kamera bisa 3–5 MB; sebagai foto profil cukup sisi pendek 512 px.
+/// Pilih → potong → unggah. Fotonya diambil cukup besar supaya masih tajam
+/// saat di-zoom di layar potong; yang diunggah hanya hasil potongannya
+/// (512 px), dan server tetap menormalkannya lagi.
 Future<void> _change(BuildContext context, ImageSource source) async {
   final file = await ImagePicker().pickImage(
     source: source,
+    maxWidth: 1600,
+    maxHeight: 1600,
+    imageQuality: 90,
     preferredCameraDevice: CameraDevice.front,
   );
 
-  if (file == null || !context.mounted) return;
+  if (file == null) return;
+
+  final bytes = await file.readAsBytes();
+
+  if (!context.mounted) return;
+
+  final cropped = await cropAvatar(context, bytes);
+
+  if (cropped == null || !context.mounted) return;
 
   showMessage(context, 'Mengunggah foto…');
-
-  final jpeg = await compressImage(file, side: 512, quality: 82);
-
-  if (context.mounted) await _save(context, (api) => api.uploadAvatar(jpeg));
+  await _save(
+    context,
+    (api) => api.uploadAvatar(
+      XFile.fromData(cropped, name: 'avatar.png', mimeType: 'image/png'),
+    ),
+  );
 }
 
 /// Kontainer, bukan `ref` milik widget: unggahan tetap selesai walau layar

@@ -4,6 +4,11 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import '../core/theme.dart';
 
 /// Markdown untuk catatan aturan dan jawaban AI, bergaya `.rte-content` web.
+///
+/// Bisa dipilih lewat satu `SelectionArea` untuk seluruh teks, bukan
+/// `selectable: true` milik paket markdown: yang itu menjadikan setiap
+/// paragraf `SelectableText` (lengkap dengan kursor dan pengenal gestur
+/// sendiri), dan analisa AI yang panjang jadi berat dibangun saat di-scroll.
 class MarkdownView extends StatelessWidget {
   const MarkdownView(this.source, {super.key, this.selectable = true});
 
@@ -18,9 +23,8 @@ class MarkdownView extends StatelessWidget {
       color: AppColors.foreground,
     );
 
-    return MarkdownBody(
+    final markdown = MarkdownBody(
       data: source,
-      selectable: selectable,
       styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
         p: body,
         listBullet: body,
@@ -70,5 +74,7 @@ class MarkdownView extends StatelessWidget {
         blockSpacing: 10,
       ),
     );
+
+    return selectable ? SelectionArea(child: markdown) : markdown;
   }
 }

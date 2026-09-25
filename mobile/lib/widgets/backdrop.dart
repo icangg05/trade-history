@@ -16,19 +16,81 @@ class Backdrop extends StatelessWidget {
 
   final Widget child;
 
+  // Selalu seukuran layar dan ditempel dari pojok kiri atas, berapa pun
+  // tinggi halamannya: halaman tab (yang berhenti di atas nav bawah) dan
+  // kerangka tab di belakang nav jadi menampilkan latar yang sama, menyambung
+  // tanpa garis. Stack memotong sisanya.
   @override
   Widget build(BuildContext context) => Stack(
     children: [
-      // Lapisan sendiri: animasi di halaman (kilau skeleton, dsb.) tidak
-      // ikut melukis ulang latarnya.
-      const Positioned.fill(
+      Positioned.fill(
         child: RepaintBoundary(
-          child: CustomPaint(painter: _Ornaments(), isComplex: true),
+          child: CustomPaint(
+            painter: _Cached(
+              MediaQuery.sizeOf(context),
+              MediaQuery.devicePixelRatioOf(context),
+            ),
+          ),
         ),
       ),
       child,
     ],
   );
+}
+
+/// Ornamennya dilukis sekali ke tekstur GPU, lalu tiap frame cukup
+/// menempelkan tekstur itu. Impeller (renderer bawaan Android & iOS) tidak
+/// menyimpan cache raster, jadi tanpa ini lima gradien selebar layar plus
+/// lapisan kisi digambar ulang di setiap frame scroll, di setiap halaman.
+class _Cached extends CustomPainter {
+  const _Cached(this.screen, this.ratio);
+
+  final Size screen;
+  final double ratio;
+
+  /// Satu untuk seluruh aplikasi: semua halaman memakai ukuran layar.
+  /// Tekstur lama dilepas pemungut sampah, bukan `dispose()` — halaman lain
+  /// yang ukurannya belum berganti (saat rotasi) mungkin masih memakainya.
+  static ({Size size, double ratio, ui.Image image})? _cache;
+
+  static ui.Image _imageFor(Size size, double ratio) {
+    final cached = _cache;
+
+    if (cached != null && cached.size == size && cached.ratio == ratio) {
+      return cached.image;
+    }
+
+    final recorder = ui.PictureRecorder();
+    const _Ornaments().paint(Canvas(recorder)..scale(ratio), size);
+    final picture = recorder.endRecording();
+    final image = picture.toImageSync(
+      (size.width * ratio).ceil(),
+      (size.height * ratio).ceil(),
+    );
+    picture.dispose();
+
+    _cache = (size: size, ratio: ratio, image: image);
+
+    return image;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (screen.isEmpty) return;
+
+    final image = _imageFor(screen, ratio);
+
+    canvas.drawImageRect(
+      image,
+      Offset.zero & Size(image.width.toDouble(), image.height.toDouble()),
+      Offset.zero & screen,
+      Paint(),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_Cached oldDelegate) =>
+      oldDelegate.screen != screen || oldDelegate.ratio != ratio;
 }
 
 class _Ornaments extends CustomPainter {

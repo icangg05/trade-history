@@ -21,6 +21,13 @@ class TransactionController extends Controller
 {
     private const FOLDER = 'proofs';
 
+    /**
+     * Bukti transfer masuk laporan pajak, jadi tulisannya harus tetap terbaca:
+     * sisi terpanjang 2000 px dengan kualitas JPEG 85 masih tajam untuk
+     * screenshot mutasi rekening maupun foto struk.
+     */
+    private const PROOF_SIDE = 2000;
+
     public function index(Request $request): Response|JsonResponse
     {
         $account = $request->currentAccount();
@@ -96,7 +103,7 @@ class TransactionController extends Controller
         // Bukti transfer wajib saat dicatat — ini catatan uang sungguhan.
         $data = $request->validate($this->rules($account, ['required', 'image', 'max:8192']));
 
-        $data['proof_path'] = Uploads::store($request->file('proof'), $account, self::FOLDER);
+        $data['proof_path'] = Uploads::image($request->file('proof'), self::FOLDER.'/'.$account->id, self::PROOF_SIDE);
         unset($data['proof']);
 
         $transaction = $account->transactions()->create($data);
@@ -123,7 +130,7 @@ class TransactionController extends Controller
 
         if ($request->hasFile('proof')) {
             $lama = $transaction->proof_path;
-            $data['proof_path'] = Uploads::store($request->file('proof'), $account, self::FOLDER);
+            $data['proof_path'] = Uploads::image($request->file('proof'), self::FOLDER.'/'.$account->id, self::PROOF_SIDE);
             Uploads::delete($lama);
         }
 
@@ -150,7 +157,7 @@ class TransactionController extends Controller
             // direkonstruksi belakangan, jadi harus ikut tercatat saat itu juga.
             'rate_idr' => [Rule::requiredIf($account->currency !== 'IDR'), 'nullable', 'numeric', 'gt:0'],
             'occurred_at' => ['required', 'date'],
-            'proof' => $proof,
+            'proof' => [...$proof, Uploads::readable()],
             'note' => ['nullable', 'string', 'max:255'],
         ];
     }

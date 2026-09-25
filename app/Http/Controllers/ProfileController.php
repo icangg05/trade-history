@@ -79,18 +79,18 @@ class ProfileController extends Controller
     }
 
     /**
-     * Ganti foto profil. Aplikasi sudah mengecilkannya sebelum dikirim; batas
-     * 2 MB di sini hanya penjaga kalau ada yang mengirim berkas mentah.
+     * Ganti foto profil. Disimpan sebagai JPEG dengan sisi terpanjang 512 px —
+     * foto profil hanya tampil sebagai lingkaran kecil.
      */
     public function updateAvatar(Request $request): JsonResponse
     {
-        $request->validate(['avatar' => ['required', 'image', 'max:2048']]);
+        $request->validate(['avatar' => ['required', 'image', 'max:8192', Uploads::readable()]]);
 
         $user = $request->user();
         $old = $user->avatar_path;
 
         $user->forceFill([
-            'avatar_path' => $request->file('avatar')->store('avatars/'.$user->id, Uploads::DISK),
+            'avatar_path' => Uploads::image($request->file('avatar'), 'avatars/'.$user->id, 512),
         ])->save();
 
         Uploads::delete($old);

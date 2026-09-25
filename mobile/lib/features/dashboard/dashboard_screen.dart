@@ -66,6 +66,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final currency = summary.currency;
 
     return ListView(
+      scrollCacheExtent: kWholePageCache,
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
         Caption('${longDate(summary.from)} — ${longDate(summary.to)}'),
