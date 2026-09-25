@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
 use App\Models\Transaction;
 use App\Services\AccountStats;
 use App\Services\Uploads;
@@ -14,6 +15,7 @@ use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -27,6 +29,13 @@ class TransactionController extends Controller
      * screenshot mutasi rekening maupun foto struk.
      */
     private const PROOF_SIDE = 2000;
+
+    /**
+     * Foto dari galeri ponsel dikirim apa adanya (lihat transaction_form.dart),
+     * jadi batasnya cukup untuk foto kamera 50 MP. Tetap di bawah
+     * upload_max_filesize (16M) di docker/php.ini.
+     */
+    private const PROOF_MAX_KB = 15 * 1024;
 
     public function index(Request $request): Response|JsonResponse
     {
@@ -101,7 +110,8 @@ class TransactionController extends Controller
         $account = $request->currentAccount();
 
         // Bukti transfer wajib saat dicatat — ini catatan uang sungguhan.
-        $data = $request->validate($this->rules($account, ['required', 'image', 'max:8192']));
+        $data = $request->validate($this->rules($account, ['required', 'image', 'max:'.self::PROOF_MAX_KB]));
+        $this->ensureAffordable($account, $data);
 
         $data['proof_path'] = Uploads::image($request->file('proof'), self::FOLDER.'/'.$account->id, self::PROOF_SIDE);
         unset($data['proof']);
@@ -126,7 +136,8 @@ class TransactionController extends Controller
     {
         $account = $request->currentAccount();
 
-        $data = $request->validate($this->rules($account, ['nullable', 'image', 'max:8192']));
+        $data = $request->validate($this->rules($account, ['nullable', 'image', 'max:'.self::PROOF_MAX_KB]));
+        $this->ensureAffordable($account, $data, $transaction);
 
         if ($request->hasFile('proof')) {
             $lama = $transaction->proof_path;
@@ -139,6 +150,31 @@ class TransactionController extends Controller
         $transaction->update($data);
 
         return $this->done('Transaksi diperbarui.');
+    }
+
+    /**
+     * Withdrawal tidak boleh melebihi saldo akun sekarang — uang yang tidak
+     * ada tidak bisa ditarik. Saat memperbaiki, baris yang sedang diubah
+     * dikeluarkan dulu dari hitungan: withdrawal 500 yang diubah jadi 600
+     * hanya butuh tambahan 100.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function ensureAffordable(Account $account, array $data, ?Transaction $editing = null): void
+    {
+        if ($data['type'] !== 'withdrawal') {
+            return;
+        }
+
+        $current = $editing === null ? 0 : ($editing->type === 'deposit' ? 1 : -1) * (float) $editing->amount;
+        $available = round((new AccountStats($account))->balance() - $current, 2);
+
+        if ((float) $data['amount'] > $available) {
+            throw ValidationException::withMessages([
+                'amount' => 'Melebihi saldo akun. Yang bisa ditarik paling banyak '
+                    .number_format(max($available, 0), 2, ',', '.').' '.$account->currency.'.',
+            ]);
+        }
     }
 
     /**

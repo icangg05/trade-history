@@ -78,9 +78,9 @@
     "semantic_hash": ""
   },
   "app/Http/Controllers/TransactionController.php": {
-    "mtime": 1790331264.1153631,
-    "seen": 1790331432.0268168,
-    "ast_hash": "4a31e69e6cee2ceea486c94e1db02a65",
+    "mtime": 1790333700.9293492,
+    "seen": 1790334027.5890207,
+    "ast_hash": "b3131bf951dd9b5152f488b8e2da5fd0",
     "semantic_hash": ""
   },
   "app/Http/Middleware/EnsureAdmin.php": {
@@ -174,9 +174,9 @@
     "semantic_hash": ""
   },
   "app/Services/Uploads.php": {
-    "mtime": 1790331254.1384919,
-    "seen": 1790331432.0268338,
-    "ast_hash": "bf8045fddd467c66004209288c36bcc9",
+    "mtime": 1790333516.7893262,
+    "seen": 1790334027.5890462,
+    "ast_hash": "cddda4edf7aa5dab74ffe8e62f64e0f0",
     "semantic_hash": ""
   },
   "artisan": {
@@ -1452,9 +1452,9 @@
     "semantic_hash": ""
   },
   "mobile/lib/app.dart": {
-    "mtime": 1790331913.459501,
-    "seen": 1790332291.2584481,
-    "ast_hash": "94aeb9773caa61ed78454551488e576e",
+    "mtime": 1790333864.4135554,
+    "seen": 1790334027.5891032,
+    "ast_hash": "9888cd3c245114d3985fc71292bc1f56",
     "semantic_hash": ""
   },
   "mobile/lib/core/api_client.dart": {
@@ -1464,9 +1464,9 @@
     "semantic_hash": ""
   },
   "mobile/lib/core/format.dart": {
-    "mtime": 1790325923.2494226,
-    "seen": 1790330588.8306155,
-    "ast_hash": "7189d02494d07c51acd0d2a8fe89b248",
+    "mtime": 1790333966.6758313,
+    "seen": 1790334027.5891051,
+    "ast_hash": "528dfea3cfb8b9af5ede8df98dd370c3",
     "semantic_hash": ""
   },
   "mobile/lib/core/json.dart": {
@@ -1482,15 +1482,15 @@
     "semantic_hash": ""
   },
   "mobile/lib/data/journal_api.dart": {
-    "mtime": 1790331386.4105537,
-    "seen": 1790331432.0268745,
-    "ast_hash": "80bbd5cdf3e50e27be1dc8fd581add00",
+    "mtime": 1790333463.0702815,
+    "seen": 1790334027.589108,
+    "ast_hash": "0127909ff35aa09395f44210747077d8",
     "semantic_hash": ""
   },
   "mobile/lib/data/session.dart": {
-    "mtime": 1790330169.0132906,
-    "seen": 1790330588.8306184,
-    "ast_hash": "0e7d80157ca6479bb42668f4ac4d9f5a",
+    "mtime": 1790333864.4134645,
+    "seen": 1790334027.5891087,
+    "ast_hash": "4f16747554a36fc4832406c16bee24af",
     "semantic_hash": ""
   },
   "mobile/lib/features/accounts/accounts_screen.dart": {
@@ -1536,9 +1536,9 @@
     "semantic_hash": ""
   },
   "mobile/lib/features/dashboard/dashboard_screen.dart": {
-    "mtime": 1790331766.915929,
-    "seen": 1790332291.2584639,
-    "ast_hash": "a1222a52252bca9ee934ac99fb62d13b",
+    "mtime": 1790333901.2259436,
+    "seen": 1790334027.5891185,
+    "ast_hash": "29783d8f747a33ecf92c9d1b0582f041",
     "semantic_hash": ""
   },
   "mobile/lib/features/more/more_screen.dart": {
@@ -1572,15 +1572,15 @@
     "semantic_hash": ""
   },
   "mobile/lib/features/trades/ai_import_sheet.dart": {
-    "mtime": 1790325923.249933,
-    "seen": 1790330588.8306255,
-    "ast_hash": "60e3e92afe075562cbc1a22d6e375ab1",
+    "mtime": 1790334003.118922,
+    "seen": 1790334027.5891244,
+    "ast_hash": "f4d0a6329e394289252de20e05b2ef7a",
     "semantic_hash": ""
   },
   "mobile/lib/features/trades/trade_detail.dart": {
-    "mtime": 1790330198.1948955,
-    "seen": 1790330588.830626,
-    "ast_hash": "70cb2d2e74dc5830d9d811cbb48ed365",
+    "mtime": 1790333966.6771414,
+    "seen": 1790334027.5891254,
+    "ast_hash": "7897d3035615b75e67128f536f8008b3",
     "semantic_hash": ""
   },
   "mobile/lib/features/trades/trade_filters_sheet.dart": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": ""
   },
   "mobile/lib/features/trades/trade_form_screen.dart": {
-    "mtime": 1790332138.0395718,
-    "seen": 1790332291.2584736,
-    "ast_hash": "a352a3104c203459234fbe3be0f40b29",
+    "mtime": 1790334003.1188667,
+    "seen": 1790334027.589127,
+    "ast_hash": "6defbe0620c5a98ecd6a94acd42fd6f9",
     "semantic_hash": ""
   },
   "mobile/lib/features/trades/trades_screen.dart": {
@@ -1602,15 +1602,15 @@
     "semantic_hash": ""
   },
   "mobile/lib/features/transactions/transaction_form.dart": {
-    "mtime": 1790332138.039531,
-    "seen": 1790332291.2584755,
-    "ast_hash": "242912ac7aebfe88659729229e4b7a23",
+    "mtime": 1790334003.1188667,
+    "seen": 1790334027.589129,
+    "ast_hash": "f17b1d08172584c10defa15efaf7f080",
     "semantic_hash": ""
   },
   "mobile/lib/features/transactions/transactions_screen.dart": {
-    "mtime": 1790332138.039475,
-    "seen": 1790332291.2584763,
-    "ast_hash": "3de6884ea105082a2de34bba53256750",
+    "mtime": 1790334003.1187944,
+    "seen": 1790334027.58913,
+    "ast_hash": "11f33ab714bb51b1a4d5774853671dbd",
     "semantic_hash": ""
   },
   "mobile/lib/main.dart": {
@@ -1680,9 +1680,9 @@
     "semantic_hash": ""
   },
   "mobile/test/app_test.dart": {
-    "mtime": 1790330627.0372574,
-    "seen": 1790330660.7282104,
-    "ast_hash": "73dddd6648f9538e855f7cf07bd482ed",
+    "mtime": 1790334003.1187944,
+    "seen": 1790334027.589147,
+    "ast_hash": "a9e32223b3c860d6daed596a23103457",
     "semantic_hash": ""
   },
   "mobile/test/fixtures/accounts.json": {
@@ -1782,9 +1782,9 @@
     "semantic_hash": ""
   },
   "mobile/test/support.dart": {
-    "mtime": 1790325923.2510874,
-    "seen": 1790330588.8306458,
-    "ast_hash": "6bbfaf7ec55737ff25fac1ddfd8dd53b",
+    "mtime": 1790333864.4136035,
+    "seen": 1790334027.5891645,
+    "ast_hash": "27205d833cf95818444a8d0bfd09bea1",
     "semantic_hash": ""
   },
   "routes/api.php": {
@@ -1794,9 +1794,9 @@
     "semantic_hash": ""
   },
   "tests/Feature/ApiTest.php": {
-    "mtime": 1790331280.6481085,
-    "seen": 1790331432.0269916,
-    "ast_hash": "2385d0ab22940f00ee13fd8f1947bd11",
+    "mtime": 1790333711.9764397,
+    "seen": 1790334027.5892894,
+    "ast_hash": "d28fd7568c53f6542a97f3733ddeff6e",
     "semantic_hash": ""
   },
   "mobile/README.md": {
@@ -2070,9 +2070,9 @@
     "semantic_hash": ""
   },
   "mobile/lib/widgets/user_avatar.dart": {
-    "mtime": 1790331976.875299,
-    "seen": 1790332291.2584925,
-    "ast_hash": "2c6ede12138dd067c53922975e49be6a",
+    "mtime": 1790333463.0704033,
+    "seen": 1790334027.5891461,
+    "ast_hash": "7497cd8ed92b0075e951425eca368d66",
     "semantic_hash": ""
   },
   "skills-lock.json": {
@@ -2097,6 +2097,12 @@
     "mtime": 1790331992.5462666,
     "seen": 1790332291.2584944,
     "ast_hash": "3a23725dda6662cabf48d1e4f8d2da40",
+    "semantic_hash": ""
+  },
+  "mobile/lib/features/auth/welcome_screen.dart": {
+    "mtime": 1790333852.666314,
+    "seen": 1790334027.5891151,
+    "ast_hash": "4e4cc7b512b0b4ba4dcd0d4d7871a9de",
     "semantic_hash": ""
   }
 }

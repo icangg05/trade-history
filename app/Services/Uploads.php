@@ -54,16 +54,24 @@ class Uploads
     /**
      * Simpan gambar yang sudah lolos `readable()`. Sisi terpanjangnya dibatasi
      * $maxSide; gambar yang lebih kecil tidak diperbesar.
+     *
+     * Hasilnya tidak pernah lebih besar dari yang perlu: gambar yang sudah
+     * kecil dan tegak bisa membengkak kalau dikodekan ulang (JPEG yang sudah
+     * dikompres pengirimnya, screenshot PNG berwarna datar). Untuk gambar
+     * seperti itu, aslinya — dengan metadatanya dibuang — ikut dibandingkan,
+     * dan yang lebih kecil yang disimpan.
      */
     public static function image(UploadedFile $file, string $folder, int $maxSide, int $quality = 85): string
     {
-        $source = @imagecreatefromstring($file->get());
+        $original = $file->get();
+        $source = @imagecreatefromstring($original);
 
         if ($source === false) {
             throw new RuntimeException('Gambar tidak bisa dibuka GD.');
         }
 
-        $source = self::upright($source, $file->getRealPath());
+        $orientation = (int) ((@exif_read_data($file->getRealPath()) ?: [])['Orientation'] ?? 1);
+        $source = self::upright($source, $orientation);
 
         $width = imagesx($source);
         $height = imagesy($source);
@@ -79,13 +87,99 @@ class Uploads
 
         ob_start();
         imagejpeg($canvas, null, $quality);
-        $jpeg = ob_get_clean();
+        [$bytes, $extension] = [ob_get_clean(), 'jpg'];
 
-        $path = $folder.'/'.Str::ulid().'.jpg';
+        // Aslinya hanya boleh dipakai kalau memang tidak perlu diubah: tidak
+        // diperkecil, dan tidak bergantung pada tanda putar EXIF (tanda itu
+        // ikut terbuang bersama metadatanya).
+        if ($scale >= 1 && $orientation === 1) {
+            foreach ([[self::strippedJpeg($original), 'jpg'], [self::strippedPng($original), 'png']] as [$clean, $type]) {
+                if ($clean !== null && strlen($clean) < strlen($bytes)) {
+                    [$bytes, $extension] = [$clean, $type];
+                }
+            }
+        }
 
-        Storage::disk(self::DISK)->put($path, $jpeg);
+        $path = $folder.'/'.Str::ulid().'.'.$extension;
+
+        Storage::disk(self::DISK)->put($path, $bytes);
 
         return $path;
+    }
+
+    /**
+     * JPEG asli tanpa metadata: EXIF/XMP (termasuk lokasi GPS), IPTC, dan
+     * komentar dibuang; profil warna ICC dipertahankan. Data gambarnya disalin
+     * utuh, jadi kualitasnya persis sama. Apa pun yang menempel setelah
+     * penanda akhir ikut terbuang. Null kalau bukan JPEG atau strukturnya aneh.
+     */
+    private static function strippedJpeg(string $data): ?string
+    {
+        if (! str_starts_with($data, "\xFF\xD8")) {
+            return null;
+        }
+
+        $out = "\xFF\xD8";
+        $at = 2;
+
+        while ($at + 4 <= strlen($data) && $data[$at] === "\xFF") {
+            $marker = ord($data[$at + 1]);
+
+            if ($marker === 0xFF) {
+                $at++; // byte pengisi
+
+                continue;
+            }
+
+            // SOS: sisanya data gambar, sampai penanda akhir.
+            if ($marker === 0xDA) {
+                $end = strrpos($data, "\xFF\xD9");
+
+                return $end === false || $end < $at ? null : $out.substr($data, $at, $end + 2 - $at);
+            }
+
+            $size = unpack('n', $data, $at + 2)[1];
+            $icc = $marker === 0xE2 && substr($data, $at + 4, 11) === 'ICC_PROFILE';
+
+            if (! (($marker >= 0xE1 && $marker <= 0xEF && ! $icc) || $marker === 0xFE)) {
+                $out .= substr($data, $at, 2 + $size);
+            }
+
+            $at += 2 + $size;
+        }
+
+        return null;
+    }
+
+    /**
+     * PNG asli tanpa chunk teks, waktu, dan EXIF. Chunk gambar, warna, dan
+     * transparansi tetap. Null kalau bukan PNG atau tidak ada penanda akhirnya.
+     */
+    private static function strippedPng(string $data): ?string
+    {
+        if (! str_starts_with($data, "\x89PNG\r\n\x1A\n")) {
+            return null;
+        }
+
+        $out = substr($data, 0, 8);
+        $at = 8;
+
+        while ($at + 12 <= strlen($data)) {
+            $size = unpack('N', $data, $at)[1];
+            $type = substr($data, $at + 4, 4);
+
+            if (! in_array($type, ['tEXt', 'zTXt', 'iTXt', 'eXIf', 'tIME'], true)) {
+                $out .= substr($data, $at, 12 + $size);
+            }
+
+            if ($type === 'IEND') {
+                return $out;
+            }
+
+            $at += 12 + $size;
+        }
+
+        return null;
     }
 
     public static function delete(?string $path): void
@@ -101,10 +195,8 @@ class Uploads
      * diterapkan ke pikselnya dulu. Hanya JPEG yang membawa EXIF; format lain
      * lolos apa adanya.
      */
-    private static function upright(GdImage $image, string $path): GdImage
+    private static function upright(GdImage $image, int $orientation): GdImage
     {
-        $orientation = (@exif_read_data($path) ?: [])['Orientation'] ?? 1;
-
         match ($orientation) {
             2, 7 => imageflip($image, IMG_FLIP_HORIZONTAL),
             4, 5 => imageflip($image, IMG_FLIP_VERTICAL),

@@ -270,6 +270,71 @@ class ApiTest extends TestCase
             ->assertJsonValidationErrors(['proof' => 'megapiksel']);
     }
 
+    public function test_withdrawal_tidak_boleh_melebihi_saldo(): void
+    {
+        Storage::fake('local');
+
+        $account = $this->account(); // modal 1000, tanpa trade
+        $headers = [...$this->token($account->user), 'Accept' => 'application/json'];
+        $url = "/api/v1/accounts/{$account->id}/transactions";
+        $withdraw = fn (float $amount) => [
+            'type' => 'withdrawal',
+            'amount' => $amount,
+            'rate_idr' => 16000,
+            'occurred_at' => '2026-02-01',
+            'proof' => UploadedFile::fake()->image('bukti.jpg'),
+        ];
+
+        $this->post($url, $withdraw(1000.01), $headers)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['amount' => '1.000,00 USD']);
+
+        $id = $this->post($url, $withdraw(1000), $headers)->assertCreated()->json('id');
+
+        // Saldo kini nol, tapi baris ini sendiri tidak ikut dihitung saat diubah:
+        // menurunkan jumlahnya boleh, menaikkannya melewati modal tidak.
+        $this->post("{$url}/{$id}", [...$withdraw(900), 'proof' => null], $headers)->assertOk();
+        $this->post("{$url}/{$id}", [...$withdraw(1200), 'proof' => null], $headers)
+            ->assertJsonValidationErrors('amount');
+    }
+
+    public function test_gambar_kecil_tidak_membengkak_dan_metadatanya_dibuang(): void
+    {
+        Storage::fake('local');
+
+        $account = $this->account();
+        $headers = [...$this->token($account->user), 'Accept' => 'application/json'];
+
+        // JPEG kualitas rendah berisi kotak acak: dikodekan ulang di kualitas 85
+        // pasti lebih besar dari aslinya. EXIF berisi "lokasi" diselipkan tepat
+        // setelah penanda awal.
+        $image = imagecreatetruecolor(400, 300);
+        mt_srand(7);
+        for ($x = 0; $x < 400; $x += 4) {
+            for ($y = 0; $y < 300; $y += 4) {
+                imagefilledrectangle($image, $x, $y, $x + 3, $y + 3, mt_rand(0, 0xFFFFFF));
+            }
+        }
+        ob_start();
+        imagejpeg($image, null, 40);
+        $exif = "Exif\0\0GPS-rahasia";
+        $jpeg = "\xFF\xD8\xFF\xE1".pack('n', strlen($exif) + 2).$exif.substr(ob_get_clean(), 2);
+
+        $this->post("/api/v1/accounts/{$account->id}/transactions", [
+            'type' => 'deposit',
+            'amount' => 500,
+            'rate_idr' => 16000,
+            'occurred_at' => '2026-02-01',
+            'proof' => UploadedFile::fake()->createWithContent('bukti.jpg', $jpeg),
+        ], $headers)->assertCreated();
+
+        $stored = Storage::disk('local')->get($account->transactions()->sole()->proof_path);
+
+        $this->assertLessThanOrEqual(strlen($jpeg), strlen($stored));
+        $this->assertStringNotContainsString('GPS-rahasia', $stored);
+        $this->assertSame([400, 300], array_slice(getimagesizefromstring($stored), 0, 2));
+    }
+
     public function test_foto_profil_diganti_dan_dihapus_lewat_api(): void
     {
         Storage::fake('local');
