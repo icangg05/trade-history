@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Uploads;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Response;
 use Laravel\Sanctum\PersonalAccessToken;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProfileController extends Controller
 {
@@ -63,6 +66,46 @@ class ProfileController extends Controller
         }
 
         return $this->done('Profil diperbarui.', data: ['user' => $user->only('id', 'name', 'email')]);
+    }
+
+    /** Foto profil hanya keluar lewat sini, untuk pemiliknya sendiri. */
+    public function avatar(Request $request): StreamedResponse
+    {
+        $path = $request->user()->avatar_path;
+
+        abort_if(blank($path), 404);
+
+        return Storage::disk(Uploads::DISK)->response($path);
+    }
+
+    /**
+     * Ganti foto profil. Aplikasi sudah mengecilkannya sebelum dikirim; batas
+     * 2 MB di sini hanya penjaga kalau ada yang mengirim berkas mentah.
+     */
+    public function updateAvatar(Request $request): JsonResponse
+    {
+        $request->validate(['avatar' => ['required', 'image', 'max:2048']]);
+
+        $user = $request->user();
+        $old = $user->avatar_path;
+
+        $user->forceFill([
+            'avatar_path' => $request->file('avatar')->store('avatars/'.$user->id, Uploads::DISK),
+        ])->save();
+
+        Uploads::delete($old);
+
+        return response()->json(['message' => 'Foto profil diperbarui.', 'avatar' => $user->avatarVersion()]);
+    }
+
+    public function destroyAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        Uploads::delete($user->avatar_path);
+        $user->forceFill(['avatar_path' => null])->save();
+
+        return response()->json(['message' => 'Foto profil dihapus.', 'avatar' => null]);
     }
 
     /**

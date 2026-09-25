@@ -10,6 +10,7 @@ import '../../models/journal.dart';
 import '../../models/stats.dart';
 import '../../widgets/account_scope.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 import '../../widgets/markdown_view.dart';
 import '../dashboard/dashboard_screen.dart' show periods;
 
@@ -230,11 +231,11 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
             )
           else if (_generating)
             const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
+              padding: EdgeInsets.symmetric(vertical: 12),
               child: Column(
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 12),
+                  Shimmer(child: Panel(child: SkeletonLines(lines: 7))),
+                  SizedBox(height: 14),
                   Text('Sedang membaca jurnalmu…'),
                   SizedBox(height: 4),
                   Caption(

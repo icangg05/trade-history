@@ -20,6 +20,7 @@ import 'features/shell/home_shell.dart';
 import 'features/trades/trade_form_screen.dart';
 import 'features/trades/trades_screen.dart';
 import 'features/transactions/transactions_screen.dart';
+import 'widgets/backdrop.dart';
 
 class TradeHistoryApp extends ConsumerWidget {
   const TradeHistoryApp({super.key});
@@ -44,11 +45,15 @@ final _rootKey = GlobalKey<NavigatorState>();
 /// milik `package:material_ui`, sedangkan aplikasi ini masih memakai
 /// `package:flutter/material.dart` (fl_chart & kawan-kawan belum pindah) —
 /// tanpa ini semua perpindahan layar tampil tanpa animasi.
+///
+/// Latarnya dilukis per halaman, bukan sekali di belakang aplikasi: tiap
+/// halaman jadi buram sendiri, jadi saat transisi halaman lama tidak tembus
+/// ke halaman baru.
 GoRouterPageBuilder _page(Widget Function(GoRouterState state) child) =>
     (context, state) => MaterialPage<void>(
       key: state.pageKey,
       name: state.name,
-      child: child(state),
+      child: Backdrop(child: child(state)),
     );
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -72,9 +77,11 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       return atAuth || location == '/splash' ? '/' : null;
     },
-    errorBuilder: (context, state) => Scaffold(
-      appBar: AppBar(),
-      body: Center(child: Text('Halaman tidak ditemukan: ${state.uri}')),
+    errorBuilder: (context, state) => Backdrop(
+      child: Scaffold(
+        appBar: AppBar(),
+        body: Center(child: Text('Halaman tidak ditemukan: ${state.uri}')),
+      ),
     ),
     routes: [
       GoRoute(path: '/splash', pageBuilder: _page((_) => const _Splash())),
@@ -180,10 +187,10 @@ final routerProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
+/// Hanya sekejap — selama token dibaca dari Keystore/Keychain. Cukup latarnya.
 class _Splash extends StatelessWidget {
   const _Splash();
 
   @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: CircularProgressIndicator()));
+  Widget build(BuildContext context) => const Scaffold();
 }

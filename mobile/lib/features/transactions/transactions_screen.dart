@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
 
 import '../../core/api_client.dart';
 import '../../core/format.dart';
@@ -9,6 +10,7 @@ import '../../models/account.dart';
 import '../../models/journal.dart';
 import '../../widgets/account_scope.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 import 'transaction_form.dart';
 
 /// Filter periode: tahun + bulan, atau `all`. Bulan hanya berarti kalau
@@ -265,7 +267,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             ),
             const SizedBox(height: 8),
           ],
-        if (list.loadingMore) const Center(child: CircularProgressIndicator()),
+        if (list.loadingMore) const Shimmer(child: SkeletonRow()),
       ],
     );
   }
@@ -294,7 +296,7 @@ class _Row extends ConsumerWidget {
       child: Row(
         children: [
           if (row.hasProof)
-            ProofThumbnail(account: account.id, transaction: row.id)
+            ProofThumbnail(account: account.id, row: row)
           else
             Container(
               width: 44,
@@ -354,10 +356,19 @@ class _Row extends ConsumerWidget {
               size: 20,
               color: AppColors.mutedForeground,
             ),
-            onSelected: (value) => value == 'edit' ? onEdit() : onDelete(),
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'edit', child: Text('Ubah')),
-              PopupMenuItem(
+            onSelected: (value) => switch (value) {
+              'edit' => onEdit(),
+              'download' => downloadProof(context, ref, account.id, row),
+              _ => onDelete(),
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(value: 'edit', child: Text('Ubah')),
+              if (row.hasProof)
+                const PopupMenuItem(
+                  value: 'download',
+                  child: Text('Unduh bukti'),
+                ),
+              const PopupMenuItem(
                 value: 'delete',
                 child: Text(
                   'Hapus',
@@ -372,23 +383,68 @@ class _Row extends ConsumerWidget {
   }
 }
 
+/// Simpan bukti transfer ke galeri ponsel, di album "Trade History".
+Future<void> downloadProof(
+  BuildContext context,
+  WidgetRef ref,
+  int account,
+  FundTransaction row,
+) async {
+  final api = ref.read(journalProvider);
+
+  try {
+    if (!await Gal.hasAccess(toAlbum: true) &&
+        !await Gal.requestAccess(toAlbum: true)) {
+      if (context.mounted) {
+        showMessage(
+          context,
+          'Izin galeri ditolak. Izinkan dari pengaturan aplikasi.',
+          error: true,
+        );
+      }
+      return;
+    }
+
+    await Gal.putImageBytes(
+      await api.proofBytes(account, row.id),
+      album: 'Trade History',
+      name: 'bukti-${row.type}-${isoDate(row.occurredAt)}',
+    );
+
+    if (context.mounted) showMessage(context, 'Bukti disimpan ke galeri.');
+  } on ApiException catch (error) {
+    if (context.mounted) showMessage(context, error.message, error: true);
+  } on GalException catch (error) {
+    if (context.mounted) {
+      showMessage(context, switch (error.type) {
+        GalExceptionType.accessDenied => 'Izin galeri ditolak.',
+        GalExceptionType.notEnoughSpace => 'Penyimpanan ponsel penuh.',
+        GalExceptionType.notSupportedFormat => 'Format gambar tidak didukung.',
+        GalExceptionType.unexpected => 'Gagal menyimpan ke galeri.',
+      }, error: true);
+    }
+  }
+}
+
 /// Bukti transfer dari disk privat server — hanya keluar dengan token pemiliknya.
 class ProofThumbnail extends ConsumerWidget {
   const ProofThumbnail({
     super.key,
     required this.account,
-    required this.transaction,
+    required this.row,
     this.size = 44,
   });
 
   final int account;
-  final String transaction;
+  final FundTransaction row;
   final double size;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final api = ref.watch(journalProvider);
-    final url = api.proofUrl(account, transaction);
+    // Versinya ikut di alamat: bukti yang baru diganti langsung tampil, bukan
+    // gambar lama dari cache.
+    final url = api.proofUrl(account, row.id, row.proofVersion);
     final headers = api.client.imageHeaders;
 
     return GestureDetector(
@@ -396,25 +452,45 @@ class ProofThumbnail extends ConsumerWidget {
         context: context,
         builder: (context) => Dialog.fullscreen(
           backgroundColor: Colors.black,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: InteractiveViewer(
-                  maxScale: 5,
-                  child: Image.network(
-                    url,
-                    headers: headers,
-                    fit: BoxFit.contain,
+          // Scaffold sendiri: pesan "disimpan ke galeri" tampil di atas
+          // gambar, bukan di halaman yang tertutup dialog ini.
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: InteractiveViewer(
+                    maxScale: 5,
+                    child: Image.network(
+                      url,
+                      headers: headers,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
-              ),
-              SafeArea(
-                child: IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: Colors.white),
+                SafeArea(
+                  child: Row(
+                    children: [
+                      IconButton(
+                        tooltip: 'Tutup',
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        tooltip: 'Unduh',
+                        onPressed: () =>
+                            downloadProof(context, ref, account, row),
+                        icon: const Icon(
+                          Icons.download_outlined,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

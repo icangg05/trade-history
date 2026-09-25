@@ -86,8 +86,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) => AuthShell(
     subtitle: 'Buat akun untuk mulai mencatat.',
     children: [
-      Caption('Server: ${ref.watch(serverProvider)}'),
-      const SizedBox(height: 14),
       _field(_name, 'Nama', 'name'),
       _field(_email, 'Email', 'email', type: TextInputType.emailAddress),
       _field(

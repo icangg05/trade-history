@@ -86,15 +86,25 @@ class ApiClient {
       _json(() => dio.delete<dynamic>(path, data: data));
 
   /// Unduhan biner (PDF laporan). Galatnya tetap JSON, jadi dibaca ulang.
-  Future<Uint8List> download(String path, {Object? data}) async {
-    try {
-      final response = await dio.post<List<int>>(
-        path,
-        data: data,
-        options: Options(responseType: ResponseType.bytes),
-      );
+  Future<Uint8List> download(String path, {Object? data}) => _bytes(
+    () => dio.post<List<int>>(
+      path,
+      data: data,
+      options: Options(responseType: ResponseType.bytes),
+    ),
+  );
 
-      return Uint8List.fromList(response.data ?? const []);
+  /// Berkas biner lewat GET — bukti transfer yang disimpan ke galeri.
+  Future<Uint8List> bytes(String path) => _bytes(
+    () => dio.get<List<int>>(
+      path,
+      options: Options(responseType: ResponseType.bytes),
+    ),
+  );
+
+  Future<Uint8List> _bytes(Future<Response<List<int>>> Function() send) async {
+    try {
+      return Uint8List.fromList((await send()).data ?? const []);
     } on DioException catch (error) {
       throw _wrap(error);
     }

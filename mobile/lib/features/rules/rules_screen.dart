@@ -343,6 +343,8 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
                     FilterChip(
                       label: Text(label),
                       selected: _allowed.contains(key),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: kDenseChip,
                       onSelected: (on) => setState(
                         () => on ? _allowed.add(key) : _allowed.remove(key),
                       ),

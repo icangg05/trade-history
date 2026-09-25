@@ -2,17 +2,26 @@ import '../core/format.dart';
 import '../core/json.dart';
 
 class User {
-  const User({required this.id, required this.name, required this.email});
+  const User({
+    required this.id,
+    required this.name,
+    required this.email,
+    this.avatar,
+  });
 
   factory User.fromJson(Json json) => User(
     id: toInt(json['id']),
     name: '${json['name'] ?? ''}',
     email: '${json['email'] ?? ''}',
+    avatar: toStringOrNull(json['avatar']),
   );
 
   final int id;
   final String name;
   final String email;
+
+  /// Versi foto profil, null kalau belum ada foto (lihat `avatarUrl`).
+  final String? avatar;
 }
 
 /// Akun trading yang bisa dibuka — isi pengalih akun.

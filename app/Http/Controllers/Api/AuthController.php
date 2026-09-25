@@ -94,7 +94,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'user' => $user->only('id', 'name', 'email'),
+            'user' => [...$user->only('id', 'name', 'email'), 'avatar' => $user->avatarVersion()],
             // Sama dengan pengalih akun di header web: yang diarsipkan tidak ikut.
             'accounts' => $user->accounts()->where('is_archived', false)->orderBy('name')->get()
                 ->map(fn (Account $account) => [

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../widgets/common.dart';
+import '../../widgets/user_avatar.dart';
 
 /// Menu "Lainnya": halaman yang tidak muat di tab bar.
 class MoreScreen extends ConsumerWidget {
@@ -34,7 +35,11 @@ class MoreScreen extends ConsumerWidget {
         );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Lainnya')),
+      appBar: AppBar(
+        leading: const HeaderAvatar(),
+        titleSpacing: 4,
+        title: const Text('Lainnya'),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
@@ -43,14 +48,9 @@ class MoreScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(14),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: AppColors.gold.withValues(alpha: .15),
-                    foregroundColor: AppColors.gold,
-                    child: Text(
-                      me.user.name.isEmpty
-                          ? '?'
-                          : me.user.name.characters.first.toUpperCase(),
-                    ),
+                  GestureDetector(
+                    onTap: () => showAvatarSheet(context),
+                    child: const UserAvatar(radius: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

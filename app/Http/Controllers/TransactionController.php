@@ -74,6 +74,9 @@ class TransactionController extends Controller
                     'rate_idr' => $t->rate_idr === null ? null : (float) $t->rate_idr,
                     'occurred_at' => $t->occurred_at->toDateString(),
                     'has_proof' => filled($t->proof_path),
+                    // Alamat bukti selalu sama; penanda ini yang berubah saat
+                    // buktinya diganti, supaya ponsel tidak menampilkan cache lama.
+                    'proof_version' => $t->proof_path ? substr(md5($t->proof_path), 0, 8) : null,
                 ]),
             'totals' => [
                 'deposit' => (float) ($flow['deposit']->total ?? 0),

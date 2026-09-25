@@ -13,6 +13,7 @@ class FundTransaction {
     required this.occurredAt,
     required this.note,
     required this.hasProof,
+    this.proofVersion,
   });
 
   factory FundTransaction.fromJson(Json json) => FundTransaction(
@@ -23,6 +24,7 @@ class FundTransaction {
     occurredAt: wallTime('${json['occurred_at']}'),
     note: toStringOrNull(json['note']),
     hasProof: json['has_proof'] == true,
+    proofVersion: toStringOrNull(json['proof_version']),
   );
 
   final String id;
@@ -34,6 +36,9 @@ class FundTransaction {
   final DateTime occurredAt;
   final String? note;
   final bool hasProof;
+
+  /// Berganti saat buktinya diganti; ikut di alamat gambar (lihat `proofUrl`).
+  final String? proofVersion;
 
   bool get isDeposit => type == 'deposit';
 

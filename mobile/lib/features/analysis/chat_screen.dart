@@ -263,6 +263,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                             fontSize: 11.5,
                                           ),
                                         ),
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        visualDensity: kDenseChip,
                                         onPressed: () => _send(item),
                                       ),
                                   ],

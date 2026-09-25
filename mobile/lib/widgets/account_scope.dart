@@ -6,6 +6,8 @@ import '../core/theme.dart';
 import '../data/session.dart';
 import '../models/account.dart';
 import 'common.dart';
+import 'skeleton.dart';
+import 'user_avatar.dart';
 
 /// Kerangka layar yang butuh akun aktif: judul + pengalih akun di app bar,
 /// dan pesan "buat akun dulu" kalau belum ada satu pun — padanan middleware
@@ -28,10 +30,14 @@ class AccountScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final current = ref.watch(currentAccountProvider);
     final account = current.value;
+    // Layar utama tab: foto profil di kiri. Layar turunan (aturan, analisa)
+    // tetap memakai tombol kembali di tempat itu.
+    final root = !(ModalRoute.of(context)?.canPop ?? false);
 
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 16,
+        leading: root ? const HeaderAvatar() : null,
+        titleSpacing: root ? 4 : 16,
         title: AccountSwitcher(title: title),
         actions: account == null
             ? null
@@ -42,7 +48,7 @@ class AccountScaffold extends ConsumerWidget {
           : floatingActionButton?.call(account),
       body: current.when(
         skipLoadingOnReload: true,
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SkeletonPage(),
         error: (error, _) =>
             ErrorView(error: error, onRetry: () => ref.invalidate(meProvider)),
         data: (account) =>

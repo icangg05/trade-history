@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../models/trade.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 import '../../widgets/setup_picker.dart';
 import '../../widgets/trade_widgets.dart';
 
@@ -126,8 +127,8 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
               ? const EmptyState(message: 'Trade tidak ditemukan.')
               : _content(trade),
           loading: () => const Padding(
-            padding: EdgeInsets.all(40),
-            child: Center(child: CircularProgressIndicator()),
+            padding: EdgeInsets.fromLTRB(20, 8, 20, 32),
+            child: Shimmer(child: SkeletonLines(lines: 8)),
           ),
           error: (error, _) => ErrorView(error: error),
         );
@@ -261,7 +262,6 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
                 const SizedBox(height: 6),
                 SetupPicker(
                   value: _setup,
-                  dense: true,
                   onChanged: (value) => setState(() => _setup = value),
                 ),
                 const SizedBox(height: 10),

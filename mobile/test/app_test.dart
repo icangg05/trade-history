@@ -26,7 +26,7 @@ void main() {
     );
 
     expect(find.text('Masuk ke jurnal trading kamu.'), findsOneWidget);
-    expect(find.text('https://trade.contoh.test'), findsOneWidget);
+    expect(find.text('Alamat server'), findsNothing);
     expect(find.text('Belum punya akun? Daftar'), findsOneWidget);
 
     await tester.enterText(
@@ -73,6 +73,35 @@ void main() {
 
     expect(find.text('Email atau kata sandi tidak cocok.'), findsOneWidget);
     expect(find.text('Masuk ke jurnal trading kamu.'), findsOneWidget);
+  });
+
+  testWidgets('kembali dari layar daftar, tautan "Daftar" langsung ada', (
+    tester,
+  ) async {
+    final server = await pumpApp(
+      tester,
+      loggedIn: false,
+      routes: {
+        'GET auth/options': (_) => {
+          'app_name': 'Trade History',
+          'can_register': true,
+        },
+      },
+    );
+
+    await tester.tap(find.text('Belum punya akun? Daftar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sudah punya akun? Masuk'));
+    // Dua frame: router membangun ulang, lalu layar login tampil. Belum ada
+    // kesempatan menunggu server — jawaban pertama masih diingat.
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Belum punya akun? Daftar'), findsOneWidget);
+    expect(
+      server.requests.where((request) => request.path == 'auth/options'),
+      hasLength(1),
+    );
   });
 
   testWidgets(

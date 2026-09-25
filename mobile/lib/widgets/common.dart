@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
+import 'skeleton.dart';
 
 /// Kartu permukaan standar — padanan `.glass-card` di web.
 class Panel extends StatelessWidget {
@@ -26,9 +27,13 @@ class Panel extends StatelessWidget {
   // Material, bukan DecoratedBox: ListTile & InkWell di dalam kartu melukis
   // efek sentuhnya di Material terdekat — di atas DecoratedBox berwarna,
   // efek itu tertutup.
+  //
+  // Kaca tembus pandang seperti `.glass-card` di web, supaya cahaya latar
+  // (`Backdrop`) ikut terlihat. Tanpa blur: di belakangnya hanya latar yang
+  // sudah halus, jadi blur hanya memakan GPU tanpa beda yang terlihat.
   @override
   Widget build(BuildContext context) => Material(
-    color: AppColors.card,
+    color: AppColors.glass.withValues(alpha: .6),
     clipBehavior: Clip.antiAlias,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(kRadius),
@@ -266,7 +271,7 @@ class ErrorView extends StatelessWidget {
 }
 
 /// Memuat → isi → galat. Saat dimuat ulang (tarik untuk segarkan, atau data
-/// lain baru disimpan), isi lama tetap tampil alih-alih berkedip jadi spinner.
+/// lain baru disimpan), isi lama tetap tampil alih-alih berkedip jadi kerangka.
 class AsyncView<T> extends StatelessWidget {
   const AsyncView({
     super.key,
@@ -283,7 +288,7 @@ class AsyncView<T> extends StatelessWidget {
   Widget build(BuildContext context) => value.when(
     skipLoadingOnReload: true,
     data: builder,
-    loading: () => const Center(child: CircularProgressIndicator()),
+    loading: () => const SkeletonPage(),
     error: (error, _) => ErrorView(error: error, onRetry: onRetry),
   );
 }

@@ -2,11 +2,15 @@
     <!-- Seluruh isi jurnal ada di server Trade History; tanpa ini build rilis
          tidak bisa menghubunginya sama sekali. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Mengunduh bukti transfer ke galeri. Android 11 ke atas tidak butuh izin ini. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"/>
 
     <application
         android:label="Trade History"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

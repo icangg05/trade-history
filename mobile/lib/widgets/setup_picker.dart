@@ -50,13 +50,11 @@ class SetupPicker extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.enabled = true,
-    this.dense = false,
   });
 
   final String value;
   final ValueChanged<String> onChanged;
   final bool enabled;
-  final bool dense;
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +71,13 @@ class SetupPicker extends StatelessWidget {
             FilterChip(
               label: Text(option),
               selected: selected.contains(option),
-              visualDensity: dense
-                  ? VisualDensity.compact
-                  : VisualDensity.standard,
+              // Tanpa centang: warna emas sudah menandai pilihan, dan centang
+              // melebarkan chip sampai barisnya patah lebih sering.
+              showCheckmark: false,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: kDenseChip,
               labelStyle: TextStyle(
-                fontSize: dense ? 11 : 12,
+                fontSize: 11.5,
                 color: selected.contains(option)
                     ? AppColors.gold
                     : AppColors.mutedForeground,

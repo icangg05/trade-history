@@ -81,6 +81,8 @@ class _FilterSheetState extends State<_FilterSheet> {
               label: Text(text),
               selected: current == value,
               showCheckmark: false,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: kDenseChip,
               selectedColor: AppColors.gold.withValues(alpha: .15),
               labelStyle: TextStyle(
                 fontSize: 12,
@@ -112,7 +114,8 @@ class _FilterSheetState extends State<_FilterSheet> {
                         option,
                         style: const TextStyle(fontSize: 11.5),
                       ),
-                      visualDensity: VisualDensity.compact,
+                      visualDensity: kDenseChip,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       onPressed: () => setState(() => controller.text = option),
                     ),
                   ),

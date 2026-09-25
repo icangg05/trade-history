@@ -34,6 +34,23 @@ class JournalApi {
   Future<String> deleteProfile(String password) async =>
       _message(await client.delete('profile', {'password': password}));
 
+  /// Foto sudah dikecilkan di ponsel (lihat `compressImage`).
+  Future<String> uploadAvatar(Uint8List jpeg) async => _message(
+    await client.post(
+      'profile/avatar',
+      FormData.fromMap({
+        'avatar': MultipartFile.fromBytes(jpeg, filename: 'avatar.jpg'),
+      }),
+    ),
+  );
+
+  Future<String> deleteAvatar() async =>
+      _message(await client.delete('profile/avatar'));
+
+  /// [version] ikut di alamat supaya foto yang baru diganti tidak tertahan
+  /// cache gambar — alamat dasarnya selalu sama.
+  String avatarUrl(String version) => client.url('profile/avatar?v=$version');
+
   // -------------------------------------------------------------------- akun
 
   Future<AccountsPage> accounts() async =>
@@ -141,12 +158,13 @@ class JournalApi {
     int account,
     String? id,
     Json fields, {
-    XFile? proof,
+    Uint8List? proof,
   }) async {
     final form = FormData.fromMap({
       for (final entry in fields.entries)
         if (entry.value != null) entry.key: '${entry.value}',
-      if (proof != null) 'proof': await _file(proof),
+      if (proof != null)
+        'proof': MultipartFile.fromBytes(proof, filename: 'bukti.jpg'),
     });
 
     return _message(
@@ -160,8 +178,17 @@ class JournalApi {
   Future<String> deleteTransaction(int account, String id) async =>
       _message(await client.delete(_in(account, 'transactions/$id')));
 
-  String proofUrl(int account, String id) =>
-      client.url(_in(account, 'transactions/$id/proof'));
+  /// [version] berganti setiap kali buktinya diganti — tanpa itu gambar lama
+  /// terus tampil dari cache karena alamatnya sama.
+  String proofUrl(int account, String id, String? version) => client.url(
+    _in(
+      account,
+      'transactions/$id/proof${version == null ? '' : '?v=$version'}',
+    ),
+  );
+
+  Future<Uint8List> proofBytes(int account, String id) =>
+      client.bytes(_in(account, 'transactions/$id/proof'));
 
   // ------------------------------------------------------------------ aturan
 

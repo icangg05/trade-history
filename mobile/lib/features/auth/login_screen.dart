@@ -7,12 +7,13 @@ import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../widgets/common.dart';
 
-/// `GET auth/options` untuk server yang sedang diketik: apakah pendaftaran
-/// mandiri dibuka (REGISTER_TOKEN diisi di .env server).
-final _canRegisterProvider = FutureProvider.autoDispose.family<bool, String>((
-  ref,
-  server,
-) async {
+/// `GET auth/options`: apakah pendaftaran mandiri dibuka (REGISTER_TOKEN diisi
+/// di .env server). Sengaja tidak autoDispose — layar login dibuang saat pindah
+/// ke layar daftar, dan tanpa cache ini tautan "Daftar" baru muncul setelah
+/// server menjawab lagi.
+final _canRegisterProvider = FutureProvider<bool>((ref) async {
+  final server = ref.watch(serverProvider);
+
   if (server.isEmpty) return false;
 
   final json = await ApiClient(
@@ -87,42 +88,28 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  late final _server = TextEditingController(text: ref.read(serverProvider));
   final _email = TextEditingController();
   final _password = TextEditingController();
-  final _serverFocus = FocusNode();
 
   bool _busy = false;
   bool _hidden = true;
   ApiException? _error;
 
   @override
-  void initState() {
-    super.initState();
-
-    // Alamat server disimpan begitu kolomnya ditinggalkan, supaya tautan
-    // "Daftar" bisa dicek ke server yang benar.
-    _serverFocus.addListener(() {
-      if (!_serverFocus.hasFocus && _server.text.trim().isNotEmpty) {
-        ref.read(serverProvider.notifier).set(_server.text);
-      }
-    });
-  }
-
-  @override
   void dispose() {
-    _server.dispose();
     _email.dispose();
     _password.dispose();
-    _serverFocus.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    if (_server.text.trim().isEmpty) {
+    final server = ref.read(serverProvider);
+
+    if (server.isEmpty) {
       setState(
         () => _error = const ApiException(
-          'Isi alamat server Trade History kamu dulu.',
+          'Aplikasi ini dibangun tanpa alamat server. Build ulang dengan '
+          '--dart-define=API_BASE_URL=https://alamat-server-kamu.',
         ),
       );
       return;
@@ -137,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref
           .read(sessionProvider.notifier)
           .login(
-            server: _server.text,
+            server: server,
             email: _email.text.trim(),
             password: _password.text,
           );
@@ -158,27 +145,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final server = ref.watch(serverProvider);
-    final canRegister = ref.watch(_canRegisterProvider(server)).value ?? false;
+    final canRegister = ref.watch(_canRegisterProvider).value ?? false;
 
     return AuthShell(
       subtitle: 'Masuk ke jurnal trading kamu.',
       children: [
-        TextField(
-          controller: _server,
-          focusNode: _serverFocus,
-          keyboardType: TextInputType.url,
-          autocorrect: false,
-          decoration: InputDecoration(
-            labelText: 'Alamat server',
-            hintText: 'https://trade.contoh.com',
-            prefixIcon: const Icon(Icons.dns_outlined, size: 20),
-            errorText: _error?.status == null && _error != null
-                ? _error!.message
-                : null,
-          ),
-        ),
-        const SizedBox(height: 14),
         TextField(
           controller: _email,
           keyboardType: TextInputType.emailAddress,
@@ -187,11 +158,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           decoration: InputDecoration(
             labelText: 'Email',
             prefixIcon: const Icon(Icons.alternate_email, size: 20),
-            errorText:
-                _error?['email'] ??
-                (_error?.status != null && _error!.errors.isEmpty
-                    ? _error!.message
-                    : null),
+            errorText: _error?['email'],
           ),
         ),
         const SizedBox(height: 14),
@@ -216,6 +183,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
         const SizedBox(height: 20),
+        // Galat tanpa kolom: server tak terjangkau, alamat build salah, dsb.
+        if (_error != null && _error!.errors.isEmpty) ...[
+          Text(
+            _error!.message,
+            style: const TextStyle(
+              color: AppColors.destructive,
+              fontSize: 12.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
         BusyButton(
           busy: _busy,
           onPressed: _submit,

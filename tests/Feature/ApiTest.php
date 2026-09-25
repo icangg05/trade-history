@@ -240,6 +240,39 @@ class ApiTest extends TestCase
         $this->get("{$url}/{$id}/proof", $headers)->assertOk();
     }
 
+    public function test_foto_profil_diganti_dan_dihapus_lewat_api(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $headers = [...$this->token($user), 'Accept' => 'application/json'];
+
+        $this->get('/api/v1/profile/avatar', $headers)->assertNotFound();
+
+        $first = $this->post('/api/v1/profile/avatar', ['avatar' => UploadedFile::fake()->image('a.jpg')], $headers)
+            ->assertOk()->json('avatar');
+        $oldPath = $user->fresh()->avatar_path;
+
+        $second = $this->post('/api/v1/profile/avatar', ['avatar' => UploadedFile::fake()->image('b.jpg')], $headers)
+            ->assertOk()->json('avatar');
+
+        // Versi berganti supaya ponsel memuat ulang, dan foto lama tidak tertinggal.
+        $this->assertNotSame($first, $second);
+        Storage::disk('local')->assertMissing($oldPath);
+        $this->getJson('/api/v1/me', $headers)->assertJsonPath('user.avatar', $second);
+        $this->get('/api/v1/profile/avatar', $headers)->assertOk();
+
+        $this->post('/api/v1/profile/avatar', ['avatar' => UploadedFile::fake()->create('x.pdf')], $headers)
+            ->assertUnprocessable();
+
+        $lastPath = $user->fresh()->avatar_path;
+        Storage::disk('local')->assertExists($lastPath);
+
+        $this->deleteJson('/api/v1/profile/avatar', [], $headers)->assertOk();
+        Storage::disk('local')->assertMissing($lastPath);
+        $this->getJson('/api/v1/me', $headers)->assertJsonPath('user.avatar', null);
+    }
+
     public function test_keluar_hanya_mencabut_token_perangkat_ini(): void
     {
         $user = User::factory()->create();

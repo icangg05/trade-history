@@ -36,6 +36,15 @@ abstract final class AppColors {
 
 const kRadius = 12.0;
 
+/// Chip pilihan (strategi, filter, sesi). Tinggi chip Material ditentukan
+/// batas minimumnya, bukan padding — batas itu hanya turun lewat densitas.
+/// Pasangannya di tiap chip: `materialTapTargetSize: shrinkWrap`, tanpa itu
+/// setiap chip tetap memesan tinggi 48 px dan barisnya renggang.
+const kDenseChip = VisualDensity(
+  horizontal: -2,
+  vertical: VisualDensity.minimumDensity,
+);
+
 const kSans = 'IBMPlexSans';
 
 /// Semua angka uang, harga, lot, dan P/L memakai Plex Mono berangka tabel
@@ -85,7 +94,8 @@ ThemeData buildTheme() {
     useMaterial3: true,
     colorScheme: scheme,
     fontFamily: kSans,
-    scaffoldBackgroundColor: AppColors.background,
+    // Transparan: latarnya dilukis `Backdrop` di bawah setiap halaman.
+    scaffoldBackgroundColor: Colors.transparent,
     canvasColor: AppColors.background,
     dividerColor: AppColors.border,
     splashFactory: InkSparkle.splashFactory,
@@ -102,7 +112,7 @@ ThemeData buildTheme() {
       displayColor: AppColors.foreground,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       scrolledUnderElevation: 0,
       centerTitle: false,
@@ -198,6 +208,9 @@ ThemeData buildTheme() {
         color: AppColors.foreground,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      // Rapat: daftar strategi bisa puluhan pilihan (lihat kDenseChip).
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 2),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.card,

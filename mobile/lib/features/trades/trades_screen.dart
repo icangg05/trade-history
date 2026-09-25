@@ -10,6 +10,7 @@ import '../../models/account.dart';
 import '../../models/trade.dart';
 import '../../widgets/account_scope.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 import '../../widgets/trade_widgets.dart';
 import 'trade_detail.dart';
 import 'trade_filters_sheet.dart';
@@ -348,8 +349,8 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
                 ),
               if (list.loadingMore)
                 const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator()),
+                  padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  child: Shimmer(child: SkeletonRow()),
                 ),
               if (rows.isNotEmpty && !list.hasMore)
                 const Padding(

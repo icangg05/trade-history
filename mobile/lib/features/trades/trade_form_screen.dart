@@ -11,6 +11,7 @@ import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../models/trade.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 import '../../widgets/setup_picker.dart';
 import 'ai_import_sheet.dart';
 
@@ -32,10 +33,7 @@ class TradeFormScreen extends ConsumerWidget {
     final account = ref.watch(currentAccountProvider).value;
 
     if (account == null) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: const Center(child: CircularProgressIndicator()),
-      );
+      return Scaffold(appBar: AppBar(), body: const SkeletonPage(rows: 3));
     }
 
     final key = (account.id, tradeId);
@@ -43,10 +41,8 @@ class TradeFormScreen extends ConsumerWidget {
     return ref
         .watch(_formProvider(key))
         .when(
-          loading: () => Scaffold(
-            appBar: AppBar(),
-            body: const Center(child: CircularProgressIndicator()),
-          ),
+          loading: () =>
+              Scaffold(appBar: AppBar(), body: const SkeletonPage(rows: 3)),
           error: (error, _) => Scaffold(
             appBar: AppBar(),
             body: ErrorView(

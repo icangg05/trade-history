@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.13.4
+  sdk: ^3.12.0
 
 dependencies:
   flutter:
@@ -26,12 +26,14 @@ dependencies:
   # Tampilan
   fl_chart: ^1.2.0
   flutter_markdown_plus: ^1.0.12
-  intl: ^0.20.3
+  intl: ^0.20.2
 
   # Berkas: screenshot trade, bukti transfer, PDF laporan
   image_picker: ^1.2.3
   share_plus: ^13.3.0
   cupertino_icons: ^1.0.9
+  flutter_image_compress: ^2.5.1
+  gal: ^2.3.3
 
 dev_dependencies:
   flutter_test:

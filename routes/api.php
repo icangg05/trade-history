@@ -33,6 +33,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit']);
         Route::put('/profile', [ProfileController::class, 'update']);
         Route::delete('/profile', [ProfileController::class, 'destroy']);
+        Route::get('/profile/avatar', [ProfileController::class, 'avatar']);
+        Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar']);
+        Route::delete('/profile/avatar', [ProfileController::class, 'destroyAvatar']);
 
         Route::middleware('trader')->group(function () {
             Route::get('/accounts', [AccountController::class, 'index']);

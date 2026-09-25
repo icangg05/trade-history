@@ -22,19 +22,22 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
 /// dengan jawaban server rekaman tanpa jaringan.
 final httpAdapterProvider = Provider<HttpClientAdapter?>((ref) => null);
 
-/// Alamat server bawaan saat build: `--dart-define=API_BASE_URL=https://…`.
+/// Alamat server, ditanam saat build: `--dart-define=API_BASE_URL=https://…`.
 const defaultServer = String.fromEnvironment('API_BASE_URL');
 
 const _serverKey = 'server';
 const _tokenKey = 'token';
 const _accountKey = 'account_id';
 
-/// Server yang terakhir dipakai. Aplikasi ini self-hosted, jadi alamatnya
-/// bisa diganti dari layar masuk.
+/// Server yang dituju. Alamat dari build selalu menang — tidak ada lagi isian
+/// alamat di layar masuk, jadi alamat lama yang tersimpan tidak boleh
+/// mengunci aplikasi ke server yang salah. Yang tersimpan hanya dipakai kalau
+/// build tidak membawa alamat (test).
 class ServerController extends Notifier<String> {
   @override
-  String build() =>
-      ref.read(prefsProvider).getString(_serverKey) ?? defaultServer;
+  String build() => defaultServer.isNotEmpty
+      ? normalizeServer(defaultServer)
+      : ref.read(prefsProvider).getString(_serverKey) ?? '';
 
   Future<void> set(String value) async {
     state = normalizeServer(value);
@@ -59,9 +62,9 @@ class SessionController extends AsyncNotifier<Session?> {
   @override
   Future<Session?> build() async {
     final token = await ref.read(secureStorageProvider).read(key: _tokenKey);
-    final server = ref.read(prefsProvider).getString(_serverKey);
+    final server = ref.read(serverProvider);
 
-    return token == null || server == null || server.isEmpty
+    return token == null || server.isEmpty
         ? null
         : Session(server: server, token: token);
   }
