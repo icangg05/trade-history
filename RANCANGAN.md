@@ -639,11 +639,9 @@ satu-satunya yang menghitung.
 | Waktu dibaca sebagai jam dinding server | server menyimpan dalam `APP_TIMEZONE` dan mengirim sebagian dengan offset; ponsel di zona lain tidak boleh menggeser jam trade |
 | Uji layar memakai jawaban API rekaman (`mobile/test/fixtures`) | 38 uji Flutter menjalankan aplikasi utuh di layar 360 px — galat tata letak dan alur (login, form trade, grouping, filter, dana, aturan, chat) ketahuan tanpa perangkat |
 
-Temuan saat membangun klien kedua, **belum** diperbaiki di sisi server:
+Dua bug lama ketahuan saat membangun klien kedua, lalu diperbaiki:
 
-- Tidak ada `lang/id/validation.php`, jadi pesan validasi bawaan keluar sebagai kuncinya
-  (`validation.required`) — di web maupun API. Aplikasi mobile menerjemahkannya sendiri
-  (`validationMessage()`); web masih menampilkannya mentah.
-- Form profil web selalu mengirim `current_password: ''`, sehingga mengganti **nama saja**
-  ditolak `validation.current_password`. Uji `ProfileTest` tidak menangkapnya karena
-  tidak mengirim kolom itu. Aplikasi mobile tidak kena: kolom sandi yang kosong tidak dikirim.
+| Perubahan | Alasan |
+|---|---|
+| `lang/id/validation.php` | aplikasi berjalan dengan `APP_LOCALE=id` (fallback juga `id`), sedangkan framework hanya membawa bahasa Inggris — setiap galat isian keluar sebagai kuncinya mentah (`validation.required`), di web maupun API. Seluruh aturan bawaan diterjemahkan, dan kolom diberi nama yang sama dengan label form ("Hasil wajib diisi.", bukan "pnl"). `ValidationLangTest` membandingkan kuncinya dengan berkas bahasa Inggris framework, jadi aturan baru di versi Laravel berikutnya tidak diam-diam kembali tampil mentah. Aplikasi mobile tetap menerjemahkan kunci mentah sebagai cadangan untuk server yang belum diperbarui |
+| `current_password` di `/profile` diberi `nullable` | form web selalu mengirim `current_password: ''`; string kosong jadi null, dan tanpa `nullable` aturan `current_password` tetap menilai null itu lalu menolaknya — mengganti **nama saja** dari browser tidak pernah berhasil. `ProfileTest` tidak menangkapnya karena ujinya tidak mengirim kolom itu; dua uji baru meniru isian form web apa adanya. Saat email atau sandi diganti, kolomnya tetap wajib |
