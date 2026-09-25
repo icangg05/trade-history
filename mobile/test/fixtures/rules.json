@@ -1,0 +1,37 @@
+{
+    "rule": {
+        "max_daily_loss": null,
+        "max_daily_loss_pct": 3,
+        "daily_profit_target": null,
+        "daily_profit_target_pct": 2,
+        "max_total_loss_pct": 10,
+        "max_risk_per_trade_pct": 1,
+        "max_trades_per_day": 3,
+        "min_rr": 1.5,
+        "allowed_sessions": [
+            "london",
+            "newyork"
+        ],
+        "notes": "## Checklist sebelum entry\n- Cek kalender news\n- Konfirmasi struktur H4\n- Risiko maksimal 1% per posisi\n\n## Pantangan\n- Tidak entry setelah 2 loss beruntun\n- Tidak menggeser stop loss menjauh"
+    },
+    "status": {
+        "date": "2026-09-25",
+        "pnl": 194,
+        "trades": 1,
+        "opening_balance": 17459,
+        "loss_limit": 523.77,
+        "loss_used": 0,
+        "loss_breached": false,
+        "profit_goal": 349.18,
+        "profit_reached": false,
+        "max_trades": 3,
+        "trades_breached": false,
+        "drawdown_pct": 0.01,
+        "max_drawdown_pct": 10,
+        "drawdown_breached": false,
+        "min_rr": 1.5,
+        "low_rr_trades": 0,
+        "has_rules": true
+    },
+    "basis": 6200
+}

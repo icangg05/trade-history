@@ -8,7 +8,8 @@ Rancangan lengkap ada di [RANCANGAN.md](RANCANGAN.md).
 ## Stack
 
 Laravel 13 · Inertia 3 + Vue 3 (TS) · Tailwind CSS 4 · shadcn-vue · MySQL 8.4 ·
-FrankenPHP (+ Octane di produksi) · Gemini `gemini-3.5-flash` · PWA
+FrankenPHP (+ Octane di produksi) · Gemini `gemini-3.5-flash` · PWA ·
+aplikasi mobile Flutter 3.47 di [`mobile/`](mobile/README.md) lewat API token Sanctum
 
 Tema **dark saja** — palet diambil dari blok `.dark` project `nfp`, di-flatten ke `:root`
 di [resources/css/app.css](resources/css/app.css). Tidak ada toggle terang/gelap.
@@ -36,6 +37,29 @@ npm run dev            # terminal 1
 php artisan serve      # terminal 2
 ```
 
+## Aplikasi mobile
+
+Aplikasi Android/iOS ada di [`mobile/`](mobile/README.md). Ia memakai `/api/v1`
+(`routes/api.php`) dengan token Sanctum — **controllernya sama dengan halaman web**:
+`Controller::page()` menjawab Inertia untuk browser dan JSON untuk `/api/*`, jadi tidak
+ada angka yang dihitung di dua tempat. Yang berbeda hanya dua hal:
+
+- **Masuk lewat token, bukan sesi.** `POST /api/v1/auth/login` (email, password,
+  device_name) mengembalikan token per perangkat; `auth/logout` mencabut token itu saja.
+  Admin tidak diberi token — perannya tetap di `/admin`.
+- **Akun ada di alamat, bukan di sesi:** `/api/v1/accounts/{account}/dashboard`,
+  `/trades`, `/calendar`, `/transactions`, `/rules`, `/analysis`. Middleware
+  `UseRouteAccount` memasangnya ke `$request->currentAccount()` dan memastikan trade /
+  transaksi di alamat itu memang milik akun tersebut.
+
+Setelah menarik perubahan ini, jalankan `php artisan migrate` (tabel
+`personal_access_tokens`).
+
+```bash
+cd mobile && flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
+```
+
 ## Perintah harian
 
 | Perintah | Guna |
@@ -45,6 +69,7 @@ php artisan serve      # terminal 2
 | `npm run build` | build aset produksi |
 | `docker compose exec app php artisan db:seed --class=DemoSeeder` | isi ulang data contoh |
 | `python3 scripts/make-icons.py` | buat ulang ikon PWA (butuh Pillow) |
+| `cd mobile && flutter test` | uji aplikasi mobile (model, format, seluruh layar) |
 
 Container `app` berjalan dalam mode klasik FrankenPHP, jadi perubahan kode PHP langsung
 terpakai tanpa restart. Produksi memakai stage `production` di `Dockerfile` (Octane
@@ -62,6 +87,10 @@ resources/js/pages/              Dashboard, Trades, Calendar, Transactions, Rule
                                  Analysis, Accounts, Profile, Login, Register
 resources/js/components/         EquityChart & MonthlyPnlChart (SVG murni), PnlCalendar,
                                  RuleStatusBanner, AiImportDialog
+app/Http/Controllers/Api/        AuthController — login/daftar/keluar lewat token (mobile)
+app/Http/Middleware/UseRouteAccount.php   akun aktif dari alamat /api/v1/accounts/{id}
+routes/api.php                   API mobile; controllernya sama dengan web
+mobile/                          aplikasi Flutter (Android & iOS)
 public/manifest.webmanifest      PWA
 public/sw.js                     service worker (cache aset build saja)
 scripts/make-icons.py            generator ikon PWA

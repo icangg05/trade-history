@@ -1,0 +1,274 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'support.dart';
+
+/// Aplikasi utuh dijalankan di layar 360 px dengan jawaban server rekaman.
+/// Yang dijaga: tiap layar benar-benar tampil (tanpa galat tata letak di
+/// layar sempit), dan aksi utama mengirim permintaan yang benar.
+void main() {
+  setUpAll(setUpFormatting);
+
+  testWidgets('belum masuk → layar login, lalu masuk ke dashboard', (
+    tester,
+  ) async {
+    final server = await pumpApp(
+      tester,
+      loggedIn: false,
+      routes: {
+        'GET auth/options': (_) => {
+          'app_name': 'Trade History',
+          'can_register': true,
+        },
+      },
+    );
+
+    expect(find.text('Masuk ke jurnal trading kamu.'), findsOneWidget);
+    expect(find.text('https://trade.contoh.test'), findsOneWidget);
+    expect(find.text('Belum punya akun? Daftar'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Email'),
+      'demo@contoh.com',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Kata sandi'),
+      'rahasia123',
+    );
+    await tester.tap(find.text('Masuk'));
+    await tester.pumpAndSettle();
+
+    final login = server.requests.firstWhere(
+      (request) => request.path == 'auth/login',
+    );
+    expect(login.data, containsPair('email', 'demo@contoh.com'));
+    expect(login.data, contains('device_name'));
+
+    expect(find.text('Dashboard'), findsWidgets);
+    expect(find.text('Demo XAUUSD'), findsOneWidget);
+  });
+
+  testWidgets('login yang ditolak menampilkan alasannya', (tester) async {
+    await pumpApp(
+      tester,
+      loggedIn: false,
+      routes: {
+        'POST auth/login': (_) => const Reply(422, {
+          'message': 'Email atau kata sandi tidak cocok.',
+          'errors': {
+            'email': ['Email atau kata sandi tidak cocok.'],
+          },
+        }),
+      },
+    );
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Email'),
+      'salah@contoh.com',
+    );
+    await tester.tap(find.text('Masuk'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Email atau kata sandi tidak cocok.'), findsOneWidget);
+    expect(find.text('Masuk ke jurnal trading kamu.'), findsOneWidget);
+  });
+
+  testWidgets(
+    'dashboard: kartu angka, kurva, aturan hari ini, trade terakhir',
+    (tester) async {
+      await pumpApp(tester);
+
+      expect(find.text('SALDO'), findsOneWidget);
+      expect(find.text('17.653,00 USC'), findsOneWidget);
+      expect(find.text('Perkembangan akun'), findsOneWidget);
+
+      await tester.scrollUntilVisible(find.text('Hari ini'), 300);
+      expect(find.text('Hari ini'), findsOneWidget);
+
+      await tester.scrollUntilVisible(find.text('Trade terakhir'), 300);
+      expect(find.text('Trade terakhir'), findsOneWidget);
+    },
+  );
+
+  testWidgets('semua tab dan halaman "Lainnya" tampil tanpa galat', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    await tester.tap(find.text('Kalender'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sen'), findsOneWidget);
+    expect(find.textContaining('hari hijau'), findsOneWidget);
+
+    await tester.tap(find.text('Trade').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Riwayat trade'), findsOneWidget);
+    expect(find.textContaining('trade tercatat'), findsOneWidget);
+
+    await tester.tap(find.text('Dana'));
+    await tester.pumpAndSettle();
+    expect(find.text('SALDO SEKARANG'), findsOneWidget);
+
+    await tester.tap(find.text('Lainnya'));
+    await tester.pumpAndSettle();
+
+    for (final (menu, marker) in [
+      ('Aturan trading', 'Catatan pribadi'),
+      ('Analisa', 'Statistik dihitung'),
+      ('Laporan tahunan', 'Berkas PDF A4'),
+      ('Akun trading', 'Tiap akun punya riwayat'),
+      ('Profil', 'Data login kamu.'),
+    ]) {
+      await tester.tap(find.text(menu).first);
+      await tester.pumpAndSettle();
+      expect(find.textContaining(marker), findsWidgets, reason: menu);
+
+      // `pageBack()` mencari tooltip "Back"; aplikasinya berbahasa Indonesia.
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+    }
+  });
+
+  testWidgets('detail trade bergrup bisa mengubah grupnya', (tester) async {
+    final server = await pumpApp(
+      tester,
+      routes: {
+        'PUT accounts/1/trades/group/.+': (_) => {
+          'message': 'Grup diperbarui.',
+        },
+      },
+    );
+
+    await tester.tap(find.text('Trade').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('USDJPY').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Satu grup dengan 1 trade lain'), findsOneWidget);
+    expect(find.text('Entry'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Simpan grup'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Simpan grup'));
+    await tester.pumpAndSettle();
+
+    expect(
+      server.requests.where((request) => request.method == 'PUT'),
+      hasLength(1),
+    );
+    expect(find.text('Grup diperbarui.'), findsOneWidget);
+  });
+
+  testWidgets(
+    'form trade: umpan balik TP salah sisi, RR rencana, lalu simpan',
+    (tester) async {
+      final server = await pumpApp(
+        tester,
+        routes: {
+          'POST accounts/1/trades': (_) =>
+              const Reply(201, {'message': 'Trade XAUUSD tersimpan.'}),
+        },
+      );
+
+      await tester.tap(find.text('Trade').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Trade baru'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Simbol *'),
+        'xauusd',
+      );
+      await tester.enterText(find.widgetWithText(TextField, 'Entry *'), '2400');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Stop loss'),
+        '2390',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Take profit'),
+        '2380',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('TP harus di atas entry.'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Take profit'),
+        '2430',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('TP harus di atas entry.'), findsNothing);
+      expect(find.textContaining('3,00R'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Hasil (USC) *'),
+        '150,5',
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Simpan').first);
+      await tester.pumpAndSettle();
+
+      final saved = jsonDecode(
+        jsonEncode(server.requests.firstWhere((r) => r.method == 'POST').data),
+      ) as Map;
+
+      expect(saved['symbol'], 'XAUUSD');
+      expect(saved['entry_price'], 2400);
+      expect(saved['pnl'], 150.5);
+      expect(saved['closed_at'], saved['opened_at']);
+      expect(saved['source'], 'manual');
+      expect(find.text('Riwayat trade'), findsOneWidget);
+      expect(find.text('Trade XAUUSD tersimpan.'), findsOneWidget);
+    },
+  );
+
+  testWidgets('galat isian dari server tampil di kolomnya', (tester) async {
+    await pumpApp(
+      tester,
+      routes: {
+        'POST accounts/1/trades': (_) => const Reply(422, {
+          'message': 'validation.required',
+          'errors': {
+            'symbol': ['validation.required'],
+            'pnl': ['validation.required'],
+          },
+        }),
+      },
+    );
+
+    await tester.tap(find.text('Trade').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Simpan').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wajib diisi.'), findsWidgets);
+    expect(find.text('Trade baru'), findsOneWidget);
+  });
+
+  testWidgets('keluar mencabut token dan kembali ke login', (tester) async {
+    final server = await pumpApp(tester);
+
+    await tester.tap(find.text('Lainnya'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Keluar'), 200);
+    await tester.tap(find.text('Keluar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Keluar'));
+    await tester.pumpAndSettle();
+
+    expect(
+      server.requests.any((request) => request.path == 'auth/logout'),
+      isTrue,
+    );
+    expect(find.text('Masuk ke jurnal trading kamu.'), findsOneWidget);
+  });
+}

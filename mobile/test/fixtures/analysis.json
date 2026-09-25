@@ -1,0 +1,189 @@
+{
+    "period": "30d",
+    "summary": {
+        "period": {
+            "from": "2026-08-26",
+            "to": "2026-09-25"
+        },
+        "currency": "USC",
+        "initial_balance": 5000,
+        "balance": 17653,
+        "net_flow": 1200,
+        "total_trades": 26,
+        "wins": 17,
+        "losses": 9,
+        "breakeven": 0,
+        "win_rate_pct": 65.4,
+        "net_pnl": 2435,
+        "gross_profit": 3702,
+        "gross_loss": 1267,
+        "profit_factor": 2.92,
+        "expectancy": 93.65,
+        "avg_win": 217.76,
+        "avg_loss": 140.78,
+        "payoff_ratio": 1.55,
+        "largest_win": 274,
+        "largest_loss": -219,
+        "avg_rr_planned": 2.39,
+        "avg_rr_realized": 1.2,
+        "max_drawdown": {
+            "amount": 840,
+            "pct": 6.64
+        },
+        "longest_win_streak": 5,
+        "longest_loss_streak": 5,
+        "by_symbol": {
+            "USDJPY": {
+                "trades": 14,
+                "pnl": 1172,
+                "win_rate_pct": 64.3
+            },
+            "XAUUSD": {
+                "trades": 5,
+                "pnl": 761,
+                "win_rate_pct": 80
+            },
+            "GBPUSD": {
+                "trades": 4,
+                "pnl": 526,
+                "win_rate_pct": 75
+            },
+            "EURUSD": {
+                "trades": 3,
+                "pnl": -24,
+                "win_rate_pct": 33.3
+            }
+        },
+        "by_direction": {
+            "buy": {
+                "trades": 14,
+                "pnl": 1642,
+                "win_rate_pct": 71.4
+            },
+            "sell": {
+                "trades": 12,
+                "pnl": 793,
+                "win_rate_pct": 58.3
+            }
+        },
+        "by_weekday": {
+            "Rabu": {
+                "trades": 6,
+                "pnl": 1092,
+                "win_rate_pct": 83.3
+            },
+            "Jumat": {
+                "trades": 6,
+                "pnl": -211,
+                "win_rate_pct": 33.3
+            },
+            "Selasa": {
+                "trades": 6,
+                "pnl": 1114,
+                "win_rate_pct": 83.3
+            },
+            "Sabtu": {
+                "trades": 4,
+                "pnl": 79,
+                "win_rate_pct": 50
+            },
+            "Kamis": {
+                "trades": 2,
+                "pnl": 288,
+                "win_rate_pct": 100
+            },
+            "Senin": {
+                "trades": 2,
+                "pnl": 73,
+                "win_rate_pct": 50
+            }
+        },
+        "by_hour": {
+            "18:00": {
+                "trades": 9,
+                "pnl": 500,
+                "win_rate_pct": 55.6
+            },
+            "19:00": {
+                "trades": 7,
+                "pnl": -325,
+                "win_rate_pct": 28.6
+            },
+            "16:00": {
+                "trades": 4,
+                "pnl": 825,
+                "win_rate_pct": 100
+            },
+            "20:00": {
+                "trades": 2,
+                "pnl": 494,
+                "win_rate_pct": 100
+            },
+            "15:00": {
+                "trades": 1,
+                "pnl": 274,
+                "win_rate_pct": 100
+            },
+            "21:00": {
+                "trades": 1,
+                "pnl": 258,
+                "win_rate_pct": 100
+            },
+            "17:00": {
+                "trades": 1,
+                "pnl": 179,
+                "win_rate_pct": 100
+            },
+            "13:00": {
+                "trades": 1,
+                "pnl": 230,
+                "win_rate_pct": 100
+            }
+        },
+        "by_setup": {
+            "(tanpa setup)": {
+                "trades": 8,
+                "pnl": 1021,
+                "win_rate_pct": 75
+            },
+            "Liquidity sweep": {
+                "trades": 7,
+                "pnl": 714,
+                "win_rate_pct": 71.4
+            },
+            "Break of structure": {
+                "trades": 6,
+                "pnl": -26,
+                "win_rate_pct": 33.3
+            },
+            "Order block": {
+                "trades": 5,
+                "pnl": 726,
+                "win_rate_pct": 80
+            }
+        },
+        "violations": {
+            "2026-09-05": [
+                "RR di bawah minimum"
+            ],
+            "2026-08-29": [
+                "RR di bawah minimum"
+            ],
+            "2026-09-11": [
+                "rugi satu trade melewati batas risiko"
+            ],
+            "2026-09-12": [
+                "rugi satu trade melewati batas risiko"
+            ],
+            "2026-09-23": [
+                "entry di luar sesi yang diizinkan"
+            ],
+            "2026-08-28": [
+                "rugi satu trade melewati batas risiko"
+            ]
+        }
+    },
+    "aiEnabled": false,
+    "model": "gemini-3.5-flash-lite",
+    "analysis": null
+}

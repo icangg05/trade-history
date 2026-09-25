@@ -1,0 +1,8 @@
+{
+    "user": {
+        "id": 1,
+        "name": "Trader Demo",
+        "email": "demo@contoh.com"
+    },
+    "accountCount": 1
+}

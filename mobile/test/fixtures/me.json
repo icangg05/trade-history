@@ -1,0 +1,17 @@
+{
+    "user": {
+        "id": 1,
+        "name": "Trader Demo",
+        "email": "demo@contoh.com"
+    },
+    "accounts": [
+        {
+            "id": 1,
+            "name": "Demo XAUUSD",
+            "broker": "Exness",
+            "currency": "USC",
+            "initial_balance": 5000,
+            "started_at": "2026-01-01"
+        }
+    ]
+}

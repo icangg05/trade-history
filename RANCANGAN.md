@@ -611,3 +611,39 @@ tetap terbuka di §15.
 | Filter `setup` dan pencarian `q` di `/trades` | analisa sudah memecah hasil per setup, tapi daftar tradenya tidak bisa dibuka. `setup` disimpan sebagai daftar dipisah koma sehingga dicocokkan sebagian; `%` dan `_` di kata kunci di-escape supaya tetap jadi karakter biasa, bukan wildcard yang mencocokkan semuanya |
 | Daftar strategi di filter datang dari trade akun itu sendiri | daftar bawaan `SetupPicker` berisi 29 nama; menawarkan filter untuk strategi yang tidak pernah dipakai cuma memperbesar daftar tanpa menambah jawaban |
 | Lima uji baru (106 lulus, dari 101) | yang menyentuh uang dijaga: transaksi bisa diperbaiki tanpa unggah ulang, bukti pengganti membuang berkas lamanya, transaksi akun lain tetap 404, dolar dan rupiah tidak pernah dijumlahkan jadi satu angka, dan `%` di kolom pencarian tidak mengembalikan seluruh isi tabel |
+
+
+---
+
+## 17. Aplikasi mobile (Flutter)
+
+Jurnal ini dipakai dari ponsel sambil trading; PWA sudah bisa dipasang, tapi input
+angka, kamera, dan berbagi berkas terasa lebih pas sebagai aplikasi sungguhan. Folder
+`mobile/` berisi aplikasi Flutter 3.47 (Dart 3.13) untuk Android & iOS; server tetap
+satu-satunya yang menghitung.
+
+| Keputusan | Alasan |
+|---|---|
+| Controller web yang sama menjawab JSON di bawah `/api` (`Controller::page()`, `done()`, `failed()`) | API terpisah berarti props halaman ditulis dua kali — saldo, winrate, dan pelanggaran aturan di ponsel bisa berbeda dari browser tanpa ada yang sadar. Sekarang perbedaannya cuma bentuk jawaban: Inertia untuk browser, JSON untuk `/api/*`, pesan flash jadi `{message}`, `back()->with('error')` jadi 422 |
+| Token Sanctum per perangkat, bukan sesi | ponsel tidak punya cookie yang bisa diandalkan. Satu token per perangkat bisa dicabut sendiri-sendiri: keluar hanya mencabut token perangkat itu, ganti sandi mencabut semua token lain (sesi browser lain tetap lewat `logoutOtherDevices`), hapus pengguna ikut membuang tokennya (`User::booted()` — relasi morph tidak kena cascade) |
+| Akun aktif di alamat (`/api/v1/accounts/{account}/…`), dipasang `UseRouteAccount` ke macro `currentAccount()` | API tanpa sesi tidak bisa menyimpan "akun yang sedang dibuka". Dengan macro yang sama, controller web tidak perlu tahu dari mana akunnya datang. Parameter `account` dilepas dari rute supaya tidak menggeser argumen controller |
+| `UseRouteAccount` mengecek trade/transaksi milik akun di alamat itu | `Route::bind` hanya memastikan barisnya milik pengguna. Tanpa cek ini, `DELETE accounts/A/trades/{trade milik akun B}` tetap jalan |
+| Akun arsip 404 di API | web pun tidak bisa membukanya (`SetCurrentAccount` melewatinya); dikeluarkan dari arsip lewat daftar akun |
+| Admin tidak diberi token | perannya mengurus pengguna & kunci Gemini di `/admin`, bukan mencatat trade — sama dengan `EnsureTrader` |
+| Pendaftaran lewat `RegisterRequest` bersama | aturan token pendaftaran (hash_equals, 404 saat REGISTER_TOKEN kosong — sebelum satu isian pun divalidasi) cukup ditulis sekali untuk web dan mobile |
+| `Period::resolve()` | dashboard dan analisa punya salinan logika rentang 30/90/365/semua yang identik; aplikasi mobile menambah konsumen ketiga |
+| Riverpod 3 + go_router 18 + Dio 5 | state per akun lewat `FutureProvider.family`; satu `revisionProvider` dinaikkan tiap simpan supaya semua layar segar tanpa diurus satu per satu |
+| Masih `package:flutter/material.dart`, belum `material_ui` | fl_chart dan flutter_markdown_plus belum pindah; go_router 18 sudah, sehingga MaterialApp lama tidak dikenalinya — tiap rute memakai `pageBuilder` + `MaterialPage` supaya transisi tetap ada |
+| IBM Plex dibundel di `mobile/assets/fonts` | sama dengan web yang menyajikan fontnya sendiri; tanpa jaringan pun angka tetap rata ber-font mono |
+| Format angka & tanggal diport dari `useFormat.ts` dan diuji terhadap keluaran `Intl` browser | `US$1.234,50`, `Rp 1.234.567`, minus tipografis untuk nilai bertanda — angka yang sama tidak boleh terbaca beda di dua klien |
+| Waktu dibaca sebagai jam dinding server | server menyimpan dalam `APP_TIMEZONE` dan mengirim sebagian dengan offset; ponsel di zona lain tidak boleh menggeser jam trade |
+| Uji layar memakai jawaban API rekaman (`mobile/test/fixtures`) | 38 uji Flutter menjalankan aplikasi utuh di layar 360 px — galat tata letak dan alur (login, form trade, grouping, filter, dana, aturan, chat) ketahuan tanpa perangkat |
+
+Temuan saat membangun klien kedua, **belum** diperbaiki di sisi server:
+
+- Tidak ada `lang/id/validation.php`, jadi pesan validasi bawaan keluar sebagai kuncinya
+  (`validation.required`) — di web maupun API. Aplikasi mobile menerjemahkannya sendiri
+  (`validationMessage()`); web masih menampilkannya mentah.
+- Form profil web selalu mengirim `current_password: ''`, sehingga mengganti **nama saja**
+  ditolak `validation.current_password`. Uji `ProfileTest` tidak menangkapnya karena
+  tidak mengirim kolom itu. Aplikasi mobile tidak kena: kolom sandi yang kosong tidak dikirim.
