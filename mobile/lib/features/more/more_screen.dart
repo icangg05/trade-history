@@ -48,9 +48,11 @@ class MoreScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(14),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => showAvatarSheet(context),
-                    child: const UserAvatar(radius: 20),
+                  IconButton(
+                    tooltip: 'Foto profil',
+                    padding: EdgeInsets.zero,
+                    onPressed: () => showAvatarSheet(context),
+                    icon: const UserAvatar(radius: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

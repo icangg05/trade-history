@@ -15,6 +15,19 @@ import '../../widgets/skeleton.dart';
 import '../../widgets/setup_picker.dart';
 import 'ai_import_sheet.dart';
 
+/// Keterangan, tombol isi dari screenshot, lalu kartu simbol & arah, harga,
+/// hasil, dan setup.
+const _loading = SkeletonView(
+  children: [
+    Bone(width: 260, height: 10),
+    SkeletonField(),
+    Panel(child: SkeletonFields()),
+    Panel(child: SkeletonFields(count: 3)),
+    Panel(child: SkeletonFields(count: 2)),
+    SkeletonPanel(child: Bone(height: 60)),
+  ],
+);
+
 final _formProvider = FutureProvider.autoDispose
     .family<(Trade?, bool), (int, String?)>(
       (ref, key) => ref.watch(journalProvider).tradeForm(key.$1, key.$2),
@@ -33,7 +46,7 @@ class TradeFormScreen extends ConsumerWidget {
     final account = ref.watch(currentAccountProvider).value;
 
     if (account == null) {
-      return Scaffold(appBar: AppBar(), body: const SkeletonPage(rows: 3));
+      return Scaffold(appBar: AppBar(), body: _loading);
     }
 
     final key = (account.id, tradeId);
@@ -41,8 +54,7 @@ class TradeFormScreen extends ConsumerWidget {
     return ref
         .watch(_formProvider(key))
         .when(
-          loading: () =>
-              Scaffold(appBar: AppBar(), body: const SkeletonPage(rows: 3)),
+          loading: () => Scaffold(appBar: AppBar(), body: _loading),
           error: (error, _) => Scaffold(
             appBar: AppBar(),
             body: ErrorView(
@@ -407,7 +419,6 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
   @override
   Widget build(BuildContext context) {
     const gap = SizedBox(height: 14);
-    const hgap = SizedBox(width: 10);
 
     return Scaffold(
       appBar: AppBar(
@@ -497,31 +508,18 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
                   required: true,
                 ),
                 gap,
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _number(
-                        _sl,
-                        'Stop loss',
-                        'sl_price',
-                        hint: '2405.00',
-                      ),
-                    ),
-                    hgap,
-                    Expanded(
-                      child: _number(
-                        _tp,
-                        'Take profit',
-                        'tp_price',
-                        hint: '2430.00',
-                        note: _tpSideWrong
-                            ? 'TP harus di ${_direction == 'buy' ? 'atas' : 'bawah'} entry.'
-                            : null,
-                        noteColor: AppColors.destructive,
-                      ),
-                    ),
-                  ],
+                FieldPair(
+                  _number(_sl, 'Stop loss', 'sl_price', hint: '2405.00'),
+                  _number(
+                    _tp,
+                    'Take profit',
+                    'tp_price',
+                    hint: '2430.00',
+                    note: _tpSideWrong
+                        ? 'TP harus di ${_direction == 'buy' ? 'atas' : 'bawah'} entry.'
+                        : null,
+                    noteColor: AppColors.destructive,
+                  ),
                 ),
                 if (_stopNote != null) ...[
                   const SizedBox(height: 10),
@@ -558,29 +556,21 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
                 gap,
                 _timeField('Ditutup', _closedAt, 'closed_at', closed: true),
                 gap,
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _number(
-                        _exit,
-                        'Harga keluar',
-                        'exit_price',
-                        hint: 'Opsional',
-                      ),
-                    ),
-                    hgap,
-                    Expanded(
-                      child: _number(
-                        _pnl,
-                        'Hasil (${widget.currency})',
-                        'pnl',
-                        hint: 'Untung/rugi',
-                        required: true,
-                        signed: true,
-                      ),
-                    ),
-                  ],
+                FieldPair(
+                  _number(
+                    _exit,
+                    'Harga keluar',
+                    'exit_price',
+                    hint: 'Opsional',
+                  ),
+                  _number(
+                    _pnl,
+                    'Hasil (${widget.currency})',
+                    'pnl',
+                    hint: 'Untung/rugi',
+                    required: true,
+                    signed: true,
+                  ),
                 ),
               ],
             ),

@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../models/account.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 
 final accountsProvider = FutureProvider.autoDispose<AccountsPage>((ref) {
   ref.watch(revisionProvider);
@@ -17,6 +18,42 @@ final accountsProvider = FutureProvider.autoDispose<AccountsPage>((ref) {
 
 /// Akun trading. Tiap akun punya riwayat dan aturan sendiri; ini juga
 /// satu-satunya layar yang menjumlahkan seluruh akun (per mata uang).
+/// Satu kartu akun: nama, broker, saldo, P/L, lalu tombol-tombolnya.
+const _accountCard = Panel(
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Bone(width: 140, height: 14),
+      SizedBox(height: 8),
+      Bone(width: 200, height: 9),
+      SizedBox(height: 14),
+      Bone(width: 130, height: 18),
+      SizedBox(height: 6),
+      Bone(width: 110, height: 10),
+      SizedBox(height: 14),
+      Row(
+        children: [
+          SkeletonField(width: 72),
+          Spacer(),
+          Bone(width: 20, height: 20),
+          SizedBox(width: 24),
+          Bone(width: 20, height: 20),
+          SizedBox(width: 12),
+        ],
+      ),
+    ],
+  ),
+);
+
+const _loading = SkeletonView(
+  children: [
+    Bone(width: 220, height: 10),
+    _accountCard,
+    _accountCard,
+    _accountCard,
+  ],
+);
+
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
 
@@ -66,6 +103,7 @@ class AccountsScreen extends ConsumerWidget {
         child: AsyncView(
           value: ref.watch(accountsProvider),
           onRetry: () => ref.invalidate(accountsProvider),
+          loading: _loading,
           builder: (page) => ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
             children: [
@@ -93,86 +131,89 @@ class AccountsScreen extends ConsumerWidget {
                 const SizedBox(height: 14),
               ],
               for (final row in page.items) ...[
-                Opacity(
-                  opacity: row.isArchived ? .6 : 1,
-                  child: Panel(
-                    borderColor: row.id == active
-                        ? AppColors.gold.withValues(alpha: .4)
-                        : null,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                row.name,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                // Arsip ditandai pil "Arsip" dan nama yang diabukan, bukan
+                // seluruh kartu diredupkan: opasitas 60% menjatuhkan semua
+                // teksnya ke 3:1.
+                Panel(
+                  borderColor: row.id == active
+                      ? AppColors.gold.withValues(alpha: .4)
+                      : null,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              row.name,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: row.isArchived
+                                    ? AppColors.mutedForeground
+                                    : null,
                               ),
                             ),
-                            if (row.id == active) const _Pill('Aktif'),
-                            if (row.isArchived)
-                              const _Pill(
-                                'Arsip',
-                                color: AppColors.mutedForeground,
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Caption(
-                          [
-                            row.broker ?? 'Tanpa broker',
-                            if ((row.accountNumber ?? '').isNotEmpty)
-                              row.accountNumber!,
-                            row.currency,
-                            '${row.trades} trade',
-                          ].join(' · '),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          money(row.balance, row.currency),
-                          style: mono(size: 18, weight: FontWeight.w600),
-                        ),
-                        Text(
-                          '${money(row.netPnl, row.currency, signed: true)} dari trading',
-                          style: mono(size: 12, color: pnlColor(row.netPnl)),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            if (row.id != active && !row.isArchived)
-                              OutlinedButton(
-                                onPressed: () {
-                                  ref
-                                      .read(selectedAccountProvider.notifier)
-                                      .select(row.id);
-                                  context.go('/');
-                                },
-                                child: const Text('Buka'),
-                              ),
-                            const Spacer(),
-                            IconButton(
-                              tooltip: 'Ubah',
-                              onPressed: () =>
-                                  showAccountForm(context, editing: row),
-                              icon: const Icon(Icons.edit_outlined, size: 20),
+                          ),
+                          if (row.id == active) const _Pill('Aktif'),
+                          if (row.isArchived)
+                            const _Pill(
+                              'Arsip',
+                              color: AppColors.mutedForeground,
                             ),
-                            IconButton(
-                              tooltip: 'Hapus',
-                              onPressed: () => _delete(context, ref, row),
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                size: 20,
-                                color: AppColors.destructive,
-                              ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Caption(
+                        [
+                          row.broker ?? 'Tanpa broker',
+                          if ((row.accountNumber ?? '').isNotEmpty)
+                            row.accountNumber!,
+                          row.currency,
+                          '${row.trades} trade',
+                        ].join(' · '),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        money(row.balance, row.currency),
+                        style: mono(size: 18, weight: FontWeight.w600),
+                      ),
+                      Text(
+                        '${money(row.netPnl, row.currency, signed: true)} dari trading',
+                        style: mono(size: 12, color: pnlColor(row.netPnl)),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          if (row.id != active && !row.isArchived)
+                            OutlinedButton(
+                              onPressed: () {
+                                ref
+                                    .read(selectedAccountProvider.notifier)
+                                    .select(row.id);
+                                context.go('/');
+                              },
+                              child: const Text('Buka'),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          const Spacer(),
+                          IconButton(
+                            tooltip: 'Ubah',
+                            onPressed: () =>
+                                showAccountForm(context, editing: row),
+                            icon: const Icon(Icons.edit_outlined, size: 20),
+                          ),
+                          IconButton(
+                            tooltip: 'Hapus',
+                            onPressed: () => _delete(context, ref, row),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              size: 20,
+                              color: AppColors.destructive,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -199,7 +240,7 @@ class _Pill extends StatelessWidget {
       color: color.withValues(alpha: .15),
       borderRadius: BorderRadius.circular(99),
     ),
-    child: Text(label, style: TextStyle(fontSize: 10.5, color: color)),
+    child: Text(label, style: TextStyle(fontSize: 11, color: color)),
   );
 }
 
@@ -344,62 +385,51 @@ class _AccountFormState extends ConsumerState<_AccountForm> {
             ),
           ),
           gap,
-          DropdownButtonFormField<String>(
-            isExpanded: true,
-            initialValue: _currency,
-            decoration: InputDecoration(
-              labelText: 'Mata uang *',
-              errorText: _errors['currency'],
-            ),
-            items: [
-              for (final (code, label) in currencies)
-                DropdownMenuItem(value: code, child: Text(label)),
-            ],
-            onChanged: (value) => setState(() => _currency = value ?? 'USD'),
+          SelectField(
+            label: 'Mata uang *',
+            value: _currency,
+            errorText: _errors['currency'],
+            options: currencies,
+            onChanged: (value) => setState(() => _currency = value),
           ),
           gap,
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _balance,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  style: mono(size: 14),
-                  decoration: InputDecoration(
-                    labelText: 'Saldo awal ($_currency) *',
-                    hintText: '10000',
-                    errorText: _errors['initial_balance'],
-                  ),
+          FieldPair(
+            TextField(
+              controller: _balance,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              style: mono(size: 14),
+              decoration: InputDecoration(
+                labelText: 'Saldo awal ($_currency) *',
+                hintText: '10000',
+                errorText: _errors['initial_balance'],
+              ),
+            ),
+            InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _startedAt,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now().add(const Duration(days: 366)),
+                );
+                if (picked != null) setState(() => _startedAt = picked);
+              },
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Mulai *',
+                  errorText: _errors['started_at'],
+                ),
+                child: Text(
+                  longDate(_startedAt),
+                  style: const TextStyle(fontSize: 14),
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: InkWell(
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _startedAt,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now().add(const Duration(days: 366)),
-                    );
-                    if (picked != null) setState(() => _startedAt = picked);
-                  },
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: 'Mulai *',
-                      errorText: _errors['started_at'],
-                    ),
-                    child: Text(
-                      longDate(_startedAt),
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
+            // "26 September 2026" butuh lebih dari separuh lebar ponsel
+            // 360 dp; tanpa ini tanggalnya turun jadi dua baris.
+            minWidth: 165,
           ),
           if (widget.editing != null) ...[
             gap,

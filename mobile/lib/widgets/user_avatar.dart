@@ -9,6 +9,7 @@ import '../data/journal_api.dart';
 import '../data/session.dart';
 import 'avatar_cropper.dart';
 import 'common.dart';
+import 'image_viewer.dart';
 
 /// Foto profil bulat; inisial nama selama belum ada foto atau fotonya gagal dimuat.
 class UserAvatar extends ConsumerWidget {
@@ -27,12 +28,7 @@ class UserAvatar extends ConsumerWidget {
       radius: radius,
       backgroundColor: AppColors.gold.withValues(alpha: .15),
       foregroundColor: AppColors.gold,
-      foregroundImage: version == null
-          ? null
-          : NetworkImage(
-              api.avatarUrl(version),
-              headers: api.client.imageHeaders,
-            ),
+      foregroundImage: version == null ? null : _photo(api, version),
       // Gagal dimuat → inisialnya tetap tampil di bawah.
       onForegroundImageError: version == null ? null : (_, _) {},
       child: Text(
@@ -42,6 +38,11 @@ class UserAvatar extends ConsumerWidget {
     );
   }
 }
+
+/// Alamat yang sama dengan [UserAvatar]: layar penuhnya langsung memakai
+/// gambar yang sudah ada di cache.
+ImageProvider _photo(JournalApi api, String version) =>
+    NetworkImage(api.avatarUrl(version), headers: api.client.imageHeaders);
 
 /// Foto profil di ujung kiri app bar layar utama; diketuk untuk menggantinya.
 class HeaderAvatar extends ConsumerWidget {
@@ -63,77 +64,107 @@ Future<void> showAvatarSheet(BuildContext context) =>
       builder: (sheet) => Consumer(
         builder: (sheet, ref, _) {
           final user = ref.watch(meProvider).value?.user;
+          final version = user?.avatar;
+          final api = ref.watch(journalProvider);
 
           void pick(ImageSource source) {
             Navigator.pop(sheet);
             _change(context, source);
           }
 
+          // Bisa digulir: di ponsel yang dimiringkan lembar ini lebih pendek
+          // dari isinya, dan "Hapus foto" / "Profil" tak terjangkau.
           return SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                  child: Row(
-                    children: [
-                      const UserAvatar(radius: 28),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              user?.name ?? '',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Caption(user?.email ?? ''),
-                          ],
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: Row(
+                      children: [
+                        // Diketuk untuk melihatnya besar dan mengunduhnya.
+                        IconButton(
+                          tooltip: version == null ? null : 'Lihat foto profil',
+                          padding: EdgeInsets.zero,
+                          onPressed: version == null
+                              ? null
+                              : () => showImageViewer(
+                                  sheet,
+                                  image: _photo(api, version),
+                                  bytes: api.avatarBytes,
+                                  name: 'foto-profil',
+                                ),
+                          icon: const UserAvatar(radius: 28),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user?.name ?? '',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Caption(user?.email ?? ''),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.photo_library_outlined),
-                  title: const Text('Pilih dari galeri'),
-                  onTap: () => pick(ImageSource.gallery),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.photo_camera_outlined),
-                  title: const Text('Ambil foto'),
-                  onTap: () => pick(ImageSource.camera),
-                ),
-                if (user?.avatar != null)
                   ListTile(
-                    leading: const Icon(
-                      Icons.delete_outline,
-                      color: AppColors.destructive,
+                    leading: const Icon(Icons.photo_library_outlined),
+                    title: const Text('Pilih dari galeri'),
+                    onTap: () => pick(ImageSource.gallery),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo_camera_outlined),
+                    title: const Text('Ambil foto'),
+                    onTap: () => pick(ImageSource.camera),
+                  ),
+                  if (version != null)
+                    ListTile(
+                      leading: const Icon(
+                        Icons.delete_outline,
+                        color: AppColors.destructive,
+                      ),
+                      title: const Text(
+                        'Hapus foto',
+                        style: TextStyle(color: AppColors.destructive),
+                      ),
+                      onTap: () async {
+                        Navigator.pop(sheet);
+
+                        final ok = await confirm(
+                          context,
+                          title: 'Hapus foto profil?',
+                          message: 'Fotonya diganti inisial namamu.',
+                          action: 'Hapus',
+                          destructive: true,
+                        );
+
+                        if (ok && context.mounted) {
+                          await _save(context, (api) => api.deleteAvatar());
+                        }
+                      },
                     ),
-                    title: const Text(
-                      'Hapus foto',
-                      style: TextStyle(color: AppColors.destructive),
-                    ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.person_outline),
+                    title: const Text('Profil'),
                     onTap: () {
                       Navigator.pop(sheet);
-                      _save(context, (api) => api.deleteAvatar());
+                      context.go('/more/profile');
                     },
                   ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.person_outline),
-                  title: const Text('Profil'),
-                  onTap: () {
-                    Navigator.pop(sheet);
-                    context.go('/more/profile');
-                  },
-                ),
-                const SizedBox(height: 8),
-              ],
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           );
         },

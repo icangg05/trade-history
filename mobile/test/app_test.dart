@@ -71,6 +71,96 @@ void main() {
     expect(find.text('Masuk ke jurnal trading kamu.'), findsOneWidget);
   });
 
+  testWidgets('perkenalan: slide terakhir tidak menggeser isinya', (
+    tester,
+  ) async {
+    await pumpApp(tester, loggedIn: false, onboarded: false);
+
+    final top = tester.getTopLeft(find.byType(PageView));
+
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(find.text('Lanjut'));
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text('Mulai'), findsOneWidget);
+    // "Lewati" disembunyikan, tapi tempatnya tetap.
+    expect(tester.getTopLeft(find.byType(PageView)), top);
+  });
+
+  testWidgets('pemilih akun dengan banyak akun tetap bisa digulir', (
+    tester,
+  ) async {
+    final me = fixture('me');
+    final base = (me['accounts'] as List).first as Map<String, dynamic>;
+    me['accounts'] = [
+      for (var i = 1; i <= 12; i++) {...base, 'id': i, 'name': 'Akun $i'},
+    ];
+    await pumpApp(tester, routes: {'GET me': (_) => me});
+
+    await tester.tap(find.byIcon(Icons.expand_more).first);
+    await tester.pumpAndSettle();
+
+    // Judul dan "Kelola akun" tetap di tempat; daftarnya yang digulir.
+    expect(find.text('Kelola akun'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Akun 12'),
+      100,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Akun 12'), findsOneWidget);
+  });
+
+  testWidgets('ponsel miring: lembar dan dialog tetap muat', (tester) async {
+    await pumpApp(tester);
+
+    // Dialog berkode, lalu ponsel dimiringkan dengan keyboard terbuka:
+    // sisa tingginya sempit sekali.
+    await tester.tap(find.text('Dana'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hapus').last);
+    await tester.pumpAndSettle();
+    tester.view.physicalSize = const Size(2340, 1080);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 600);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    await tester.tap(find.text('Batal'));
+    tester.view.resetViewInsets();
+    await tester.pumpAndSettle();
+
+    // Lembar foto profil lebih tinggi dari layar miring: isinya digulir.
+    await tester.tap(find.byTooltip('Foto profil').first);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Profil'),
+      50,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Profil'), findsOneWidget);
+  });
+
+  testWidgets('FAB di tab lain tidak bentrok saat membuka form trade', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    // Halaman akun (FAB "Akun baru") tetap hidup di tab Lainnya.
+    await tester.tap(find.text('Lainnya'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Akun trading').first);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Trade').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FloatingActionButton, 'Trade'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Trade baru'), findsOneWidget);
+  });
+
   testWidgets('dashboard tanpa trade menunjukkan langkah pertama', (
     tester,
   ) async {

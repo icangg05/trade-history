@@ -82,10 +82,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       .read(prefsProvider)
       .setString(_key, jsonEncode(_messages.map((m) => m.toJson()).toList()));
 
+  /// Daftarnya terbalik (lihat [build]): pesan terakhir ada di offset 0.
   void _scrollDown() => WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (_scroll.hasClients) {
+    if (!_scroll.hasClients || !mounted) return;
+
+    // Animasi dimatikan di ponsel: langsung lompat ke pesan terakhir.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _scroll.jumpTo(0);
+    } else {
       _scroll.animateTo(
-        _scroll.position.maxScrollExtent,
+        0,
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
       );
@@ -110,9 +116,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       setState(() => _shown = shown >= text.length ? null : shown);
 
       if (_shown == null) timer.cancel();
-      if (_scroll.hasClients &&
-          _scroll.position.maxScrollExtent - _scroll.offset < 120) {
-        _scroll.jumpTo(_scroll.position.maxScrollExtent);
+      // Masih dekat pesan terakhir: tetap ikuti balasan yang sedang diketik.
+      if (_scroll.hasClients && _scroll.offset > 0 && _scroll.offset < 120) {
+        _scroll.jumpTo(0);
       }
     });
   }
@@ -169,6 +175,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       title: 'Bersihkan percakapan?',
       message: 'Riwayat chat di ponsel ini dihapus.',
       action: 'Bersihkan',
+      destructive: true,
     )) {
       return;
     }
@@ -232,51 +239,68 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             : Column(
                 children: [
                   Expanded(
-                    child: ListView(
-                      controller: _scroll,
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                      children: [
-                        if (_messages.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 32),
-                            child: Column(
-                              children: [
-                                const Icon(
-                                  Icons.auto_awesome,
-                                  color: AppColors.gold,
+                    child: _messages.isEmpty
+                        ? ListView(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 32,
                                 ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'Tanyakan apa saja soal cara kamu trading.',
-                                ),
-                                const SizedBox(height: 14),
-                                Wrap(
-                                  alignment: WrapAlignment.center,
-                                  spacing: 6,
-                                  runSpacing: 6,
+                                child: Column(
                                   children: [
-                                    for (final item in _suggestions)
-                                      ActionChip(
-                                        label: Text(
-                                          item,
-                                          style: const TextStyle(
-                                            fontSize: 11.5,
+                                    const Icon(
+                                      Icons.auto_awesome,
+                                      color: AppColors.gold,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    const Text(
+                                      'Tanyakan apa saja soal cara kamu trading.',
+                                    ),
+                                    const SizedBox(height: 14),
+                                    Wrap(
+                                      alignment: WrapAlignment.center,
+                                      spacing: 6,
+                                      runSpacing: 6,
+                                      children: [
+                                        for (final item in _suggestions)
+                                          ActionChip(
+                                            label: Text(
+                                              item,
+                                              style: const TextStyle(
+                                                fontSize: 11.5,
+                                              ),
+                                            ),
+                                            materialTapTargetSize:
+                                                MaterialTapTargetSize
+                                                    .shrinkWrap,
+                                            visualDensity: kDenseChip,
+                                            onPressed: () => _send(item),
                                           ),
-                                        ),
-                                        materialTapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                        visualDensity: kDenseChip,
-                                        onPressed: () => _send(item),
-                                      ),
+                                      ],
+                                    ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
+                          )
+                        // Terbalik dan dibangun seperlunya: dibuka langsung
+                        // di pesan terakhir, dan selama balasan diketik
+                        // (setState tiap frame) hanya gelembung yang terlihat
+                        // yang dibangun ulang — bukan markdown seluruh riwayat.
+                        : ListView.builder(
+                            controller: _scroll,
+                            reverse: true,
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                            itemCount: _messages.length + (_busy ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (_busy && index == 0) return const _Thinking();
+
+                              final at = index - (_busy ? 1 : 0);
+
+                              return _bubble(_messages.length - 1 - at);
+                            },
                           ),
-                        for (var i = 0; i < _messages.length; i++) _bubble(i),
-                        if (_busy) const _Thinking(),
-                      ],
-                    ),
                   ),
                   if (_error != null)
                     Padding(

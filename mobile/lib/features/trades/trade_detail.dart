@@ -107,6 +107,7 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
       context,
       title: 'Hapus trade ${trade.symbol}?',
       action: 'Hapus',
+      destructive: true,
     )) {
       return;
     }
@@ -147,10 +148,10 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
     children: [
       Caption(label),
       const SizedBox(height: 2),
+      // Boleh turun baris, tidak dipotong "…": jam buka/tutup dan harga
+      // adalah isi detail ini, bukan hiasan.
       Text(
         value,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
         style: mono(
           size: size,
           weight: size > 13 ? FontWeight.w600 : FontWeight.w400,
@@ -234,15 +235,17 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
             borderRadius: BorderRadius.circular(kRadius - 2),
             border: Border.all(color: tone.withValues(alpha: .25)),
           ),
-          child: Row(
+          // Wrap: dengan huruf sistem besar RR turun ke baris kedua, bukan
+          // memotong P/L jadi "+194,00…".
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            runSpacing: 8,
             children: [
-              Expanded(
-                child: _fact(
-                  'P/L',
-                  money(trade.pnl, widget.currency, signed: true),
-                  size: 18,
-                  color: tone,
-                ),
+              _fact(
+                'P/L',
+                money(trade.pnl, widget.currency, signed: true),
+                size: 18,
+                color: tone,
               ),
               _fact('RR hasil', rr(trade.rrRealized), size: 18, end: true),
             ],
@@ -251,14 +254,13 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
         const SizedBox(height: 14),
         // Baris setinggi isinya — bukan sel ber-rasio tetap yang
         // meninggalkan ruang kosong di bawah setiap angka.
+        // Nilainya pendek, jadi pasangannya bertahan lebih lama dari isian
+        // form sebelum ditumpuk (minWidth lebih kecil).
         for (final (left, right) in details) ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: _fact(left.$1, left.$2)),
-              const SizedBox(width: 12),
-              Expanded(child: _fact(right.$1, right.$2)),
-            ],
+          FieldPair(
+            _fact(left.$1, left.$2),
+            _fact(right.$1, right.$2),
+            minWidth: 100,
           ),
           const SizedBox(height: 10),
         ],

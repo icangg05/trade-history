@@ -15,6 +15,35 @@ import '../../widgets/trade_widgets.dart';
 import 'trade_detail.dart';
 import 'trade_filters_sheet.dart';
 
+/// Jumlah trade, lalu satu kartu riwayat: pita tanggal dan baris-baris trade.
+/// Barisnya sengaja lebih banyak dari tinggi layar ponsel mana pun — daftar
+/// kerangka terpotong di tepi bawah, jadi kartunya memenuhi sisa layar
+/// seperti riwayat sungguhan, bukan berhenti di tengah.
+const _loading = SkeletonView(
+  padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+  children: [
+    Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4),
+      child: Bone(width: 140, height: 10),
+    ),
+    Panel(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        children: [
+          Bone(height: 22, radius: 0),
+          SkeletonTradeRows(),
+          Bone(height: 22, radius: 0),
+          SkeletonTradeRows(count: 5),
+          Bone(height: 22, radius: 0),
+          SkeletonTradeRows(count: 8),
+          Bone(height: 22, radius: 0),
+          SkeletonTradeRows(count: 12),
+        ],
+      ),
+    ),
+  ],
+);
+
 /// Riwayat yang sudah dimuat, halaman demi halaman.
 class TradeList {
   const TradeList({
@@ -177,6 +206,7 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
   @override
   Widget build(BuildContext context) => AccountScaffold(
     title: 'Riwayat trade',
+    loading: _loading,
     actions: (account) => [
       IconButton(
         tooltip: _grouping ? 'Batal grouping' : 'Grouping',
@@ -225,6 +255,7 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
         child: AsyncView(
           value: ref.watch(tradesProvider(query)),
           onRetry: () => ref.invalidate(tradesProvider(query)),
+          loading: _loading,
           builder: (list) => _list(list, account),
         ),
       );
@@ -377,8 +408,15 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
               if (list.loadingMore)
                 const SliverPadding(
                   padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  // Beberapa baris, bukan satu: halaman berikutnya memang
+                  // berisi banyak trade.
                   sliver: SliverToBoxAdapter(
-                    child: Shimmer(child: SkeletonRow()),
+                    child: Shimmer(
+                      child: Panel(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: SkeletonTradeRows(),
+                      ),
+                    ),
                   ),
                 ),
               if (rows.isNotEmpty && !list.hasMore)
@@ -489,17 +527,18 @@ class _DayHeader extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     color: AppColors.muted.withValues(alpha: .5),
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-    child: Row(
+    // Wrap: dengan huruf sistem besar P/L-nya turun ke baris sendiri, bukan
+    // memeras tanggal jadi tiga baris.
+    child: Wrap(
+      alignment: WrapAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Text(
-            longDate(day).toUpperCase(),
-            style: const TextStyle(
-              fontSize: 10,
-              letterSpacing: .6,
-              fontWeight: FontWeight.w500,
-              color: AppColors.mutedForeground,
-            ),
+        Text(
+          longDate(day).toUpperCase(),
+          style: const TextStyle(
+            fontSize: 11,
+            letterSpacing: .6,
+            fontWeight: FontWeight.w500,
+            color: AppColors.mutedForeground,
           ),
         ),
         if (pnl != null)

@@ -11,6 +11,7 @@ import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../models/journal.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 
 final _reportProvider = FutureProvider.autoDispose<ReportOptions>(
   (ref) => ref.watch(journalProvider).reportOptions(),
@@ -19,6 +20,17 @@ final _reportProvider = FutureProvider.autoDispose<ReportOptions>(
 /// Laporan tahunan untuk pajak: PDF A4 landscape berisi rekonsiliasi saldo,
 /// rekap bulanan, mutasi dana, dan lampiran seluruh trade. Semua akun ikut,
 /// termasuk yang diarsipkan.
+/// Keterangan, periode & kurs, identitas, akun yang ikut, tombol unduh.
+const _loading = SkeletonView(
+  children: [
+    SkeletonLines(lines: 3),
+    SkeletonPanel(child: SkeletonFields(count: 3)),
+    SkeletonPanel(child: SkeletonFields(count: 3)),
+    SkeletonPanel(child: SkeletonLines(lines: 3)),
+    SkeletonField(),
+  ],
+);
+
 class ReportScreen extends ConsumerWidget {
   const ReportScreen({super.key});
 
@@ -28,6 +40,7 @@ class ReportScreen extends ConsumerWidget {
     body: AsyncView(
       value: ref.watch(_reportProvider),
       onRetry: () => ref.invalidate(_reportProvider),
+      loading: _loading,
       builder: (options) => _ReportForm(options: options),
     ),
   );
@@ -167,21 +180,17 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              DropdownButtonFormField<int>(
-                isExpanded: true,
-                initialValue: _year,
-                decoration: InputDecoration(
-                  labelText: 'Tahun pajak',
-                  errorText: _errors['year'],
-                ),
-                items: [
-                  for (final year in widget.options.years)
-                    DropdownMenuItem(value: year, child: Text('$year')),
+              SelectField(
+                label: 'Tahun pajak',
+                value: _year,
+                errorText: _errors['year'],
+                options: [
+                  for (final year in widget.options.years) (year, '$year'),
                 ],
                 // Tanggal kurs ikut pindah: tanggal tahun lalu yang tersimpan
                 // akan tercetak diam-diam di laporan tahun ini kalau tidak.
                 onChanged: (value) => setState(() {
-                  _year = value ?? _year;
+                  _year = value;
                   _rateDate = _endOfYear(_year);
                 }),
               ),

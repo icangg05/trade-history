@@ -22,17 +22,37 @@ abstract final class AppColors {
   /// Data sekunder: deposit/withdrawal di grafik, penanda BE / SL+.
   static const cyan = Color(0xFF28DEF6);
 
-  /// Rugi, hari merah, pelanggaran aturan.
-  static const destructive = Color(0xFFE23C3C);
+  /// Rugi, hari merah, pelanggaran aturan — teks dan ikon di atas latar
+  /// gelap. Sedikit lebih terang dari web: merah web hanya 4,2:1 di atas
+  /// panel, di bawah batas 4,5:1 untuk angka rugi dan pesan galat.
+  static const destructive = Color(0xFFF05252);
+
+  /// Merah sebagai bidang (tombol hapus, snackbar galat) dengan teks
+  /// [destructiveForeground] di atasnya — 5,2:1. Merah terang di atas tidak
+  /// cukup kontras untuk teks putih.
+  static const destructiveFill = Color(0xFFC53030);
   static const destructiveForeground = Color(0xFFF8FAFC);
 
   /// Untung, hari hijau.
   static const success = Color(0xFF28C37A);
   static const successForeground = Color(0xFF0E121B);
 
+  /// Teks sekunder (tanggal, W/L) di atas bidang berwarna seperti sel
+  /// kalender: [mutedForeground] turun ke 3:1 di sel hijau paling pekat.
+  static const mutedOnTint = Color(0xFFC8CFDA);
+
   static const border = Color(0xFF2B3546);
-  static const input = Color(0xFF2F3A4C);
+
+  /// Garis kotak isian: 3,2:1 terhadap panel dan isi kolom, supaya batas
+  /// kolom terlihat (garis panel [border] hanya hiasan).
+  static const input = Color(0xFF5A6883);
 }
+
+/// Teks di atas bidang tembus pandang dari hue yang sama (sel kalender, segmen
+/// terpilih, badge persen): hue-nya dicampur separuh dengan [AppColors.foreground].
+/// Merah di atas merah transparan hanya 3–4:1; versi terangnya tetap merah
+/// dan lolos 4,5:1 bahkan di sel kalender paling pekat.
+Color onTint(Color hue) => Color.lerp(hue, AppColors.foreground, .5)!;
 
 const kRadius = 12.0;
 
@@ -106,6 +126,29 @@ ThemeData buildTheme() {
     borderSide: const BorderSide(color: AppColors.input),
   );
 
+  final inputs = InputDecorationThemeData(
+    isDense: true,
+    filled: true,
+    fillColor: AppColors.background,
+    hintStyle: const TextStyle(color: AppColors.mutedForeground),
+    labelStyle: const TextStyle(color: AppColors.mutedForeground),
+    floatingLabelStyle: const TextStyle(color: AppColors.gold),
+    helperMaxLines: 4,
+    errorMaxLines: 4,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    border: outline,
+    enabledBorder: outline,
+    focusedBorder: outline.copyWith(
+      borderSide: const BorderSide(color: AppColors.gold),
+    ),
+    errorBorder: outline.copyWith(
+      borderSide: const BorderSide(color: AppColors.destructive),
+    ),
+    focusedErrorBorder: outline.copyWith(
+      borderSide: const BorderSide(color: AppColors.destructive),
+    ),
+  );
+
   return base.copyWith(
     textTheme: base.textTheme.apply(
       bodyColor: AppColors.foreground,
@@ -138,28 +181,7 @@ ThemeData buildTheme() {
       thickness: 1,
       space: 1,
     ),
-    inputDecorationTheme: InputDecorationTheme(
-      isDense: true,
-      filled: true,
-      fillColor: AppColors.background,
-      hintStyle: const TextStyle(color: AppColors.mutedForeground),
-      labelStyle: const TextStyle(color: AppColors.mutedForeground),
-      floatingLabelStyle: const TextStyle(color: AppColors.gold),
-      helperMaxLines: 4,
-      errorMaxLines: 4,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      border: outline,
-      enabledBorder: outline,
-      focusedBorder: outline.copyWith(
-        borderSide: const BorderSide(color: AppColors.gold),
-      ),
-      errorBorder: outline.copyWith(
-        borderSide: const BorderSide(color: AppColors.destructive),
-      ),
-      focusedErrorBorder: outline.copyWith(
-        borderSide: const BorderSide(color: AppColors.destructive),
-      ),
-    ),
+    inputDecorationTheme: inputs,
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.gold,
@@ -193,8 +215,7 @@ ThemeData buildTheme() {
         selectedForegroundColor: AppColors.accentForeground,
         selectedBackgroundColor: AppColors.accent,
         side: const BorderSide(color: AppColors.border),
-        visualDensity: VisualDensity.compact,
-        textStyle: const TextStyle(fontFamily: kSans, fontSize: 12),
+        textStyle: const TextStyle(fontFamily: kSans, fontSize: 12.5),
       ),
     ),
     chipTheme: ChipThemeData(
@@ -246,6 +267,28 @@ ThemeData buildTheme() {
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppColors.gold,
       foregroundColor: AppColors.goldForeground,
+    ),
+    // Select (DropdownMenu): kolomnya sama dengan isian lain, menunya
+    // rapat seperti <select> di web — bukan 48 px per pilihan.
+    dropdownMenuTheme: DropdownMenuThemeData(
+      inputDecorationTheme: inputs,
+      menuStyle: MenuStyle(
+        backgroundColor: const WidgetStatePropertyAll(AppColors.popover),
+        surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(kRadius - 2),
+            side: const BorderSide(color: AppColors.border),
+          ),
+        ),
+      ),
+    ),
+    menuButtonTheme: MenuButtonThemeData(
+      style: MenuItemButton.styleFrom(
+        minimumSize: const Size(64, 40),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        textStyle: const TextStyle(fontFamily: kSans, fontSize: 14),
+      ),
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: AppColors.popover,

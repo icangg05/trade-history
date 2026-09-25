@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
 import '../../data/session.dart';
+import 'login_screen.dart';
 
 const _slides = [
   (
@@ -43,6 +44,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   int _index = 0;
 
   bool get _last => _index == _slides.length - 1;
+
+  @override
+  void initState() {
+    super.initState();
+    // Tanya server sekarang, selagi perkenalan dibaca: tautan "Daftar" di
+    // layar login sudah siap begitu layar itu dibuka.
+    ref.read(canRegisterProvider);
+  }
 
   @override
   void dispose() {
@@ -92,9 +101,19 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                 ),
-                // Hilang di layar terakhir: tombol utamanya sudah "Mulai".
-                if (!_last)
-                  TextButton(onPressed: _finish, child: const Text('Lewati')),
+                // Hilang di layar terakhir (tombol utamanya sudah "Mulai"),
+                // tapi tempatnya tetap: tanpa itu baris ini memendek dan isi
+                // di bawahnya ikut bergeser naik.
+                Visibility(
+                  visible: !_last,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: TextButton(
+                    onPressed: _finish,
+                    child: const Text('Lewati'),
+                  ),
+                ),
               ],
             ),
           ),

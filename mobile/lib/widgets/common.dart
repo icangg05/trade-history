@@ -117,7 +117,7 @@ class StatCard extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            fontSize: 10.5,
+            fontSize: 11,
             letterSpacing: .6,
             fontWeight: FontWeight.w500,
             color: AppColors.mutedForeground,
@@ -149,7 +149,51 @@ class StatCard extends StatelessWidget {
   );
 }
 
-/// Kisi dua kolom untuk kartu angka; tinggi tiap baris mengikuti isinya.
+/// Ukuran huruf sistem 150% ke atas: baris yang biasanya berjajar ke samping
+/// (nama + nominal) disusun ke bawah, seperti tumpukan Dynamic Type di iOS.
+bool largeText(BuildContext context) =>
+    MediaQuery.textScalerOf(context).scale(10) >= 15;
+
+/// Dua isian (atau dua nilai berlabel) berdampingan, ditumpuk bila separuh
+/// lebar tidak muat untuk labelnya — huruf sistem yang besar, atau ponsel
+/// sempit. Diputuskan dari lebar yang benar-benar tersedia, bukan jenis
+/// perangkat: di tablet tetap berdampingan.
+///
+/// [minWidth] adalah lebar minimum satu sisi pada ukuran huruf normal. 128
+/// menjaga form di ponsel 360 dp tetap berdampingan di ukuran normal dan
+/// menumpuknya mulai 1,3×.
+class FieldPair extends StatelessWidget {
+  const FieldPair(this.first, this.second, {super.key, this.minWidth = 128});
+
+  final Widget first;
+  final Widget second;
+  final double minWidth;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final half = (constraints.maxWidth - 10) / 2;
+
+      return half < MediaQuery.textScalerOf(context).scale(minWidth)
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [first, const SizedBox(height: 14), second],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: first),
+                const SizedBox(width: 10),
+                Expanded(child: second),
+              ],
+            );
+    },
+  );
+}
+
+/// Kisi dua kolom untuk kartu angka (tiga di layar lebar); tinggi tiap baris
+/// mengikuti isinya. Dengan huruf sistem yang besar kolomnya berkurang satu,
+/// supaya angka di kartu ikut membesar alih-alih dikecilkan lagi agar muat.
 class StatGrid extends StatelessWidget {
   const StatGrid({super.key, required this.children});
 
@@ -158,7 +202,8 @@ class StatGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      final columns = constraints.maxWidth > 600 ? 3 : 2;
+      final columns =
+          (constraints.maxWidth > 600 ? 3 : 2) - (largeText(context) ? 1 : 0);
       final width = (constraints.maxWidth - 10 * (columns - 1)) / columns;
 
       return Wrap(
@@ -283,23 +328,28 @@ class ErrorView extends StatelessWidget {
 
 /// Memuat → isi → galat. Saat dimuat ulang (tarik untuk segarkan, atau data
 /// lain baru disimpan), isi lama tetap tampil alih-alih berkedip jadi kerangka.
+///
+/// [loading] adalah kerangka milik layar itu sendiri ([SkeletonView]),
+/// supaya bentuknya sama dengan isi yang akan datang.
 class AsyncView<T> extends StatelessWidget {
   const AsyncView({
     super.key,
     required this.value,
     required this.builder,
+    required this.loading,
     this.onRetry,
   });
 
   final AsyncValue<T> value;
   final Widget Function(T data) builder;
+  final Widget loading;
   final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) => value.when(
     skipLoadingOnReload: true,
     data: builder,
-    loading: () => const SkeletonPage(),
+    loading: () => loading,
     error: (error, _) => ErrorView(error: error, onRetry: onRetry),
   );
 }
@@ -313,7 +363,7 @@ void showMessage(BuildContext context, String message, {bool error = false}) {
     ..showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: error ? AppColors.destructive : AppColors.accent,
+        backgroundColor: error ? AppColors.destructiveFill : AppColors.accent,
         duration: Duration(milliseconds: error ? 5000 : 3000),
       ),
     );
@@ -354,6 +404,52 @@ class BusyButton extends StatelessWidget {
   );
 }
 
+/// Pengganti `<select>`: kolomnya setinggi isian lain, menunya rapat di
+/// bawah kolom (lihat `dropdownMenuTheme`). Mengetuk di mana pun di kolom
+/// membuka menunya.
+class SelectField<T> extends StatelessWidget {
+  const SelectField({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+    this.errorText,
+    this.enabled = true,
+  });
+
+  final String label;
+  final T value;
+  final List<(T, String)> options;
+  final ValueChanged<T> onChanged;
+  final String? errorText;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) => DropdownMenu<T>(
+    expandedInsets: EdgeInsets.zero,
+    initialSelection: value,
+    enabled: enabled,
+    dropdownMenuEntries: [
+      for (final (value, label) in options)
+        DropdownMenuEntry(value: value, label: label),
+    ],
+    onSelected: (value) {
+      if (value != null) onChanged(value);
+    },
+    // Panah biasa, bukan IconButton bawaan (48 px + jarak 4 px) yang
+    // membuat kolom ini lebih tinggi dari isian di sebelahnya.
+    decorationBuilder: (context, menu) => InputDecoration(
+      labelText: label,
+      errorText: errorText,
+      suffixIcon: Icon(
+        menu.isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+      ),
+      suffixIconConstraints: const BoxConstraints(minWidth: 40),
+    ),
+  );
+}
+
 /// Pilihan bersegmen ringkas — rentang periode, satuan, arah posisi.
 class Segments<T> extends StatelessWidget {
   const Segments({
@@ -371,51 +467,37 @@ class Segments<T> extends StatelessWidget {
   /// Warna khusus per nilai saat terpilih (mis. buy hijau, sell merah).
   final Map<T, Color>? colors;
 
+  // SegmentedButton, bukan kotak buatan sendiri: pembaca layar mengumumkan
+  // pilihan yang aktif, targetnya 48 dp, dan ada umpan balik sentuh.
+  // Lebar penuh: SegmentedButton membagi batas lebar yang ketat sama rata.
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(3),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(kRadius - 2),
-      border: Border.all(color: AppColors.border),
-    ),
-    child: Row(
-      children: [
-        for (final (option, label) in options)
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => onChanged(option),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(vertical: 7),
-                decoration: BoxDecoration(
-                  color: option == value
-                      ? (colors?[option]?.withValues(alpha: .18) ??
-                            AppColors.accent)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(kRadius - 5),
-                ),
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: option == value
-                        ? FontWeight.w600
-                        : FontWeight.w400,
-                    color: option == value
-                        ? (colors?[option] ?? AppColors.accentForeground)
-                        : AppColors.mutedForeground,
-                  ),
-                ),
-              ),
+  Widget build(BuildContext context) {
+    final tint = colors?[value];
+
+    return SizedBox(
+      width: double.infinity,
+      child: SegmentedButton<T>(
+        showSelectedIcon: false,
+        segments: [
+          for (final (option, label) in options)
+            ButtonSegment(
+              value: option,
+              // Mengecil bila perlu: dengan huruf sistem yang besar kata
+              // seperti "Semua" terpotong di tengah kalau dibiarkan turun baris.
+              label: FittedBox(fit: BoxFit.scaleDown, child: Text(label)),
             ),
-          ),
-      ],
-    ),
-  );
+        ],
+        selected: {value},
+        onSelectionChanged: (picked) => onChanged(picked.first),
+        style: tint == null
+            ? null
+            : SegmentedButton.styleFrom(
+                selectedForegroundColor: onTint(tint),
+                selectedBackgroundColor: tint.withValues(alpha: .18),
+              ),
+      ),
+    );
+  }
 }
 
 /// Konfirmasi hapus yang sengaja merepotkan: kode empat angka acak harus
@@ -428,12 +510,18 @@ Future<bool> confirmWithCode(
   String confirmLabel = 'Hapus',
 }) async {
   final code = (1000 + Random().nextInt(9000)).toString();
-  final typed = TextEditingController();
+  // Teks biasa, bukan TextEditingController: controller yang dibuang begitu
+  // dialog ditutup masih dipakai kolomnya selama animasi keluar (keyboard
+  // yang menutup membangunnya ulang) dan memicu galat.
+  var typed = '';
 
   final result = await showDialog<bool>(
     context: context,
     builder: (context) => StatefulBuilder(
       builder: (context, setState) => AlertDialog(
+        // Konten digulir bila keyboard + layar miring menyisakan sedikit
+        // tinggi; tanpa ini kolom kodenya meluap keluar dialog.
+        scrollable: true,
         icon: const Icon(
           Icons.warning_amber_rounded,
           color: AppColors.destructive,
@@ -466,7 +554,6 @@ Future<bool> confirmWithCode(
             ),
             const SizedBox(height: 8),
             TextField(
-              controller: typed,
               autofocus: true,
               keyboardType: TextInputType.number,
               maxLength: 4,
@@ -475,7 +562,7 @@ Future<bool> confirmWithCode(
                 counterText: '',
                 hintText: '0000',
               ),
-              onChanged: (_) => setState(() {}),
+              onChanged: (value) => setState(() => typed = value),
             ),
           ],
         ),
@@ -486,10 +573,10 @@ Future<bool> confirmWithCode(
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.destructive,
+              backgroundColor: AppColors.destructiveFill,
               foregroundColor: AppColors.destructiveForeground,
             ),
-            onPressed: typed.text == code
+            onPressed: typed == code
                 ? () => Navigator.pop(context, true)
                 : null,
             child: Text(confirmLabel),
@@ -499,17 +586,19 @@ Future<bool> confirmWithCode(
     ),
   );
 
-  typed.dispose();
-
   return result ?? false;
 }
 
 /// Konfirmasi biasa untuk hal yang tidak menyentuh uang.
+///
+/// [destructive]: tombolnya merah, bukan emas — untuk hapus atau buang,
+/// sama dengan konfirmasi yang memakai kode.
 Future<bool> confirm(
   BuildContext context, {
   required String title,
   String? message,
   String action = 'Ya',
+  bool destructive = false,
 }) async =>
     await showDialog<bool>(
       context: context,
@@ -527,6 +616,12 @@ Future<bool> confirm(
             child: const Text('Batal'),
           ),
           FilledButton(
+            style: destructive
+                ? FilledButton.styleFrom(
+                    backgroundColor: AppColors.destructiveFill,
+                    foregroundColor: AppColors.destructiveForeground,
+                  )
+                : null,
             onPressed: () => Navigator.pop(context, true),
             child: Text(action),
           ),

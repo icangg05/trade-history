@@ -12,6 +12,7 @@ import '../../models/stats.dart';
 import '../../models/trade.dart';
 import '../../widgets/account_scope.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 import '../../widgets/trade_widgets.dart';
 import '../trades/trade_detail.dart';
 
@@ -45,17 +46,21 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) => AccountScaffold(
     title: monthLabel(isoMonth(_month)),
+    loading: const _Skeleton(),
     actions: (_) => [
       IconButton(
         tooltip: 'Bulan sebelumnya',
         onPressed: () => _shift(-1),
         icon: const Icon(Icons.chevron_left),
       ),
-      TextButton(
+      // Ikon, bukan tulisan "Bulan ini": di layar 360 dp tulisan itu
+      // memotong judul bulannya sendiri jadi "September …".
+      IconButton(
+        tooltip: 'Bulan ini',
         onPressed: () => setState(
           () => _month = DateTime(DateTime.now().year, DateTime.now().month),
         ),
-        child: const Text('Bulan ini'),
+        icon: const Icon(Icons.today_outlined),
       ),
       IconButton(
         tooltip: 'Bulan berikutnya',
@@ -76,7 +81,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         child: RefreshIndicator(
           onRefresh: () => ref.refresh(calendarProvider(key).future),
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
+            // Animasi dimatikan di ponsel: bulan langsung berganti, tanpa
+            // geser.
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 250),
             transitionBuilder: (child, animation) => SlideTransition(
               position: Tween(
                 begin: Offset(
@@ -94,6 +103,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               child: AsyncView(
                 value: ref.watch(calendarProvider(key)),
                 onRetry: () => ref.invalidate(calendarProvider(key)),
+                loading: const _Skeleton(),
                 builder: (data) => _content(data, account),
               ),
             ),
@@ -201,50 +211,123 @@ class _Grid extends StatelessWidget {
         day,
     ];
 
-    return Column(
-      children: [
-        Row(
+    // Tinggi sel: bentuk tegak di layar tegak, lebih landai saat layar
+    // melebar (ponsel miring, tablet) supaya sebulan muat tanpa menggulir.
+    // Itu tinggi minimum — satu minggu ikut meninggi bila isi selnya butuh
+    // lebih (huruf sistem yang besar), alih-alih teksnya meluap.
+    final landscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final minHeight =
+            (constraints.maxWidth / 7 - 4) / (landscape ? 1.6 : .82);
+
+        return Column(
           children: [
-            for (final name in _weekdays)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Text(
-                    name,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.mutedForeground,
-                    ),
-                  ),
+            const _Weekdays(),
+            for (var week = 0; week < days.length / 7; week++)
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final day in days.skip(week * 7).take(7))
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: _Cell(
+                            day: day,
+                            stat: data.days[isoDate(day)],
+                            inMonth: isoMonth(day) == data.month,
+                            today: isoDate(day) == today,
+                            flagged: data.violations.containsKey(isoDate(day)),
+                            maxAbs: maxAbs,
+                            minHeight: minHeight,
+                            onTap: () => onSelect(isoDate(day)),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
           ],
-        ),
-        for (var week = 0; week < days.length / 7; week++)
-          Row(
-            children: [
-              for (final day in days.skip(week * 7).take(7))
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(2),
-                    child: _Cell(
-                      day: day,
-                      stat: data.days[isoDate(day)],
-                      inMonth: isoMonth(day) == data.month,
-                      today: isoDate(day) == today,
-                      flagged: data.violations.containsKey(isoDate(day)),
-                      maxAbs: maxAbs,
-                      onTap: () => onSelect(isoDate(day)),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-      ],
+        );
+      },
     );
   }
+}
+
+class _Weekdays extends StatelessWidget {
+  const _Weekdays();
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (final name in _weekdays)
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            // "Kam" tidak pecah jadi "Ka / m" saat huruf sistem besar.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                name,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.mutedForeground,
+                ),
+              ),
+            ),
+          ),
+        ),
+    ],
+  );
+}
+
+/// Ringkasan bulan, kisi tanggal (nama harinya sudah pasti, selnya menyusul),
+/// lalu keterangan di bawahnya.
+class _Skeleton extends StatelessWidget {
+  const _Skeleton();
+
+  @override
+  Widget build(BuildContext context) => SkeletonView(
+    padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
+    children: [
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4),
+        child: Bone(width: 220, height: 14),
+      ),
+      Panel(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            const _Weekdays(),
+            for (var week = 0; week < 5; week++)
+              Row(
+                children: [
+                  for (var day = 0; day < 7; day++)
+                    const Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(2),
+                        child: AspectRatio(
+                          aspectRatio: .82,
+                          child: Bone(radius: 7),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+          ],
+        ),
+      ),
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4),
+        child: SkeletonLines(lines: 2),
+      ),
+    ],
+  );
 }
 
 class _Cell extends StatelessWidget {
@@ -255,9 +338,11 @@ class _Cell extends StatelessWidget {
     required this.today,
     required this.flagged,
     required this.maxAbs,
+    required this.minHeight,
     required this.onTap,
   });
 
+  final double minHeight;
   final DateTime day;
   final DayStat? stat;
   final bool inMonth;
@@ -271,16 +356,22 @@ class _Cell extends StatelessWidget {
     final stat = this.stat;
 
     // Warna sel: hijau/merah dengan opasitas mengikuti besar P/L (heatmap ringan).
-    final heat = stat == null || stat.pnl == 0
-        ? Colors.transparent
-        : (stat.pnl > 0 ? AppColors.success : AppColors.destructive).withValues(
-            alpha: .1 + stat.pnl.abs() / maxAbs * .28,
-          );
+    final hue = stat == null || stat.pnl == 0
+        ? null
+        : (stat.pnl > 0 ? AppColors.success : AppColors.destructive);
+    final heat =
+        hue?.withValues(alpha: .1 + stat!.pnl.abs() / maxAbs * .28) ??
+        Colors.transparent;
+    // Di atas sel berwarna teksnya ikut terang, supaya tetap terbaca di hari
+    // untung/rugi terbesar — justru hari yang paling ingin dibaca.
+    final secondary = hue == null
+        ? AppColors.mutedForeground
+        : AppColors.mutedOnTint;
 
     return Opacity(
       opacity: inMonth ? 1 : .35,
-      child: AspectRatio(
-        aspectRatio: .82,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minHeight),
         child: Material(
           color: heat,
           shape: RoundedRectangleBorder(
@@ -303,7 +394,7 @@ class _Cell extends StatelessWidget {
                     children: [
                       Text(
                         '${day.day}',
-                        style: mono(size: 10, color: AppColors.mutedForeground),
+                        style: mono(size: 11, color: secondary),
                       ),
                       const Spacer(),
                       if (stat != null) ...[
@@ -312,11 +403,11 @@ class _Cell extends StatelessWidget {
                           child: Text(
                             compact(stat.pnl, signed: true),
                             style: mono(
-                              size: 10.5,
+                              size: 11,
                               weight: FontWeight.w600,
-                              color: stat.pnl >= 0
+                              color: hue == null
                                   ? AppColors.success
-                                  : AppColors.destructive,
+                                  : onTint(hue),
                             ),
                           ),
                         ),
@@ -324,10 +415,7 @@ class _Cell extends StatelessWidget {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             '${stat.wins}W/${stat.losses}L',
-                            style: const TextStyle(
-                              fontSize: 8.5,
-                              color: AppColors.mutedForeground,
-                            ),
+                            style: TextStyle(fontSize: 11, color: secondary),
                           ),
                         ),
                       ],

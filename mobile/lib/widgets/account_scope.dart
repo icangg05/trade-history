@@ -6,7 +6,6 @@ import '../core/theme.dart';
 import '../data/session.dart';
 import '../models/account.dart';
 import 'common.dart';
-import 'skeleton.dart';
 import 'user_avatar.dart';
 
 /// Kerangka layar yang butuh akun aktif: judul + pengalih akun di app bar,
@@ -17,12 +16,17 @@ class AccountScaffold extends ConsumerWidget {
     super.key,
     required this.title,
     required this.body,
+    required this.loading,
     this.actions,
     this.floatingActionButton,
   });
 
   final String title;
   final Widget Function(BuildContext context, AccountBrief account) body;
+
+  /// Kerangka layar ini selama akun aktif belum diketahui — sama dengan
+  /// kerangka isinya, jadi tidak berganti bentuk di tengah jalan.
+  final Widget loading;
   final List<Widget> Function(AccountBrief account)? actions;
   final Widget? Function(AccountBrief account)? floatingActionButton;
 
@@ -48,7 +52,7 @@ class AccountScaffold extends ConsumerWidget {
           : floatingActionButton?.call(account),
       body: current.when(
         skipLoadingOnReload: true,
-        loading: () => const SkeletonPage(),
+        loading: () => loading,
         error: (error, _) =>
             ErrorView(error: error, onRetry: () => ref.invalidate(meProvider)),
         data: (account) =>
@@ -134,21 +138,38 @@ Future<void> showAccountPicker(
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
-            for (final account in me?.accounts ?? const <AccountBrief>[])
-              ListTile(
-                leading: const Icon(Icons.account_balance_wallet_outlined),
-                title: Text(account.name),
-                subtitle: Text(
-                  '${account.broker ?? 'Tanpa broker'} · ${account.currency}',
-                ),
-                trailing: account.id == current?.id
-                    ? const Icon(Icons.circle, size: 8, color: AppColors.gold)
-                    : null,
-                onTap: () {
-                  ref.read(selectedAccountProvider.notifier).select(account.id);
-                  Navigator.pop(sheet);
-                },
+            // Daftarnya digulir sendiri, judul dan "Kelola akun" tetap:
+            // dengan lima akun lebih, isinya melebihi tinggi lembar ini.
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final account in me?.accounts ?? const <AccountBrief>[])
+                    ListTile(
+                      // `selected` juga diumumkan pembaca layar; tanda
+                      // centang, bukan hanya warna, menandai akun aktif.
+                      selected: account.id == current?.id,
+                      selectedColor: AppColors.gold,
+                      leading: const Icon(
+                        Icons.account_balance_wallet_outlined,
+                      ),
+                      title: Text(account.name),
+                      subtitle: Text(
+                        '${account.broker ?? 'Tanpa broker'} · ${account.currency}',
+                      ),
+                      trailing: account.id == current?.id
+                          ? const Icon(Icons.check, color: AppColors.gold)
+                          : null,
+                      onTap: () {
+                        ref
+                            .read(selectedAccountProvider.notifier)
+                            .select(account.id);
+                        Navigator.pop(sheet);
+                      },
+                    ),
+                ],
               ),
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.settings_outlined),

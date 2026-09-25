@@ -25,6 +25,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _token = TextEditingController();
 
   bool _busy = false;
+
+  /// Satu untuk kedua kolom sandi: sekali ketuk keduanya terlihat, jadi
+  /// "Ulangi kata sandi" mudah dicocokkan.
+  bool _hidden = true;
   ApiException? _error;
 
   @override
@@ -75,10 +79,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     padding: const EdgeInsets.only(bottom: 14),
     child: TextField(
       controller: controller,
-      obscureText: secret,
+      obscureText: secret && _hidden,
       keyboardType: type,
       autocorrect: false,
-      decoration: InputDecoration(labelText: label, errorText: _error?[key]),
+      decoration: InputDecoration(
+        labelText: label,
+        errorText: _error?[key],
+        suffixIcon: secret
+            ? PasswordToggle(
+                hidden: _hidden,
+                onPressed: () => setState(() => _hidden = !_hidden),
+              )
+            : null,
+      ),
     ),
   );
 

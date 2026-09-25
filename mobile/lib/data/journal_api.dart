@@ -52,6 +52,8 @@ class JournalApi {
   /// cache gambar — alamat dasarnya selalu sama.
   String avatarUrl(String version) => client.url('profile/avatar?v=$version');
 
+  Future<Uint8List> avatarBytes() => client.bytes('profile/avatar');
+
   // -------------------------------------------------------------------- akun
 
   Future<AccountsPage> accounts() async =>

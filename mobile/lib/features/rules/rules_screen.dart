@@ -9,6 +9,7 @@ import '../../models/account.dart';
 import '../../models/journal.dart';
 import '../../widgets/account_scope.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 import '../../widgets/markdown_view.dart';
 import '../../widgets/rule_status_card.dart';
 
@@ -28,6 +29,17 @@ const _sessions = [
   ('newyork', 'New York'),
 ];
 
+/// Keterangan, status hari ini, batas harian, batas per trade, catatan.
+const _loading = SkeletonView(
+  children: [
+    Bone(width: 260, height: 10),
+    Panel(child: SkeletonLines(lines: 3)),
+    SkeletonPanel(child: SkeletonFields(count: 4)),
+    SkeletonPanel(child: SkeletonFields(count: 4)),
+    SkeletonPanel(child: Bone(height: 120)),
+  ],
+);
+
 /// Aturan trading: catatan pribadi + indikator. Tidak ada satu pun angka di
 /// sini yang memblokir pencatatan trade.
 class RulesScreen extends ConsumerWidget {
@@ -36,9 +48,11 @@ class RulesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => AccountScaffold(
     title: 'Aturan trading',
+    loading: _loading,
     body: (context, account) => AsyncView(
       value: ref.watch(rulesProvider(account.id)),
       onRetry: () => ref.invalidate(rulesProvider(account.id)),
+      loading: _loading,
       // Form diisi sekali per akun; simpanan berikutnya cukup menyegarkan status.
       builder: (page) =>
           _RulesForm(key: ValueKey(account.id), account: account, page: page),
@@ -288,50 +302,41 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: _field(
-                      _risk,
-                      'Risiko / trade (%)',
-                      'max_risk_per_trade_pct',
-                      '1',
-                      helper: risk == null
-                          ? null
-                          : 'Sekitar ${money(risk, _currency)}',
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(child: _field(_minRr, 'RR minimum', 'min_rr', '2')),
-                ],
+              FieldPair(
+                _field(
+                  _risk,
+                  'Risiko / trade (%)',
+                  'max_risk_per_trade_pct',
+                  '1',
+                  helper: risk == null
+                      ? null
+                      : 'Sekitar ${money(risk, _currency)}',
+                ),
+                _field(_minRr, 'RR minimum', 'min_rr', '2'),
+                // Label "Risiko / trade (%)" dan "Maks. drawdown (%)" lebih
+                // panjang dari isian lain: di ponsel 360 dp keduanya ditumpuk
+                // supaya labelnya tidak terpotong.
+                minWidth: 150,
               ),
               gap,
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: _field(
-                      _maxTrades,
-                      'Maks. trade / hari',
-                      'max_trades_per_day',
-                      '3',
-                      integer: true,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _field(
-                      _drawdown,
-                      'Maks. drawdown (%)',
-                      'max_total_loss_pct',
-                      '10',
-                      helper: drawdown == null
-                          ? null
-                          : 'Sekitar ${money(drawdown, _currency)}',
-                    ),
-                  ),
-                ],
+              FieldPair(
+                _field(
+                  _maxTrades,
+                  'Maks. trade / hari',
+                  'max_trades_per_day',
+                  '3',
+                  integer: true,
+                ),
+                _field(
+                  _drawdown,
+                  'Maks. drawdown (%)',
+                  'max_total_loss_pct',
+                  '10',
+                  helper: drawdown == null
+                      ? null
+                      : 'Sekitar ${money(drawdown, _currency)}',
+                ),
+                minWidth: 150,
               ),
               gap,
               const Caption('Sesi yang boleh ditradingkan'),

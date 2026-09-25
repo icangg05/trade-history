@@ -22,6 +22,44 @@ final analysisProvider = FutureProvider.autoDispose
     });
 
 /// Statistik dihitung dari database; AI hanya menafsirkan angkanya.
+/// Keterangan, periode, kartu angka, tiga rincian, angka lain, kartu AI.
+const _loading = SkeletonView(
+  children: [
+    Bone(width: 260, height: 10),
+    SkeletonField(),
+    SkeletonStats(),
+    SkeletonPanel(child: _PairsSkeleton(count: 5)),
+    SkeletonPanel(child: _PairsSkeleton(count: 5)),
+    SkeletonPanel(child: _PairsSkeleton(count: 5)),
+    SkeletonPanel(child: _PairsSkeleton(count: 6)),
+    SkeletonPanel(child: SkeletonLines()),
+  ],
+);
+
+/// Baris "label ... angka" di rincian dan angka lain.
+class _PairsSkeleton extends StatelessWidget {
+  const _PairsSkeleton({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (var i = 0; i < count; i++)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              Bone(width: i.isEven ? 120 : 90),
+              const Spacer(),
+              const Bone(width: 64),
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
 class AnalysisScreen extends ConsumerStatefulWidget {
   const AnalysisScreen({super.key});
 
@@ -53,6 +91,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
   @override
   Widget build(BuildContext context) => AccountScaffold(
     title: 'Analisa',
+    loading: _loading,
     actions: (_) => [
       TextButton.icon(
         onPressed: () => context.push('/chat?period=$_period'),
@@ -68,6 +107,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
         child: AsyncView(
           value: ref.watch(analysisProvider(key)),
           onRetry: () => ref.invalidate(analysisProvider(key)),
+          loading: _loading,
           builder: (page) => _content(page, account.id),
         ),
       );

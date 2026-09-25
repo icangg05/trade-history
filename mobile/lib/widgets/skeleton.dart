@@ -27,8 +27,17 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  // Pembaca layar mendengar "Memuat…", bukan diam: tulang-tulangnya tidak
+  // punya teks. Semua kerangka lewat widget ini, jadi cukup di sini.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Semantics(
+    label: 'Memuat…',
+    liveRegion: true,
+    excludeSemantics: true,
+    child: _sweep(context),
+  );
+
+  Widget _sweep(BuildContext context) {
     // Pengguna yang mematikan animasi di pengaturan ponsel cukup melihat
     // kerangkanya diam.
     if (MediaQuery.disableAnimationsOf(context)) return widget.child;
@@ -107,69 +116,184 @@ class SkeletonLines extends StatelessWidget {
   );
 }
 
-/// Satu kartu baris daftar: gambar kecil, dua baris teks, angka di kanan.
-class SkeletonRow extends StatelessWidget {
-  const SkeletonRow({super.key});
+/// Kartu baris dana: bukti kecil, dua baris teks, nominal di kanan — sebanyak
+/// [count], berjarak seperti daftar aslinya.
+class SkeletonRows extends StatelessWidget {
+  const SkeletonRows({super.key, this.count = 3});
+
+  final int count;
 
   @override
-  Widget build(BuildContext context) => const Panel(
-    padding: EdgeInsets.all(12),
-    child: Row(
-      children: [
-        Bone(width: 44, height: 44),
-        SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (var i = 0; i < count; i++) ...[
+        if (i > 0) const SizedBox(height: 8),
+        const Panel(
+          padding: EdgeInsets.all(12),
+          child: Row(
             children: [
-              FractionallySizedBox(widthFactor: .5, child: Bone()),
-              SizedBox(height: 8),
-              FractionallySizedBox(widthFactor: .8, child: Bone(height: 9)),
+              Bone(width: 44, height: 44),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FractionallySizedBox(widthFactor: .5, child: Bone()),
+                    SizedBox(height: 8),
+                    FractionallySizedBox(
+                      widthFactor: .8,
+                      child: Bone(height: 9),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 12),
+              Bone(width: 56),
             ],
           ),
         ),
-        SizedBox(width: 12),
-        Bone(width: 56),
+      ],
+    ],
+  );
+}
+
+/// Baris riwayat trade: badge arah, simbol + waktu, P/L di kanan. Tanpa
+/// kartu — dipasang di dalam kartu riwayat atau "Trade terakhir".
+class SkeletonTradeRows extends StatelessWidget {
+  const SkeletonTradeRows({super.key, this.count = 3});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (var i = 0; i < count; i++) ...[
+        if (i > 0) const Divider(indent: 12, endIndent: 12),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            children: [
+              Bone(width: 40, height: 16),
+              SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Bone(width: 72),
+                    SizedBox(height: 6),
+                    Bone(width: 110, height: 9),
+                  ],
+                ),
+              ),
+              Bone(width: 64),
+            ],
+          ),
+        ),
+      ],
+    ],
+  );
+}
+
+/// Kisi kartu angka, sebanyak kartu di layar aslinya.
+class SkeletonStats extends StatelessWidget {
+  const SkeletonStats({super.key, this.count = 4});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => StatGrid(
+    children: [
+      for (var i = 0; i < count; i++)
+        const Panel(
+          padding: EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Bone(width: 70, height: 9),
+              SizedBox(height: 10),
+              Bone(width: 110, height: 18),
+              SizedBox(height: 6),
+              Bone(width: 90, height: 9),
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
+/// Kotak isian, pilihan bersegmen, atau tombol — setinggi aslinya.
+class SkeletonField extends StatelessWidget {
+  const SkeletonField({super.key, this.width = double.infinity});
+
+  final double width;
+
+  @override
+  Widget build(BuildContext context) =>
+      Bone(width: width, height: 44, radius: kRadius - 2);
+}
+
+/// Deretan isian form: profil, aturan, laporan, form trade.
+class SkeletonFields extends StatelessWidget {
+  const SkeletonFields({super.key, this.count = 3});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (var i = 0; i < count; i++) ...[
+        if (i > 0) const SizedBox(height: 14),
+        const SkeletonField(),
+      ],
+    ],
+  );
+}
+
+/// Kartu berjudul ([Panel] dengan `title`): judul pendek lalu isinya.
+class SkeletonPanel extends StatelessWidget {
+  const SkeletonPanel({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Panel(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Bone(width: 120, height: 13),
+        const SizedBox(height: 14),
+        child,
       ],
     ),
   );
 }
 
-/// Kerangka halaman bawaan: kartu angka lalu baris daftar — bentuk yang
-/// dipakai hampir semua layar (dashboard, trade, dana, analisa).
-class SkeletonPage extends StatelessWidget {
-  const SkeletonPage({super.key, this.rows = 5});
+/// Kerangka satu layar: bagian-bagiannya disusun seperti isi layar itu
+/// (tiap layar merakitnya sendiri), disapu satu [Shimmer]. Tidak digulir —
+/// isinya belum ada.
+class SkeletonView extends StatelessWidget {
+  const SkeletonView({
+    super.key,
+    required this.children,
+    this.padding = const EdgeInsets.fromLTRB(16, 4, 16, 24),
+  });
 
-  final int rows;
+  final List<Widget> children;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) => Shimmer(
-    child: ListView(
+    child: ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      children: [
-        StatGrid(
-          children: [
-            for (var i = 0; i < 4; i++)
-              const Panel(
-                padding: EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Bone(width: 70, height: 9),
-                    SizedBox(height: 12),
-                    Bone(width: 110, height: 18),
-                  ],
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        for (var i = 0; i < rows; i++) ...[
-          const SkeletonRow(),
-          const SizedBox(height: 8),
-        ],
-      ],
+      padding: padding,
+      itemCount: children.length,
+      // Rata kiri, bukan diregangkan: tulang pendek (keterangan, judul)
+      // tetap pendek seperti teks aslinya.
+      itemBuilder: (_, index) => Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: children[index],
+      ),
+      separatorBuilder: (_, _) => const SizedBox(height: 14),
     ),
   );
 }

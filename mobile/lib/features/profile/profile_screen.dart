@@ -6,9 +6,19 @@ import '../../core/json.dart';
 import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 
 final _profileProvider = FutureProvider.autoDispose<Json>(
   (ref) => ref.watch(journalProvider).profile(),
+);
+
+/// Keterangan, form data login (lima isian + tombol), lalu kartu hapus akun.
+const _loading = SkeletonView(
+  children: [
+    Bone(width: 120, height: 10),
+    Panel(child: SkeletonFields(count: 6)),
+    Panel(child: SkeletonLines(lines: 3)),
+  ],
 );
 
 /// Nama, email, kata sandi. Mengganti email atau sandi meminta sandi sekarang;
@@ -22,6 +32,7 @@ class ProfileScreen extends ConsumerWidget {
     body: AsyncView(
       value: ref.watch(_profileProvider),
       onRetry: () => ref.invalidate(_profileProvider),
+      loading: _loading,
       builder: (json) => _ProfileForm(
         user: map(json['user']),
         accountCount: toInt(json['accountCount']),
@@ -105,11 +116,15 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
   }
 
   Future<void> _destroy() async {
-    final password = TextEditingController();
+    // Teks biasa, bukan TextEditingController — lihat `confirmWithCode`.
+    var typed = '';
 
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        // Konten digulir bila keyboard + layar miring menyisakan sedikit
+        // tinggi.
+        scrollable: true,
         title: const Text('Yakin hapus akun?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -120,7 +135,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
             ),
             const SizedBox(height: 14),
             TextField(
-              controller: password,
+              onChanged: (value) => typed = value,
               obscureText: true,
               autofocus: true,
               decoration: const InputDecoration(labelText: 'Kata sandi'),
@@ -134,8 +149,8 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.destructive,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.destructiveFill,
+              foregroundColor: AppColors.destructiveForeground,
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Hapus permanen'),
@@ -143,9 +158,6 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
         ],
       ),
     );
-
-    final typed = password.text;
-    password.dispose();
 
     if (ok != true) return;
 
@@ -192,6 +204,13 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
             _field(_name, 'Nama', 'name'),
             _field(_email, 'Email', 'email'),
             _field(
+              _current,
+              'Kata sandi sekarang',
+              'current_password',
+              secret: true,
+              hint: 'Wajib saat mengganti email atau kata sandi',
+            ),
+            _field(
               _password,
               'Kata sandi baru',
               'password',
@@ -200,16 +219,9 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
             ),
             _field(
               _confirmation,
-              'Ulangi kata sandi',
+              'Ulangi kata sandi baru',
               'password_confirmation',
               secret: true,
-            ),
-            _field(
-              _current,
-              'Kata sandi sekarang',
-              'current_password',
-              secret: true,
-              hint: 'Wajib saat mengganti email atau kata sandi',
             ),
             BusyButton(
               busy: _busy,

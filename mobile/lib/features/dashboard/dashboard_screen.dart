@@ -9,6 +9,7 @@ import '../../models/stats.dart';
 import '../../widgets/account_scope.dart';
 import '../../widgets/common.dart';
 import '../../widgets/rule_status_card.dart';
+import '../../widgets/skeleton.dart';
 import '../../widgets/trade_widgets.dart';
 import '../trades/trade_detail.dart';
 import 'charts.dart';
@@ -27,6 +28,24 @@ final dashboardProvider = FutureProvider.autoDispose
       return ref.watch(journalProvider).dashboard(key.$1, key.$2);
     });
 
+/// Rentang tanggal, periode, kartu angka, kurva, aturan hari ini, grafik
+/// bulanan, trade terakhir — urutan yang sama dengan isinya.
+const _loading = SkeletonView(
+  children: [
+    Bone(width: 180, height: 10),
+    SkeletonField(),
+    SkeletonStats(count: 6),
+    SkeletonPanel(
+      child: Column(
+        children: [SkeletonField(), SizedBox(height: 14), Bone(height: 240)],
+      ),
+    ),
+    SkeletonPanel(child: SkeletonLines(lines: 3)),
+    SkeletonPanel(child: Bone(height: 170)),
+    SkeletonPanel(child: SkeletonTradeRows(count: 4)),
+  ],
+);
+
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
@@ -41,6 +60,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) => AccountScaffold(
     title: 'Dashboard',
+    loading: _loading,
     actions: (_) => [
       IconButton(
         tooltip: 'Trade baru',
@@ -56,6 +76,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         child: AsyncView(
           value: ref.watch(dashboardProvider(key)),
           onRetry: () => ref.invalidate(dashboardProvider(key)),
+          loading: _loading,
           builder: (data) => _content(data, account.id),
         ),
       );

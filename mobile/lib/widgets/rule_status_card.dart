@@ -38,13 +38,15 @@ class RuleStatusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
+          // Wrap, bukan Row: dengan huruf sistem besar ringkasannya turun ke
+          // baris berikutnya alih-alih meluap keluar kartu.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Expanded(
-                child: Text(
-                  'Hari ini',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                ),
+              const Text(
+                'Hari ini',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               Text(
                 '${money(status.pnl, currency, signed: true)} · ${status.trades} trade',
@@ -59,23 +61,24 @@ class RuleStatusCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (!status.hasRules)
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
+            // Tombol sungguhan, bukan tautan kecil di tengah kalimat: area
+            // ketuknya cukup besar dan dikenali pembaca layar.
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Caption('Belum ada aturan yang diisi. '),
-                GestureDetector(
-                  onTap: () => context.go('/more/rules'),
-                  child: const Text(
-                    'Tulis aturan trading kamu',
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: AppColors.gold,
-                      decoration: TextDecoration.underline,
-                      decorationColor: AppColors.gold,
-                    ),
-                  ),
+                const Caption(
+                  'Belum ada aturan yang diisi. Tulis aturan trading kamu supaya '
+                  'sisa jatah loss harian tampil di sini.',
                 ),
-                const Caption(' supaya sisa jatah loss harian tampil di sini.'),
+                TextButton.icon(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    iconAlignment: IconAlignment.end,
+                  ),
+                  onPressed: () => context.go('/more/rules'),
+                  icon: const Icon(Icons.arrow_forward, size: 16),
+                  label: const Text('Tulis aturan trading'),
+                ),
               ],
             )
           else ...[
@@ -160,9 +163,10 @@ class _Meter extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Row(
+      Wrap(
+        alignment: WrapAlignment.spaceBetween,
         children: [
-          Expanded(child: Caption(label)),
+          Caption(label),
           Text(value, style: mono(size: 11.5)),
         ],
       ),

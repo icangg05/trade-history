@@ -7,11 +7,14 @@ import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../widgets/common.dart';
 
+const _canRegisterKey = 'auth.can_register';
+
 /// `GET auth/options`: apakah pendaftaran mandiri dibuka (REGISTER_TOKEN diisi
 /// di .env server). Sengaja tidak autoDispose — layar login dibuang saat pindah
 /// ke layar daftar, dan tanpa cache ini tautan "Daftar" baru muncul setelah
-/// server menjawab lagi.
-final _canRegisterProvider = FutureProvider<bool>((ref) async {
+/// server menjawab lagi. Jawabannya juga disimpan di ponsel (lihat
+/// [LoginScreen]).
+final canRegisterProvider = FutureProvider<bool>((ref) async {
   final server = ref.watch(serverProvider);
 
   if (server.isEmpty) return false;
@@ -20,8 +23,11 @@ final _canRegisterProvider = FutureProvider<bool>((ref) async {
     server: server,
     adapter: ref.watch(httpAdapterProvider),
   ).get('auth/options');
+  final open = json['can_register'] == true;
 
-  return json['can_register'] == true;
+  await ref.read(prefsProvider).setBool(_canRegisterKey, open);
+
+  return open;
 });
 
 class AuthShell extends StatelessWidget {
@@ -77,6 +83,29 @@ class AuthShell extends StatelessWidget {
         ),
       ),
     ),
+  );
+}
+
+/// Ikon mata di kolom kata sandi. Berlabel, supaya pembaca layar tidak
+/// hanya menyebut "tombol".
+class PasswordToggle extends StatelessWidget {
+  const PasswordToggle({
+    super.key,
+    required this.hidden,
+    required this.onPressed,
+  });
+
+  final bool hidden;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    tooltip: hidden ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi',
+    icon: Icon(
+      hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+      size: 20,
+    ),
+    onPressed: onPressed,
   );
 }
 
@@ -145,7 +174,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canRegister = ref.watch(_canRegisterProvider).value ?? false;
+    // Jawaban terakhir yang tersimpan tampil seketika; jawaban baru dari
+    // server menyusul. Tanpa ini tautan "Daftar" selalu muncul terlambat.
+    final canRegister =
+        ref.watch(canRegisterProvider).value ??
+        ref.watch(prefsProvider).getBool(_canRegisterKey) ??
+        false;
 
     return AuthShell(
       subtitle: 'Masuk ke jurnal trading kamu.',
@@ -171,13 +205,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             labelText: 'Kata sandi',
             prefixIcon: const Icon(Icons.lock_outline, size: 20),
             errorText: _error?['password'],
-            suffixIcon: IconButton(
-              icon: Icon(
-                _hidden
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-                size: 20,
-              ),
+            suffixIcon: PasswordToggle(
+              hidden: _hidden,
               onPressed: () => setState(() => _hidden = !_hidden),
             ),
           ),

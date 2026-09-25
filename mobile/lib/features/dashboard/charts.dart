@@ -9,6 +9,13 @@ import '../../core/theme.dart';
 import '../../models/stats.dart';
 import '../../widgets/common.dart';
 
+/// Label sumbu grafik ikut ukuran huruf sistem sampai 130%, lalu berhenti:
+/// grafik tidak bisa mengalir ulang seperti teks, dan angka lengkapnya ada di
+/// tooltip serta ringkasan untuk pembaca layar. Ruang sumbu dihitung dari
+/// skala yang sama, jadi labelnya tidak meluap.
+TextScaler _axisScaler(BuildContext context) =>
+    MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3);
+
 /// Kurva perkembangan akun. `pnl = true` menampilkan P/L kumulatif: saldo
 /// dikurangi modal awal dan seluruh setoran/penarikan, supaya deposit tidak
 /// terbaca sebagai profit. Titik cyan menandai hari dengan arus dana.
@@ -80,107 +87,121 @@ class EquityChart extends StatelessWidget {
       'id_ID',
     ).format(start.add(Duration(hours: (x * 24).round())));
 
-    return SizedBox(
-      height: height,
-      child: LineChart(
-        LineChartData(
-          minX: 0,
-          maxX: xMax,
-          minY: lo,
-          maxY: hi,
-          clipData: const FlClipData.all(),
-          borderData: FlBorderData(show: false),
-          gridData: FlGridData(
-            drawVerticalLine: false,
-            horizontalInterval: step,
-            getDrawingHorizontalLine: (_) => const FlLine(
-              color: AppColors.border,
-              strokeWidth: 1,
-              dashArray: [4, 4],
+    final axis = _axisScaler(context);
+    final low = ys.reduce(math.min);
+    final high = ys.reduce(math.max);
+
+    return Semantics(
+      label:
+          '${pnl ? 'Grafik P/L kumulatif' : 'Grafik saldo'} ${dateAt(0)} sampai '
+          '${dateAt(xMax)}: dari ${money(ys.first, currency)} ke '
+          '${money(ys.last, currency)}, terendah ${money(low, currency)}, '
+          'tertinggi ${money(high, currency)}.',
+      excludeSemantics: true,
+      child: SizedBox(
+        height: height,
+        child: LineChart(
+          LineChartData(
+            minX: 0,
+            maxX: xMax,
+            minY: lo,
+            maxY: hi,
+            clipData: const FlClipData.all(),
+            borderData: FlBorderData(show: false),
+            gridData: FlGridData(
+              drawVerticalLine: false,
+              horizontalInterval: step,
+              getDrawingHorizontalLine: (_) => const FlLine(
+                color: AppColors.border,
+                strokeWidth: 1,
+                dashArray: [4, 4],
+              ),
             ),
-          ),
-          titlesData: FlTitlesData(
-            topTitles: const AxisTitles(),
-            leftTitles: const AxisTitles(),
-            rightTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 46,
-                interval: step,
-                getTitlesWidget: (value, meta) => SideTitleWidget(
-                  meta: meta,
-                  child: Text(
-                    compact(value),
-                    style: mono(size: 9.5, color: AppColors.mutedForeground),
+            titlesData: FlTitlesData(
+              topTitles: const AxisTitles(),
+              leftTitles: const AxisTitles(),
+              rightTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: axis.scale(11) * 4.2,
+                  interval: step,
+                  getTitlesWidget: (value, meta) => SideTitleWidget(
+                    meta: meta,
+                    child: Text(
+                      compact(value),
+                      textScaler: axis,
+                      style: mono(size: 11, color: AppColors.mutedForeground),
+                    ),
                   ),
                 ),
               ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 22,
-                interval: xMax / 2,
-                getTitlesWidget: (value, meta) => SideTitleWidget(
-                  meta: meta,
-                  fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
-                  child: Text(
-                    dateAt(value),
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: AppColors.mutedForeground,
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: axis.scale(11) * 1.4 + 6,
+                  interval: xMax / 2,
+                  getTitlesWidget: (value, meta) => SideTitleWidget(
+                    meta: meta,
+                    fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                    child: Text(
+                      dateAt(value),
+                      textScaler: axis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.mutedForeground,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          lineTouchData: LineTouchData(
-            touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (_) => AppColors.popover,
-              tooltipBorder: const BorderSide(color: AppColors.border),
-              tooltipBorderRadius: BorderRadius.circular(8),
-              fitInsideHorizontally: true,
-              fitInsideVertically: true,
-              getTooltipItems: (spots) => [
-                for (final spot in spots)
-                  _tooltip(points[spots.first.spotIndex], spot.y),
-              ],
+            lineTouchData: LineTouchData(
+              touchTooltipData: LineTouchTooltipData(
+                getTooltipColor: (_) => AppColors.popover,
+                tooltipBorder: const BorderSide(color: AppColors.border),
+                tooltipBorderRadius: BorderRadius.circular(8),
+                fitInsideHorizontally: true,
+                fitInsideVertically: true,
+                getTooltipItems: (spots) => [
+                  for (final spot in spots)
+                    _tooltip(points[spots.first.spotIndex], spot.y),
+                ],
+              ),
             ),
-          ),
-          lineBarsData: [
-            LineChartBarData(
-              spots: [
-                for (var i = 0; i < points.length; i++) FlSpot(xs[i], ys[i]),
-              ],
-              color: AppColors.gold,
-              barWidth: 2,
-              isStrokeCapRound: true,
-              belowBarData: BarAreaData(
-                show: true,
-                applyCutOffY: true,
-                cutOffY: math.max(lo, 0),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.gold.withValues(alpha: .28),
-                    AppColors.gold.withValues(alpha: 0),
-                  ],
+            lineBarsData: [
+              LineChartBarData(
+                spots: [
+                  for (var i = 0; i < points.length; i++) FlSpot(xs[i], ys[i]),
+                ],
+                color: AppColors.gold,
+                barWidth: 2,
+                isStrokeCapRound: true,
+                belowBarData: BarAreaData(
+                  show: true,
+                  applyCutOffY: true,
+                  cutOffY: math.max(lo, 0),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.gold.withValues(alpha: .28),
+                      AppColors.gold.withValues(alpha: 0),
+                    ],
+                  ),
+                ),
+                dotData: FlDotData(
+                  checkToShowDot: (spot, _) => flows.contains(spot.x),
+                  getDotPainter: (spot, percent, bar, index) =>
+                      FlDotCirclePainter(
+                        radius: 3.5,
+                        color: AppColors.cyan,
+                        strokeWidth: 1.5,
+                        strokeColor: AppColors.background,
+                      ),
                 ),
               ),
-              dotData: FlDotData(
-                checkToShowDot: (spot, _) => flows.contains(spot.x),
-                getDotPainter: (spot, percent, bar, index) =>
-                    FlDotCirclePainter(
-                      radius: 3.5,
-                      color: AppColors.cyan,
-                      strokeWidth: 1.5,
-                      strokeColor: AppColors.background,
-                    ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -201,13 +222,13 @@ class EquityChart extends StatelessWidget {
       if (point.pnl != 0)
         TextSpan(
           text: '\nTrading ${money(point.pnl, currency, signed: true)}',
-          style: mono(size: 10.5, color: pnlColor(point.pnl)),
+          style: mono(size: 11, color: pnlColor(point.pnl)),
         ),
       if (point.flow != 0)
         TextSpan(
           text:
               '\n${point.flow > 0 ? 'Deposit' : 'Withdrawal'} ${money(point.flow.abs(), currency)}',
-          style: mono(size: 10.5, color: AppColors.cyan),
+          style: mono(size: 11, color: AppColors.cyan),
         ),
     ],
   );
@@ -254,6 +275,7 @@ class MonthlyPnlChart extends StatelessWidget {
     final profit = data.fold(0.0, (sum, item) => sum + item.profit);
     final loss = data.fold(0.0, (sum, item) => sum + item.loss);
     final change = base != null && base! > 0 ? net / base! * 100 : null;
+    final axis = _axisScaler(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -292,9 +314,11 @@ class MonthlyPnlChart extends StatelessWidget {
                       Icon(
                         change >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
                         size: 12,
-                        color: change >= 0
-                            ? AppColors.success
-                            : AppColors.destructive,
+                        color: onTint(
+                          change >= 0
+                              ? AppColors.success
+                              : AppColors.destructive,
+                        ),
                       ),
                       const SizedBox(width: 3),
                       Text(
@@ -302,9 +326,11 @@ class MonthlyPnlChart extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
-                          color: change >= 0
-                              ? AppColors.success
-                              : AppColors.destructive,
+                          color: onTint(
+                            change >= 0
+                                ? AppColors.success
+                                : AppColors.destructive,
+                          ),
                         ),
                       ),
                     ],
@@ -314,122 +340,134 @@ class MonthlyPnlChart extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        SizedBox(
-          height: 170,
-          child: BarChart(
-            BarChartData(
-              minY: bottom,
-              maxY: top,
-              alignment: BarChartAlignment.spaceAround,
-              borderData: FlBorderData(show: false),
-              gridData: FlGridData(
-                drawVerticalLine: false,
-                horizontalInterval: step,
-                getDrawingHorizontalLine: (value) => value.abs() < step / 1000
-                    ? const FlLine(color: AppColors.border, strokeWidth: 1)
-                    : FlLine(
-                        color: AppColors.border.withValues(alpha: .45),
-                        strokeWidth: 1,
-                        dashArray: const [3, 3],
-                      ),
-              ),
-              titlesData: FlTitlesData(
-                topTitles: const AxisTitles(),
-                rightTitles: const AxisTitles(),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 40,
-                    interval: step,
-                    getTitlesWidget: (value, meta) => SideTitleWidget(
-                      meta: meta,
-                      child: Text(
-                        compact(value),
-                        style: mono(size: 9, color: AppColors.mutedForeground),
+        Semantics(
+          label:
+              'Grafik P/L per bulan: ${[for (final item in data) '${monthLabel(item.month)} ${money(item.pnl, currency, signed: true)}'].join(', ')}.',
+          excludeSemantics: true,
+          child: SizedBox(
+            height: 170,
+            child: BarChart(
+              BarChartData(
+                minY: bottom,
+                maxY: top,
+                alignment: BarChartAlignment.spaceAround,
+                borderData: FlBorderData(show: false),
+                gridData: FlGridData(
+                  drawVerticalLine: false,
+                  horizontalInterval: step,
+                  getDrawingHorizontalLine: (value) => value.abs() < step / 1000
+                      ? const FlLine(color: AppColors.border, strokeWidth: 1)
+                      : FlLine(
+                          color: AppColors.border.withValues(alpha: .45),
+                          strokeWidth: 1,
+                          dashArray: const [3, 3],
+                        ),
+                ),
+                titlesData: FlTitlesData(
+                  topTitles: const AxisTitles(),
+                  rightTitles: const AxisTitles(),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: axis.scale(11) * 3.6,
+                      interval: step,
+                      getTitlesWidget: (value, meta) => SideTitleWidget(
+                        meta: meta,
+                        child: Text(
+                          compact(value),
+                          textScaler: axis,
+                          style: mono(
+                            size: 11,
+                            color: AppColors.mutedForeground,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 30,
-                    getTitlesWidget: (value, meta) {
-                      final index = value.toInt();
-                      final month = data[index].month;
-                      final showYear = index == 0 || month.endsWith('-01');
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      // Dua baris label (bulan, lalu tahun) + jarak 4.
+                      reservedSize: axis.scale(11) * 1.5 * 2 + 6,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        final month = data[index].month;
+                        final showYear = index == 0 || month.endsWith('-01');
 
-                      return SideTitleWidget(
-                        meta: meta,
-                        space: 4,
-                        child: Column(
-                          children: [
-                            Text(
-                              shortMonth(month),
-                              style: const TextStyle(
-                                fontSize: 9.5,
-                                color: AppColors.mutedForeground,
-                              ),
-                            ),
-                            if (showYear)
+                        return SideTitleWidget(
+                          meta: meta,
+                          space: 4,
+                          child: Column(
+                            children: [
                               Text(
-                                "'${month.substring(2, 4)}",
-                                style: mono(
-                                  size: 8.5,
+                                shortMonth(month),
+                                textScaler: axis,
+                                style: const TextStyle(
+                                  fontSize: 11,
                                   color: AppColors.mutedForeground,
                                 ),
                               ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              barTouchData: BarTouchData(
-                touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (_) => AppColors.popover,
-                  tooltipBorder: const BorderSide(color: AppColors.border),
-                  tooltipBorderRadius: BorderRadius.circular(8),
-                  fitInsideHorizontally: true,
-                  fitInsideVertically: true,
-                  getTooltipItem: (group, _, rod, _) => BarTooltipItem(
-                    '${monthLabel(data[group.x].month)}\n',
-                    const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.mutedForeground,
+                              if (showYear)
+                                Text(
+                                  "'${month.substring(2, 4)}",
+                                  textScaler: axis,
+                                  style: mono(
+                                    size: 11,
+                                    color: AppColors.mutedForeground,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    children: [
-                      TextSpan(
-                        text: money(rod.toY, currency, signed: true),
-                        style: mono(
-                          size: 12,
-                          weight: FontWeight.w600,
-                          color: pnlColor(rod.toY),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ),
-              barGroups: [
-                for (var i = 0; i < data.length; i++)
-                  BarChartGroupData(
-                    x: i,
-                    barRods: [
-                      BarChartRodData(
-                        toY: data[i].pnl,
-                        width: 12,
-                        color:
-                            (data[i].pnl >= 0
-                                    ? AppColors.success
-                                    : AppColors.destructive)
-                                .withValues(alpha: .75),
-                        borderRadius: BorderRadius.circular(2),
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => AppColors.popover,
+                    tooltipBorder: const BorderSide(color: AppColors.border),
+                    tooltipBorderRadius: BorderRadius.circular(8),
+                    fitInsideHorizontally: true,
+                    fitInsideVertically: true,
+                    getTooltipItem: (group, _, rod, _) => BarTooltipItem(
+                      '${monthLabel(data[group.x].month)}\n',
+                      const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.mutedForeground,
                       ),
-                    ],
+                      children: [
+                        TextSpan(
+                          text: money(rod.toY, currency, signed: true),
+                          style: mono(
+                            size: 12,
+                            weight: FontWeight.w600,
+                            color: pnlColor(rod.toY),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-              ],
+                ),
+                barGroups: [
+                  for (var i = 0; i < data.length; i++)
+                    BarChartGroupData(
+                      x: i,
+                      barRods: [
+                        BarChartRodData(
+                          toY: data[i].pnl,
+                          width: 12,
+                          color:
+                              (data[i].pnl >= 0
+                                      ? AppColors.success
+                                      : AppColors.destructive)
+                                  .withValues(alpha: .75),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
             ),
           ),
         ),

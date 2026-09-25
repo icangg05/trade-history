@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gal/gal.dart';
 
 import '../../core/api_client.dart';
 import '../../core/format.dart';
@@ -10,12 +9,29 @@ import '../../models/account.dart';
 import '../../models/journal.dart';
 import '../../widgets/account_scope.dart';
 import '../../widgets/common.dart';
+import '../../widgets/image_viewer.dart';
 import '../../widgets/skeleton.dart';
 import 'transaction_form.dart';
 
 /// Filter periode: tahun + bulan, atau `all`. Bulan hanya berarti kalau
 /// tahunnya juga dipilih — "Agustus" lintas tahun bukan angka yang berarti.
 typedef FundsQuery = (int account, String year, String month);
+
+/// Keterangan, pilihan tahun + bulan, kartu saldo, lalu baris transaksi.
+const _loading = SkeletonView(
+  children: [
+    Bone(width: 240, height: 10),
+    Row(
+      children: [
+        Expanded(child: SkeletonField()),
+        SizedBox(width: 10),
+        Expanded(child: SkeletonField()),
+      ],
+    ),
+    SkeletonStats(),
+    SkeletonRows(count: 5),
+  ],
+);
 
 class FundsList {
   const FundsList({
@@ -133,6 +149,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   @override
   Widget build(BuildContext context) => AccountScaffold(
     title: 'Dana',
+    loading: _loading,
     floatingActionButton: (account) => FloatingActionButton.extended(
       onPressed: () => showTransactionForm(
         context,
@@ -155,6 +172,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         child: AsyncView(
           value: ref.watch(fundsProvider(query)),
           onRetry: () => ref.invalidate(fundsProvider(query)),
+          loading: _loading,
           builder: (list) => NotificationListener<ScrollNotification>(
             onNotification: (notification) {
               if (notification.metrics.extentAfter < 400) {
@@ -180,117 +198,124 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               ? '${page.year}'
               : monthLabel('${page.year}-${'${page.month}'.padLeft(2, '0')}'));
 
-    return ListView(
+    final rows = list.items;
+    final header = <Widget>[
+      const Caption('Arus dana masuk-keluar, terpisah dari hasil trading.'),
+      const SizedBox(height: 12),
+      Row(
+        children: [
+          Expanded(
+            child: SelectField(
+              label: 'Tahun',
+              value: _year,
+              options: [
+                ('all', 'Semua tahun'),
+                for (final year in page.years) ('$year', '$year'),
+              ],
+              onChanged: (value) => setState(() => _year = value),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            // Bulan ikut terkunci ke "semua" selama tahunnya "semua".
+            child: SelectField(
+              label: 'Bulan',
+              value: _year == 'all' ? 'all' : _month,
+              enabled: _year != 'all',
+              options: [
+                ('all', 'Semua bulan'),
+                for (var month = 1; month <= 12; month++)
+                  (
+                    '$month',
+                    monthLabel(
+                      '2000-${'$month'.padLeft(2, '0')}',
+                    ).split(' ').first,
+                  ),
+              ],
+              onChanged: (value) => setState(() => _month = value),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 14),
+      StatGrid(
+        children: [
+          StatCard(
+            label: 'Saldo sekarang',
+            value: money(totals.balance, currency),
+            tone: Tone.gold,
+          ),
+          StatCard(
+            label: 'Modal awal',
+            value: money(totals.initialBalance, currency),
+          ),
+          StatCard(
+            label: 'Deposit · $scope',
+            value: money(totals.deposit, currency),
+            hint: needsRate ? money(totals.depositIdr, 'IDR') : null,
+            tone: Tone.good,
+          ),
+          StatCard(
+            label: 'Withdrawal · $scope',
+            value: money(totals.withdrawal, currency),
+            hint: needsRate ? money(totals.withdrawalIdr, 'IDR') : null,
+            tone: Tone.bad,
+          ),
+        ],
+      ),
+      const SizedBox(height: 14),
+    ];
+    final count = rows.isEmpty ? 1 : rows.length;
+
+    // Builder, bukan daftar jadi: hasil gulir tanpa ujung bisa ratusan baris,
+    // masing-masing dengan gambar bukti. Yang dibangun hanya yang dekat layar.
+    return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
-      children: [
-        const Caption('Arus dana masuk-keluar, terpisah dari hasil trading.'),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                isExpanded: true,
-                initialValue: _year,
-                decoration: const InputDecoration(labelText: 'Tahun'),
-                items: [
-                  const DropdownMenuItem(
-                    value: 'all',
-                    child: Text('Semua tahun'),
-                  ),
-                  for (final year in page.years)
-                    DropdownMenuItem(value: '$year', child: Text('$year')),
-                ],
-                onChanged: (value) => setState(() => _year = value ?? 'all'),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                isExpanded: true,
-                // Isian form hanya membaca nilai awal; kuncinya berganti supaya
-                // bulan ikut terkunci ke "semua" saat tahunnya "semua".
-                key: ValueKey('month-$_year'),
-                initialValue: _year == 'all' ? 'all' : _month,
-                decoration: const InputDecoration(labelText: 'Bulan'),
-                items: [
-                  const DropdownMenuItem(
-                    value: 'all',
-                    child: Text('Semua bulan'),
-                  ),
-                  for (var month = 1; month <= 12; month++)
-                    DropdownMenuItem(
-                      value: '$month',
-                      child: Text(
-                        monthLabel('2000-${'$month'.padLeft(2, '0')}')
-                            .split(' ')
-                            .first,
-                      ),
-                    ),
-                ],
-                onChanged: _year == 'all'
-                    ? null
-                    : (value) => setState(() => _month = value ?? 'all'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        StatGrid(
-          children: [
-            StatCard(
-              label: 'Saldo sekarang',
-              value: money(totals.balance, currency),
-              tone: Tone.gold,
-            ),
-            StatCard(
-              label: 'Modal awal',
-              value: money(totals.initialBalance, currency),
-            ),
-            StatCard(
-              label: 'Deposit · $scope',
-              value: money(totals.deposit, currency),
-              hint: needsRate ? money(totals.depositIdr, 'IDR') : null,
-              tone: Tone.good,
-            ),
-            StatCard(
-              label: 'Withdrawal · $scope',
-              value: money(totals.withdrawal, currency),
-              hint: needsRate ? money(totals.withdrawalIdr, 'IDR') : null,
-              tone: Tone.bad,
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        if (list.items.isEmpty)
-          EmptyState(
+      itemCount: header.length + count + (list.loadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index < header.length) return header[index];
+
+        final at = index - header.length;
+
+        if (at >= count) {
+          // Beberapa baris, bukan satu: halaman berikutnya memang berisi banyak.
+          return const Shimmer(child: SkeletonRows());
+        }
+
+        if (rows.isEmpty) {
+          return EmptyState(
             message: page.year == null
                 ? 'Belum ada transaksi.'
                 : 'Tidak ada transaksi pada $scope.',
-          )
-        else
-          for (final row in list.items) ...[
-            _Row(
-              row: row,
+          );
+        }
+
+        final row = rows[at];
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: _Row(
+            key: ValueKey(row.id),
+            row: row,
+            account: account,
+            onEdit: () => showTransactionForm(
+              context,
               account: account,
-              onEdit: () => showTransactionForm(
-                context,
-                account: account,
-                editing: row,
-                balance: totals.balance,
-              ),
-              onDelete: () => _delete(account, row),
+              editing: row,
+              balance: totals.balance,
             ),
-            const SizedBox(height: 8),
-          ],
-        if (list.loadingMore) const Shimmer(child: SkeletonRow()),
-      ],
+            onDelete: () => _delete(account, row),
+          ),
+        );
+      },
     );
   }
 }
 
-class _Row extends ConsumerWidget {
+class _Row extends ConsumerStatefulWidget {
   const _Row({
+    super.key,
     required this.row,
     required this.account,
     required this.onEdit,
@@ -303,9 +328,49 @@ class _Row extends ConsumerWidget {
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Row> createState() => _RowState();
+}
+
+class _RowState extends ConsumerState<_Row> {
+  bool _saving = false;
+
+  Future<void> _download() async {
+    setState(() => _saving = true);
+    await saveToGallery(
+      context,
+      () => ref
+          .read(journalProvider)
+          .proofBytes(widget.account.id, widget.row.id),
+      _proofName(widget.row),
+    );
+    if (mounted) setState(() => _saving = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final row = widget.row;
+    final account = widget.account;
     final color = row.isDeposit ? AppColors.success : AppColors.destructive;
     final idr = toIdr(row.amount, row.rateIdr, account.currency);
+    // Huruf sistem besar: nominal pindah ke bawah keterangan, jadi kata
+    // "Withdrawal" tidak terjepit jadi satu huruf per baris.
+    final stacked = largeText(context);
+    final amounts = Column(
+      crossAxisAlignment: stacked
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.end,
+      children: [
+        Text(
+          money(row.signed, account.currency, signed: true),
+          style: mono(size: 13, color: color),
+        ),
+        if (account.currency != 'IDR')
+          Text(
+            '${money(idr, 'IDR')}${row.rateIdr == null ? '' : ' @ ${price(row.rateIdr)}'}',
+            style: mono(size: 11, color: AppColors.mutedForeground),
+          ),
+      ],
+    );
 
     return Panel(
       padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
@@ -317,6 +382,8 @@ class _Row extends ConsumerWidget {
             Container(
               width: 44,
               height: 44,
+              // Setara area ketuk thumbnail bukti, supaya barisnya sejajar.
+              margin: const EdgeInsets.all(2),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.border),
@@ -349,33 +416,30 @@ class _Row extends ConsumerWidget {
                     color: AppColors.mutedForeground,
                   ),
                 ),
+                if (stacked) ...[const SizedBox(height: 4), amounts],
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                money(row.signed, account.currency, signed: true),
-                style: mono(size: 13, color: color),
-              ),
-              if (account.currency != 'IDR')
-                Text(
-                  '${money(idr, 'IDR')}${row.rateIdr == null ? '' : ' @ ${price(row.rateIdr)}'}',
-                  style: mono(size: 10.5, color: AppColors.mutedForeground),
-                ),
-            ],
-          ),
+          if (!stacked) amounts,
+          // Selama bukti diunduh, titik tiganya jadi putaran dan menunya
+          // terkunci — tidak ada unduhan ganda.
           PopupMenuButton<String>(
-            icon: const Icon(
-              Icons.more_vert,
-              size: 20,
-              color: AppColors.mutedForeground,
-            ),
+            enabled: !_saving,
+            tooltip: _saving ? 'Mengunduh bukti…' : null,
+            icon: _saving
+                ? const SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(
+                    Icons.more_vert,
+                    size: 20,
+                    color: AppColors.mutedForeground,
+                  ),
             onSelected: (value) => switch (value) {
-              'edit' => onEdit(),
-              'download' => downloadProof(context, ref, account.id, row),
-              _ => onDelete(),
+              'edit' => widget.onEdit(),
+              'download' => _download(),
+              _ => widget.onDelete(),
             },
             itemBuilder: (_) => [
               const PopupMenuItem(value: 'edit', child: Text('Ubah')),
@@ -399,48 +463,9 @@ class _Row extends ConsumerWidget {
   }
 }
 
-/// Simpan bukti transfer ke galeri ponsel, di album "Trade History".
-Future<void> downloadProof(
-  BuildContext context,
-  WidgetRef ref,
-  int account,
-  FundTransaction row,
-) async {
-  final api = ref.read(journalProvider);
-
-  try {
-    if (!await Gal.hasAccess(toAlbum: true) &&
-        !await Gal.requestAccess(toAlbum: true)) {
-      if (context.mounted) {
-        showMessage(
-          context,
-          'Izin galeri ditolak. Izinkan dari pengaturan aplikasi.',
-          error: true,
-        );
-      }
-      return;
-    }
-
-    await Gal.putImageBytes(
-      await api.proofBytes(account, row.id),
-      album: 'Trade History',
-      name: 'bukti-${row.type}-${isoDate(row.occurredAt)}',
-    );
-
-    if (context.mounted) showMessage(context, 'Bukti disimpan ke galeri.');
-  } on ApiException catch (error) {
-    if (context.mounted) showMessage(context, error.message, error: true);
-  } on GalException catch (error) {
-    if (context.mounted) {
-      showMessage(context, switch (error.type) {
-        GalExceptionType.accessDenied => 'Izin galeri ditolak.',
-        GalExceptionType.notEnoughSpace => 'Penyimpanan ponsel penuh.',
-        GalExceptionType.notSupportedFormat => 'Format gambar tidak didukung.',
-        GalExceptionType.unexpected => 'Gagal menyimpan ke galeri.',
-      }, error: true);
-    }
-  }
-}
+/// Nama berkas bukti transfer saat disimpan ke galeri.
+String _proofName(FundTransaction row) =>
+    'bukti-${row.type}-${isoDate(row.occurredAt)}';
 
 /// Bukti transfer dari disk privat server — hanya keluar dengan token pemiliknya.
 class ProofThumbnail extends ConsumerWidget {
@@ -463,70 +488,39 @@ class ProofThumbnail extends ConsumerWidget {
     final url = api.proofUrl(account, row.id, row.proofVersion);
     final headers = api.client.imageHeaders;
 
-    return GestureDetector(
-      onTap: () => showDialog<void>(
-        context: context,
-        builder: (context) => Dialog.fullscreen(
-          backgroundColor: Colors.black,
-          // Scaffold sendiri: pesan "disimpan ke galeri" tampil di atas
-          // gambar, bukan di halaman yang tertutup dialog ini.
-          child: Scaffold(
-            backgroundColor: Colors.black,
-            // Seluas layar: body Scaffold hanya menerima batas longgar, dan
-            // tanpa ini Stack menyusut setinggi baris tombol di atas —
-            // gambarnya ikut terjepit kecil di situ.
-            body: Stack(
-              fit: StackFit.expand,
-              children: [
-                Positioned.fill(
-                  child: InteractiveViewer(
-                    maxScale: 5,
-                    child: Image.network(
-                      url,
-                      headers: headers,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                SafeArea(
-                  child: Row(
-                    children: [
-                      IconButton(
-                        tooltip: 'Tutup',
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        tooltip: 'Unduh',
-                        onPressed: () =>
-                            downloadProof(context, ref, account, row),
-                        icon: const Icon(
-                          Icons.download_outlined,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+    return Semantics(
+      button: true,
+      label: 'Bukti transfer, ketuk untuk memperbesar',
+      excludeSemantics: true,
+      child: GestureDetector(
+        // Area ketuk minimal 48 dp walau gambarnya lebih kecil.
+        behavior: HitTestBehavior.opaque,
+        onTap: () => showImageViewer(
+          context,
+          image: NetworkImage(url, headers: headers),
+          bytes: () => api.proofBytes(account, row.id),
+          name: _proofName(row),
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: Image.network(
-          url,
-          headers: headers,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => SizedBox.square(
-            dimension: size,
-            child: const Icon(
-              Icons.broken_image_outlined,
-              color: AppColors.mutedForeground,
+        child: Padding(
+          padding: EdgeInsets.all(size < 48 ? (48 - size) / 2 : 0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.network(
+              url,
+              headers: headers,
+              width: size,
+              height: size,
+              // Didekode seukuran thumbnail, bukan resolusi penuh buktinya.
+              cacheWidth: (size * MediaQuery.devicePixelRatioOf(context))
+                  .round(),
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => SizedBox.square(
+                dimension: size,
+                child: const Icon(
+                  Icons.broken_image_outlined,
+                  color: AppColors.mutedForeground,
+                ),
+              ),
             ),
           ),
         ),

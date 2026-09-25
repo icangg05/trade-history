@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../core/format.dart';
 import '../core/theme.dart';
 import '../models/trade.dart';
+import 'common.dart';
 
 /// BUY emas, SELL abu — sama dengan badge di web.
 class DirectionBadge extends StatelessWidget {
-  const DirectionBadge(this.direction, {super.key, this.width = 40});
+  const DirectionBadge(this.direction, {super.key, this.width = 44});
 
   final String direction;
   final double? width;
@@ -15,8 +16,10 @@ class DirectionBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final buy = direction == 'buy';
 
+    // Lebar minimum, bukan lebar tetap: dengan huruf sistem yang besar
+    // "SELL" melebar alih-alih pecah jadi dua baris.
     return Container(
-      width: width,
+      constraints: BoxConstraints(minWidth: width ?? 0),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -25,8 +28,9 @@ class DirectionBadge extends StatelessWidget {
       ),
       child: Text(
         buy ? 'BUY' : 'SELL',
+        softWrap: false,
         style: TextStyle(
-          fontSize: 9.5,
+          fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: .3,
           color: buy ? AppColors.goldForeground : AppColors.foreground,
@@ -65,7 +69,8 @@ class StopBadge extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: const TextStyle(fontSize: 9, color: AppColors.cyan),
+          softWrap: false,
+          style: const TextStyle(fontSize: 11, color: AppColors.cyan),
         ),
       ),
     );
@@ -109,95 +114,104 @@ class TradeRow extends StatelessWidget {
   final bool highlighted;
 
   @override
-  Widget build(BuildContext context) => Opacity(
-    opacity: dimmed ? .4 : 1,
-    child: Material(
-      color: highlighted
-          ? AppColors.gold.withValues(alpha: .1)
-          : Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-          child: Row(
-            children: [
-              if (leading != null) ...[leading!, const SizedBox(width: 6)],
-              DirectionBadge(trade.direction),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            trade.symbol,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
+  Widget build(BuildContext context) {
+    // Huruf sistem besar: nominal pindah ke bawah simbol, jadi simbolnya
+    // tidak terjepit jadi "XAU…".
+    final stacked = largeText(context);
+    final amounts = Column(
+      crossAxisAlignment: stacked
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.end,
+      children: [
+        Text(
+          money(trade.pnl, currency, signed: true),
+          style: mono(size: 12.5, color: statusColor(trade.status)),
+        ),
+        if (trailingBelow != null)
+          Text(
+            trailingBelow!,
+            style: mono(size: 11, color: AppColors.mutedForeground),
+          ),
+      ],
+    );
+
+    return Opacity(
+      opacity: dimmed ? .4 : 1,
+      child: Material(
+        color: highlighted
+            ? AppColors.gold.withValues(alpha: .1)
+            : Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            child: Row(
+              children: [
+                if (leading != null) ...[leading!, const SizedBox(width: 6)],
+                DirectionBadge(trade.direction),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              trade.symbol,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                        ),
-                        if (trade.source == 'ai') ...[
-                          const SizedBox(width: 4),
-                          const Tooltip(
-                            message: 'Diisi dari screenshot',
-                            child: Icon(
-                              Icons.auto_awesome,
-                              size: 12,
-                              color: AppColors.gold,
+                          if (trade.source == 'ai') ...[
+                            const SizedBox(width: 4),
+                            const Tooltip(
+                              message: 'Diisi dari screenshot',
+                              child: Icon(
+                                Icons.auto_awesome,
+                                size: 12,
+                                color: AppColors.gold,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            subtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.mutedForeground,
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.mutedForeground,
+                              ),
                             ),
                           ),
-                        ),
-                        if (trade.stopState != null &&
-                            trade.stopState != StopState.risk) ...[
-                          const SizedBox(width: 4),
-                          StopBadge(trade.stopState),
+                          if (trade.stopState != null &&
+                              trade.stopState != StopState.risk) ...[
+                            const SizedBox(width: 4),
+                            StopBadge(trade.stopState),
+                          ],
                         ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    money(trade.pnl, currency, signed: true),
-                    style: mono(size: 12.5, color: statusColor(trade.status)),
+                      ),
+                      if (stacked) ...[const SizedBox(height: 4), amounts],
+                    ],
                   ),
-                  if (trailingBelow != null)
-                    Text(
-                      trailingBelow!,
-                      style: mono(size: 10.5, color: AppColors.mutedForeground),
-                    ),
-                ],
-              ),
-            ],
+                ),
+                if (!stacked) ...[const SizedBox(width: 8), amounts],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// Bingkai grup: trade yang satu grup dibungkus satu garis emas tipis —
@@ -209,7 +223,7 @@ BoxDecoration? groupFrame(List<Trade> rows, int index) {
 
   if (group == null) return null;
 
-  const side = BorderSide(color: Color(0x66FBBD23));
+  final side = BorderSide(color: AppColors.gold.withValues(alpha: .4));
   final first = index == 0 || rows[index - 1].groupId != group;
   final last = index == rows.length - 1 || rows[index + 1].groupId != group;
 

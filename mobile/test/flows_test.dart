@@ -92,7 +92,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Grouping 1 trade'), findsOneWidget);
 
-    await tester.ensureVisible(row(next));
+    // Gulir sampai barisnya dibangun: daftar riwayat dibangun seperlunya,
+    // jadi baris di bawah layar belum tentu ada di pohon widget.
+    await tester.scrollUntilVisible(
+      row(next),
+      100,
+      scrollable: find.descendant(
+        of: find.byType(CustomScrollView),
+        matching: find.byType(Scrollable),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(row(next));
     await tester.pumpAndSettle();

@@ -54,8 +54,25 @@ GoRouterPageBuilder _page(Widget Function(GoRouterState state) child) =>
     (context, state) => MaterialPage<void>(
       key: state.pageKey,
       name: state.name,
-      child: Backdrop(child: child(state)),
+      child: Backdrop(child: _Readable(child: child(state))),
     );
+
+/// Di tablet isi halaman dibatasi 840 dp di tengah, latarnya tetap selebar
+/// layar: daftar, form, dan kartu yang direntang 1.300 dp sulit dibaca dan
+/// kotak isiannya jadi selebar layar. Di ponsel tidak berpengaruh.
+class _Readable extends StatelessWidget {
+  const _Readable({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 840),
+      child: child,
+    ),
+  );
+}
 
 /// Form trade naik dari bawah seperti lembar isian, bukan bergeser seperti
 /// halaman biasa: tandanya "isi lalu tutup", dan tombol kiri atasnya jadi ✕.
@@ -67,7 +84,7 @@ GoRouterPageBuilder _formPage(Widget Function(GoRouterState state) child) =>
       fullscreenDialog: true,
       transitionDuration: const Duration(milliseconds: 340),
       reverseTransitionDuration: const Duration(milliseconds: 260),
-      child: Backdrop(child: child(state)),
+      child: Backdrop(child: _Readable(child: child(state))),
       transitionsBuilder: (context, animation, _, page) =>
           MediaQuery.disableAnimationsOf(context)
           ? page
@@ -131,8 +148,28 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/register',
         pageBuilder: _page((_) => const RegisterScreen()),
       ),
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         builder: (context, state, shell) => HomeShell(shell: shell),
+        // Sama dengan `indexedStack` bawaan, ditambah HeroMode. Tab yang
+        // tidak aktif tetap hidup di latar; tanpa ini FAB-nya ikut dihitung
+        // saat halaman baru dibuka, dan dua FAB bertag bawaan yang sama
+        // (mis. "Trade" dan "Akun baru") memicu galat "multiple heroes".
+        navigatorContainerBuilder: (context, shell, children) => IndexedStack(
+          index: shell.currentIndex,
+          children: [
+            for (final (index, child) in children.indexed)
+              HeroMode(
+                enabled: index == shell.currentIndex,
+                child: Offstage(
+                  offstage: index != shell.currentIndex,
+                  child: TickerMode(
+                    enabled: index == shell.currentIndex,
+                    child: child,
+                  ),
+                ),
+              ),
+          ],
+        ),
         branches: [
           StatefulShellBranch(
             routes: [
