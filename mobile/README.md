@@ -76,6 +76,6 @@ test/fixtures/   jawaban API sungguhan (php artisan serve + DemoSeeder)
   flutter_markdown_plus belum. Karena itu tiap rute memakai `pageBuilder` dengan
   `MaterialPage` (lihat `lib/app.dart`); tanpa itu go_router tidak mengenali MaterialApp
   dan semua perpindahan layar tampil tanpa animasi.
-- Pesan galat validasi bawaan Laravel diterjemahkan di `validationMessage()`: server
-  belum punya `lang/id/validation.php`, jadi pesannya keluar sebagai kunci
-  (`validation.required`).
+- Pesan galat validasi datang dari server dalam bahasa Indonesia
+  (`lang/id/validation.php`). Server lama yang belum punya berkas itu mengirim kuncinya
+  mentah (`validation.required`); `validationMessage()` menerjemahkannya sebagai cadangan.

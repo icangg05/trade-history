@@ -62,6 +62,46 @@ class ProfileTest extends TestCase
         $this->assertTrue(Hash::check('rahasia-baru', $user->password));
     }
 
+    /**
+     * Form profil web mengirim seluruh kolomnya, termasuk kolom sandi yang
+     * kosong. Dulu kolom `current_password` kosong itu tetap dinilai dan
+     * ditolak, jadi mengganti nama saja dari browser tidak pernah berhasil.
+     */
+    public function test_ganti_nama_dari_form_web_dengan_kolom_sandi_kosong(): void
+    {
+        $user = User::factory()->create(['password' => 'rahasia-lama']);
+
+        $this->actingAs($user)
+            ->put('/profile', [
+                'name' => 'Nama Baru',
+                'email' => $user->email,
+                'password' => '',
+                'password_confirmation' => '',
+                'current_password' => '',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('Nama Baru', $user->refresh()->name);
+        $this->assertTrue(Hash::check('rahasia-lama', $user->password));
+    }
+
+    public function test_kolom_sandi_sekarang_yang_kosong_tetap_wajib_saat_ganti_email(): void
+    {
+        $user = User::factory()->create(['password' => 'rahasia-lama']);
+
+        $this->actingAs($user)
+            ->put('/profile', [
+                'name' => $user->name,
+                'email' => 'baru@contoh.test',
+                'password' => '',
+                'password_confirmation' => '',
+                'current_password' => '',
+            ])
+            ->assertSessionHasErrors('current_password');
+
+        $this->assertNotSame('baru@contoh.test', $user->refresh()->email);
+    }
+
     public function test_ganti_nama_saja_tidak_minta_sandi(): void
     {
         $user = User::factory()->create(['password' => 'rahasia-lama']);

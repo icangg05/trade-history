@@ -37,7 +37,10 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:60'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'password' => ['nullable', 'confirmed', Password::min(8)],
-            'current_password' => [Rule::requiredIf($takesOverLogin), 'current_password'],
+            // `nullable`: form web selalu mengirim kolom ini, kosong kalau cuma
+            // ganti nama. String kosong jadi null, dan tanpa `nullable` aturan
+            // current_password tetap menilai null itu — lalu menolaknya.
+            'current_password' => [Rule::requiredIf($takesOverLogin), 'nullable', 'current_password'],
         ]);
 
         unset($data['current_password']);

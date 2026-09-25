@@ -172,9 +172,10 @@ class ApiClient {
   }
 }
 
-/// Server belum punya berkas `lang/id/validation.php`, jadi pesan bawaan Laravel
-/// keluar sebagai kuncinya (`validation.required`). Kunci itu diterjemahkan di
-/// sini; pesan yang sudah berupa kalimat (buatan controller) dibiarkan.
+/// Server membawa `lang/id/validation.php`, jadi pesannya sudah berupa kalimat
+/// dan dibiarkan apa adanya. Server lama yang belum punya berkas itu mengirim
+/// kuncinya mentah (`validation.required`); kunci itu diterjemahkan di sini
+/// supaya aplikasi tetap terbaca selama servernya belum diperbarui.
 String validationMessage(String message) {
   if (!message.startsWith('validation.')) return message;
 
