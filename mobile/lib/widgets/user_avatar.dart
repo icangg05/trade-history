@@ -163,12 +163,7 @@ Future<void> _change(BuildContext context, ImageSource source) async {
   if (cropped == null || !context.mounted) return;
 
   showMessage(context, 'Mengunggah foto…');
-  await _save(
-    context,
-    (api) => api.uploadAvatar(
-      XFile.fromData(cropped, name: 'avatar.png', mimeType: 'image/png'),
-    ),
-  );
+  await _save(context, (api) => api.uploadAvatar(cropped));
 }
 
 /// Kontainer, bukan `ref` milik widget: unggahan tetap selesai walau layar

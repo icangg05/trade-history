@@ -10,6 +10,7 @@ import 'features/analysis/analysis_screen.dart';
 import 'features/analysis/chat_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
+import 'features/auth/welcome_screen.dart';
 import 'features/calendar/calendar_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/more/more_screen.dart';
@@ -100,9 +101,18 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (!session.hasValue) return location == '/splash' ? null : '/splash';
 
-      if (session.value == null) return atAuth ? null : '/login';
+      if (session.value == null) {
+        // Sekali saja, di pemasangan baru. Yang pernah masuk sudah ditandai.
+        if (ref.read(prefsProvider).getBool(onboardedKey) != true) {
+          return location == '/welcome' ? null : '/welcome';
+        }
 
-      return atAuth || location == '/splash' ? '/' : null;
+        return atAuth ? null : '/login';
+      }
+
+      return atAuth || location == '/splash' || location == '/welcome'
+          ? '/'
+          : null;
     },
     errorBuilder: (context, state) => Backdrop(
       child: Scaffold(
@@ -112,6 +122,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     ),
     routes: [
       GoRoute(path: '/splash', pageBuilder: _page((_) => const _Splash())),
+      GoRoute(
+        path: '/welcome',
+        pageBuilder: _page((_) => const WelcomeScreen()),
+      ),
       GoRoute(path: '/login', pageBuilder: _page((_) => const LoginScreen())),
       GoRoute(
         path: '/register',

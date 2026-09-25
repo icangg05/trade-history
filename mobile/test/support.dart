@@ -101,6 +101,7 @@ Future<void> setUpFormatting() async {
 Future<FakeServer> pumpApp(
   WidgetTester tester, {
   bool loggedIn = true,
+  bool onboarded = true,
   Map<String, Handler> routes = const {},
 }) async {
   tester.view.physicalSize = const Size(1080, 2340);
@@ -111,6 +112,7 @@ Future<FakeServer> pumpApp(
       InMemorySharedPreferencesAsync.withData({
         'server': 'https://trade.contoh.test',
         'account_id': 1,
+        if (onboarded) 'onboarded': true,
       });
   FlutterSecureStorage.setMockInitialValues(
     loggedIn ? {'token': '1|token-uji'} : {},

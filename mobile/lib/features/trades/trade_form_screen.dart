@@ -623,7 +623,14 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
                   maxLines: 8,
                   decoration: InputDecoration(
                     labelText: 'Catatan',
-                    hintText: 'Kondisi pasar, alasan entry, evaluasi…',
+                    // Contoh nyata di dalam kolom, arahan tetap di bawahnya —
+                    // yang di dalam hilang begitu mulai mengetik.
+                    hintText:
+                        'Contoh: Entry di retest support H1 setelah break of structure. '
+                        'Terlalu cepat, harusnya tunggu candle konfirmasi.',
+                    hintMaxLines: 3,
+                    helperText:
+                        'Tulis alasan masuk, kondisi pasar saat itu, dan pelajaran setelah trade selesai.',
                     alignLabelWithHint: true,
                     errorText: _errors['notes'],
                   ),

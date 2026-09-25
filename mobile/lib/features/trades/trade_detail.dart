@@ -134,6 +134,32 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
         );
   }
 
+  /// Label kecil di atas angka mono — satu sel detail.
+  Widget _fact(
+    String label,
+    String value, {
+    double size = 13,
+    Color? color,
+    bool end = false,
+  }) => Column(
+    crossAxisAlignment: end ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Caption(label),
+      const SizedBox(height: 2),
+      Text(
+        value,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: mono(
+          size: size,
+          weight: size > 13 ? FontWeight.w600 : FontWeight.w400,
+          color: color,
+        ),
+      ),
+    ],
+  );
+
   Widget _content(Trade trade) {
     final rows = widget.rows;
     final members = rows == null || trade.groupId == null
@@ -143,16 +169,21 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
         members.isNotEmpty &&
         (members.first.id == trade.id || members.last.id == trade.id);
 
+    // Berpasangan kiri-kanan: harga masuk-keluar, batas rugi-untung, ukuran
+    // dan rencana, lalu waktunya.
     final details = [
-      ('Lot', number(trade.lot)),
-      ('Entry', price(trade.entryPrice)),
-      ('Stop loss', price(trade.slPrice)),
-      ('Take profit', price(trade.tpPrice)),
-      ('Exit', price(trade.exitPrice)),
-      ('P/L', money(trade.pnl, widget.currency, signed: true)),
-      ('RR rencana', rr(trade.rrPlanned)),
-      ('RR hasil', rr(trade.rrRealized)),
+      (('Entry', price(trade.entryPrice)), ('Exit', price(trade.exitPrice))),
+      (
+        ('Stop loss', price(trade.slPrice)),
+        ('Take profit', price(trade.tpPrice)),
+      ),
+      (('Lot', number(trade.lot)), ('RR rencana', rr(trade.rrPlanned))),
+      (
+        ('Dibuka', shortDateTime(trade.openedAt)),
+        ('Ditutup', shortDateTime(trade.closedAt)),
+      ),
     ];
+    final tone = pnlColor(trade.pnl);
 
     return ListView(
       controller: widget.scroll,
@@ -183,52 +214,55 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
             ],
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Row(
           children: [
-            Flexible(
-              child: Text(
-                '${statusLabel(trade.status)} · ${dateTime(trade.openedAt)}',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: statusColor(trade.status),
-                ),
-              ),
+            Text(
+              statusLabel(trade.status),
+              style: TextStyle(fontSize: 12, color: statusColor(trade.status)),
             ),
             const SizedBox(width: 6),
             StopBadge(trade.stopState),
           ],
         ),
-        const Divider(height: 24),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 4,
-          mainAxisSpacing: 4,
-          crossAxisSpacing: 12,
-          children: [
-            for (final (label, value) in details)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Caption(label),
-                  Text(
-                    value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: mono(size: 12.5),
-                  ),
-                ],
+        const SizedBox(height: 14),
+        // Yang paling dicari lebih dulu: hasilnya.
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: tone.withValues(alpha: .08),
+            borderRadius: BorderRadius.circular(kRadius - 2),
+            border: Border.all(color: tone.withValues(alpha: .25)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _fact(
+                  'P/L',
+                  money(trade.pnl, widget.currency, signed: true),
+                  size: 18,
+                  color: tone,
+                ),
               ),
-          ],
+              _fact('RR hasil', rr(trade.rrRealized), size: 18, end: true),
+            ],
+          ),
         ),
+        const SizedBox(height: 14),
+        // Baris setinggi isinya — bukan sel ber-rasio tetap yang
+        // meninggalkan ruang kosong di bawah setiap angka.
+        for (final (left, right) in details) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _fact(left.$1, left.$2)),
+              const SizedBox(width: 12),
+              Expanded(child: _fact(right.$1, right.$2)),
+            ],
+          ),
+          const SizedBox(height: 10),
+        ],
         const SizedBox(height: 4),
-        const Caption('Ditutup'),
-        Text(dateTime(trade.closedAt), style: mono(size: 12.5)),
-        const SizedBox(height: 12),
         if (trade.groupId != null && rows != null)
           Notice(
             child: Column(
@@ -272,7 +306,11 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
                   style: const TextStyle(fontSize: 13),
                   decoration: const InputDecoration(
                     labelText: 'Catatan grup',
-                    hintText: 'Alasan entry, kondisi pasar, evaluasi…',
+                    hintText:
+                        'Contoh: Tiga entry di zona demand yang sama, dua pertama terlalu cepat.',
+                    hintMaxLines: 3,
+                    helperText:
+                        'Kenapa masuk berkali-kali, kondisi pasar, dan pelajarannya.',
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -324,7 +362,7 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
             ),
           ],
         ],
-        const Divider(height: 28),
+        const Divider(height: 24),
         Row(
           children: [
             TextButton.icon(

@@ -89,6 +89,11 @@ String clock(DateTime? value) =>
 String dateTime(DateTime? value) =>
     value == null ? '—' : '${longDate(value)}, ${clock(value)}';
 
+/// "5 Mar 2026, 14.05" — untuk sel setengah lebar yang tidak muat nama bulan penuh.
+String shortDateTime(DateTime? value) => value == null
+    ? '—'
+    : '${DateFormat('d MMM y', _locale).format(value)}, ${clock(value)}';
+
 /// "2026-03" → "Maret 2026".
 String monthLabel(String month) =>
     DateFormat('MMMM y', _locale).format(DateTime.parse('$month-01'));

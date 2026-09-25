@@ -127,16 +127,28 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     }
   }
 
+  FundsQuery _query(AccountBrief account) =>
+      (account.id, _year, _year == 'all' ? 'all' : _month);
+
   @override
   Widget build(BuildContext context) => AccountScaffold(
     title: 'Dana',
     floatingActionButton: (account) => FloatingActionButton.extended(
-      onPressed: () => showTransactionForm(context, account: account),
+      onPressed: () => showTransactionForm(
+        context,
+        account: account,
+        balance: ref
+            .read(fundsProvider(_query(account)))
+            .value
+            ?.first
+            .totals
+            .balance,
+      ),
       icon: const Icon(Icons.add),
       label: const Text('Catat'),
     ),
     body: (context, account) {
-      final query = (account.id, _year, _year == 'all' ? 'all' : _month);
+      final query = _query(account);
 
       return RefreshIndicator(
         onRefresh: () => ref.refresh(fundsProvider(query).future),
@@ -261,8 +273,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             _Row(
               row: row,
               account: account,
-              onEdit: () =>
-                  showTransactionForm(context, account: account, editing: row),
+              onEdit: () => showTransactionForm(
+                context,
+                account: account,
+                editing: row,
+                balance: totals.balance,
+              ),
               onDelete: () => _delete(account, row),
             ),
             const SizedBox(height: 8),
@@ -456,7 +472,11 @@ class ProofThumbnail extends ConsumerWidget {
           // gambar, bukan di halaman yang tertutup dialog ini.
           child: Scaffold(
             backgroundColor: Colors.black,
+            // Seluas layar: body Scaffold hanya menerima batas longgar, dan
+            // tanpa ini Stack menyusut setinggi baris tombol di atas —
+            // gambarnya ikut terjepit kecil di situ.
             body: Stack(
+              fit: StackFit.expand,
               children: [
                 Positioned.fill(
                   child: InteractiveViewer(

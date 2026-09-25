@@ -19,20 +19,26 @@ Future<void> showTransactionForm(
   BuildContext context, {
   required AccountBrief account,
   FundTransaction? editing,
+  double? balance,
 }) => showModalBottomSheet<void>(
   context: context,
   // Menutupi tab bar juga, sama seperti modal di web.
   useRootNavigator: true,
   isScrollControlled: true,
   useSafeArea: true,
-  builder: (_) => _TransactionForm(account: account, editing: editing),
+  builder: (_) =>
+      _TransactionForm(account: account, editing: editing, balance: balance),
 );
 
 class _TransactionForm extends ConsumerStatefulWidget {
-  const _TransactionForm({required this.account, this.editing});
+  const _TransactionForm({required this.account, this.editing, this.balance});
 
   final AccountBrief account;
   final FundTransaction? editing;
+
+  /// Saldo akun sekarang — batas withdrawal. Server yang menegakkannya;
+  /// di sini hanya ditampilkan supaya tidak perlu menebak.
+  final double? balance;
 
   @override
   ConsumerState<_TransactionForm> createState() => _TransactionFormState();
@@ -58,6 +64,12 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
 
   String get _currency => widget.account.currency;
 
+  /// Batas withdrawal. Saat memperbaiki, baris ini sendiri dikeluarkan dulu
+  /// dari saldo — sama dengan hitungan server.
+  double? get _available => _type != 'withdrawal' || widget.balance == null
+      ? null
+      : widget.balance! - (widget.editing?.signed ?? 0);
+
   /// Akun rupiah tidak perlu kurs — nilainya sudah rupiah.
   bool get _needsRate => _currency != 'IDR';
 
@@ -77,13 +89,17 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   }
 
   Future<void> _pickProof(ImageSource source) async {
-    // Hanya penghemat kuota: server tetap menormalkan ke JPEG 2000 px.
-    // Jangan lebih kecil — bukti ini masuk laporan pajak dan harus terbaca.
+    // Foto kamera selalu besar (3–5 MB), jadi dikecilkan dulu supaya
+    // unggahannya ringan — jangan lebih kecil dari 2000 px, bukti ini masuk
+    // laporan pajak dan harus terbaca. Gambar galeri dikirim apa adanya:
+    // begitu diberi batas, image_picker selalu mengodekan ulang, dan screenshot
+    // yang sudah kecil malah membengkak. Server yang menormalkan keduanya.
+    final camera = source == ImageSource.camera;
     final file = await ImagePicker().pickImage(
       source: source,
-      maxWidth: 2000,
-      maxHeight: 2000,
-      imageQuality: 85,
+      maxWidth: camera ? 2000 : null,
+      maxHeight: camera ? 2000 : null,
+      imageQuality: camera ? 85 : null,
     );
 
     if (file == null) return;
@@ -172,6 +188,9 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
               labelText: 'Jumlah ($_currency) *',
               hintText: '500',
               errorText: _errors['amount'],
+              helperText: _available == null
+                  ? null
+                  : 'Bisa ditarik paling banyak ${money(_available, _currency)}.',
             ),
           ),
           if (_needsRate) ...[

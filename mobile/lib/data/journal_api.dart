@@ -34,10 +34,14 @@ class JournalApi {
   Future<String> deleteProfile(String password) async =>
       _message(await client.delete('profile', {'password': password}));
 
-  Future<String> uploadAvatar(XFile photo) async => _message(
+  /// Nama berkasnya wajib ada: bagian multipart tanpa nama berkas dibaca PHP
+  /// sebagai "tidak ada unggahan", lalu ditolak dengan "wajib diisi".
+  Future<String> uploadAvatar(Uint8List png) async => _message(
     await client.post(
       'profile/avatar',
-      FormData.fromMap({'avatar': await _file(photo)}),
+      FormData.fromMap({
+        'avatar': MultipartFile.fromBytes(png, filename: 'avatar.png'),
+      }),
     ),
   );
 

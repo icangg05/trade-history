@@ -25,6 +25,10 @@ final httpAdapterProvider = Provider<HttpClientAdapter?>((ref) => null);
 /// Alamat server, ditanam saat build: `--dart-define=API_BASE_URL=https://…`.
 const defaultServer = String.fromEnvironment('API_BASE_URL');
 
+/// Perkenalan sudah dilihat (atau dilewati), atau pengguna sudah pernah
+/// masuk — keduanya berarti layar perkenalan tidak perlu tampil lagi.
+const onboardedKey = 'onboarded';
+
 const _serverKey = 'server';
 const _tokenKey = 'token';
 const _accountKey = 'account_id';
@@ -97,6 +101,7 @@ class SessionController extends AsyncNotifier<Session?> {
     ).post(path, {...body, 'device_name': _deviceName()});
 
     await ref.read(serverProvider.notifier).set(server);
+    await ref.read(prefsProvider).setBool(onboardedKey, true);
     await ref
         .read(secureStorageProvider)
         .write(key: _tokenKey, value: '${json['token']}');

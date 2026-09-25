@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/format.dart';
+import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../models/stats.dart';
 import '../../widgets/account_scope.dart';
@@ -69,6 +70,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       scrollCacheExtent: kWholePageCache,
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
+        if (data.recent.isEmpty) ...[
+          const _FirstSteps(),
+          const SizedBox(height: 14),
+        ],
         Caption('${longDate(summary.from)} — ${longDate(summary.to)}'),
         const SizedBox(height: 10),
         Segments(
@@ -192,6 +197,78 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// Pengguna baru melihat angka nol di mana-mana. Kartu ini menunjukkan
+/// langkah pertamanya, dan hilang sendiri begitu trade pertama tercatat
+/// (`recent` tidak dibatasi periode, jadi kosong berarti belum pernah ada).
+class _FirstSteps extends StatelessWidget {
+  const _FirstSteps();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget step(
+      IconData icon,
+      String title,
+      String subtitle,
+      VoidCallback onTap,
+    ) => ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: AppColors.gold.withValues(alpha: .12),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, size: 18, color: AppColors.gold),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(fontSize: 12, color: AppColors.mutedForeground),
+      ),
+      trailing: const Icon(
+        Icons.chevron_right,
+        color: AppColors.mutedForeground,
+      ),
+      onTap: onTap,
+    );
+
+    return Panel(
+      title: 'Mulai di sini',
+      borderColor: AppColors.gold.withValues(alpha: .35),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Caption('Tiga langkah supaya dashboard ini mulai berisi.'),
+          const SizedBox(height: 4),
+          step(
+            Icons.add_chart,
+            'Catat trade pertama',
+            'Isi manual, atau biarkan AI membaca screenshot.',
+            () => context.push('/trade/new'),
+          ),
+          step(
+            Icons.shield_outlined,
+            'Atur batas harian',
+            'Maksimal loss dan target profit per hari.',
+            () => context.go('/more/rules'),
+          ),
+          step(
+            Icons.account_balance_wallet_outlined,
+            'Catat deposit dan withdrawal',
+            'Arus dana dipisah dari hasil trading.',
+            () => context.go('/funds'),
+          ),
+        ],
+      ),
     );
   }
 }

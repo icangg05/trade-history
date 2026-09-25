@@ -108,33 +108,38 @@ class _AiImportSheetState extends ConsumerState<_AiImportSheet> {
           'Hasilnya mengisi form, periksa dulu sebelum disimpan.',
         ),
         const SizedBox(height: 16),
-        Container(
-          constraints: const BoxConstraints(minHeight: 160),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(kRadius),
-            border: Border.all(color: AppColors.border),
-          ),
-          alignment: Alignment.center,
-          padding: const EdgeInsets.all(12),
-          child: _bytes == null
-              ? const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.add_photo_alternate_outlined,
-                      size: 32,
-                      color: AppColors.mutedForeground,
+        // Kotaknya sendiri bisa diketuk — sama dengan tombol Galeri.
+        InkWell(
+          onTap: _busy ? null : () => _pick(ImageSource.gallery),
+          borderRadius: BorderRadius.circular(kRadius),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 160),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(kRadius),
+              border: Border.all(color: AppColors.border),
+            ),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(12),
+            child: _bytes == null
+                ? const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.add_photo_alternate_outlined,
+                        size: 32,
+                        color: AppColors.mutedForeground,
+                      ),
+                      SizedBox(height: 8),
+                      Caption('PNG / JPG / WEBP, maksimal 8 MB'),
+                    ],
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.memory(
+                      _bytes!,
+                      height: 260,
+                      fit: BoxFit.contain,
                     ),
-                    SizedBox(height: 8),
-                    Caption('PNG / JPG / WEBP, maksimal 8 MB'),
-                  ],
-                )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.memory(
-                    _bytes!,
-                    height: 260,
-                    fit: BoxFit.contain,
                   ),
                 ),
         ),

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:trade_history/features/auth/login_screen.dart';
 
 import 'support.dart';
 
@@ -48,6 +50,38 @@ void main() {
 
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('Demo XAUUSD'), findsOneWidget);
+  });
+
+  testWidgets('pemasangan baru: perkenalan dulu, sekali saja', (tester) async {
+    await pumpApp(tester, loggedIn: false, onboarded: false);
+
+    expect(find.text('Jurnal yang mencatat semuanya'), findsOneWidget);
+
+    await tester.tap(find.text('Lanjut'));
+    await tester.pumpAndSettle();
+    expect(find.text('Isi dari screenshot'), findsOneWidget);
+
+    await tester.tap(find.text('Lewati'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masuk ke jurnal trading kamu.'), findsOneWidget);
+
+    // Kembali ke awal aplikasi tidak memunculkannya lagi.
+    GoRouter.of(tester.element(find.byType(LoginScreen))).go('/');
+    await tester.pumpAndSettle();
+    expect(find.text('Masuk ke jurnal trading kamu.'), findsOneWidget);
+  });
+
+  testWidgets('dashboard tanpa trade menunjukkan langkah pertama', (
+    tester,
+  ) async {
+    final empty = fixture('dashboard')..['recent'] = [];
+    await pumpApp(tester, routes: {'GET accounts/1/dashboard': (_) => empty});
+
+    expect(find.text('Mulai di sini'), findsOneWidget);
+
+    await tester.tap(find.text('Atur batas harian'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aturan trading'), findsWidgets);
   });
 
   testWidgets('login yang ditolak menampilkan alasannya', (tester) async {
