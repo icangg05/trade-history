@@ -410,95 +410,227 @@ class _RowState extends ConsumerState<_Row> {
     );
 
     return Panel(
-      padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
-      child: Row(
-        children: [
-          if (row.hasProof)
-            ProofThumbnail(account: account.id, row: row)
-          else
-            Container(
-              width: 44,
-              height: 44,
-              // Setara area ketuk thumbnail bukti, supaya barisnya sejajar.
-              margin: const EdgeInsets.all(2),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Text(
-                '—',
-                style: TextStyle(color: AppColors.mutedForeground),
-              ),
-            ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  row.isDeposit ? 'Deposit' : 'Withdrawal',
-                  style: TextStyle(fontSize: 14, color: color),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  [
-                    longDate(row.occurredAt),
-                    if ((row.note ?? '').isNotEmpty) row.note!,
-                  ].join(' · '),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11.5,
-                    color: AppColors.mutedForeground,
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () => _showDetail(
+          context,
+          account: account,
+          row: row,
+          onEdit: widget.onEdit,
+          onDelete: widget.onDelete,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
+          child: Row(
+            children: [
+              if (row.hasProof)
+                ProofThumbnail(account: account.id, row: row)
+              else
+                Container(
+                  width: 44,
+                  height: 44,
+                  // Setara area ketuk thumbnail bukti, supaya barisnya sejajar.
+                  margin: const EdgeInsets.all(2),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.border),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    '—',
+                    style: TextStyle(color: AppColors.mutedForeground),
                   ),
                 ),
-                if (stacked) ...[const SizedBox(height: 4), amounts],
-              ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      row.isDeposit ? 'Deposit' : 'Withdrawal',
+                      style: TextStyle(fontSize: 14, color: color),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      [
+                        longDate(row.occurredAt),
+                        if ((row.note ?? '').isNotEmpty) row.note!,
+                      ].join(' · '),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        color: AppColors.mutedForeground,
+                      ),
+                    ),
+                    if (stacked) ...[const SizedBox(height: 4), amounts],
+                  ],
+                ),
+              ),
+              if (!stacked) amounts,
+              // Selama bukti diunduh, titik tiganya jadi putaran dan menunya
+              // terkunci — tidak ada unduhan ganda.
+              PopupMenuButton<String>(
+                enabled: !_saving,
+                tooltip: _saving ? 'Mengunduh bukti…' : null,
+                icon: _saving
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(
+                        Icons.more_vert,
+                        size: 20,
+                        color: AppColors.mutedForeground,
+                      ),
+                onSelected: (value) => switch (value) {
+                  'edit' => widget.onEdit(),
+                  'download' => _download(),
+                  _ => widget.onDelete(),
+                },
+                itemBuilder: (_) => [
+                  const PopupMenuItem(value: 'edit', child: Text('Ubah')),
+                  if (row.hasProof)
+                    const PopupMenuItem(
+                      value: 'download',
+                      child: Text('Unduh bukti'),
+                    ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      'Hapus',
+                      style: TextStyle(color: AppColors.destructive),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Detail satu transaksi. Baris di daftar memotong catatan jadi dua baris dan
+/// buktinya jadi thumbnail kecil; di sini semuanya tampil utuh.
+Future<void> _showDetail(
+  BuildContext context, {
+  required AccountBrief account,
+  required FundTransaction row,
+  required VoidCallback onEdit,
+  required VoidCallback onDelete,
+}) => showModalBottomSheet<void>(
+  context: context,
+  // Menutupi tab bar juga, sama seperti modal di web.
+  useRootNavigator: true,
+  isScrollControlled: true,
+  useSafeArea: true,
+  builder: (sheet) {
+    final currency = account.currency;
+    final color = row.isDeposit ? AppColors.success : AppColors.destructive;
+
+    // Sheet ditutup dulu: form ubah dan konfirmasi hapus muncul di atas
+    // halaman Dana, bukan menumpuk di atas detail ini.
+    void close(VoidCallback action) {
+      Navigator.pop(sheet);
+      action();
+    }
+
+    Widget fact(String label, String value) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Caption(label),
+        const SizedBox(height: 2),
+        Text(value, style: mono(size: 13)),
+      ],
+    );
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            row.isDeposit ? 'Deposit' : 'Withdrawal',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: color,
             ),
           ),
-          if (!stacked) amounts,
-          // Selama bukti diunduh, titik tiganya jadi putaran dan menunya
-          // terkunci — tidak ada unduhan ganda.
-          PopupMenuButton<String>(
-            enabled: !_saving,
-            tooltip: _saving ? 'Mengunduh bukti…' : null,
-            icon: _saving
-                ? const SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(
-                    Icons.more_vert,
-                    size: 20,
-                    color: AppColors.mutedForeground,
-                  ),
-            onSelected: (value) => switch (value) {
-              'edit' => widget.onEdit(),
-              'download' => _download(),
-              _ => widget.onDelete(),
-            },
-            itemBuilder: (_) => [
-              const PopupMenuItem(value: 'edit', child: Text('Ubah')),
-              if (row.hasProof)
-                const PopupMenuItem(
-                  value: 'download',
-                  child: Text('Unduh bukti'),
+          const SizedBox(height: 2),
+          Caption(longDate(row.occurredAt)),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: .08),
+              borderRadius: BorderRadius.circular(kRadius - 2),
+              border: Border.all(color: color.withValues(alpha: .25)),
+            ),
+            child: Text(
+              money(row.signed, currency, signed: true),
+              style: mono(size: 18, weight: FontWeight.w600, color: color),
+            ),
+          ),
+          if (currency != 'IDR') ...[
+            const SizedBox(height: 14),
+            FieldPair(
+              fact('Kurs', row.rateIdr == null ? '—' : price(row.rateIdr)),
+              fact(
+                'Setara rupiah',
+                money(toIdr(row.amount, row.rateIdr, currency), 'IDR'),
+              ),
+              minWidth: 100,
+            ),
+          ],
+          if ((row.note ?? '').isNotEmpty) ...[
+            const SizedBox(height: 14),
+            const Caption('Catatan'),
+            const SizedBox(height: 2),
+            Text(row.note!, style: const TextStyle(fontSize: 13.5)),
+          ],
+          const SizedBox(height: 14),
+          const Caption('Bukti transfer'),
+          const SizedBox(height: 6),
+          if (row.hasProof)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ProofThumbnail(account: account.id, row: row, size: 120),
+            )
+          else
+            const Text(
+              'Tidak ada bukti transfer.',
+              style: TextStyle(
+                fontSize: 13.5,
+                color: AppColors.mutedForeground,
+              ),
+            ),
+          const Divider(height: 24),
+          Row(
+            children: [
+              TextButton.icon(
+                onPressed: () => close(onDelete),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.destructive,
                 ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: Text(
-                  'Hapus',
-                  style: TextStyle(color: AppColors.destructive),
-                ),
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: const Text('Hapus'),
+              ),
+              const Spacer(),
+              FilledButton.icon(
+                onPressed: () => close(onEdit),
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: const Text('Ubah'),
               ),
             ],
           ),
         ],
       ),
     );
-  }
-}
+  },
+);
 
 /// Nama berkas bukti transfer saat disimpan ke galeri.
 String _proofName(FundTransaction row) =>

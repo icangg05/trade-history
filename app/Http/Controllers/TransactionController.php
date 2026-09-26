@@ -21,8 +21,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionController extends Controller
 {
-    private const FOLDER = 'proofs';
-
     /**
      * Bukti transfer masuk laporan pajak, jadi tulisannya harus tetap terbaca:
      * sisi terpanjang 2000 px dengan kualitas JPEG 85 masih tajam untuk
@@ -112,7 +110,7 @@ class TransactionController extends Controller
         $data = $request->validate($this->rules($account, ['required', 'image', 'max:'.self::PROOF_MAX_KB]));
         $this->ensureAffordable($account, $data);
 
-        $data['proof_path'] = Uploads::image($request->file('proof'), self::FOLDER.'/'.$account->id, self::PROOF_SIDE);
+        $data['proof_path'] = Uploads::image($request->file('proof'), $account->uploadFolder(), self::PROOF_SIDE);
         unset($data['proof']);
 
         $transaction = $account->transactions()->create($data);
@@ -140,7 +138,7 @@ class TransactionController extends Controller
 
         if ($request->hasFile('proof')) {
             $lama = $transaction->proof_path;
-            $data['proof_path'] = Uploads::image($request->file('proof'), self::FOLDER.'/'.$account->id, self::PROOF_SIDE);
+            $data['proof_path'] = Uploads::image($request->file('proof'), $account->uploadFolder(), self::PROOF_SIDE);
             Uploads::delete($lama);
         }
 

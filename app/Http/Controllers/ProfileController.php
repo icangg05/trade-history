@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Response;
-use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProfileController extends Controller
@@ -51,18 +50,10 @@ class ProfileController extends Controller
         $user->update(array_filter($data, fn ($value) => filled($value)));
 
         // Sandi berganti → pintu di perangkat lain ikut ditutup, termasuk yang
-        // dipakai orang yang membuat penggantian ini perlu: sesi browser lain
-        // dan token aplikasi mobile, kecuali yang sedang dipakai sekarang.
-        if (filled($newPassword)) {
-            $current = $user->currentAccessToken();
-
-            $user->tokens()
-                ->when($current instanceof PersonalAccessToken, fn ($q) => $q->whereKeyNot($current->getKey()))
-                ->delete();
-
-            if ($request->hasSession()) {
-                Auth::logoutOtherDevices($newPassword);
-            }
+        // dipakai orang yang membuat penggantian ini perlu. Token aplikasi
+        // mobile dicabut oleh User::booted(); sesi browser lain di sini.
+        if (filled($newPassword) && $request->hasSession()) {
+            Auth::logoutOtherDevices($newPassword);
         }
 
         return $this->done('Profil diperbarui.', data: ['user' => $user->only('id', 'name', 'email')]);
@@ -90,7 +81,7 @@ class ProfileController extends Controller
         $old = $user->avatar_path;
 
         $user->forceFill([
-            'avatar_path' => Uploads::image($request->file('avatar'), 'avatars/'.$user->id, 512),
+            'avatar_path' => Uploads::image($request->file('avatar'), $user->uploadFolder(), 512),
         ])->save();
 
         Uploads::delete($old);

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
  */
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:10,1');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:10,1,login');
 });
 
 Route::get('/', [LoginController::class, 'home'])->name('home');
@@ -50,9 +50,9 @@ Route::middleware('auth')->group(function () {
             Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
             Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
             Route::post('/gemini-keys', [AdminController::class, 'storeGeminiKey'])->name('gemini.store');
-            Route::post('/gemini-keys/{key}/test', [AdminController::class, 'testGeminiKey'])->middleware('throttle:20,1')->name('gemini.test');
+            Route::post('/gemini-keys/{key}/test', [AdminController::class, 'testGeminiKey'])->middleware('throttle:20,1,gemini-test')->name('gemini.test');
             Route::delete('/gemini-keys/{key}', [AdminController::class, 'destroyGeminiKey'])->name('gemini.destroy');
-            Route::post('/backup', [AdminController::class, 'backup'])->middleware('throttle:5,1')->name('backup');
+            Route::post('/backup', [AdminController::class, 'backup'])->middleware('throttle:5,1,backup')->name('backup');
             Route::get('/backup/{name}', [AdminController::class, 'downloadBackup'])->name('backup.download');
         });
     });

@@ -8,12 +8,14 @@ import 'data/session.dart';
 import 'features/accounts/accounts_screen.dart';
 import 'features/analysis/analysis_screen.dart';
 import 'features/analysis/chat_screen.dart';
+import 'features/auth/forgot_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/register_screen.dart';
 import 'features/auth/welcome_screen.dart';
 import 'features/calendar/calendar_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'features/more/more_screen.dart';
+import 'features/profile/devices_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/reports/report_screen.dart';
 import 'features/rules/rules_screen.dart';
@@ -114,7 +116,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final session = ref.read(sessionProvider);
       final location = state.matchedLocation;
-      final atAuth = location == '/login' || location == '/register';
+      final atAuth = const [
+        '/login',
+        '/register',
+        '/forgot',
+      ].contains(location);
 
       if (!session.hasValue) return location == '/splash' ? null : '/splash';
 
@@ -148,6 +154,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/register',
         pageBuilder: _page((_) => const RegisterScreen()),
       ),
+      GoRoute(path: '/forgot', pageBuilder: _page((_) => const ForgotScreen())),
       StatefulShellRoute(
         builder: (context, state, shell) => HomeShell(shell: shell),
         // Sama dengan `indexedStack` bawaan, ditambah HeroMode. Tab yang
@@ -228,6 +235,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'profile',
                     pageBuilder: _page((_) => const ProfileScreen()),
+                  ),
+                  GoRoute(
+                    path: 'devices',
+                    pageBuilder: _page((_) => const DevicesScreen()),
                   ),
                 ],
               ),

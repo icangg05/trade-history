@@ -362,6 +362,37 @@ class ApiTest extends TestCase
         $this->getJson('/api/v1/me', $headers)->assertJsonPath('user.avatar', null);
     }
 
+    public function test_hapus_akun_ikut_membuang_folder_foto_di_server(): void
+    {
+        Storage::fake('local');
+        $disk = Storage::disk('local');
+
+        $user = User::factory()->create();
+        $headers = [...$this->token($user), 'Accept' => 'application/json'];
+        [$pertama, $kedua] = [$this->account($user), $this->account($user)];
+
+        foreach ([$pertama, $kedua] as $account) {
+            $this->post("/api/v1/accounts/{$account->id}/transactions", [
+                'type' => 'deposit',
+                'amount' => 500,
+                'rate_idr' => 16000,
+                'occurred_at' => '2026-02-01',
+                'proof' => UploadedFile::fake()->image('bukti.jpg'),
+            ], $headers)->assertCreated();
+        }
+        $this->post('/api/v1/profile/avatar', ['avatar' => UploadedFile::fake()->image('a.jpg')], $headers)->assertOk();
+
+        // Hapus satu akun trading: hanya folder bukti akun itu yang hilang.
+        $this->deleteJson("/api/v1/accounts/{$pertama->id}", [], $headers)->assertOk();
+        $disk->assertMissing($pertama->uploadFolder());
+        $disk->assertExists($kedua->uploadFolder());
+
+        // Hapus pengguna: folder foto profil dan bukti semua akunnya ikut hilang.
+        $this->deleteJson('/api/v1/profile', ['password' => 'password'], $headers)->assertOk();
+        $disk->assertMissing($kedua->uploadFolder());
+        $disk->assertMissing($user->uploadFolder());
+    }
+
     public function test_keluar_hanya_mencabut_token_perangkat_ini(): void
     {
         $user = User::factory()->create();

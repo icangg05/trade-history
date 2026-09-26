@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Uploads;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,21 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 #[Fillable(['name', 'broker', 'account_number', 'currency', 'initial_balance', 'started_at', 'is_archived'])]
 class Account extends Model
 {
+    /**
+     * Transaksi ikut terhapus lewat cascade foreign key, tapi berkas buktinya
+     * di disk tidak — folder bukti akun ini dibuang di sini.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(fn (Account $account) => Uploads::deleteFolder($account->uploadFolder()));
+    }
+
+    /** Folder bukti deposit/withdrawal akun ini di disk Uploads. */
+    public function uploadFolder(): string
+    {
+        return 'proofs/'.$this->id;
+    }
+
     protected function casts(): array
     {
         return [

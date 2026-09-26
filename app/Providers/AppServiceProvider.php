@@ -5,12 +5,17 @@ namespace App\Providers;
 use App\Models\Account;
 use App\Models\Trade;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Support\Hashid;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +23,23 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->registerRequestMacros();
         $this->registerScopedRouteBindings();
+        $this->registerApiGuards();
+    }
+
+    private function registerApiGuards(): void
+    {
+        // Masa berlaku bergeser: dihitung dari terakhir dipakai, bukan dari
+        // saat login. Yang membuka aplikasi tiap minggu tidak pernah dipaksa
+        // login ulang; ponsel yang hilang atau ditinggal mati sendiri.
+        Sanctum::authenticateAccessTokensUsing(
+            fn (PersonalAccessToken $token, bool $isValid) => $isValid
+                && ($token->last_used_at ?? $token->created_at)->gt(now()->subDays(User::TOKEN_IDLE_DAYS))
+        );
+
+        // Batas umum semua API, per pengguna (per IP sebelum login). Longgar:
+        // satu layar Dana bisa memuat puluhan thumbnail bukti sekaligus, dan
+        // tiap thumbnail satu permintaan. Rute berat punya batas sendiri.
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(300)->by($request->user()?->id ?: $request->ip()));
     }
 
     /** Akun aktif diisi oleh SetCurrentAccount; dibaca lewat dua macro ini. */

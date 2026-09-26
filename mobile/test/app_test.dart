@@ -273,6 +273,7 @@ void main() {
       ('Laporan tahunan', 'Berkas PDF A4'),
       ('Akun trading', 'Tiap akun punya riwayat'),
       ('Profil', 'Data login kamu.'),
+      ('Perangkat', 'keluar dengan sendirinya'),
     ]) {
       await tester.tap(find.text(menu).first);
       await tester.pumpAndSettle();
@@ -412,7 +413,10 @@ void main() {
 
     await tester.tap(find.text('Lainnya'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Keluar'), 200);
+    // ensureVisible, bukan scrollUntilVisible: yang terakhir menggulir
+    // Scrollable pertama — daftar di tab lain yang sedang tersembunyi.
+    await tester.ensureVisible(find.text('Keluar'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Keluar'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Keluar'));

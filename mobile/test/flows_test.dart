@@ -159,6 +159,162 @@ void main() {
     );
   });
 
+  testWidgets('dana: ketuk baris → detail transaksi, Ubah membuka form', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await openTab(tester, 'Dana');
+
+    await tester.ensureVisible(find.text('Withdrawal'));
+    await tester.tap(find.text('Withdrawal'));
+    await tester.pumpAndSettle();
+
+    // Catatan tampil utuh sendiri, bukan tergabung dengan tanggal seperti di baris.
+    expect(find.text('Ambil profit'), findsOneWidget);
+    expect(find.text('Tidak ada bukti transfer.'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Ubah'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tidak ada bukti transfer.'), findsNothing);
+    expect(find.text('Ubah transaksi'), findsOneWidget);
+  });
+
+  testWidgets('lupa sandi: kode dicek dulu, baru sandi baru, lalu masuk', (
+    tester,
+  ) async {
+    const wrongCode = Reply(422, {
+      'message': 'Kode salah atau sudah kedaluwarsa.',
+      'errors': {
+        'code': ['Kode salah atau sudah kedaluwarsa.'],
+      },
+    });
+    final server = await pumpApp(
+      tester,
+      loggedIn: false,
+      routes: {
+        'POST auth/password/forgot': (request) =>
+            (request.data as Map)['email'] == 'demo@contoh.com'
+            ? {'message': 'Kode 4 digit sudah dikirim ke email kamu.'}
+            : const Reply(422, {
+                'message': 'Email ini belum terdaftar.',
+                'errors': {
+                  'email': ['Email ini belum terdaftar.'],
+                },
+              }),
+        // 1111 lolos verifikasi, tapi kedaluwarsa sebelum sandi diganti.
+        'POST auth/password/verify': (request) =>
+            ['4821', '1111'].contains((request.data as Map)['code'])
+            ? {'message': 'Kode benar.'}
+            : wrongCode,
+        'POST auth/password/reset': (request) =>
+            (request.data as Map)['code'] == '4821'
+            ? {'message': 'Kata sandi diganti.'}
+            : wrongCode,
+      },
+    );
+
+    Future<void> sendCode(String email) async {
+      await tester.enterText(find.widgetWithText(TextField, 'Email'), email);
+      await tester.tap(find.text('Kirim kode'));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.tap(find.text('Lupa kata sandi?'));
+    await tester.pumpAndSettle();
+
+    // Email salah ketik ditolak di langkah pertama.
+    await sendCode('demo@contoh.co');
+    expect(find.text('Email ini belum terdaftar.'), findsOneWidget);
+    expect(find.text('Kode dari email'), findsNothing);
+
+    await sendCode('demo@contoh.com');
+    expect(find.text('Email ini belum terdaftar.'), findsNothing);
+    expect(find.textContaining('Kode 4 digit sudah dikirim'), findsOneWidget);
+
+    const password = 'Kata sandi baru (min. 8 karakter)';
+
+    Future<void> verify(String code) async {
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Kode dari email'),
+        code,
+      );
+      await tester.tap(find.text('Verifikasi'));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> changePassword() async {
+      await tester.ensureVisible(find.text('Ganti sandi'));
+      await tester.tap(find.text('Ganti sandi'));
+      await tester.pumpAndSettle();
+    }
+
+    // Form sandi baru baru muncul setelah kodenya benar.
+    expect(find.text(password), findsNothing);
+    await verify('0000');
+    expect(find.text('Kode salah atau sudah kedaluwarsa.'), findsOneWidget);
+    expect(find.text(password), findsNothing);
+
+    await verify('1111');
+    expect(find.text('Kode dari email'), findsNothing);
+    await tester.enterText(
+      find.widgetWithText(TextField, password),
+      'sandi-baru-123',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Ulangi kata sandi baru'),
+      'sandi-baru-123',
+    );
+
+    // Kode kedaluwarsa selagi sandi diisi: kembali ke langkah kode, dan sandi
+    // yang sudah diketik tidak perlu diulang.
+    await changePassword();
+    expect(find.text('Kode salah atau sudah kedaluwarsa.'), findsOneWidget);
+    expect(find.text(password), findsNothing);
+
+    await verify('4821');
+    await changePassword();
+
+    // Masuk dengan sandi baru, bukan sandi lama.
+    final login = server.requests.lastWhere(
+      (request) => request.path == 'auth/login',
+    );
+    expect((login.data as Map)['password'], 'sandi-baru-123');
+    expect(find.text('Lupa kata sandi?'), findsNothing);
+  });
+
+  testWidgets(
+    'perangkat: perangkat lain bisa dikeluarkan, perangkat ini tidak',
+    (tester) async {
+      final server = await pumpApp(
+        tester,
+        routes: {
+          'DELETE devices/2': (_) => {'message': 'Perangkat dikeluarkan.'},
+        },
+      );
+
+      await openMore(tester, 'Perangkat');
+
+      expect(find.text('Android · perangkat ini'), findsOneWidget);
+      // Hanya iPhone yang punya tombol; perangkat ini keluar lewat menu Keluar.
+      expect(find.widgetWithText(TextButton, 'Keluarkan'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(TextButton, 'Keluarkan'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Keluarkan'));
+      await tester.pumpAndSettle();
+
+      expect(
+        server.requests.any(
+          (request) =>
+              request.method == 'DELETE' && request.path == 'devices/2',
+        ),
+        isTrue,
+      );
+      expect(find.text('Perangkat dikeluarkan.'), findsOneWidget);
+    },
+  );
+
   testWidgets('aturan: aturan persen lama disimpan ulang sebagai nominal', (
     tester,
   ) async {

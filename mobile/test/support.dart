@@ -80,6 +80,24 @@ final defaultRoutes = <String, Handler>{
   'POST auth/logout': (_) => {'message': 'Kamu sudah keluar.'},
   'GET me': (_) => fixture('me'),
   'GET profile': (_) => fixture('profile'),
+  'GET devices': (_) => {
+    'devices': [
+      {
+        'id': 1,
+        'name': 'Android',
+        'created_at': '2026-09-01T02:00:00.000000Z',
+        'last_used_at': '2026-09-26T03:15:00.000000Z',
+        'current': true,
+      },
+      {
+        'id': 2,
+        'name': 'iPhone / iPad',
+        'created_at': '2026-08-20T08:00:00.000000Z',
+        'last_used_at': '2026-09-10T12:30:00.000000Z',
+        'current': false,
+      },
+    ],
+  },
   'GET accounts': (_) => fixture('accounts'),
   'GET reports': (_) => fixture('reports'),
   'GET accounts/1/dashboard': (_) => fixture('dashboard'),

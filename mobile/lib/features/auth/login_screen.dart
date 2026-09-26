@@ -211,7 +211,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () => context.go('/forgot'),
+            child: const Text('Lupa kata sandi?'),
+          ),
+        ),
+        const SizedBox(height: 8),
         // Galat tanpa kolom: server tak terjangkau, alamat build salah, dsb.
         if (_error != null && _error!.errors.isEmpty) ...[
           Text(

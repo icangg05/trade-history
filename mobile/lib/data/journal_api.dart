@@ -54,6 +54,13 @@ class JournalApi {
 
   Future<Uint8List> avatarBytes() => client.bytes('profile/avatar');
 
+  Future<List<Device>> devices() async => list(
+    (await client.get('devices'))['devices'],
+  ).map((item) => Device.fromJson(map(item))).toList();
+
+  Future<String> revokeDevice(int id) async =>
+      _message(await client.delete('devices/$id'));
+
   // -------------------------------------------------------------------- akun
 
   Future<AccountsPage> accounts() async =>

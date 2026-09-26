@@ -94,6 +94,41 @@ class SessionController extends AsyncNotifier<Session?> {
     'token': token,
   });
 
+  /// Lupa sandi, langkah 1: server mengirim kode 4 digit ke email itu.
+  Future<String> requestResetCode(String email) async =>
+      '${(await _guest().post('auth/password/forgot', {'email': email}))['message']}';
+
+  /// Langkah 2: server mengecek kodenya saja; sandi belum diganti.
+  Future<void> verifyResetCode(String email, String code) =>
+      _guest().post('auth/password/verify', {'email': email, 'code': code});
+
+  /// Langkah 3: sandi diganti (kodenya dicek ulang, semua token lama dicabut
+  /// server), lalu langsung masuk dengan sandi baru.
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    await _guest().post('auth/password/reset', {
+      'email': email,
+      'code': code,
+      'password': password,
+      'password_confirmation': passwordConfirmation,
+    });
+
+    await login(
+      server: ref.read(serverProvider),
+      email: email,
+      password: password,
+    );
+  }
+
+  ApiClient _guest() => ApiClient(
+    server: ref.read(serverProvider),
+    adapter: ref.read(httpAdapterProvider),
+  );
+
   Future<void> _signIn(String server, String path, Json body) async {
     final json = await ApiClient(
       server: server,

@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api_client.dart';
@@ -37,7 +37,8 @@ class ChatScreen extends ConsumerStatefulWidget {
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen>
+    with TickerProviderStateMixin {
   final _draft = TextEditingController();
   final _scroll = ScrollController();
 
@@ -48,13 +49,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   /// Huruf balasan terakhir yang sudah tampil; null = tampil penuh.
   int? _shown;
-  Timer? _typing;
+  Ticker? _typing;
 
   String get _key => 'ai-chat:$_account';
 
   @override
   void dispose() {
-    _typing?.cancel();
+    _typing?.dispose();
     _draft.dispose();
     _scroll.dispose();
     super.dispose();
@@ -70,9 +71,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
       _messages = raw == null
           ? []
-          : list(jsonDecode(raw))
-                .map((item) => ChatMessage.fromJson(map(item)))
-                .toList();
+          : list(
+              jsonDecode(raw),
+            ).map((item) => ChatMessage.fromJson(map(item))).toList();
     } on FormatException {
       _messages = [];
     }
@@ -100,27 +101,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   /// Balasan dimunculkan sedikit demi sedikit mengikuti waktu nyata.
   void _typeOut(String text) {
-    const frame = Duration(milliseconds: 16);
     final speed = math.max(_charsPerSecond, text.length / _maxSeconds);
 
-    _typing?.cancel();
+    _typing?.dispose();
     _shown = 0;
-    _typing = Timer.periodic(frame, (timer) {
-      // `tick` ikut menghitung periode yang terlewat saat layar tersendat,
-      // jadi lajunya tetap mengikuti waktu nyata.
-      final elapsed = timer.tick * frame.inMilliseconds / 1000;
-      final shown = math.min(text.length, (elapsed * speed).round());
-
-      if (!mounted) return timer.cancel();
+    // Berdetak tiap frame layar, jadi ikut refresh rate HP (60/90/120 Hz).
+    // `elapsed` adalah waktu nyata sejak mulai: frame yang tersendat tidak
+    // memperlambat lajunya.
+    _typing = createTicker((elapsed) {
+      final seconds = elapsed.inMicroseconds / Duration.microsecondsPerSecond;
+      final shown = math.min(text.length, (seconds * speed).round());
 
       setState(() => _shown = shown >= text.length ? null : shown);
 
-      if (_shown == null) timer.cancel();
+      if (_shown == null) _typing!.stop();
       // Masih dekat pesan terakhir: tetap ikuti balasan yang sedang diketik.
       if (_scroll.hasClients && _scroll.offset > 0 && _scroll.offset < 120) {
         _scroll.jumpTo(0);
       }
-    });
+    })..start();
   }
 
   Future<void> _send([String? preset]) async {
@@ -128,7 +127,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     if (text.isEmpty || _busy || _account == null) return;
 
-    _typing?.cancel();
+    _typing?.stop();
 
     // Sepuluh giliran terakhir sudah cukup menjaga konteks; sisanya hanya
     // menambah token tanpa menambah jawaban.
@@ -180,7 +179,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
 
-    _typing?.cancel();
+    _typing?.stop();
     setState(() {
       _messages = [];
       _shown = null;
@@ -233,7 +232,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ? const Center(
                 child: EmptyState(
                   icon: Icons.key_off_outlined,
-                  message: 'Kunci Gemini belum diisi. Minta admin mengisinya di halaman Admin.',
+                  message:
+                      'Kunci Gemini belum diisi. Minta admin mengisinya di halaman Admin.',
                 ),
               )
             : Column(

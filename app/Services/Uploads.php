@@ -189,6 +189,12 @@ class Uploads
         }
     }
 
+    /** Buang satu folder beserta seluruh isinya; aman kalau foldernya belum ada. */
+    public static function deleteFolder(string $folder): void
+    {
+        Storage::disk(self::DISK)->deleteDirectory($folder);
+    }
+
     /**
      * Foto kamera sering disimpan miring dengan tanda EXIF "putar sekian
      * derajat". Tanda itu hilang saat disimpan ulang, jadi putarannya

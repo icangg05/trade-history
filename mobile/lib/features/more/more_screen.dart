@@ -113,6 +113,12 @@ class MoreScreen extends ConsumerWidget {
                   'Nama, email, kata sandi',
                   '/more/profile',
                 ),
+                item(
+                  Icons.devices_outlined,
+                  'Perangkat',
+                  'Ponsel yang sedang masuk ke akun ini',
+                  '/more/devices',
+                ),
                 ListTile(
                   leading: const Icon(
                     Icons.logout,

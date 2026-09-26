@@ -24,6 +24,33 @@ class User {
   final String? avatar;
 }
 
+/// Perangkat yang sedang masuk ke akun ini — satu token Sanctum per perangkat.
+class Device {
+  const Device({
+    required this.id,
+    required this.name,
+    required this.createdAt,
+    required this.lastUsedAt,
+    required this.current,
+  });
+
+  factory Device.fromJson(Json json) => Device(
+    id: toInt(json['id']),
+    name: '${json['name'] ?? ''}',
+    createdAt: instantOrNull(json['created_at']),
+    lastUsedAt: instantOrNull(json['last_used_at']),
+    current: json['current'] == true,
+  );
+
+  final int id;
+  final String name;
+  final DateTime? createdAt;
+  final DateTime? lastUsedAt;
+
+  /// Perangkat yang sedang dipegang — keluarnya lewat menu Keluar.
+  final bool current;
+}
+
 /// Akun trading yang bisa dibuka — isi pengalih akun.
 class AccountBrief {
   const AccountBrief({
