@@ -110,6 +110,7 @@ class TradeController extends Controller
         return $this->page('Trades/Form', [
             'trade' => $this->present($trade, full: true),
             'aiEnabled' => app(Gemini::class)->configured(),
+            'symbols' => $trade->account->trades()->distinct()->orderBy('symbol')->pluck('symbol'),
         ]);
     }
 

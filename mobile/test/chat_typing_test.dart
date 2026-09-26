@@ -21,7 +21,7 @@ void main() {
         'POST accounts/1/analysis/chat': (_) => {'reply': reply},
       },
     );
-    await tester.tap(find.text('Lainnya').last);
+    await tester.tap(find.byTooltip('Lainnya'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Analisa').first);
     await tester.pumpAndSettle();

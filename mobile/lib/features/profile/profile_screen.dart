@@ -6,6 +6,7 @@ import '../../core/json.dart';
 import '../../core/theme.dart';
 import '../../data/session.dart';
 import '../../widgets/common.dart';
+import '../auth/login_screen.dart' show PasswordToggle;
 import '../../widgets/skeleton.dart';
 
 final _profileProvider = FutureProvider.autoDispose<Json>(
@@ -118,6 +119,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
   Future<void> _destroy() async {
     // Teks biasa, bukan TextEditingController — lihat `confirmWithCode`.
     var typed = '';
+    var hidden = true;
 
     final ok = await showDialog<bool>(
       context: context,
@@ -134,11 +136,20 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
               style: TextStyle(color: AppColors.mutedForeground),
             ),
             const SizedBox(height: 14),
-            TextField(
-              onChanged: (value) => typed = value,
-              obscureText: true,
-              autofocus: true,
-              decoration: const InputDecoration(labelText: 'Kata sandi'),
+            StatefulBuilder(
+              builder: (context, setField) => TextField(
+                onChanged: (value) => typed = value,
+                obscureText: hidden,
+                autocorrect: false,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Kata sandi',
+                  suffixIcon: PasswordToggle(
+                    hidden: hidden,
+                    onPressed: () => setField(() => hidden = !hidden),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

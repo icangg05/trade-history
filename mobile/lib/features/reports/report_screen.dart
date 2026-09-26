@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -12,6 +13,9 @@ import '../../data/session.dart';
 import '../../models/journal.dart';
 import '../../widgets/common.dart';
 import '../../widgets/skeleton.dart';
+
+/// Kanal ke `MainActivity.kt`: menulis ke folder Download publik.
+const _downloads = MethodChannel('trade_history/downloads');
 
 final _reportProvider = FutureProvider.autoDispose<ReportOptions>(
   (ref) => ref.watch(journalProvider).reportOptions(),
@@ -139,9 +143,26 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
           .toLowerCase()
           .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
           .replaceAll(RegExp(r'^-|-$'), '');
-      final file = File(
-        '${(await getTemporaryDirectory()).path}/laporan-trading-$_year-$slug.pdf',
-      );
+      final name = 'laporan-trading-$_year-$slug.pdf';
+
+      try {
+        await _downloads.invokeMethod('save', {
+          'name': name,
+          'mime': 'application/pdf',
+          'bytes': bytes,
+        });
+        if (mounted) {
+          showMessage(context, '$name tersimpan di folder Download.');
+        }
+        return;
+      } on MissingPluginException {
+        // iOS dan Android 9 ke bawah: tidak ada folder Download bersama yang
+        // bisa ditulis tanpa izin — pakai lembar bagikan (ada "Simpan ke File").
+      } on PlatformException catch (error) {
+        debugPrint('Simpan ke Download gagal: ${error.message}');
+      }
+
+      final file = File('${(await getTemporaryDirectory()).path}/$name');
 
       await file.writeAsBytes(bytes);
 

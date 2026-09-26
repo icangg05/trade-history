@@ -11,7 +11,7 @@ use RuntimeException;
 /**
  * Pembungkus tipis REST API Gemini. Dua kegunaan:
  *   1. extractTrade() — baca screenshot chart, kembalikan field trade (JSON terstruktur).
- *   2. analyze()      — terima statistik yang SUDAH dihitung + aturan, kembalikan markdown.
+ *   2. analyze()      — terima statistik & pola perilaku yang SUDAH dihitung, kembalikan markdown.
  *
  * Statistik tidak pernah dihitung oleh model: angka datang dari AccountStats,
  * model hanya menafsirkan.
@@ -146,103 +146,111 @@ class Gemini
     // ----------------------------------------------------------------- analisa
 
     /**
-     * Analisa periode berdasarkan statistik yang sudah jadi.
+     * Penjelasan isi DATA — dipakai analyze() dan chat() supaya kedua model
+     * membaca bahan yang sama dengan cara yang sama.
      */
-    public function analyze(array $stats, ?string $rules = null): string
+    private const DATA_GUIDE = <<<'TXT'
+    DATA (JSON) sudah dihitung dari database — angkanya benar. Pakai apa adanya,
+    jangan hitung ulang, jangan mengarang angka yang tidak ada. Membandingkan dua
+    angka yang ada (selisih, "dua kali lipat") boleh.
+    - `statistik`: ringkasan periode ini, termasuk breakdown `by_symbol`,
+      `by_direction`, `by_weekday`, `by_hour` (jam buka, WIB), `by_setup`, dan
+      `violations` (tanggal → aturan yang dilanggar). `max_drawdown` diukur dari
+      seluruh umur akun, bukan periode ini.
+    - `perilaku`: kebiasaan di balik angka — `by_trade_of_day` (posisi ke-berapa
+      dalam sehari), `after_loss` (dibuka ≤60 menit setelah posisi rugi, dibanding
+      lainnya), `hold_minutes` (rata-rata lama posisi menang vs kalah),
+      `avg_lot` (setelah win vs setelah loss), `by_stop` (letak SL saat ditutup),
+      `by_rr_planned` (kelompok RR rencana), `days` (hari hijau vs merah, hari
+      terbaik & terburuk).
+    - `periode_sebelumnya`: angka inti periode sepanjang ini tepat sebelumnya;
+      null kalau tidak ada pembanding.
+    - `aturan_terpasang`: aturan yang sedang aktif di aplikasi (null kalau belum
+      ada); `notes` adalah catatan pribadi trader.
+    - `rencana_sebelumnya`: rencana dari analisa terakhir, tanggal ditulis, dan
+      `hasil_sejak_itu` (statistik + perilaku trade setelah tanggal itu); null
+      kalau belum ada.
+
+    Cara menilai:
+    - Kelompok dengan kurang dari 5 trade belum bisa disebut pola; sebut sebagai
+      dugaan.
+    - Urutkan temuan dari dampak P/L terbesar, bukan dari yang paling menarik.
+    - Kebiasaan biasanya bocor lebih besar daripada pilihan setup: terlalu
+      banyak posisi per hari, masuk lagi tak lama setelah loss, menahan posisi
+      rugi lebih lama dari posisi untung, lot membesar setelah loss, trade tanpa
+      SL. Sebut hanya yang didukung data.
+    TXT;
+
+    /**
+     * Evaluasi periode: di mana uang bocor, apa yang terbukti menghasilkan, dan
+     * rencana terukur yang dinilai lagi di analisa berikutnya.
+     */
+    public function analyze(array $context): string
     {
         $prompt = <<<'TXT'
-        Kamu mentor trading yang membaca jurnal seorang trader dan menulis evaluasi
-        periode ini untuknya.
-
-        Statistik di bawah SUDAH DIHITUNG dari database — angka itu benar, pakai apa
-        adanya, jangan hitung ulang dan jangan mengarang angka yang tidak ada di sana.
-        Kamu boleh membandingkan angka satu sama lain (mis. rata-rata rugi terhadap
-        rugi terbesar), tapi setiap angka yang kamu sebut harus berasal dari data.
-
-        Tulis dalam Bahasa Indonesia dengan markdown. Panjangnya bebas — sepanjang yang
-        dibutuhkan, sependek yang cukup. Yang dinilai bukan jumlah kata melainkan
-        kepadatannya: setiap kalimat harus membawa temuan, angka, atau instruksi.
-        Buang kalimat yang hanya mengantar, mengulang, atau menyemangati.
-
-        Pakai format seperlunya supaya cepat dibaca, jangan menulis dinding paragraf:
-        - **tebal** untuk angka kunci dan nama pola
-        - *miring* untuk istilah atau catatan sisi
-        - daftar berpoin untuk temuan sejajar, daftar bernomor untuk langkah berurutan
-        - tabel markdown kalau membandingkan tiga hal atau lebih (mis. per simbol atau per jam)
-        - `>` untuk satu peringatan yang paling penting, kalau memang ada
-
-        Susun tujuh bagian berikut:
-
-        ## Ringkasan
-        Isi terpadat dari seluruh tulisan. Sebut jumlah trade, P/L bersih, winrate, dan
-        profit factor, lalu satu kalimat kesimpulan: periode ini menghasilkan atau
-        menggerus modal, dan angka mana yang paling menentukan hasil itu. Kalau ada satu
-        hal yang paling mendesak untuk diperbaiki, sebut di sini.
-
-        ## Kualitas eksekusi
-        Winrate bersama payoff ratio dan ekspektasi per trade: keuntungan datang dari
-        sering benar, atau dari sedikit menang besar? Bandingkan `avg_rr_planned` dengan
-        `avg_rr_realized` — selisih besar berarti posisi ditutup lebih awal atau
-        melenceng dari rencana, katakan mana yang terjadi. Bandingkan `avg_loss` dengan
-        `largest_loss`; kalau rugi terbesar jauh melampaui rata-rata, tunjuk itu sebagai
-        satu kejadian yang merusak statistik, bukan sebagai pola.
-
-        ## Model & strategi
-        Bagian terpenting. Dari `by_setup`, `by_direction`, `by_symbol`, `by_hour`,
-        `by_weekday`, RR, dan catatan aturan trader, simpulkan seperti apa sebenarnya
-        cara dia trading — apakah lebih condong scalping atau menahan posisi, searah
-        atau melawan tren, satu instrumen atau menyebar, satu jam favorit atau acak,
-        RR-nya konsisten atau berubah-ubah. Tulis pembacaan itu terlebih dulu, lalu
-        pecah jadi dua daftar:
-
-        **Yang sudah bagus** — kebiasaan yang datanya membuktikan berhasil, dengan
-        angkanya, dan alasan kenapa itu layak dipertahankan.
-
-        **Yang masih kurang** — celah yang datanya menunjukkan merugikan atau tidak
-        konsisten, dengan angkanya, dan akibat yang terlihat di statistik. Termasuk
-        kalau datanya sendiri belum cukup untuk menilai (mis. setup tidak pernah diisi,
-        SL/TP tidak dicatat), karena itu juga kekurangan strateginya.
-
-        ## Pola yang menghasilkan
-        2-3 kombinasi paling menguntungkan dari breakdown, lengkap dengan jumlah trade,
-        P/L, dan winrate. Kalau satu kelompok hanya berisi sedikit trade, katakan terus
-        terang bahwa sampelnya belum cukup untuk disimpulkan.
-
-        ## Pola yang merugikan
-        Cara yang sama untuk sisi rugi. Tunjuk yang paling layak dihentikan lebih dulu
-        dan sebutkan berapa kerugian yang bisa dihindari kalau kelompok itu dilewati.
-
-        ## Risiko & disiplin
-        `max_drawdown` (nominal dan persen) dan `longest_loss_streak`.
-        Kalau `violations` berisi tanggal pelanggaran, sebut berapa hari yang melanggar
-        dan aturan mana yang paling sering dilanggar. Kalau trader menulis aturannya
-        sendiri di bawah, nilai kepatuhannya terhadap aturan itu secara spesifik. Kalau
-        `violations` kosong, katakan disiplinnya terjaga.
-
-        ## Langkah berikutnya
-        Daftar bernomor, 4-6 butir, diurutkan dari yang paling berdampak. Masing-masing
-        satu kalimat, bisa dikerjakan minggu depan, dan menyebut angka target yang
-        diturunkan dari data di atas — batas trade per hari, jam yang dihindari, RR
-        minimum, ukuran lot, dan sejenisnya. Nasihat umum tanpa angka ("jaga disiplin",
-        "kelola emosi") dilarang.
-
-        Larangan: jangan memberi sinyal, prediksi arah pasar, atau rekomendasi entry.
-        Jangan menulis paragraf pembuka atau penutup di luar tujuh bagian itu. Jangan
-        mengulang angka yang sama persis di dua bagian kecuali memang sedang
-        dibandingkan. Kalau `total_trades` di bawah 10, tetap tulis ketujuh bagian tapi
-        awali Ringkasan dengan satu kalimat bahwa sampelnya masih terlalu kecil untuk
-        disimpulkan sebagai pola.
+        Kamu pelatih performa trading. Tugasmu bukan merangkum statistik, tapi
+        menemukan apa yang paling membuat trader ini kehilangan uang, apa yang
+        terbukti menghasilkan, dan memberi rencana terukur untuk periode berikutnya
+        yang akan dinilai lagi di analisa selanjutnya. Dibaca di ponsel: padat dan
+        langsung, setiap kalimat membawa angka, temuan, atau instruksi.
         TXT;
 
-        $payload = "STATISTIK:\n".json_encode($stats, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $format = <<<'TXT'
+        Tulis Bahasa Indonesia dengan markdown, tepat enam bagian ini, urut:
 
-        if (filled($rules)) {
-            $payload .= "\n\nATURAN TRADING YANG DITULIS TRADER:\n".$rules;
-        }
+        ## Ringkasan
+        Tiga sampai empat kalimat: hasil periode ini (jumlah trade, P/L bersih,
+        winrate, profit factor); dibanding `periode_sebelumnya` membaik atau
+        memburuk, dan angka mana yang paling bergerak (lewati kalau null); lalu
+        satu kalimat berisi kebocoran terbesar.
+
+        ## Kebocoran terbesar
+        Satu pola yang paling banyak menggerus uang, dengan buktinya (jumlah
+        trade, P/L, winrate dibanding sisanya) dan kira-kira P/L seandainya pola
+        itu dilewati. Kalau ada kebocoran kedua yang dampaknya hampir sama,
+        tambahkan singkat. Pakai `>` untuk kalimat intinya.
+
+        ## Yang terbukti menghasilkan
+        1-3 pola dengan sampel cukup yang layak diperbanyak, dengan angkanya, dan
+        apa yang membedakannya dari trade lain.
+
+        ## Cek perilaku
+        Tabel `| Perilaku | Angka | Status |` untuk: posisi ke-3+ per hari,
+        masuk ≤60 menit setelah loss, lama posisi rugi vs untung, lot setelah loss
+        vs setelah win, trade tanpa SL. Status satu kata: **Aman**, **Waspada**,
+        atau **Bocor**. Lewati baris yang datanya kosong.
+
+        ## Evaluasi rencana sebelumnya
+        Kalau `rencana_sebelumnya` ada: tiap butirnya dijalankan atau tidak
+        (nilai dari `hasil_sejak_itu`), dan dampaknya ke hasil. Kalau null, satu
+        kalimat saja: belum ada rencana sebelumnya untuk dinilai.
+
+        ## Rencana periode berikutnya
+        **Fokus utama:** satu kebiasaan yang diubah, satu kalimat.
+
+        Lalu paling banyak tiga aturan bernomor. Tiap aturan: angka yang jelas dan
+        alasannya dari data. Kalau cocok dengan kolom di halaman Aturan aplikasi,
+        tulis nama kolomnya persis — "Maks. trade / hari", "Maks. loss harian",
+        "Maks. loss / trade", "RR minimum", "Maks. drawdown", atau "Sesi"
+        (Sydney, Tokyo, London, New York) — dan bandingkan dengan
+        `aturan_terpasang` kalau sudah ada nilainya.
+
+        Tutup dengan **Target:** satu atau dua angka yang harus tercapai di
+        analisa berikutnya (mis. profit factor ≥ 1,5, atau P/L posisi ke-3+ tidak
+        lagi negatif) supaya kemajuannya bisa diukur.
+
+        Larangan: sinyal, prediksi arah pasar, rekomendasi entry; nasihat tanpa
+        angka ("jaga emosi", "lebih disiplin"); paragraf pembuka atau penutup di
+        luar enam bagian; mengulang angka yang sama di banyak bagian. Kalau
+        `statistik.total_trades` di bawah 10, awali Ringkasan dengan satu kalimat
+        bahwa sampelnya masih kecil sehingga semua temuan adalah dugaan.
+        TXT;
+
+        $data = 'DATA:'."\n".json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
         $response = $this->call([
             'contents' => [[
-                'parts' => [['text' => $prompt."\n\n".$payload]],
+                'parts' => [['text' => $prompt."\n\n".self::DATA_GUIDE."\n\n".$format."\n\n".$data]],
             ]],
             // Batas atas yang longgar: panjangnya ditentukan isi, bukan dipangkas
             // di tengah kalimat. Pemakaian sebenarnya tetap dihitung ke kuota TPM.
@@ -260,16 +268,13 @@ class Gemini
      *
      * @param  list<array{role: string, text: string}>  $messages  urut lama → baru, yang terakhir dari trader
      */
-    public function chat(array $stats, ?string $rules, array $messages): string
+    public function chat(array $context, array $messages): string
     {
         $system = <<<'TXT'
-        Kamu mentor trading yang sedang berbicara langsung dengan pemilik jurnal ini.
-        Jawab pertanyaannya tentang cara dia trading, berdasarkan STATISTIK AKUN di bawah.
-
-        Angka di STATISTIK AKUN sudah dihitung dari database — pakai apa adanya,
-        jangan hitung ulang dan jangan mengarang angka yang tidak ada di sana. Kalau
-        sebuah pertanyaan tidak bisa dijawab dari data yang ada, katakan terus terang
-        data mana yang kurang, jangan menebak.
+        Kamu pelatih performa trading yang sedang berbicara langsung dengan pemilik
+        jurnal ini. Jawab pertanyaannya tentang cara dia trading, berdasarkan DATA
+        di bawah. Kalau sebuah pertanyaan tidak bisa dijawab dari data yang ada,
+        katakan terus terang data mana yang kurang, jangan menebak.
 
         Gaya jawaban:
         - Bahasa Indonesia, santai tapi padat. Ini percakapan, bukan laporan.
@@ -285,14 +290,10 @@ class Gemini
         dari jurnalnya sendiri.
         TXT;
 
-        $context = "STATISTIK AKUN:\n".json_encode($stats, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
-        if (filled($rules)) {
-            $context .= "\n\nATURAN TRADING YANG DITULIS TRADER:\n".$rules;
-        }
+        $data = 'DATA:'."\n".json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
         $response = $this->call([
-            'systemInstruction' => ['parts' => [['text' => $system."\n\n".$context]]],
+            'systemInstruction' => ['parts' => [['text' => $system."\n\n".self::DATA_GUIDE."\n\n".$data]]],
             'contents' => array_map(fn (array $message): array => [
                 'role' => $message['role'] === 'assistant' ? 'model' : 'user',
                 'parts' => [['text' => $message['text']]],

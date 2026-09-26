@@ -80,10 +80,19 @@ class _Readable extends StatelessWidget {
 /// halaman biasa: tandanya "isi lalu tutup", dan tombol kiri atasnya jadi ✕.
 /// Pengguna yang mematikan animasi di ponsel langsung melihat formnya.
 GoRouterPageBuilder _formPage(Widget Function(GoRouterState state) child) =>
+    _slidePage(child, from: const Offset(0, 1), dialog: true);
+
+/// Halaman yang meluncur masuk dari [from] — form dari bawah, chat dari
+/// kanan seperti Lainnya — dengan bayangan di tepi depannya.
+GoRouterPageBuilder _slidePage(
+  Widget Function(GoRouterState state) child, {
+  Offset from = const Offset(1, 0),
+  bool dialog = false,
+}) =>
     (context, state) => CustomTransitionPage<void>(
       key: state.pageKey,
       name: state.name,
-      fullscreenDialog: true,
+      fullscreenDialog: dialog,
       transitionDuration: const Duration(milliseconds: 340),
       reverseTransitionDuration: const Duration(milliseconds: 260),
       child: Backdrop(child: _Readable(child: child(state))),
@@ -91,15 +100,21 @@ GoRouterPageBuilder _formPage(Widget Function(GoRouterState state) child) =>
           MediaQuery.disableAnimationsOf(context)
           ? page
           : SlideTransition(
-              position: Tween(begin: const Offset(0, 1), end: Offset.zero)
-                  .animate(
-                    CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                      reverseCurve: Curves.easeInCubic,
-                    ),
-                  ),
-              child: page,
+              position: Tween(begin: from, end: Offset.zero).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                  reverseCurve: Curves.easeInCubic,
+                ),
+              ),
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(color: Color(0x73000000), blurRadius: 24),
+                  ],
+                ),
+                child: page,
+              ),
             ),
     );
 
@@ -161,22 +176,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         // tidak aktif tetap hidup di latar; tanpa ini FAB-nya ikut dihitung
         // saat halaman baru dibuka, dan dua FAB bertag bawaan yang sama
         // (mis. "Trade" dan "Akun baru") memicu galat "multiple heroes".
-        navigatorContainerBuilder: (context, shell, children) => IndexedStack(
-          index: shell.currentIndex,
-          children: [
-            for (final (index, child) in children.indexed)
-              HeroMode(
-                enabled: index == shell.currentIndex,
-                child: Offstage(
-                  offstage: index != shell.currentIndex,
-                  child: TickerMode(
-                    enabled: index == shell.currentIndex,
-                    child: child,
-                  ),
-                ),
-              ),
-          ],
-        ),
+        navigatorContainerBuilder: (context, shell, children) =>
+            _Branches(index: shell.currentIndex, children: children),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -263,7 +264,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/chat',
         parentNavigatorKey: _rootKey,
-        pageBuilder: _page(
+        pageBuilder: _slidePage(
           (state) =>
               ChatScreen(period: state.uri.queryParameters['period'] ?? '30d'),
         ),
@@ -275,6 +276,118 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return router;
 });
+
+/// Cabang shell. Pindah tab langsung tanpa animasi; Lainnya (cabang terakhir,
+/// dibuka dari header) masuk dari kanan di atas tab asalnya dan keluar lagi
+/// ke kanan, seperti membuka halaman, bukan berganti tab.
+class _Branches extends StatefulWidget {
+  const _Branches({required this.index, required this.children});
+
+  final int index;
+  final List<Widget> children;
+
+  @override
+  State<_Branches> createState() => _BranchesState();
+}
+
+class _BranchesState extends State<_Branches>
+    with SingleTickerProviderStateMixin {
+  static const _duration = Duration(milliseconds: 320);
+
+  int get _more => widget.children.length - 1;
+
+  late final _controller = AnimationController(
+    vsync: this,
+    duration: _duration,
+    value: widget.index == _more ? 1 : 0,
+  )..addStatusListener((_) => setState(() {}));
+
+  late final _curve = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+
+  late final _in = Tween(
+    begin: const Offset(1, 0),
+    end: Offset.zero,
+  ).animate(_curve);
+
+  /// Tab di bawahnya ikut bergeser sedikit ke kiri.
+  late final _out = Tween(
+    begin: Offset.zero,
+    end: const Offset(-.25, 0),
+  ).animate(_curve);
+
+  /// Tab yang tampak di bawah Lainnya selama animasi berjalan.
+  late int _base = widget.index == _more ? 0 : widget.index;
+
+  @override
+  void didUpdateWidget(_Branches old) {
+    super.didUpdateWidget(old);
+
+    if (widget.index != _more) _base = widget.index;
+
+    if (widget.index == _more && old.index != _more) _controller.forward();
+    if (widget.index != _more && old.index == _more) _controller.reverse();
+  }
+
+  @override
+  void dispose() {
+    _curve.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _controller.duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : _duration;
+
+    final moving = _controller.isAnimating;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        for (final (index, child) in widget.children.indexed)
+          HeroMode(
+            enabled: index == widget.index,
+            child: Offstage(
+              offstage:
+                  index != widget.index &&
+                  !(moving && (index == _base || index == _more)),
+              child: TickerMode(
+                enabled: index == widget.index,
+                child: SlideTransition(
+                  position: index == _more
+                      ? _in
+                      : index == _base
+                      ? _out
+                      : const AlwaysStoppedAnimation(Offset.zero),
+                  // Bayangan di tepi kiri Lainnya saat menimpa tab; saat
+                  // diam, bayangannya terpotong Stack di luar layar.
+                  child: index == _more
+                      ? DecoratedBox(
+                          decoration: const BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0x73000000),
+                                blurRadius: 24,
+                              ),
+                            ],
+                          ),
+                          child: child,
+                        )
+                      : child,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
 
 /// Hanya sekejap — selama token dibaca dari Keystore/Keychain. Cukup latarnya.
 class _Splash extends StatelessWidget {

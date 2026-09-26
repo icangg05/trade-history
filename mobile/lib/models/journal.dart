@@ -225,9 +225,18 @@ class AnalysisPage {
     required this.aiEnabled,
     required this.model,
     required this.analysis,
+    this.previous,
   });
 
   factory AnalysisPage.fromJson(Json json) => AnalysisPage(
+    previous: switch (json['previous']) {
+      final Map<dynamic, dynamic> previous => (
+        netPnl: toDouble(previous['net_pnl']),
+        winRate: toDouble(previous['win_rate_pct']),
+        profitFactor: toDoubleOrNull(previous['profit_factor']),
+      ),
+      _ => null,
+    },
     period: '${json['period']}',
     summary: Summary.fromJson(map(json['summary'])),
     aiEnabled: json['aiEnabled'] == true,
@@ -242,6 +251,10 @@ class AnalysisPage {
   final bool aiEnabled;
   final String model;
   final SavedAnalysis? analysis;
+
+  /// Periode sepanjang ini tepat sebelumnya; null untuk "Semua" atau kalau
+  /// periode itu kosong.
+  final ({double netPnl, double winRate, double? profitFactor})? previous;
 }
 
 class ReportOptions {

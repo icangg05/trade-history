@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trade_history/widgets/common.dart';
 import 'package:trade_history/widgets/trade_widgets.dart';
@@ -17,7 +18,8 @@ void main() {
   }
 
   Future<void> openMore(WidgetTester tester, String menu) async {
-    await openTab(tester, 'Lainnya');
+    await tester.tap(find.byTooltip('Lainnya'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(menu).first);
     await tester.pumpAndSettle();
   }
@@ -87,6 +89,12 @@ void main() {
     );
 
     // Baris yang tidak menempel di pilihan tidak bisa ikut dicentang.
+    // Gulir sesedikit mungkin: baris pertama harus tetap ada di pohon.
+    await Scrollable.ensureVisible(
+      tester.element(row(gbp)),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(row(gbp));
     await tester.pumpAndSettle();
     await tester.tap(row(trades[0] as Map));
@@ -141,6 +149,8 @@ void main() {
     await tester.tap(find.text('Batal'));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.more_vert).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ubah'));
@@ -295,7 +305,8 @@ void main() {
 
       await openMore(tester, 'Perangkat');
 
-      expect(find.text('Android · perangkat ini'), findsOneWidget);
+      expect(find.text('Infinix GT 30 Pro'), findsOneWidget);
+      expect(find.text('Perangkat ini'), findsOneWidget);
       // Hanya iPhone yang punya tombol; perangkat ini keluar lewat menu Keluar.
       expect(find.widgetWithText(TextButton, 'Keluarkan'), findsOneWidget);
 
@@ -506,5 +517,77 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.state<ScrollableState>(list).position.pixels, before);
+  });
+
+  // Gestur kembali Android (predictive back) dari layar chat: dulu ikut
+  // menutup halaman Analisa yang tertimpa di bawahnya, jadi mendarat di
+  // Lainnya.
+  testWidgets('gestur kembali dari Tanya AI mendarat di Analisa', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      routes: {
+        'GET accounts/1/analysis': (_) => {
+          ...fixture('analysis'),
+          'aiEnabled': true,
+        },
+      },
+    );
+    await openMore(tester, 'Analisa');
+    await tester.tap(find.text('Tanya AI'));
+    await tester.pumpAndSettle();
+    expect(find.text('Berdasarkan statistik akun ini.'), findsOneWidget);
+
+    Future<void> send(String method, [Object? args]) =>
+        tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/backgesture',
+          const StandardMethodCodec().encodeMethodCall(
+            MethodCall(method, args),
+          ),
+          (_) {},
+        );
+    final event = {
+      'touchOffset': [5.0, 300.0],
+      'progress': 0.0,
+      'swipeEdge': 0,
+    };
+
+    await send('startBackGesture', event);
+    await tester.pump();
+    await send('updateBackGestureProgress', {...event, 'progress': .6});
+    await tester.pump();
+    await send('commitBackGesture');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Berdasarkan statistik akun ini.'), findsNothing);
+    expect(find.textContaining('Statistik dihitung'), findsOneWidget);
+  });
+
+  testWidgets('kartu analisa membandingkan dengan periode sebelumnya', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      routes: {
+        'GET accounts/1/analysis': (_) => {
+          ...fixture('analysis'),
+          'previous': {
+            'net_pnl': 9999.0,
+            'win_rate_pct': 40.0,
+            'profit_factor': 1.1,
+          },
+        },
+      },
+    );
+    await openMore(tester, 'Analisa');
+
+    // Winrate & profit factor membaik, P/L turun dari 9.999.
+    expect(find.text('dari 40,0%'), findsOneWidget);
+    expect(find.text('dari 1,10'), findsOneWidget);
+    expect(find.textContaining('dari +9.999'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_upward), findsNWidgets(2));
+    expect(find.text('Panah: dibanding 30 hari sebelumnya.'), findsOneWidget);
   });
 }

@@ -98,12 +98,17 @@ class StatCard extends StatelessWidget {
     required this.label,
     required this.value,
     this.hint,
+    this.trend,
     this.tone = Tone.plain,
   });
 
   final String label;
   final String value;
   final String? hint;
+
+  /// Pembanding periode sebelumnya ("dari 58,3%") dan apakah angkanya
+  /// membaik — panah naik hijau, turun merah.
+  final (String, bool)? trend;
   final Tone tone;
 
   @override
@@ -132,6 +137,31 @@ class StatCard extends StatelessWidget {
             style: mono(size: 18, weight: FontWeight.w600, color: tone.color),
           ),
         ),
+        if (trend case (final text, final better)) ...[
+          const SizedBox(height: 2),
+          Row(
+            children: [
+              Icon(
+                better ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 12,
+                color: better ? AppColors.success : AppColors.destructive,
+              ),
+              const SizedBox(width: 3),
+              Flexible(
+                child: Text(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  semanticsLabel: '${better ? 'naik' : 'turun'} $text',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: better ? AppColors.success : AppColors.destructive,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
         if (hint != null) ...[
           const SizedBox(height: 2),
           Text(
@@ -676,5 +706,24 @@ class SuggestChips extends StatelessWidget {
           ),
       ],
     ),
+  );
+}
+
+/// Label kecil membulat di samping judul: "Aktif", "Arsip", "Perangkat ini".
+class Pill extends StatelessWidget {
+  const Pill(this.label, {super.key, this.color = AppColors.gold});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.only(left: 6),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: .15),
+      borderRadius: BorderRadius.circular(99),
+    ),
+    child: Text(label, style: TextStyle(fontSize: 11, color: color)),
   );
 }

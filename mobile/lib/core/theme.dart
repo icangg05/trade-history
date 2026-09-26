@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 /// Token warna dari `resources/css/app.css` versi web, dikonversi dari HSL.
@@ -263,6 +264,17 @@ ThemeData buildTheme() {
     ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: AppColors.gold,
+    ),
+    // Animasinya sama dengan bawaan Android (PredictiveBack… memakai
+    // FadeForwards untuk navigasi biasa), tapi tanpa gestur per halaman: di
+    // sana tiap halaman teratas di navigatornya sendiri ikut menangkap gestur
+    // kembali — Analisa di bawah layar chat ikut tertutup. Lewat jalur biasa,
+    // go_router menutup navigator paling atas lebih dulu.
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppColors.gold,

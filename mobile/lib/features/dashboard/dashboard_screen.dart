@@ -66,13 +66,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) => AccountScaffold(
     title: 'Dashboard',
     loading: _loading,
-    actions: (_) => [
-      IconButton(
-        tooltip: 'Trade baru',
-        icon: const Icon(Icons.add_circle_outline),
-        onPressed: () => context.push('/trade/new'),
-      ),
-    ],
     body: (context, account) {
       final key = (account.id, _range);
       var value = ref.watch(dashboardProvider(key));

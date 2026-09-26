@@ -412,6 +412,94 @@ class AccountStats
     }
 
     /**
+     * Kebiasaan yang biasanya paling menggerus modal, sebagai angka mentah untuk
+     * AI: overtrading, masuk lagi tak lama setelah loss, menahan posisi rugi
+     * lebih lama dari posisi untung, lot membesar setelah loss, dan trade tanpa
+     * SL. Menilai buruk tidaknya tugas model; di sini hanya dihitung.
+     *
+     * Anggota satu grup (posisi yang ditambah) dihitung sebagai satu posisi
+     * untuk urutan harian dan "sebelumnya".
+     */
+    public function behavior(CarbonInterface $from, CarbonInterface $to): array
+    {
+        $trades = $this->trades($from, $to)->sortBy('opened_at')->values();
+
+        // Trade ke-berapa dalam harinya (per hari buka).
+        $nth = [];
+        $seen = [];
+        foreach ($trades as $trade) {
+            $day = $trade->opened_at->toDateString();
+            $position = $trade->group_id ?? 'trade-'.$trade->id;
+            $seen[$day] ??= [];
+            $seen[$day][$position] ??= count($seen[$day]) + 1;
+            $nth[$trade->id] = $seen[$day][$position];
+        }
+
+        // Posisi terakhir yang sudah ditutup saat trade ini dibuka.
+        // ponytail: O(n²) per periode — cukup untuk ratusan trade; urutkan
+        // menurut closed_at + pencarian biner kalau periodenya ribuan trade.
+        $previous = [];
+        foreach ($trades as $trade) {
+            $previous[$trade->id] = $trades
+                ->filter(fn (Trade $o) => $o->id !== $trade->id
+                    && $o->closed_at !== null && $o->closed_at <= $trade->opened_at
+                    && ($trade->group_id === null || $o->group_id !== $trade->group_id))
+                ->sortBy('closed_at')
+                ->last();
+        }
+
+        $afterLoss = fn (Trade $t) => ($p = $previous[$t->id]) && $p->status === 'loss'
+            && $p->closed_at->diffInMinutes($t->opened_at) <= 60;
+
+        $held = fn (string $status) => $trades
+            ->where('status', $status)
+            ->filter(fn (Trade $t) => $t->closed_at !== null)
+            ->map(fn (Trade $t) => $t->opened_at->diffInMinutes($t->closed_at));
+
+        $lots = fn (callable $after) => $trades
+            ->filter(fn (Trade $t) => $previous[$t->id] && $after($previous[$t->id]) && $t->lot !== null)
+            ->avg(fn (Trade $t) => (float) $t->lot);
+
+        $days = collect($this->dailyPnl($from, $to));
+        $green = $days->where('pnl', '>', 0);
+        $red = $days->where('pnl', '<', 0);
+
+        return [
+            'by_trade_of_day' => $this->breakdown($trades, fn (Trade $t) => $nth[$t->id] >= 4 ? 'ke-4+' : 'ke-'.$nth[$t->id]),
+            'after_loss' => $this->breakdown($trades, fn (Trade $t) => $afterLoss($t) ? 'dibuka ≤60 menit setelah loss' : 'lainnya'),
+            'hold_minutes' => [
+                'win' => $held('win')->isEmpty() ? null : (int) round($held('win')->avg()),
+                'loss' => $held('loss')->isEmpty() ? null : (int) round($held('loss')->avg()),
+            ],
+            'avg_lot' => [
+                'setelah win' => round((float) $lots(fn (Trade $p) => $p->status === 'win'), 2) ?: null,
+                'setelah loss' => round((float) $lots(fn (Trade $p) => $p->status === 'loss'), 2) ?: null,
+            ],
+            'by_stop' => $this->breakdown($trades, fn (Trade $t) => match ($t->stopState()) {
+                Trade::STOP_RISK => 'SL di sisi rugi',
+                Trade::STOP_BREAKEVEN => 'SL digeser ke BE',
+                Trade::STOP_LOCKED => 'SL+ (profit dikunci)',
+                default => 'tanpa SL tercatat',
+            }),
+            'by_rr_planned' => $this->breakdown($trades, fn (Trade $t) => match (true) {
+                $t->rr_planned === null => 'tidak tercatat',
+                (float) $t->rr_planned < 1 => '< 1',
+                (float) $t->rr_planned < 2 => '1 - 2',
+                (float) $t->rr_planned < 3 => '2 - 3',
+                default => '≥ 3',
+            }),
+            'days' => [
+                'green' => $green->count(),
+                'red' => $red->count(),
+                'avg_green' => $green->isEmpty() ? null : round($green->avg('pnl'), 2),
+                'avg_red' => $red->isEmpty() ? null : round($red->avg('pnl'), 2),
+                'worst' => $days->isEmpty() ? null : ['date' => $days->sortBy('pnl')->keys()->first(), ...$days->sortBy('pnl')->first()],
+                'best' => $days->isEmpty() ? null : ['date' => $days->sortByDesc('pnl')->keys()->first(), ...$days->sortByDesc('pnl')->first()],
+            ],
+        ];
+    }
+
+    /**
      * Trade satu periode, urut kronologis menurut hari efektifnya. Dipakai
      * `summary()` untuk semua agregatnya dan oleh laporan tahunan yang memang
      * butuh barisnya satu per satu — bukan cuma angka jadinya.

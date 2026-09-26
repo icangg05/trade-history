@@ -80,8 +80,11 @@ class AnalysisChatTest extends TestCase
             $this->assertSame(['user', 'model', 'user'], array_column($contents, 'role'));
             $this->assertSame('Winrate saya berapa?', $contents[2]['parts'][0]['text']);
 
-            // Statistik akun ikut dikirim sebagai instruksi sistem, bukan dihitung model.
-            $this->assertStringContainsString('STATISTIK AKUN', $request->data()['systemInstruction']['parts'][0]['text']);
+            // Statistik & pola perilaku ikut dikirim sebagai instruksi sistem,
+            // bukan dihitung model.
+            $system = $request->data()['systemInstruction']['parts'][0]['text'];
+            $this->assertStringContainsString('"statistik"', $system);
+            $this->assertStringContainsString('"perilaku"', $system);
 
             return true;
         });

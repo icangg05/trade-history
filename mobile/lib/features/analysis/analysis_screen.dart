@@ -22,7 +22,7 @@ final analysisProvider = FutureProvider.autoDispose
     });
 
 /// Statistik dihitung dari database; AI hanya menafsirkan angkanya.
-/// Keterangan, periode, kartu angka, tiga rincian, angka lain, kartu AI.
+/// Keterangan, periode, kartu angka, tiga rincian, kartu AI.
 const _loading = SkeletonView(
   children: [
     Bone(width: 260, height: 10),
@@ -30,13 +30,12 @@ const _loading = SkeletonView(
     SkeletonStats(),
     SkeletonPanel(child: _PairsSkeleton(count: 5)),
     SkeletonPanel(child: _PairsSkeleton(count: 5)),
-    SkeletonPanel(child: _PairsSkeleton(count: 5)),
     SkeletonPanel(child: _PairsSkeleton(count: 6)),
     SkeletonPanel(child: SkeletonLines()),
   ],
 );
 
-/// Baris "label ... angka" di rincian dan angka lain.
+/// Baris "label ... angka" di rincian.
 class _PairsSkeleton extends StatelessWidget {
   const _PairsSkeleton({required this.count});
 
@@ -72,14 +71,18 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
   bool _generating = false;
 
   Future<void> _generate(int account) async {
+    final period = _period;
     setState(() => _generating = true);
 
     try {
       final message = await ref
           .read(journalProvider)
-          .generateAnalysis(account, _period);
+          .generateAnalysis(account, period);
 
       ref.read(revisionProvider.notifier).bump();
+      // Tunggu data baru sebelum skeleton hilang: AsyncView menahan data
+      // lama selama memuat ulang, jadi analisa lama sempat muncul sekejap.
+      await ref.read(analysisProvider((account, period)).future);
       if (mounted) showMessage(context, message);
     } on ApiException catch (error) {
       if (mounted) showMessage(context, error.message, error: true);
@@ -117,6 +120,16 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
   Widget _content(AnalysisPage page, int account) {
     final summary = page.summary;
     final currency = summary.currency;
+    final previous = page.previous;
+
+    // Panah hanya kalau angkanya bergerak; sama persis tidak perlu ditandai.
+    (String, bool)? trend(
+      double now,
+      double? before,
+      String Function(double) show,
+    ) => before == null || now == before
+        ? null
+        : ('dari ${show(before)}', now > before);
 
     return ListView(
       scrollCacheExtent: kWholePageCache,
@@ -142,23 +155,45 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
             StatCard(
               label: 'Net P/L',
               value: money(summary.netPnl, currency, signed: true),
+              trend: trend(
+                summary.netPnl,
+                previous?.netPnl,
+                (value) => money(value, currency, signed: true),
+              ),
               tone: summary.netPnl >= 0 ? Tone.good : Tone.bad,
             ),
             StatCard(
               label: 'Winrate',
               value: pct(summary.winRate),
-              hint: '${summary.wins}W / ${summary.losses}L',
+              trend: trend(summary.winRate, previous?.winRate, pct),
+              hint: previous == null
+                  ? '${summary.wins}W / ${summary.losses}L'
+                  : null,
             ),
             StatCard(
-              label: 'Payoff',
-              value: summary.payoffRatio == null
+              label: 'Profit factor',
+              value: summary.profitFactor == null
                   ? '—'
-                  : number(summary.payoffRatio),
+                  : number(summary.profitFactor),
+              trend: summary.profitFactor == null
+                  ? null
+                  : trend(
+                      summary.profitFactor!,
+                      previous?.profitFactor,
+                      (value) => number(value),
+                    ),
               hint:
-                  'Menang ${money(summary.avgWin, currency)} · kalah ${money(summary.avgLoss, currency)}',
+                  'Rata-rata ${money(summary.expectancy, currency, signed: true)} per trade',
+              tone: (summary.profitFactor ?? 0) >= 1 ? Tone.good : Tone.bad,
             ),
           ],
         ),
+        if (previous != null) ...[
+          const SizedBox(height: 8),
+          Caption(
+            'Panah: dibanding ${periods.firstWhere((option) => option.$1 == _period).$2} sebelumnya.',
+          ),
+        ],
         const SizedBox(height: 14),
         _Breakdown(
           title: 'Per simbol',
@@ -181,45 +216,10 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
           limit: 6,
         ),
         const SizedBox(height: 14),
-        Panel(
-          title: 'Angka lain',
-          child: Column(
-            children: [
-              _figure(
-                'Profit factor',
-                summary.profitFactor == null
-                    ? '—'
-                    : number(summary.profitFactor),
-              ),
-              _figure(
-                'Rata-rata P/L / trade',
-                money(summary.expectancy, currency, signed: true),
-              ),
-              _figure(
-                'Max drawdown',
-                '${money(summary.maxDrawdown, currency)} (${pct(summary.maxDrawdownPct)})',
-              ),
-              _figure('Menang beruntun', '${summary.longestWinStreak}'),
-              _figure('Kalah beruntun', '${summary.longestLossStreak}'),
-              _figure('RR rata-rata', rr(summary.avgRrRealized)),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
         _aiCard(page, account),
       ],
     );
   }
-
-  Widget _figure(String label, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      children: [
-        Expanded(child: Caption(label)),
-        Text(value, style: mono(size: 12.5)),
-      ],
-    ),
-  );
 
   Widget _aiCard(AnalysisPage page, int account) {
     final analysis = page.analysis;
@@ -268,7 +268,8 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
           if (!page.aiEnabled)
             const EmptyState(
               icon: Icons.key_off_outlined,
-              message: 'Kunci Gemini belum diisi. Minta admin mengisinya di halaman Admin.',
+              message:
+                  'Kunci Gemini belum diisi. Minta admin mengisinya di halaman Admin.',
             )
           else if (_generating)
             const Padding(

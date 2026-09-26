@@ -1,6 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../core/api_client.dart';
@@ -24,7 +24,11 @@ class JournalApi {
 
   // ---------------------------------------------------------------- pengguna
 
-  Future<Me> me() async => Me.fromJson(await client.get('me'));
+  /// Nama perangkat ikut dikirim: server memperbarui nama token ini, jadi
+  /// daftar perangkat tetap benar tanpa harus masuk ulang.
+  Future<Me> me() async => Me.fromJson(
+    await client.get('me', query: {'device_name': await deviceName()}),
+  );
 
   Future<Json> profile() => client.get('profile');
 
@@ -249,4 +253,32 @@ class JournalApi {
 
   static Future<MultipartFile> _file(XFile file) async =>
       MultipartFile.fromBytes(await file.readAsBytes(), filename: file.name);
+}
+
+/// Nama HP seperti di Setelan › Tentang ponsel ("Redmi Note 12 Pro"), dari
+/// `MainActivity.kt`. iOS 16 ke atas hanya memberi "iPhone" tanpa izin
+/// khusus, jadi di sana cukup label platformnya. Fungsi, bukan Future yang
+/// disimpan: kanalnya murah, dan Future global terikat ke zona pertama yang
+/// memintanya (tiap tes widget punya zonanya sendiri).
+Future<String> deviceName() async {
+  try {
+    final name = (await const MethodChannel(
+      'trade_history/device',
+    ).invokeMethod<String>('name'))?.trim();
+
+    // Batas kolom `device_name` di server.
+    if (name != null && name.isNotEmpty) {
+      return name.length > 100 ? name.substring(0, 100) : name;
+    }
+  } on MissingPluginException {
+    // iOS, dan tes.
+  } on PlatformException {
+    // Tetap bisa masuk walau nama HP tidak terbaca.
+  }
+
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.android => 'Android',
+    TargetPlatform.iOS => 'iPhone / iPad',
+    _ => 'Aplikasi mobile',
+  };
 }

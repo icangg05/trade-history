@@ -11,35 +11,56 @@ import '../../widgets/common.dart';
 import '../../widgets/skeleton.dart';
 import '../transactions/transaction_form.dart';
 
-final accountsProvider = FutureProvider.autoDispose<AccountsPage>((ref) {
+/// Daftar akun beserta id akun yang sedang dibuka, sebagai satu snapshot.
+/// Setelah arsip diubah keduanya dimuat ulang; kalau ditampilkan terpisah,
+/// kartu berganti dua kali (tombol "Buka" muncul lalu hilang, pil "Aktif"
+/// dan "Arsip" sempat bersamaan).
+final accountsProvider = FutureProvider.autoDispose<(AccountsPage, int?)>((
+  ref,
+) async {
   ref.watch(revisionProvider);
 
-  return ref.watch(journalProvider).accounts();
+  final (page, current) = await (
+    ref.watch(journalProvider).accounts(),
+    ref.watch(currentAccountProvider.future),
+  ).wait;
+
+  return (page, current?.id);
 });
 
 /// Akun trading. Tiap akun punya riwayat dan aturan sendiri; ini juga
 /// satu-satunya layar yang menjumlahkan seluruh akun (per mata uang).
-/// Satu kartu akun: nama, broker, saldo, P/L, lalu tombol-tombolnya.
+/// Satu kartu akun: nama & tombol ubah/hapus, broker, saldo & P/L.
 const _accountCard = Panel(
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Bone(width: 140, height: 14),
-      SizedBox(height: 8),
-      Bone(width: 200, height: 9),
-      SizedBox(height: 14),
-      Bone(width: 130, height: 18),
-      SizedBox(height: 6),
-      Bone(width: 110, height: 10),
-      SizedBox(height: 14),
       Row(
         children: [
-          SkeletonField(width: 72),
+          Bone(width: 140, height: 14),
           Spacer(),
-          Bone(width: 20, height: 20),
-          SizedBox(width: 24),
-          Bone(width: 20, height: 20),
-          SizedBox(width: 12),
+          Bone(width: 18, height: 18),
+          SizedBox(width: 22),
+          Bone(width: 18, height: 18),
+        ],
+      ),
+      SizedBox(height: 10),
+      Bone(width: 200, height: 9),
+      SizedBox(height: 12),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Bone(width: 130, height: 18),
+                SizedBox(height: 6),
+                Bone(width: 110, height: 10),
+              ],
+            ),
+          ),
+          SkeletonField(width: 72),
         ],
       ),
     ],
@@ -90,8 +111,6 @@ class AccountsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final active = ref.watch(currentAccountProvider).value?.id;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Akun trading')),
       floatingActionButton: FloatingActionButton.extended(
@@ -105,143 +124,158 @@ class AccountsScreen extends ConsumerWidget {
           value: ref.watch(accountsProvider),
           onRetry: () => ref.invalidate(accountsProvider),
           loading: _loading,
-          builder: (page) => ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
-            children: [
-              const Caption('Tiap akun punya riwayat dan aturan sendiri.'),
-              const SizedBox(height: 12),
-              if (page.items.isEmpty)
-                const EmptyState(
-                  message:
-                      'Belum ada akun. Buat satu untuk mulai mencatat trade.',
-                ),
-              // Dengan satu akun kartu total cuma mengulang kartu di bawahnya.
-              if (page.items.length > 1) ...[
-                StatGrid(
-                  children: [
-                    for (final total in page.totals)
-                      StatCard(
-                        label: 'Total ${total.currency}',
-                        value: money(total.balance, total.currency),
-                        hint:
-                            '${money(total.netPnl, total.currency, signed: true)} dari trading · '
-                            '${total.trades} trade · ${total.accounts} akun',
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-              ],
-              for (final row in page.items) ...[
-                // Arsip ditandai pil "Arsip" dan nama yang diabukan, bukan
-                // seluruh kartu diredupkan: opasitas 60% menjatuhkan semua
-                // teksnya ke 3:1.
-                Panel(
-                  borderColor: row.id == active
-                      ? AppColors.gold.withValues(alpha: .4)
-                      : null,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          builder: (data) {
+            final (page, active) = data;
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+              children: [
+                const Caption('Tiap akun punya riwayat dan aturan sendiri.'),
+                const SizedBox(height: 12),
+                if (page.items.isEmpty)
+                  const EmptyState(
+                    message:
+                        'Belum ada akun. Buat satu untuk mulai mencatat trade.',
+                  ),
+                // Dengan satu akun kartu total cuma mengulang kartu di bawahnya.
+                if (page.items.length > 1) ...[
+                  StatGrid(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              row.name,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: row.isArchived
-                                    ? AppColors.mutedForeground
-                                    : null,
-                              ),
-                            ),
-                          ),
-                          if (row.id == active) const _Pill('Aktif'),
-                          if (row.isArchived)
-                            const _Pill(
-                              'Arsip',
-                              color: AppColors.mutedForeground,
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Caption(
-                        [
-                          row.broker ?? 'Tanpa broker',
-                          if ((row.accountNumber ?? '').isNotEmpty)
-                            row.accountNumber!,
-                          row.currency,
-                          '${row.trades} trade',
-                        ].join(' · '),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        money(row.balance, row.currency),
-                        style: mono(size: 18, weight: FontWeight.w600),
-                      ),
-                      Text(
-                        '${money(row.netPnl, row.currency, signed: true)} dari trading',
-                        style: mono(size: 12, color: pnlColor(row.netPnl)),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          if (row.id != active && !row.isArchived)
-                            OutlinedButton(
-                              onPressed: () {
-                                ref
-                                    .read(selectedAccountProvider.notifier)
-                                    .select(row.id);
-                                context.go('/');
-                              },
-                              child: const Text('Buka'),
-                            ),
-                          const Spacer(),
-                          IconButton(
-                            tooltip: 'Ubah',
-                            onPressed: () =>
-                                showAccountForm(context, editing: row),
-                            icon: const Icon(Icons.edit_outlined, size: 20),
-                          ),
-                          IconButton(
-                            tooltip: 'Hapus',
-                            onPressed: () => _delete(context, ref, row),
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              size: 20,
-                              color: AppColors.destructive,
-                            ),
-                          ),
-                        ],
-                      ),
+                      for (final total in page.totals)
+                        StatCard(
+                          label: 'Total ${total.currency}',
+                          value: money(total.balance, total.currency),
+                          hint:
+                              '${money(total.netPnl, total.currency, signed: true)} dari trading · '
+                              '${total.trades} trade · ${total.accounts} akun',
+                        ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 10),
+                  const SizedBox(height: 14),
+                ],
+                for (final row in page.items) ...[
+                  _AccountCard(
+                    row: row,
+                    active: row.id == active,
+                    onOpen: () {
+                      ref.read(selectedAccountProvider.notifier).select(row.id);
+                      context.go('/');
+                    },
+                    onDelete: () => _delete(context, ref, row),
+                  ),
+                  const SizedBox(height: 10),
+                ],
               ],
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class _Pill extends StatelessWidget {
-  const _Pill(this.label, {this.color = AppColors.gold});
+/// Nama, pil, dan tombol ubah/hapus satu baris; saldo dan tombol Buka di
+/// bawahnya. Arsip ditandai pil "Arsip" dan nama yang diabukan, bukan seluruh
+/// kartu diredupkan: opasitas 60% menjatuhkan semua teksnya ke 3:1.
+class _AccountCard extends StatelessWidget {
+  const _AccountCard({
+    required this.row,
+    required this.active,
+    required this.onOpen,
+    required this.onDelete,
+  });
 
-  final String label;
-  final Color color;
+  final AccountRow row;
+  final bool active;
+  final VoidCallback onOpen;
+  final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.only(left: 6),
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: .15),
-      borderRadius: BorderRadius.circular(99),
+  Widget build(BuildContext context) => Panel(
+    padding: const EdgeInsets.fromLTRB(16, 6, 6, 14),
+    borderColor: active ? AppColors.gold.withValues(alpha: .4) : null,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                row.name,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: row.isArchived ? AppColors.mutedForeground : null,
+                ),
+              ),
+            ),
+            if (active) const Pill('Aktif'),
+            if (row.isArchived)
+              const Pill('Arsip', color: AppColors.mutedForeground),
+            const SizedBox(width: 2),
+            IconButton(
+              tooltip: 'Ubah',
+              visualDensity: VisualDensity.compact,
+              onPressed: () => showAccountForm(context, editing: row),
+              icon: const Icon(Icons.edit_outlined, size: 18),
+            ),
+            IconButton(
+              tooltip: 'Hapus',
+              visualDensity: VisualDensity.compact,
+              onPressed: onDelete,
+              icon: const Icon(
+                Icons.delete_outline,
+                size: 18,
+                color: AppColors.destructive,
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Caption(
+                [
+                  row.broker ?? 'Tanpa broker',
+                  if ((row.accountNumber ?? '').isNotEmpty) row.accountNumber!,
+                  row.currency,
+                  '${row.trades} trade',
+                ].join(' · '),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          money(row.balance, row.currency),
+                          style: mono(size: 18, weight: FontWeight.w600),
+                        ),
+                        Text(
+                          '${money(row.netPnl, row.currency, signed: true)} dari trading',
+                          style: mono(size: 12, color: pnlColor(row.netPnl)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!active && !row.isArchived)
+                    OutlinedButton(
+                      onPressed: onOpen,
+                      child: const Text('Buka'),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     ),
-    child: Text(label, style: TextStyle(fontSize: 11, color: color)),
   );
 }
 

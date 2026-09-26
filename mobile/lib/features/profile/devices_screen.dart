@@ -71,15 +71,27 @@ class DevicesScreen extends ConsumerWidget {
                 children: [
                   for (final device in devices)
                     ListTile(
-                      leading: Icon(switch (device.name) {
-                        'Android' => Icons.phone_android,
-                        'iPhone / iPad' => Icons.phone_iphone,
-                        _ => Icons.devices_other,
-                      }),
-                      title: Text(
-                        device.current
-                            ? '${device.name} · perangkat ini'
-                            : device.name,
+                      // Namanya kini nama HP ("Redmi Note 12 Pro"), bukan
+                      // nama platform; iOS hanya pernah memberi iPhone/iPad.
+                      leading: Icon(
+                        RegExp(
+                              'iphone|ipad',
+                              caseSensitive: false,
+                            ).hasMatch(device.name)
+                            ? Icons.phone_iphone
+                            : Icons.phone_android,
+                      ),
+                      // Nama HP berdiri sendiri; "perangkat ini" jadi label.
+                      title: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              device.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (device.current) const Pill('Perangkat ini'),
+                        ],
                       ),
                       subtitle: Text(
                         'Aktif ${shortDateTime(device.lastUsedAt)}\n'

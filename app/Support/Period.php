@@ -32,4 +32,21 @@ class Period
 
         return [$to->subDays(self::DAYS[$key])->startOfDay(), $to, $key];
     }
+
+    /**
+     * Rentang sepanjang periode ini, tepat sebelum ia dimulai — pembanding
+     * "membaik atau memburuk". Seluruh umur akun tidak punya pembanding.
+     *
+     * @return array{0: CarbonImmutable, 1: CarbonImmutable}|null
+     */
+    public static function previous(CarbonImmutable $from, string $key): ?array
+    {
+        if (! array_key_exists($key, self::DAYS)) {
+            return null;
+        }
+
+        $to = $from->subDay()->endOfDay();
+
+        return [$to->subDays(self::DAYS[$key])->startOfDay(), $to];
+    }
 }

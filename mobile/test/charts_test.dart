@@ -1,6 +1,17 @@
+import 'package:fl_chart/fl_chart.dart';
+// ignore: implementation_imports
+import 'package:fl_chart/src/chart/bar_chart/bar_chart_painter.dart';
+// ignore: implementation_imports
+import 'package:fl_chart/src/chart/bar_chart/bar_chart_renderer.dart';
+// ignore: implementation_imports
+import 'package:fl_chart/src/chart/base/base_chart/base_chart_painter.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:trade_history/features/dashboard/charts.dart';
 import 'package:trade_history/models/stats.dart';
+
+import 'support.dart';
 
 EquityPoint point(
   String date,
@@ -93,5 +104,92 @@ void main() {
       ]),
       [0, 200, 200],
     );
+  });
+
+  // Seluruh kolom bisa disentuh, bukan hanya batangnya: di atas dan di bawah
+  // batang (jalur latar), dan di celah antarbatang. Jalur yang arahnya
+  // berlawanan dengan batang membuat kolom batang merah mati sentuh.
+  testWidgets('tiap kolom P/L periode, hijau maupun merah, bisa disentuh', (
+    tester,
+  ) async {
+    await initializeDateFormatting('id_ID');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PeriodPnlChart(data: Dashboard.fromJson(fixture('dashboard'))),
+        ),
+      ),
+    );
+
+    final chart = tester.widget<BarChart>(find.byType(BarChart)).data;
+    final painter = BarChartPainter();
+    final holder = PaintHolder(chart, chart, TextScaler.noScaling);
+    final size = tester.getSize(find.byType(BarChartLeaf));
+    final rods = [for (final group in chart.barGroups) group.barRods.single];
+
+    expect(rods.where((rod) => rod.toY < 0), isNotEmpty);
+
+    final touched = <int>{};
+    for (var x = 1.0; x < size.width - 1; x++) {
+      for (final y in [1.0, size.height / 2, size.height - 1]) {
+        final spot = painter.handleTouch(Offset(x, y), size, holder);
+
+        expect(spot, isNotNull, reason: 'x $x, y $y');
+        touched.add(spot!.touchedBarGroupIndex);
+      }
+    }
+
+    expect(touched, {for (var i = 0; i < rods.length; i++) i});
+  });
+
+  testWidgets('kolom yang ditekan disorot, tooltip di separuh seberang jari', (
+    tester,
+  ) async {
+    await initializeDateFormatting('id_ID');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PeriodPnlChart(data: Dashboard.fromJson(fixture('dashboard'))),
+        ),
+      ),
+    );
+
+    BarChartData chart() => tester.widget<BarChart>(find.byType(BarChart)).data;
+    List<double> alphas() => [
+      for (final group in chart().barGroups) group.barRods.single.color!.a,
+    ];
+
+    final leaf = tester.getRect(find.byType(BarChartLeaf));
+
+    // Separuh bawah: tooltip di atas.
+    final gesture = await tester.startGesture(
+      Offset(leaf.center.dx, leaf.bottom - 4),
+    );
+    await tester.pumpAndSettle();
+
+    expect(alphas().where((alpha) => alpha == 1), hasLength(1));
+    expect(
+      alphas().where((alpha) => alpha < .5),
+      hasLength(alphas().length - 1),
+    );
+    expect(
+      chart().barTouchData.touchTooltipData.direction,
+      TooltipDirection.top,
+    );
+
+    // Separuh atas: tooltip pindah ke bawah.
+    await gesture.moveTo(Offset(leaf.center.dx, leaf.top + 4));
+    await tester.pumpAndSettle();
+
+    expect(
+      chart().barTouchData.touchTooltipData.direction,
+      TooltipDirection.bottom,
+    );
+
+    // Dilepas: sorotan hilang.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(alphas(), everyElement(closeTo(.75, .01)));
   });
 }

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -133,7 +132,7 @@ class SessionController extends AsyncNotifier<Session?> {
     final json = await ApiClient(
       server: server,
       adapter: ref.read(httpAdapterProvider),
-    ).post(path, {...body, 'device_name': _deviceName()});
+    ).post(path, {...body, 'device_name': await deviceName()});
 
     await ref.read(serverProvider.notifier).set(server);
     await ref.read(prefsProvider).setBool(onboardedKey, true);
@@ -175,12 +174,6 @@ class SessionController extends AsyncNotifier<Session?> {
 
     state = const AsyncData(null);
   }
-
-  static String _deviceName() => switch (defaultTargetPlatform) {
-    TargetPlatform.android => 'Android',
-    TargetPlatform.iOS => 'iPhone / iPad',
-    _ => 'Aplikasi mobile',
-  };
 }
 
 final sessionProvider = AsyncNotifierProvider<SessionController, Session?>(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/api_client.dart';
 import '../../core/format.dart';
@@ -239,13 +238,6 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
         },
       ),
     ],
-    floatingActionButton: (_) => _grouping
-        ? null
-        : FloatingActionButton.extended(
-            onPressed: () => context.push('/trade/new'),
-            icon: const Icon(Icons.add),
-            label: const Text('Trade'),
-          ),
     body: (context, account) {
       final query = (account.id, _filters);
       _query = query;
@@ -406,15 +398,25 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
                   ),
                 ),
               if (list.loadingMore)
-                const SliverPadding(
-                  padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
-                  // Beberapa baris, bukan satu: halaman berikutnya memang
-                  // berisi banyak trade.
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  // Sepertiga layar yang memudar ke bawah, di tempat ruang
+                  // kosong akhir daftar: daftar tampak berlanjut sampai tepi
+                  // layar, tanpa menambah banyak panjang gulir.
                   sliver: SliverToBoxAdapter(
-                    child: Shimmer(
-                      child: Panel(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: SkeletonTradeRows(),
+                    child: ShaderMask(
+                      blendMode: BlendMode.dstIn,
+                      shaderCallback: (bounds) => const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [.4, 1],
+                        colors: [Colors.white, Colors.transparent],
+                      ).createShader(bounds),
+                      child: const Shimmer(
+                        child: Panel(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: SkeletonTradeRows(count: 4),
+                        ),
                       ),
                     ),
                   ),
@@ -429,8 +431,9 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
                     ),
                   ),
                 ),
-              // Ruang untuk tombol "Trade" yang melayang.
-              const SliverToBoxAdapter(child: SizedBox(height: 96)),
+              // Saat memuat, skeleton yang memudar yang mengisi ujung daftar.
+              if (!list.loadingMore)
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           ),
         ),

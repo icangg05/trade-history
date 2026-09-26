@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
 import '../../widgets/backdrop.dart';
 
-/// Tab bar bawah, sama urutannya dengan tab bar mobile di web: Dashboard,
-/// Kalender, Trade di tengah, Dana, lalu Lainnya (aturan, analisa, laporan…).
+/// Tab terakhir sebelum Lainnya dibuka dari header: tujuan tombol kembali
+/// di sana. Lainnya tetap satu cabang shell (subhalamannya tetap memakai
+/// tab bar), hanya tidak lagi punya tab sendiri.
+var _lastTab = 0;
+
+void openMore(BuildContext context) => context.go('/more');
+
+void leaveMore(BuildContext context) =>
+    StatefulNavigationShell.of(context).goBranch(_lastTab);
+
+/// Tab bar bawah: Dashboard, Kalender, tombol + untuk trade baru di tengah,
+/// Trade, Dana. Lainnya (aturan, analisa, laporan…) dibuka dari header.
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key, required this.shell});
 
   final StatefulNavigationShell shell;
 
+  /// Urutan sama dengan cabang di `app.dart`; cabang kelima (Lainnya) tidak
+  /// punya tab.
   static const _tabs = [
     (Icons.space_dashboard_outlined, Icons.space_dashboard, 'Dashboard'),
     (Icons.calendar_month_outlined, Icons.calendar_month, 'Kalender'),
@@ -20,7 +33,11 @@ class HomeShell extends StatelessWidget {
       Icons.account_balance_wallet,
       'Dana',
     ),
-    (Icons.more_horiz, Icons.more_horiz, 'Lainnya'),
+  ];
+
+  static const _border = BorderSide(color: Color(0x12ECF0F3));
+  static const _shadows = [
+    BoxShadow(color: Color(0x66000000), blurRadius: 24, offset: Offset(0, 8)),
   ];
 
   /// Pulau mengambang seperti tab bar web. Tanpa blur: yang ada di
@@ -29,11 +46,16 @@ class HomeShell extends StatelessWidget {
     color: AppColors.popover.withValues(alpha: .92),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(28),
-      side: BorderSide(color: AppColors.foreground.withValues(alpha: .07)),
+      side: _border,
     ),
-    shadows: const [
-      BoxShadow(color: Color(0x66000000), blurRadius: 24, offset: Offset(0, 8)),
-    ],
+    shadows: _shadows,
+  );
+
+  /// Pulau yang sama dengan lekukan tempat tombol + duduk.
+  static final _cradled = ShapeDecoration(
+    color: AppColors.popover.withValues(alpha: .92),
+    shape: const _Cradle(_border),
+    shadows: _shadows,
   );
 
   List<Widget> _items() => [
@@ -58,6 +80,9 @@ class HomeShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rail = MediaQuery.sizeOf(context).width >= 600;
+    final items = _items();
+
+    if (shell.currentIndex < _tabs.length) _lastTab = shell.currentIndex;
 
     return Backdrop(
       child: Scaffold(
@@ -79,7 +104,14 @@ class HomeShell extends StatelessWidget {
                               width: 68,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
-                                children: _items(),
+                                children: [
+                                  ...items.take(2),
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 8),
+                                    child: _AddTrade(size: 48),
+                                  ),
+                                  ...items.skip(2),
+                                ],
                               ),
                             ),
                           ),
@@ -95,19 +127,152 @@ class HomeShell extends StatelessWidget {
             ? null
             : SafeArea(
                 top: false,
-                minimum: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-                child: DecoratedBox(
-                  decoration: _island,
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Row(
-                      children: [
-                        for (final item in _items()) Expanded(child: item),
-                      ],
+                minimum: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: _Cradle.rise),
+                      child: DecoratedBox(
+                        decoration: _cradled,
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: Row(
+                            children: [
+                              for (final item in items.take(2))
+                                Expanded(child: item),
+                              const SizedBox(width: _Cradle.slot),
+                              for (final item in items.skip(2))
+                                Expanded(child: item),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const _AddTrade(size: _Cradle.button),
+                  ],
                 ),
               ),
+      ),
+    );
+  }
+}
+
+/// Pulau membulat dengan lekukan melingkar di tengah atas — tombol + duduk
+/// di dalamnya, menyembul [rise] px di atas pulau.
+class _Cradle extends ShapeBorder {
+  const _Cradle(this.side);
+
+  final BorderSide side;
+
+  static const button = 56.0;
+  static const rise = 16.0;
+  static const _gap = 6.0;
+
+  /// Lebar kolom kosong di antara dua pasang tab.
+  static const slot = button + _gap * 2 + 8;
+
+  Rect _notch(Rect rect) => Rect.fromCircle(
+    center: Offset(rect.center.dx, rect.top + button / 2 - rise),
+    radius: button / 2 + _gap,
+  );
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) => Path.combine(
+    PathOperation.intersect,
+    const CircularNotchedRectangle().getOuterPath(rect, _notch(rect)),
+    Path()..addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(28))),
+  );
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
+      getOuterPath(rect);
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  ShapeBorder scale(double t) => this;
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) =>
+      canvas.drawPath(getOuterPath(rect), side.toPaint());
+}
+
+/// Tombol + emas untuk trade baru. Menciut sedikit saat ditekan (umpan
+/// balik sentuh), tidak sama sekali kalau animasi dimatikan.
+class _AddTrade extends StatefulWidget {
+  const _AddTrade({required this.size});
+
+  final double size;
+
+  @override
+  State<_AddTrade> createState() => _AddTradeState();
+}
+
+class _AddTradeState extends State<_AddTrade> {
+  bool _down = false;
+
+  void _press(bool down) => setState(() => _down = down);
+
+  @override
+  Widget build(BuildContext context) {
+    final still = MediaQuery.disableAnimationsOf(context);
+
+    return Semantics(
+      button: true,
+      label: 'Tambah trade',
+      excludeSemantics: true,
+      child: Tooltip(
+        message: 'Tambah trade',
+        child: GestureDetector(
+          onTapDown: (_) => _press(true),
+          onTapUp: (_) => _press(false),
+          onTapCancel: () => _press(false),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            context.push('/trade/new');
+          },
+          child: AnimatedScale(
+            scale: _down && !still ? .92 : 1,
+            duration: still ? Duration.zero : const Duration(milliseconds: 140),
+            curve: Curves.easeOutCubic,
+            child: Container(
+              width: widget.size,
+              height: widget.size,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                // Emas sedikit lebih terang di atas: terasa timbul tanpa
+                // pendar neon.
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFFDD15C), AppColors.gold],
+                ),
+                border: Border.fromBorderSide(
+                  BorderSide(color: Color(0x33FFFFFF)),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x40FBBD23),
+                    blurRadius: 14,
+                    offset: Offset(0, 5),
+                  ),
+                  BoxShadow(
+                    color: Color(0x59000000),
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.add_rounded,
+                size: widget.size * .52,
+                color: AppColors.goldForeground,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

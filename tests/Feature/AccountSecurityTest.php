@@ -60,6 +60,18 @@ class AccountSecurityTest extends TestCase
         $this->assertSame(['Pixel'], $user->tokens()->pluck('name')->all());
     }
 
+    public function test_nama_perangkat_diperbarui_saat_aplikasi_dibuka(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('Android');
+
+        $this->getJson('/api/v1/me', $this->bearer($token->plainTextToken))->assertOk();
+        $this->assertSame('Android', $token->accessToken->refresh()->name);
+
+        $this->getJson('/api/v1/me?device_name=Redmi+Note+12+Pro', $this->bearer($token->plainTextToken))->assertOk();
+        $this->assertSame('Redmi Note 12 Pro', $token->accessToken->refresh()->name);
+    }
+
     public function test_admin_mereset_sandi_mencabut_semua_token_pengguna(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

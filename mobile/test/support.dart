@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -84,7 +83,7 @@ final defaultRoutes = <String, Handler>{
     'devices': [
       {
         'id': 1,
-        'name': 'Android',
+        'name': 'Infinix GT 30 Pro',
         'created_at': '2026-09-01T02:00:00.000000Z',
         'last_used_at': '2026-09-26T03:15:00.000000Z',
         'current': true,
@@ -125,6 +124,13 @@ Future<FakeServer> pumpApp(
   tester.view.physicalSize = const Size(1080, 2340);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
+
+  // Kanal nama HP di MainActivity.kt. Tanpa tiruan, pesannya dijawab di luar
+  // waktu palsu tes dan aplikasi menunggu selamanya.
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+    const MethodChannel('trade_history/device'),
+    (_) async => 'Pixel 7',
+  );
 
   SharedPreferencesAsyncPlatform.instance =
       InMemorySharedPreferencesAsync.withData({

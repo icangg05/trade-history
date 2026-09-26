@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -46,7 +47,15 @@ void main() {
       (request) => request.path == 'auth/login',
     );
     expect(login.data, containsPair('email', 'demo@contoh.com'));
-    expect(login.data, contains('device_name'));
+    expect(login.data, containsPair('device_name', 'Pixel 7'));
+    expect(
+      server.requests.lastWhere((request) => request.path == 'me'),
+      isA<RequestOptions>().having(
+        (request) => request.queryParameters['device_name'],
+        'device_name',
+        'Pixel 7',
+      ),
+    );
 
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('Demo XAUUSD'), findsOneWidget);
@@ -118,6 +127,8 @@ void main() {
     // sisa tingginya sempit sekali.
     await tester.tap(find.text('Dana'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.more_vert).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Hapus').last);
@@ -142,20 +153,20 @@ void main() {
     expect(find.text('Profil'), findsOneWidget);
   });
 
-  testWidgets('FAB di tab lain tidak bentrok saat membuka form trade', (
+  testWidgets('FAB di cabang lain tidak bentrok dengan tombol + trade', (
     tester,
   ) async {
     await pumpApp(tester);
 
-    // Halaman akun (FAB "Akun baru") tetap hidup di tab Lainnya.
-    await tester.tap(find.text('Lainnya'));
+    // Halaman akun (FAB "Akun baru") tetap hidup di cabang Lainnya.
+    await tester.tap(find.byTooltip('Lainnya'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Akun trading').first);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Trade').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FloatingActionButton, 'Trade'));
+    await tester.tap(find.byTooltip('Tambah trade'));
     await tester.pumpAndSettle();
 
     expect(find.text('Trade baru'), findsOneWidget);
@@ -264,7 +275,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('SALDO SEKARANG'), findsOneWidget);
 
-    await tester.tap(find.text('Lainnya'));
+    await tester.tap(find.byTooltip('Lainnya'));
     await tester.pumpAndSettle();
 
     for (final (menu, marker) in [
@@ -329,7 +340,7 @@ void main() {
 
       await tester.tap(find.text('Trade').last);
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(FloatingActionButton));
+      await tester.tap(find.byTooltip('Tambah trade'));
       await tester.pumpAndSettle();
 
       expect(find.text('Trade baru'), findsOneWidget);
@@ -399,7 +410,7 @@ void main() {
 
     await tester.tap(find.text('Trade').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Tambah trade'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Simpan').first);
     await tester.pumpAndSettle();
@@ -411,7 +422,7 @@ void main() {
   testWidgets('keluar mencabut token dan kembali ke login', (tester) async {
     final server = await pumpApp(tester);
 
-    await tester.tap(find.text('Lainnya'));
+    await tester.tap(find.byTooltip('Lainnya'));
     await tester.pumpAndSettle();
     // ensureVisible, bukan scrollUntilVisible: yang terakhir menggulir
     // Scrollable pertama — daftar di tab lain yang sedang tersembunyi.

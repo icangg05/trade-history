@@ -43,9 +43,17 @@ class AccountScaffold extends ConsumerWidget {
         leading: root ? const HeaderAvatar() : null,
         titleSpacing: root ? 4 : 16,
         title: AccountSwitcher(title: title),
-        actions: account == null
-            ? null
-            : [...?actions?.call(account), const SizedBox(width: 4)],
+        actions: [
+          if (account != null) ...?actions?.call(account),
+          // Lainnya tidak punya tab; pintunya di header tiap layar tab.
+          if (root)
+            IconButton(
+              tooltip: 'Lainnya',
+              icon: const Icon(Icons.grid_view_rounded),
+              onPressed: () => context.go('/more'),
+            ),
+          const SizedBox(width: 4),
+        ],
       ),
       floatingActionButton: account == null
           ? null

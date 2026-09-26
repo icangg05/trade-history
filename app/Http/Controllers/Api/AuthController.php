@@ -107,6 +107,16 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
+        $token = $user->currentAccessToken();
+        $device = mb_substr($request->string('device_name')->trim()->toString(), 0, 100);
+
+        // Nama perangkat ikut tiap aplikasi dibuka: token lama yang masih
+        // bernama "Android" dan HP yang namanya diganti tetap terbaca benar di
+        // daftar perangkat. Dipotong, bukan divalidasi — `me` gagal berarti
+        // aplikasi tidak bisa dibuka.
+        if ($device !== '' && $token instanceof PersonalAccessToken) {
+            $token->forceFill(['name' => $device])->save();
+        }
 
         return response()->json([
             'user' => [...$user->only('id', 'name', 'email'), 'avatar' => $user->avatarVersion()],
