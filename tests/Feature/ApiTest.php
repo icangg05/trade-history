@@ -13,8 +13,7 @@ use Tests\TestCase;
 /**
  * API aplikasi mobile. Yang dijaga: token hanya untuk trader, akun di alamat
  * benar-benar milik pemegang token, baris akun lain tidak bisa disentuh lewat
- * alamat akun sendiri, dan angka yang sampai ke ponsel sama persis dengan yang
- * tampil di browser — controllernya memang sama.
+ * alamat akun sendiri.
  */
 class ApiTest extends TestCase
 {
@@ -99,6 +98,8 @@ class ApiTest extends TestCase
 
         $this->getJson('/api/v1/auth/options')->assertJsonPath('can_register', true);
 
+        $this->postJson('/api/v1/auth/register', $form)->assertJsonValidationErrors('token');
+
         $this->postJson('/api/v1/auth/register', [...$form, 'token' => 'tebakan'])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('token');
@@ -112,7 +113,7 @@ class ApiTest extends TestCase
         $this->postJson('/api/v1/auth/register', [...$form, 'email' => 'lain@contoh.com', 'token' => ''])->assertNotFound();
     }
 
-    public function test_angka_dashboard_sama_dengan_halaman_web(): void
+    public function test_dashboard_lewat_api(): void
     {
         $account = $this->account();
         $this->trade($account);
@@ -123,13 +124,6 @@ class ApiTest extends TestCase
             ->assertJsonPath('range', '90d')
             ->json();
 
-        $web = $this->actingAs($account->user)
-            ->withSession(['current_account_id' => $account->id])
-            ->get('/?range=90d')
-            ->viewData('page')['props'];
-
-        $this->assertEquals($web['summary'], $api['summary']);
-        $this->assertEquals($web['ruleStatus'], $api['ruleStatus']);
         $this->assertSame(30.0, (float) $api['summary']['net_pnl']);
     }
 

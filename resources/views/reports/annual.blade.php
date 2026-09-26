@@ -247,12 +247,6 @@
             matching the transfer receipts. Trading results carry no per-transaction rate and are therefore converted
             at a single rate as stated above.</div>
     </td></tr>
-    <tr><td>
-        <div class="id">3. Saldo awal akun pada tahun pertamanya adalah modal awal yang tercatat saat akun dibuat,
-            sehingga tidak muncul sebagai baris setoran.</div>
-        <div class="en">An account's opening balance in its first year is the initial capital recorded at account
-            creation, and therefore does not appear as a deposit entry.</div>
-    </td></tr>
 </table>
 
 {{-- ------------------------------------------------------------ rincian per akun --}}

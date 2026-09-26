@@ -122,9 +122,9 @@ class RuleStatusCard extends StatelessWidget {
                     'Trade: ${status.trades} / ${status.maxTrades}',
                     color: status.tradesBreached ? AppColors.destructive : null,
                   ),
-                if (status.maxDrawdownPct != null)
+                if (status.maxDrawdown != null)
                   Caption(
-                    'Drawdown: ${pct(status.drawdownPct)} / ${pct(status.maxDrawdownPct)}',
+                    'Drawdown: ${money(status.drawdown, currency)} / ${money(status.maxDrawdown, currency)}',
                     color: status.drawdownBreached
                         ? AppColors.destructive
                         : null,

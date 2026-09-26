@@ -9,6 +9,7 @@ import '../../data/session.dart';
 import '../../models/account.dart';
 import '../../widgets/common.dart';
 import '../../widgets/skeleton.dart';
+import '../transactions/transaction_form.dart';
 
 final accountsProvider = FutureProvider.autoDispose<AccountsPage>((ref) {
   ref.watch(revisionProvider);
@@ -271,9 +272,6 @@ class _AccountFormState extends ConsumerState<_AccountForm> {
   late final _number = TextEditingController(
     text: widget.editing?.accountNumber ?? '',
   );
-  late final _balance = TextEditingController(
-    text: inputNumber(widget.editing?.initialBalance ?? 0),
-  );
   late String _currency = widget.editing?.currency ?? 'USD';
   late DateTime _startedAt = widget.editing?.startedAt ?? DateTime.now();
   late bool _archived = widget.editing?.isArchived ?? false;
@@ -283,7 +281,7 @@ class _AccountFormState extends ConsumerState<_AccountForm> {
 
   @override
   void dispose() {
-    for (final controller in [_name, _broker, _number, _balance]) {
+    for (final controller in [_name, _broker, _number]) {
       controller.dispose();
     }
     super.dispose();
@@ -303,7 +301,6 @@ class _AccountFormState extends ConsumerState<_AccountForm> {
           'broker': _broker.text.trim(),
           'account_number': _number.text.trim(),
           'currency': _currency,
-          'initial_balance': parseDecimal(_balance.text),
           'started_at': isoDate(_startedAt),
           'is_archived': _archived,
         },
@@ -320,10 +317,28 @@ class _AccountFormState extends ConsumerState<_AccountForm> {
       if (!mounted) return;
 
       final router = GoRouter.of(context);
+      final root = Navigator.of(context, rootNavigator: true).context;
 
       showMessage(context, message);
       Navigator.pop(context);
-      if (id != null) router.go('/');
+
+      // Akun baru belum punya saldo: langsung ke Dana dan catat deposit
+      // pertamanya. Ditunda satu frame supaya halamannya sudah berganti.
+      if (id != null) {
+        router.go('/funds');
+        final account = AccountBrief(
+          id: id,
+          name: _name.text.trim(),
+          broker: _broker.text.trim(),
+          currency: _currency,
+          startedAt: _startedAt,
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (root.mounted) {
+            showTransactionForm(root, account: account, deposit: true);
+          }
+        });
+      }
     } on ApiException catch (error) {
       if (mounted) {
         setState(() => _errors = error.errors);
@@ -351,8 +366,10 @@ class _AccountFormState extends ConsumerState<_AccountForm> {
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
-          const Caption(
-            'Saldo awal dan tanggal mulai jadi titik nol kurva perkembangan akun.',
+          Caption(
+            widget.editing == null
+                ? 'Setelah disimpan, catat deposit pertamamu. Saldo akun dimulai dari situ.'
+                : 'Saldo akun berasal dari deposit, withdrawal, dan hasil trading.',
           ),
           const SizedBox(height: 16),
           TextField(
@@ -393,43 +410,26 @@ class _AccountFormState extends ConsumerState<_AccountForm> {
             onChanged: (value) => setState(() => _currency = value),
           ),
           gap,
-          FieldPair(
-            TextField(
-              controller: _balance,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              style: mono(size: 14),
+          InkWell(
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _startedAt,
+                firstDate: DateTime(2000),
+                lastDate: DateTime.now().add(const Duration(days: 366)),
+              );
+              if (picked != null) setState(() => _startedAt = picked);
+            },
+            child: InputDecorator(
               decoration: InputDecoration(
-                labelText: 'Saldo awal ($_currency) *',
-                hintText: '10000',
-                errorText: _errors['initial_balance'],
+                labelText: 'Mulai *',
+                errorText: _errors['started_at'],
+              ),
+              child: Text(
+                longDate(_startedAt),
+                style: const TextStyle(fontSize: 14),
               ),
             ),
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _startedAt,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime.now().add(const Duration(days: 366)),
-                );
-                if (picked != null) setState(() => _startedAt = picked);
-              },
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'Mulai *',
-                  errorText: _errors['started_at'],
-                ),
-                child: Text(
-                  longDate(_startedAt),
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-            ),
-            // "26 September 2026" butuh lebih dari separuh lebar ponsel
-            // 360 dp; tanpa ini tanggalnya turun jadi dua baris.
-            minWidth: 165,
           ),
           if (widget.editing != null) ...[
             gap,

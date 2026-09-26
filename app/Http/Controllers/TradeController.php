@@ -80,11 +80,13 @@ class TradeController extends Controller
         return addcslashes($value, '%_\\');
     }
 
-    public function create(): Response|JsonResponse
+    public function create(Request $request): Response|JsonResponse
     {
         return $this->page('Trades/Form', [
             'trade' => null,
             'aiEnabled' => app(Gemini::class)->configured(),
+            // Simbol yang pernah dipakai akun ini, untuk diketuk di form.
+            'symbols' => $request->currentAccount()->trades()->distinct()->orderBy('symbol')->pluck('symbol'),
         ]);
     }
 
@@ -98,7 +100,6 @@ class TradeController extends Controller
 
         return $this->done(
             'Trade '.$trade->symbol.' tersimpan.',
-            to: route('trades.index'),
             data: fn () => ['trade' => $this->present($trade->refresh(), full: true)],
             status: 201,
         );
@@ -127,7 +128,6 @@ class TradeController extends Controller
 
         return $this->done(
             'Trade diperbarui.',
-            to: route('trades.index'),
             data: fn () => ['trade' => $this->present($trade->refresh(), full: true)],
         );
     }

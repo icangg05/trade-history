@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Models\GeminiKey;
 use App\Models\User;
 use App\Services\Gemini;
@@ -35,13 +36,29 @@ class AdminTest extends TestCase
             ->assertInertia(fn ($page) => $page->component('Admin')->has('users', 1)->has('geminiKeys'));
     }
 
-    public function test_admin_tidak_bisa_masuk_wilayah_trading(): void
+    public function test_versi_web_hanya_untuk_admin(): void
     {
-        $admin = $this->admin();
+        $this->actingAs($this->admin())->get('/')->assertRedirect('/admin');
 
-        foreach (['/', '/trades', '/calendar', '/transactions', '/rules', '/analysis', '/accounts'] as $url) {
-            $this->actingAs($admin)->get($url)->assertRedirect('/admin');
+        // Halaman trading web sudah tidak ada; trader memakai aplikasi mobile.
+        foreach (['/trades', '/calendar', '/transactions', '/rules', '/analysis', '/accounts', '/register'] as $url) {
+            $this->get($url)->assertNotFound();
         }
+
+        // Trader yang masih membawa sesi web lama dikeluarkan lewat `/`.
+        $this->actingAs(User::factory()->create())->get('/')
+            ->assertRedirect('/login')
+            ->assertSessionHasErrors(['email' => LoginController::ADMIN_ONLY]);
+        $this->assertGuest();
+    }
+
+    public function test_trader_tidak_bisa_masuk_lewat_web(): void
+    {
+        User::factory()->create(['email' => 'trader@contoh.com', 'password' => 'sandi-benar']);
+
+        $this->post('/login', ['email' => 'trader@contoh.com', 'password' => 'sandi-benar'])
+            ->assertSessionHasErrors(['email' => LoginController::ADMIN_ONLY]);
+        $this->assertGuest();
     }
 
     public function test_backup_hanya_untuk_admin(): void

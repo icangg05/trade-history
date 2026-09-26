@@ -29,16 +29,16 @@ class TradeDayTest extends TestCase
         $this->trade($account, '2026-01-03 10:00', '2026-01-03 11:00', -20);
         $this->trade($account, '2026-01-02 09:00', '2026-01-02 10:00', 15);
 
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $page = $this->get('/trades')->viewData('page');
+        $page = $this->api('get', 'trades')->json();
 
-        $this->assertSame(['2026-01-02' => 15.0, '2026-01-03' => 30.0], $page['props']['daily']);
+        $this->assertEquals(['2026-01-02' => 15.0, '2026-01-03' => 30.0], $page['daily']);
 
         // Urutannya ikut tanggal tutup: dua trade 3 Januari dulu, baru 2 Januari.
         $this->assertSame(
             ['2026-01-03', '2026-01-03', '2026-01-02'],
-            array_map(fn (array $t) => substr($t['closed_at'], 0, 10), $page['props']['trades']['data']),
+            array_map(fn (array $t) => substr($t['closed_at'], 0, 10), $page['trades']['data']),
         );
     }
 
@@ -51,7 +51,7 @@ class TradeDayTest extends TestCase
             'started_at' => '2026-01-01',
         ]);
 
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
         // Stop masih di sisi rugi, stop persis di entry, lalu stop yang sudah lewat entry.
         $account->trades()->createMany([
@@ -62,7 +62,7 @@ class TradeDayTest extends TestCase
         ]);
 
         $symbols = fn (string $query) => array_column(
-            $this->get('/trades?'.$query)->viewData('page')['props']['trades']['data'],
+            $this->api('get', 'trades?'.$query)->json()['trades']['data'],
             'symbol',
         );
 
@@ -84,7 +84,7 @@ class TradeDayTest extends TestCase
             'started_at' => '2026-01-01',
         ]);
 
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
         $account->trades()->createMany([
             ['symbol' => 'AAA', 'direction' => 'buy', 'entry_price' => 100, 'pnl' => 10, 'setup' => 'FVG, Order Block', 'notes' => 'Entry setelah sweep likuiditas.', 'opened_at' => '2026-01-02 09:00', 'closed_at' => '2026-01-02 10:00'],
@@ -93,7 +93,7 @@ class TradeDayTest extends TestCase
         ]);
 
         $symbols = fn (string $query) => array_column(
-            $this->get('/trades?'.$query)->viewData('page')['props']['trades']['data'],
+            $this->api('get', 'trades?'.$query)->json()['trades']['data'],
             'symbol',
         );
 
@@ -109,7 +109,7 @@ class TradeDayTest extends TestCase
         // Daftar strategi yang ditawarkan filter datang dari trade akun ini sendiri.
         $this->assertSame(
             ['FVG', 'Order Block'],
-            $this->get('/trades')->viewData('page')['props']['setups'],
+            $this->api('get', 'trades')->json()['setups'],
         );
     }
 

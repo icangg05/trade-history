@@ -94,7 +94,12 @@ class JournalApi {
       );
 
   /// Isi form: trade yang diubah (null untuk trade baru) dan apakah import AI aktif.
-  Future<(Trade?, bool)> tradeForm(int account, String? id) async {
+  /// Trade yang diubah (null untuk trade baru), apakah AI tersedia, dan
+  /// simbol yang pernah dipakai akun ini.
+  Future<(Trade?, bool, List<String>)> tradeForm(
+    int account,
+    String? id,
+  ) async {
     final json = await client.get(
       _in(account, id == null ? 'trades/create' : 'trades/$id'),
     );
@@ -102,6 +107,7 @@ class JournalApi {
     return (
       json['trade'] is Map ? Trade.fromJson(map(json['trade'])) : null,
       json['aiEnabled'] == true,
+      strings(json['symbols']),
     );
   }
 

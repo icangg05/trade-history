@@ -39,17 +39,17 @@ class JournalTest extends TestCase
             'opened_at' => '2026-01-05 09:00', 'closed_at' => '2026-01-05 11:00', 'pnl' => 50,
         ]);
 
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $props = $this->get('/trades')->assertOk()->viewData('page')['props'];
+        $props = $this->api('get', 'trades')->assertOk()->json();
 
         $this->assertSame($trade->getRouteKey(), $props['trades']['data'][0]['id']);
         $this->assertNotSame((string) $trade->id, $props['trades']['data'][0]['id']);
 
         // Hash itu yang diterima route; id mentah dan hash karangan sama-sama 404.
-        $this->get('/trades/'.$trade->getRouteKey().'/edit')->assertOk();
-        $this->get('/trades/'.$trade->id.'/edit')->assertNotFound();
-        $this->get('/trades/bukan-hash-sama-sekali/edit')->assertNotFound();
+        $this->api('get', 'trades/'.$trade->getRouteKey())->assertOk();
+        $this->api('get', 'trades/'.$trade->id)->assertNotFound();
+        $this->api('get', 'trades/bukan-hash-sama-sekali')->assertNotFound();
     }
 
     public function test_hash_akun_lain_tetap_tidak_bisa_dibuka(): void
@@ -60,10 +60,10 @@ class JournalTest extends TestCase
         ]);
 
         $saya = $this->account();
-        $this->actingAs($saya->user)->withSession(['current_account_id' => $saya->id]);
+        $this->onAccount($saya);
 
         // Hash menyamarkan, bukan mengizinkan: pagar kepemilikannya tetap yang menahan.
-        $this->get('/trades/'.$milikOrangLain->getRouteKey().'/edit')->assertNotFound();
+        $this->api('get', 'trades/'.$milikOrangLain->getRouteKey())->assertNotFound();
     }
 
     public function test_rr_dan_status_diturunkan_saat_menyimpan_posisi_buy(): void
@@ -107,16 +107,16 @@ class JournalTest extends TestCase
     public function test_trade_tanpa_hasil_dan_waktu_tutup_ditolak(): void
     {
         $account = $this->account();
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
         // Aplikasi ini mencatat riwayat: posisi yang belum ada hasilnya tidak dicatat.
-        $this->post('/trades', [
+        $this->api('post', 'trades', [
             'symbol' => 'XAUUSD',
             'direction' => 'buy',
             'entry_price' => 100,
             'sl_price' => 90,
             'opened_at' => '2026-01-04 09:00',
-        ])->assertSessionHasErrors(['pnl', 'closed_at']);
+        ])->assertJsonValidationErrors(['pnl', 'closed_at']);
 
         $this->assertSame(0, Trade::count());
     }
@@ -135,6 +135,10 @@ class JournalTest extends TestCase
 
         // 1000 + 500 − 200 + 300 − 150
         $this->assertSame(1450.0, (new AccountStats($account))->balance());
+
+        // Modal awal ikut dihitung sebagai setoran: 1000 + 500.
+        $summary = (new AccountStats($account))->summary(CarbonImmutable::parse('2026-01-01'), CarbonImmutable::parse('2026-01-31'));
+        $this->assertSame(1500.0, $summary['total_deposited']);
     }
 
     public function test_kurva_ekuitas_menumpuk_kronologis_dari_titik_awal(): void
@@ -146,9 +150,39 @@ class JournalTest extends TestCase
         $curve = (new AccountStats($account))->equityCurve();
 
         $this->assertSame(
-            [['2026-01-01', 1000.0], ['2026-01-05', 1500.0], ['2026-01-06', 1800.0]],
+            // Mulai sehari sebelum catatan pertama, bukan dari `started_at` (1 Jan).
+            [['2026-01-04', 1000.0], ['2026-01-05', 1500.0], ['2026-01-06', 1800.0]],
             array_map(fn ($p) => [$p['date'], $p['balance']], $curve),
         );
+    }
+
+    public function test_form_trade_menawarkan_simbol_yang_pernah_dipakai(): void
+    {
+        $account = $this->account();
+        $this->trade($account, '2026-01-02', 10);
+        $this->trade($account, '2026-01-03', 20);
+
+        $this->onAccount($account)->api('get', 'trades/create')->assertJsonPath('symbols', ['XAUUSD']);
+    }
+
+    public function test_akun_tanpa_modal_awal_mulai_dari_deposit_pertama(): void
+    {
+        $account = $this->account(['initial_balance' => 0]);
+        $account->transactions()->create(['type' => 'deposit', 'amount' => 1000, 'occurred_at' => '2026-01-05']);
+        $this->trade($account, '2026-01-06', 200);
+        $this->trade($account, '2026-01-07', -300);
+
+        $stats = new AccountStats($account);
+
+        // Tidak ada titik nol sebelum deposit: garisnya dimulai dari 1000.
+        $this->assertSame(
+            [['2026-01-05', 1000.0], ['2026-01-06', 1200.0], ['2026-01-07', 900.0]],
+            array_map(fn ($p) => [$p['date'], $p['balance']], $stats->equityCurve()),
+        );
+
+        // Drawdown diukur dari deposit pertama, bukan dari nol: 300 dari puncak 1200.
+        $summary = $stats->summary(CarbonImmutable::parse('2026-01-01'), CarbonImmutable::parse('2026-01-31'));
+        $this->assertSame(['amount' => 300.0, 'pct' => 25.0], $summary['max_drawdown']);
     }
 
     public function test_status_aturan_melaporkan_sisa_jatah_loss_harian(): void
@@ -171,9 +205,9 @@ class JournalTest extends TestCase
     public function test_take_profit_di_sisi_yang_salah_ditolak(): void
     {
         $account = $this->account();
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $response = $this->post('/trades', [
+        $response = $this->api('post', 'trades', [
             'symbol' => 'XAUUSD',
             'direction' => 'sell',
             'entry_price' => 100,
@@ -181,7 +215,7 @@ class JournalTest extends TestCase
             'opened_at' => '2026-01-02 10:00',
         ]);
 
-        $response->assertSessionHasErrors('tp_price');
+        $response->assertJsonValidationErrors('tp_price');
         $this->assertSame(0, Trade::count());
     }
 
@@ -193,9 +227,9 @@ class JournalTest extends TestCase
     public function test_stop_loss_di_harga_entry_dicatat_sebagai_break_even(): void
     {
         $account = $this->account();
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $this->post('/trades', [
+        $this->api('post', 'trades', [
             'symbol' => 'XAUUSD',
             'direction' => 'sell',
             'entry_price' => 100,
@@ -204,7 +238,7 @@ class JournalTest extends TestCase
             'opened_at' => '2026-01-02 10:00',
             'closed_at' => '2026-01-02 11:00',
             'pnl' => 0,
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $trade = Trade::sole();
 
@@ -216,10 +250,10 @@ class JournalTest extends TestCase
     public function test_stop_loss_yang_sudah_mengunci_profit_dicatat_sebagai_sl_plus(): void
     {
         $account = $this->account();
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
         // Sell di 100, stop sudah diturunkan ke 95: posisi tidak bisa rugi lagi.
-        $this->post('/trades', [
+        $this->api('post', 'trades', [
             'symbol' => 'XAUUSD',
             'direction' => 'sell',
             'entry_price' => 100,
@@ -229,7 +263,7 @@ class JournalTest extends TestCase
             'pnl' => 80,
             'opened_at' => '2026-01-02 10:00',
             'closed_at' => '2026-01-02 12:00',
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $trade = Trade::sole();
 
@@ -266,34 +300,33 @@ class JournalTest extends TestCase
         $theirs = $this->account();
         $trade = $this->trade($theirs, '2026-01-02', 100);
 
-        $this->actingAs($mine->user)
-            ->withSession(['current_account_id' => $mine->id])
-            ->get("/trades/{$trade->id}/edit")
+        $this->onAccount($mine)
+            ->api('get', "trades/{$trade->id}")
             ->assertNotFound();
     }
 
     public function test_deposit_wajib_menyertakan_bukti(): void
     {
         $account = $this->account();
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $this->post('/transactions', [
+        $this->api('post', 'transactions', [
             'type' => 'deposit',
             'amount' => 500,
             'occurred_at' => '2026-01-05',
-        ])->assertSessionHasErrors(['proof', 'rate_idr']);
+        ])->assertJsonValidationErrors(['proof', 'rate_idr']);
 
         $this->assertSame(0, $account->transactions()->count());
 
         Storage::fake('local');
 
-        $this->post('/transactions', [
+        $this->api('post', 'transactions', [
             'type' => 'deposit',
             'amount' => 500,
             'rate_idr' => 16250,
             'occurred_at' => '2026-01-05',
             'proof' => UploadedFile::fake()->image('bukti.jpg'),
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $this->assertNotNull($account->transactions()->sole()->proof_path);
     }
@@ -303,27 +336,27 @@ class JournalTest extends TestCase
         Storage::fake('local');
 
         $account = $this->account();
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $this->post('/transactions', [
+        $this->api('post', 'transactions', [
             'type' => 'deposit',
             'amount' => 500,
             'rate_idr' => 16250,
             'occurred_at' => '2026-01-05',
             'proof' => UploadedFile::fake()->image('bukti.jpg'),
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $transaksi = $account->transactions()->sole();
         $bukti = $transaksi->proof_path;
 
         // Salah ketik nominal & kurs: dibetulkan tanpa menyentuh buktinya.
-        $this->post('/transactions/'.$transaksi->getRouteKey(), [
+        $this->api('post', 'transactions/'.$transaksi->getRouteKey(), [
             'type' => 'deposit',
             'amount' => 550,
             'rate_idr' => 16300,
             'occurred_at' => '2026-01-06',
             'note' => 'Koreksi',
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $transaksi->refresh();
 
@@ -338,26 +371,26 @@ class JournalTest extends TestCase
         Storage::fake('local');
 
         $account = $this->account();
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $this->post('/transactions', [
+        $this->api('post', 'transactions', [
             'type' => 'withdrawal',
             'amount' => 100,
             'rate_idr' => 16250,
             'occurred_at' => '2026-01-05',
             'proof' => UploadedFile::fake()->image('lama.jpg'),
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $transaksi = $account->transactions()->sole();
         $lama = $transaksi->proof_path;
 
-        $this->post('/transactions/'.$transaksi->getRouteKey(), [
+        $this->api('post', 'transactions/'.$transaksi->getRouteKey(), [
             'type' => 'withdrawal',
             'amount' => 100,
             'rate_idr' => 16250,
             'occurred_at' => '2026-01-05',
             'proof' => UploadedFile::fake()->image('baru.jpg'),
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $baru = $transaksi->refresh()->proof_path;
 
@@ -375,9 +408,9 @@ class JournalTest extends TestCase
         ]);
 
         $saya = $this->account();
-        $this->actingAs($saya->user)->withSession(['current_account_id' => $saya->id]);
+        $this->onAccount($saya);
 
-        $this->post('/transactions/'.$milikOrangLain->getRouteKey(), [
+        $this->api('post', 'transactions/'.$milikOrangLain->getRouteKey(), [
             'type' => 'deposit',
             'amount' => 999,
             'rate_idr' => 16250,
@@ -401,13 +434,13 @@ class JournalTest extends TestCase
         }
 
         $totals = collect(
-            $this->actingAs($user)->get('/accounts')->assertOk()->viewData('page')['props']['totals']
+            $this->actingAs($user)->api('get', 'accounts')->assertOk()->json()['totals']
         )->keyBy('currency');
 
         // Dolar dan rupiah tidak pernah dijumlahkan jadi satu angka.
-        $this->assertSame(1500.0, $totals['USD']['balance']);
-        $this->assertSame(2, $totals['USD']['accounts']);
-        $this->assertSame(2_000_000.0, $totals['IDR']['balance']);
+        $this->assertEquals(1500.0, $totals['USD']['balance']);
+        $this->assertEquals(2, $totals['USD']['accounts']);
+        $this->assertEquals(2_000_000.0, $totals['IDR']['balance']);
     }
 
     public function test_withdrawal_tidak_menggeser_dasar_persentase_dashboard(): void
@@ -420,12 +453,12 @@ class JournalTest extends TestCase
             'entry_price' => 100, 'exit_price' => 110, 'pnl' => 1_000,
             'opened_at' => '2026-08-10 09:00', 'closed_at' => '2026-08-10 12:00',
         ]);
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $base = fn () => $this->get('/')->viewData('page')['props']['monthlyBase'];
+        $base = fn () => $this->api('get', 'dashboard')->json()['monthlyBase'];
 
         // Jendela 12 bulan mulai September 2025, jadi dasarnya modal awal.
-        $this->assertSame(10_000.0, $base());
+        $this->assertEquals(10_000.0, $base());
 
         // Menarik dana sekarang tidak boleh menyentuh dasar itu — hasil trading
         // tidak berubah, jadi persentasenya juga tidak boleh berubah.
@@ -433,7 +466,7 @@ class JournalTest extends TestCase
             'type' => 'withdrawal', 'amount' => 8_000, 'occurred_at' => '2026-08-15',
         ]);
 
-        $this->assertSame(10_000.0, $base());
+        $this->assertEquals(10_000.0, $base());
     }
 
     public function test_filter_periode_membatasi_daftar_dan_total_dana(): void
@@ -444,43 +477,43 @@ class JournalTest extends TestCase
             ['type' => 'deposit', 'amount' => 300, 'occurred_at' => '2026-08-10'],
             ['type' => 'withdrawal', 'amount' => 200, 'occurred_at' => '2025-08-10'],
         ]);
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $totals = fn (array $query) => $this->get('/transactions?'.http_build_query($query))
-            ->viewData('page')['props']['totals'];
+        $totals = fn (array $query) => $this->api('get', 'transactions?'.http_build_query($query))
+            ->json()['totals'];
 
         // Tanpa parameter: bulan berjalan, bukan seluruh riwayat.
         CarbonImmutable::setTestNow('2026-08-20');
-        $this->assertSame(300.0, $totals([])['deposit']);
+        $this->assertEquals(300.0, $totals([])['deposit']);
 
         $all = $totals(['year' => 'all']);
-        $this->assertSame(800.0, $all['deposit']);
-        $this->assertSame(200.0, $all['withdrawal']);
+        $this->assertEquals(800.0, $all['deposit']);
+        $this->assertEquals(200.0, $all['withdrawal']);
 
         $year = $totals(['year' => 2026, 'month' => 'all']);
-        $this->assertSame(800.0, $year['deposit']);
-        $this->assertSame(0.0, $year['withdrawal']);
+        $this->assertEquals(800.0, $year['deposit']);
+        $this->assertEquals(0.0, $year['withdrawal']);
 
-        $this->assertSame(300.0, $totals(['year' => 2026, 'month' => 8])['deposit']);
+        $this->assertEquals(300.0, $totals(['year' => 2026, 'month' => 8])['deposit']);
 
         // "Semua tahun" ikut mengunci bulannya — Agustus 2025 tidak boleh hilang
         // kalau filter bulannya bocor lintas tahun.
-        $this->assertSame(200.0, $totals(['year' => 'all', 'month' => 8])['withdrawal']);
+        $this->assertEquals(200.0, $totals(['year' => 'all', 'month' => 8])['withdrawal']);
     }
 
     public function test_kurs_rupiah_tidak_diminta_untuk_akun_rupiah(): void
     {
         $account = $this->account(['currency' => 'IDR']);
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
         Storage::fake('local');
 
-        $this->post('/transactions', [
+        $this->api('post', 'transactions', [
             'type' => 'deposit',
             'amount' => 5_000_000,
             'occurred_at' => '2026-01-05',
             'proof' => UploadedFile::fake()->image('bukti.jpg'),
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $this->assertNull($account->transactions()->sole()->rate_idr);
     }
@@ -488,11 +521,11 @@ class JournalTest extends TestCase
     public function test_jejak_bacaan_ai_ikut_tersimpan(): void
     {
         $account = $this->account();
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
         $raw = ['is_trade_screenshot' => true, 'symbol' => 'XAUUSD', 'low_confidence_fields' => ['lot']];
 
-        $this->post('/trades', [
+        $this->api('post', 'trades', [
             'symbol' => 'XAUUSD',
             'direction' => 'buy',
             'entry_price' => 4402.285,
@@ -502,7 +535,7 @@ class JournalTest extends TestCase
             'pnl' => 12.5,
             'source' => 'ai',
             'ai_raw' => $raw,
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $trade = Trade::sole();
 
@@ -516,20 +549,20 @@ class JournalTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $this->post('/accounts', [
+        $this->api('post', 'accounts', [
             'name' => 'Salah',
             'currency' => 'EUR',
             'initial_balance' => 1000,
             'started_at' => '2026-01-01',
-        ])->assertSessionHasErrors('currency');
+        ])->assertJsonValidationErrors('currency');
 
         foreach (['USD', 'USC', 'IDR'] as $currency) {
-            $this->post('/accounts', [
+            $this->api('post', 'accounts', [
                 'name' => 'Akun '.$currency,
                 'currency' => $currency,
                 'initial_balance' => 5000,
                 'started_at' => '2026-01-01',
-            ])->assertSessionHasNoErrors();
+            ])->assertSuccessful();
         }
 
         $this->assertSame(3, $user->accounts()->count());

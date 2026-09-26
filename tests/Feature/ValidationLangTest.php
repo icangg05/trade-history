@@ -50,16 +50,15 @@ class ValidationLangTest extends TestCase
             'started_at' => CarbonImmutable::parse('2026-01-01'),
         ]);
 
-        $this->actingAs($account->user)
-            ->withSession(['current_account_id' => $account->id])
-            ->post('/trades', [
+        $this->onAccount($account)
+            ->api('post', 'trades', [
                 'symbol' => 'XAUUSD',
                 'direction' => 'buy',
                 'entry_price' => 100,
                 'opened_at' => '2026-02-02 10:00',
                 'closed_at' => '2026-02-01 10:00',
             ])
-            ->assertSessionHasErrors([
+            ->assertJsonValidationErrors([
                 'pnl' => 'Hasil wajib diisi.',
                 'closed_at' => 'Waktu tutup harus berupa tanggal setelah atau sama dengan waktu buka.',
             ]);

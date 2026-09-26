@@ -151,16 +151,13 @@ class ReportTest extends TestCase
         $account = $this->account($user, ['started_at' => CarbonImmutable::parse('2024-06-01')]);
 
         $props = $this
-            ->actingAs($user)
-            ->withSession(['current_account_id' => $account->id])
-            ->get('/reports')
+            ->onAccount($account)
+            ->api('get', 'reports')
             ->assertOk()
-            ->viewData('page')['props'];
+            ->json();
 
         $this->assertSame([2026, 2025, 2024], $props['years']);
         $this->assertCount(1, $props['accounts']);
-        // Form unduhan memakai POST biasa, jadi tokennya harus ikut terbagi.
-        $this->assertNotEmpty($props['csrf']);
     }
 
     /** Blade-nya dirender langsung: memeriksa HTML jauh lebih murah daripada byte PDF. */
@@ -368,9 +365,8 @@ class ReportTest extends TestCase
         $this->trade($account, '2025-05-05 12:00', 120);
 
         $response = $this
-            ->actingAs($user)
-            ->withSession(['current_account_id' => $account->id])
-            ->post('/reports/pdf', [
+            ->onAccount($account)
+            ->api('post', 'reports/pdf', [
                 'year' => 2025,
                 'rate' => 16000,
                 'rate_date' => '2025-12-31',
@@ -404,9 +400,8 @@ class ReportTest extends TestCase
             $this->trade($account, '2025-05-05 12:00', 100);
 
             $this
-                ->actingAs($user)
-                ->withSession(['current_account_id' => $account->id])
-                ->post('/reports/pdf', [
+                ->onAccount($account)
+                ->api('post', 'reports/pdf', [
                     'year' => 2025,
                     'rate' => (string) $masukan,
                     'rate_date' => '2025-12-31',
@@ -433,15 +428,14 @@ class ReportTest extends TestCase
         $account = $this->account($user);
 
         $this
-            ->actingAs($user)
-            ->withSession(['current_account_id' => $account->id])
-            ->post('/reports/pdf', [
+            ->onAccount($account)
+            ->api('post', 'reports/pdf', [
                 'year' => 2025,
                 'rate' => 'enam belas ribu',
                 'rate_date' => '2025-12-31',
                 'name' => 'Nama Uji',
             ])
-            ->assertSessionHasErrors('rate');
+            ->assertJsonValidationErrors('rate');
     }
 
     /**
@@ -455,9 +449,8 @@ class ReportTest extends TestCase
         $this->trade($account, '2025-05-05 12:00', 100);
 
         $pdf = $this
-            ->actingAs($user)
-            ->withSession(['current_account_id' => $account->id])
-            ->post('/reports/pdf', [
+            ->onAccount($account)
+            ->api('post', 'reports/pdf', [
                 'year' => 2025,
                 'rate' => '16000',
                 'rate_date' => '2025-12-31',

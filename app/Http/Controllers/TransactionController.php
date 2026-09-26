@@ -100,7 +100,6 @@ class TransactionController extends Controller
                 'deposit_idr' => (float) ($flow['deposit']->total_idr ?? 0) / $cents,
                 'withdrawal_idr' => (float) ($flow['withdrawal']->total_idr ?? 0) / $cents,
                 'balance' => $stats->balance(),
-                'initial_balance' => (float) $account->initial_balance,
             ],
         ]);
     }

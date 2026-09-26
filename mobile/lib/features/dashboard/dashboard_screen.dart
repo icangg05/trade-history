@@ -29,7 +29,7 @@ final dashboardProvider = FutureProvider.autoDispose
     });
 
 /// Rentang tanggal, periode, kartu angka, kurva, aturan hari ini, grafik
-/// bulanan, trade terakhir — urutan yang sama dengan isinya.
+/// P/L periode, trade terakhir — urutan yang sama dengan isinya.
 const _loading = SkeletonView(
   children: [
     Bone(width: 180, height: 10),
@@ -57,6 +57,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   String _range = '30d';
   bool _cumulative = false;
 
+  /// Isi yang terakhir tampil. Ganti periode berarti provider baru yang mulai
+  /// dari kosong; selama memuat, isi lama tetap tampil supaya kerangka tidak
+  /// mengganti daftar dan melempar posisi gulir ke atas.
+  (int, Dashboard)? _shown;
+
   @override
   Widget build(BuildContext context) => AccountScaffold(
     title: 'Dashboard',
@@ -70,11 +75,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ],
     body: (context, account) {
       final key = (account.id, _range);
+      var value = ref.watch(dashboardProvider(key));
+      final shown = _shown;
+
+      if (value.hasValue) {
+        _shown = (account.id, value.requireValue);
+      } else if (value.isLoading && shown != null && shown.$1 == account.id) {
+        value = AsyncData(shown.$2);
+      }
 
       return RefreshIndicator(
         onRefresh: () => ref.refresh(dashboardProvider(key).future),
         child: AsyncView(
-          value: ref.watch(dashboardProvider(key)),
+          value: value,
           onRetry: () => ref.invalidate(dashboardProvider(key)),
           loading: _loading,
           builder: (data) => _content(data, account.id),
@@ -108,7 +121,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             StatCard(
               label: 'Saldo',
               value: money(summary.balance, currency),
-              hint: 'Modal ${money(summary.initialBalance, currency)}',
+              hint: 'Total setor ${money(summary.totalDeposited, currency)}',
               tone: Tone.gold,
             ),
             StatCard(
@@ -120,8 +133,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             StatCard(
               label: 'Winrate',
               value: pct(summary.winRate),
+              hint: '${summary.wins}W / ${summary.losses}L',
+            ),
+            // Pasangan winrate: seberapa besar menangnya dibanding kalahnya.
+            StatCard(
+              label: 'Rata-rata win',
+              value: money(summary.avgWin, currency, signed: true),
               hint:
-                  '${summary.wins}W / ${summary.losses}L / ${summary.breakeven}BE',
+                  'Rata-rata loss ${money(-summary.avgLoss, currency, signed: true)}',
+              tone: Tone.good,
             ),
             StatCard(
               label: 'Profit factor',
@@ -129,7 +149,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ? '—'
                   : number(summary.profitFactor),
               hint:
-                  'Ekspektasi ${money(summary.expectancy, currency, signed: true)}',
+                  'Rata-rata ${money(summary.expectancy, currency, signed: true)} per trade',
               tone: (summary.profitFactor ?? 0) >= 1 ? Tone.good : Tone.bad,
             ),
             StatCard(
@@ -137,13 +157,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               value: money(summary.maxDrawdown, currency),
               hint: pct(summary.maxDrawdownPct),
               tone: Tone.bad,
-            ),
-            StatCard(
-              label: 'Rata-rata RR',
-              value: rr(summary.avgRrRealized),
-              hint: summary.avgRrPlanned == null
-                  ? null
-                  : 'Rencana ${rr(summary.avgRrPlanned)}',
             ),
           ],
         ),
@@ -175,11 +188,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         RuleStatusCard(status: data.ruleStatus, currency: currency),
         const SizedBox(height: 14),
         Panel(
-          title: 'P/L per bulan',
-          child: MonthlyPnlChart(
-            data: data.monthly,
-            currency: currency,
-            base: data.monthlyBase,
+          title: 'P/L periode',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Pilihan yang sama dengan periode di atas: mengubah salah
+              // satunya mengubah keduanya.
+              Segments(
+                value: _range,
+                options: periods,
+                onChanged: (value) => setState(() => _range = value),
+              ),
+              const SizedBox(height: 14),
+              PeriodPnlChart(data: data),
+            ],
           ),
         ),
         const SizedBox(height: 14),
@@ -271,6 +293,12 @@ class _FirstSteps extends StatelessWidget {
           const Caption('Tiga langkah supaya dashboard ini mulai berisi.'),
           const SizedBox(height: 4),
           step(
+            Icons.account_balance_wallet_outlined,
+            'Catat deposit pertama',
+            'Saldo akun dimulai dari deposit ini.',
+            () => context.go('/funds'),
+          ),
+          step(
             Icons.add_chart,
             'Catat trade pertama',
             'Isi manual, atau biarkan AI membaca screenshot.',
@@ -281,12 +309,6 @@ class _FirstSteps extends StatelessWidget {
             'Atur batas harian',
             'Maksimal loss dan target profit per hari.',
             () => context.go('/more/rules'),
-          ),
-          step(
-            Icons.account_balance_wallet_outlined,
-            'Catat deposit dan withdrawal',
-            'Arus dana dipisah dari hasil trading.',
-            () => context.go('/funds'),
           ),
         ],
       ),

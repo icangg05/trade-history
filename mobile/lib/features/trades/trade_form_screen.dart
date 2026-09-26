@@ -29,7 +29,7 @@ const _loading = SkeletonView(
 );
 
 final _formProvider = FutureProvider.autoDispose
-    .family<(Trade?, bool), (int, String?)>(
+    .family<(Trade?, bool, List<String>), (int, String?)>(
       (ref, key) => ref.watch(journalProvider).tradeForm(key.$1, key.$2),
     );
 
@@ -67,6 +67,7 @@ class TradeFormScreen extends ConsumerWidget {
             currency: account.currency,
             trade: data.$1,
             aiEnabled: data.$2,
+            symbols: data.$3,
           ),
         );
   }
@@ -78,12 +79,14 @@ class _TradeForm extends ConsumerStatefulWidget {
     required this.currency,
     required this.trade,
     required this.aiEnabled,
+    required this.symbols,
   });
 
   final int account;
   final String currency;
   final Trade? trade;
   final bool aiEnabled;
+  final List<String> symbols;
 
   @override
   ConsumerState<_TradeForm> createState() => _TradeFormState();
@@ -480,6 +483,13 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
                     helperStyle: const TextStyle(color: AppColors.gold),
                   ),
                 ),
+                if (widget.symbols.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  SuggestChips(
+                    options: widget.symbols,
+                    onSelected: (symbol) => _symbol.text = symbol,
+                  ),
+                ],
                 gap,
                 Segments(
                   value: _direction,

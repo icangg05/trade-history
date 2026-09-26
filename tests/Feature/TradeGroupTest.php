@@ -29,7 +29,7 @@ class TradeGroupTest extends TestCase
 
     private function actAs(Account $account): void
     {
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
     }
 
     public function test_grouping_menyamakan_setup_dan_catatan_tanpa_menghapus_trade(): void
@@ -40,7 +40,7 @@ class TradeGroupTest extends TestCase
         $first = $this->trade($account, '10:00', 'Order Block', 'Masuk setelah sweep');
         $second = $this->trade($account, '10:30', 'FVG, Order Block', 'Tambah saat pullback.');
 
-        $this->post('/trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]])->assertSessionHas('success');
+        $this->api('post', 'trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]])->assertSuccessful();
 
         $first->refresh();
         $second->refresh();
@@ -70,7 +70,7 @@ class TradeGroupTest extends TestCase
         $this->trade($account, '10:30');
         $third = $this->trade($account, '11:00');
 
-        $this->post('/trades/group', ['ids' => [$first->getRouteKey(), $third->getRouteKey()]])->assertSessionHas('error');
+        $this->api('post', 'trades/group', ['ids' => [$first->getRouteKey(), $third->getRouteKey()]])->assertStatus(422);
 
         $this->assertSame(0, Trade::whereNotNull('group_id')->count());
     }
@@ -82,10 +82,10 @@ class TradeGroupTest extends TestCase
 
         $first = $this->trade($account, '10:00');
         $second = $this->trade($account, '10:30');
-        $this->post('/trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]]);
+        $this->api('post', 'trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]]);
 
-        $this->put("/trades/group/{$first->getRouteKey()}", ['setup' => 'CHoCH, FVG', 'notes' => 'Ide satu sesi.'])
-            ->assertSessionHas('success');
+        $this->api('put', "trades/group/{$first->getRouteKey()}", ['setup' => 'CHoCH, FVG', 'notes' => 'Ide satu sesi.'])
+            ->assertSuccessful();
 
         $this->assertSame('CHoCH, FVG', $second->refresh()->setup);
         $this->assertSame('Ide satu sesi.', $second->notes);
@@ -98,9 +98,9 @@ class TradeGroupTest extends TestCase
 
         $first = $this->trade($account, '10:00', 'Order Block', 'Catatan grup.');
         $second = $this->trade($account, '10:30', 'Order Block', 'Catatan grup.');
-        $this->post('/trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]]);
+        $this->api('post', 'trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]]);
 
-        $this->put("/trades/{$second->getRouteKey()}", [
+        $this->api('put', "trades/{$second->getRouteKey()}", [
             'symbol' => 'XAUUSD',
             'direction' => 'buy',
             'entry_price' => 111,
@@ -109,7 +109,7 @@ class TradeGroupTest extends TestCase
             'pnl' => 50,
             'setup' => 'Breakout',
             'notes' => 'Catatan sendiri.',
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $second->refresh();
 
@@ -126,15 +126,15 @@ class TradeGroupTest extends TestCase
         $first = $this->trade($account, '10:00');
         $second = $this->trade($account, '10:30');
         $third = $this->trade($account, '11:00');
-        $this->post('/trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey(), $third->getRouteKey()]]);
+        $this->api('post', 'trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey(), $third->getRouteKey()]]);
 
-        $this->delete("/trades/{$third->getRouteKey()}/group")->assertSessionHas('success');
+        $this->api('delete', "trades/{$third->getRouteKey()}/group")->assertSuccessful();
 
         $this->assertNull($third->refresh()->group_id);
         $this->assertSame(2, Trade::whereNotNull('group_id')->count());
 
         // Tinggal satu anggota → bukan grup lagi.
-        $this->delete("/trades/{$second->getRouteKey()}/group");
+        $this->api('delete', "trades/{$second->getRouteKey()}/group");
 
         $this->assertSame(0, Trade::whereNotNull('group_id')->count());
     }
@@ -146,12 +146,12 @@ class TradeGroupTest extends TestCase
 
         $first = $this->trade($account, '10:00', 'Order Block', 'Catatan pertama.');
         $second = $this->trade($account, '10:30', 'FVG', 'Catatan kedua.');
-        $this->post('/trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]]);
+        $this->api('post', 'trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]]);
 
         // Grupnya sempat diubah pula — yang dikembalikan tetap punya trade itu.
-        $this->put("/trades/group/{$first->getRouteKey()}", ['setup' => 'CHoCH', 'notes' => 'Catatan grup.']);
+        $this->api('put', "trades/group/{$first->getRouteKey()}", ['setup' => 'CHoCH', 'notes' => 'Catatan grup.']);
 
-        $this->delete("/trades/{$second->getRouteKey()}/group")->assertSessionHas('success');
+        $this->api('delete', "trades/{$second->getRouteKey()}/group")->assertSuccessful();
 
         $second->refresh();
 
@@ -175,16 +175,16 @@ class TradeGroupTest extends TestCase
         $first = $this->trade($account, '10:00');
         $middle = $this->trade($account, '10:30');
         $last = $this->trade($account, '11:00');
-        $this->post('/trades/group', ['ids' => [$first->getRouteKey(), $middle->getRouteKey(), $last->getRouteKey()]]);
+        $this->api('post', 'trades/group', ['ids' => [$first->getRouteKey(), $middle->getRouteKey(), $last->getRouteKey()]]);
 
-        $this->delete("/trades/{$middle->getRouteKey()}/group")->assertSessionHas('error');
+        $this->api('delete', "trades/{$middle->getRouteKey()}/group")->assertStatus(422);
 
         $this->assertSame($first->id, $middle->refresh()->group_id);
         $this->assertSame(3, Trade::whereNotNull('group_id')->count());
 
         // Dari ujung boleh — sesudah itu yang tadi di tengah jadi ujung.
-        $this->delete("/trades/{$last->getRouteKey()}/group")->assertSessionHas('success');
-        $this->delete("/trades/{$middle->getRouteKey()}/group")->assertSessionHas('success');
+        $this->api('delete', "trades/{$last->getRouteKey()}/group")->assertSuccessful();
+        $this->api('delete', "trades/{$middle->getRouteKey()}/group")->assertSuccessful();
 
         $this->assertSame(0, Trade::whereNotNull('group_id')->count());
     }
@@ -197,10 +197,10 @@ class TradeGroupTest extends TestCase
         $first = $this->trade($account, '10:00', 'Order Block', 'Catatan pertama.');
         $second = $this->trade($account, '10:30', 'FVG', 'Catatan kedua.');
         $third = $this->trade($account, '11:00', 'Breakout', 'Catatan ketiga.');
-        $this->post('/trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]]);
+        $this->api('post', 'trades/group', ['ids' => [$first->getRouteKey(), $second->getRouteKey()]]);
 
         // Anggota lama ikut dipilih; itulah cara menambah trade ke grup itu.
-        $this->post('/trades/group', ['ids' => [$second->getRouteKey(), $third->getRouteKey()]])->assertSessionHas('success');
+        $this->api('post', 'trades/group', ['ids' => [$second->getRouteKey(), $third->getRouteKey()]])->assertSuccessful();
 
         $this->assertSame($first->id, $third->refresh()->group_id);   // kunci grup lama dipakai
         $this->assertSame(3, Trade::where('group_id', $first->id)->count());
@@ -220,10 +220,10 @@ class TradeGroupTest extends TestCase
         $a2 = $this->trade($account, '10:30');
         $b1 = $this->trade($account, '11:00');
         $b2 = $this->trade($account, '11:30');
-        $this->post('/trades/group', ['ids' => [$a1->getRouteKey(), $a2->getRouteKey()]]);
-        $this->post('/trades/group', ['ids' => [$b1->getRouteKey(), $b2->getRouteKey()]]);
+        $this->api('post', 'trades/group', ['ids' => [$a1->getRouteKey(), $a2->getRouteKey()]]);
+        $this->api('post', 'trades/group', ['ids' => [$b1->getRouteKey(), $b2->getRouteKey()]]);
 
-        $this->post('/trades/group', ['ids' => [$a2->getRouteKey(), $b1->getRouteKey()]])->assertSessionHas('error');
+        $this->api('post', 'trades/group', ['ids' => [$a2->getRouteKey(), $b1->getRouteKey()]])->assertStatus(422);
 
         $this->assertSame($a1->id, $a2->refresh()->group_id);
         $this->assertSame($b1->id, $b1->refresh()->group_id);
@@ -237,7 +237,7 @@ class TradeGroupTest extends TestCase
 
         $ids = [$this->trade($mine, '10:00')->getRouteKey(), $this->trade($others, '10:30')->getRouteKey()];
 
-        $this->post('/trades/group', ['ids' => $ids])->assertSessionHas('error');
+        $this->api('post', 'trades/group', ['ids' => $ids])->assertStatus(422);
 
         $this->assertSame(0, Trade::whereNotNull('group_id')->count());
     }

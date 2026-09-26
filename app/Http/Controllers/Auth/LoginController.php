@@ -14,9 +14,8 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Login & logout. Pendaftaran mandiri ada di RegisterController, tapi hanya
- * terbuka kalau REGISTER_TOKEN diisi di .env; tanpa itu user dibuat lewat
- * `php artisan db:seed` atau halaman admin.
+ * Login & logout versi web, yang hanya untuk admin. Trader masuk dan mendaftar
+ * lewat aplikasi mobile (Api\AuthController).
  */
 class LoginController extends Controller
 {
@@ -25,10 +24,11 @@ class LoginController extends Controller
 
     public const LOCKOUT_SECONDS = 60;
 
+    public const ADMIN_ONLY = 'Versi web hanya untuk admin. Silakan masuk lewat aplikasi mobile.';
+
     public function create(): Response
     {
         return Inertia::render('Login', [
-            'canRegister' => filled(config('auth.register_token')),
             // Sisa kunci dititipkan lewat flash saat store() menolak, lalu
             // dihitung mundur di layar. 0 berarti tidak sedang terkunci.
             'lockedFor' => (int) session('lockedFor', 0),
@@ -67,10 +67,33 @@ class LoginController extends Controller
         }
 
         RateLimiter::clear($key);
+
+        if (! $request->user()->is_admin) {
+            Auth::logout();
+
+            throw ValidationException::withMessages(['email' => self::ADMIN_ONLY]);
+        }
+
         $request->session()->regenerate();
 
-        // Admin tidak punya wilayah trading — langsung ke halaman pengelolaan.
-        return redirect()->intended($request->user()->is_admin ? route('admin.index') : route('dashboard'));
+        return redirect()->intended(route('admin.index'));
+    }
+
+    /**
+     * Alamat `/`. Admin ke halamannya; trader yang masih membawa sesi web lama
+     * dikeluarkan dan diarahkan ke aplikasi mobile.
+     */
+    public function home(Request $request): RedirectResponse
+    {
+        if ($request->user()?->is_admin) {
+            return redirect()->route('admin.index');
+        }
+
+        if ($request->user()) {
+            return $this->destroy($request)->withErrors(['email' => self::ADMIN_ONLY]);
+        }
+
+        return redirect()->route('login');
     }
 
     public function destroy(Request $request): RedirectResponse

@@ -31,7 +31,6 @@ class AccountBrief {
     required this.name,
     required this.broker,
     required this.currency,
-    required this.initialBalance,
     required this.startedAt,
   });
 
@@ -40,7 +39,6 @@ class AccountBrief {
     name: '${json['name'] ?? ''}',
     broker: toStringOrNull(json['broker']),
     currency: '${json['currency'] ?? 'USD'}',
-    initialBalance: toDouble(json['initial_balance']),
     startedAt: wallTimeOrNull(json['started_at']),
   );
 
@@ -48,7 +46,6 @@ class AccountBrief {
   final String name;
   final String? broker;
   final String currency;
-  final double initialBalance;
   final DateTime? startedAt;
 }
 
@@ -76,7 +73,6 @@ class AccountRow {
     required this.accountNumber,
     required this.currency,
     required this.isArchived,
-    required this.initialBalance,
     required this.startedAt,
     required this.balance,
     required this.netPnl,
@@ -90,7 +86,6 @@ class AccountRow {
     accountNumber: toStringOrNull(json['account_number']),
     currency: '${json['currency'] ?? 'USD'}',
     isArchived: json['is_archived'] == true,
-    initialBalance: toDouble(json['initial_balance']),
     startedAt: wallTime('${json['started_at']}'),
     balance: toDouble(json['balance']),
     netPnl: toDouble(json['net_pnl']),
@@ -103,7 +98,6 @@ class AccountRow {
   final String? accountNumber;
   final String currency;
   final bool isArchived;
-  final double initialBalance;
   final DateTime startedAt;
   final double balance;
   final double netPnl;

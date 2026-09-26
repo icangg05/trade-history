@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import { LoaderCircle } from '@lucide/vue'
 import { onUnmounted, ref, watch } from 'vue'
 
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const props = defineProps<{ canRegister: boolean; lockedFor: number }>()
+const props = defineProps<{ lockedFor: number }>()
 
 const form = useForm({ email: '', password: '', remember: false })
 
@@ -79,10 +79,6 @@ onUnmounted(() => clearInterval(timer))
         Masuk
       </Button>
 
-      <p v-if="canRegister" class="border-t pt-4 text-center text-xs text-muted-foreground">
-        Belum punya akun?
-        <Link href="/register" class="text-gold hover:underline">Daftar</Link>
-      </p>
     </form>
   </AuthShell>
 </template>

@@ -53,7 +53,6 @@ class TransactionTotals {
     required this.depositIdr,
     required this.withdrawalIdr,
     required this.balance,
-    required this.initialBalance,
   });
 
   factory TransactionTotals.fromJson(Json json) => TransactionTotals(
@@ -62,7 +61,6 @@ class TransactionTotals {
     depositIdr: toDouble(json['deposit_idr']),
     withdrawalIdr: toDouble(json['withdrawal_idr']),
     balance: toDouble(json['balance']),
-    initialBalance: toDouble(json['initial_balance']),
   );
 
   final double deposit;
@@ -70,7 +68,6 @@ class TransactionTotals {
   final double depositIdr;
   final double withdrawalIdr;
   final double balance;
-  final double initialBalance;
 }
 
 class TransactionsPage {
@@ -118,7 +115,9 @@ class RuleSettings {
     this.maxDailyLossPct,
     this.dailyProfitTarget,
     this.dailyProfitTargetPct,
+    this.maxTotalLoss,
     this.maxTotalLossPct,
+    this.maxRiskPerTrade,
     this.maxRiskPerTradePct,
     this.maxTradesPerDay,
     this.minRr,
@@ -131,7 +130,9 @@ class RuleSettings {
     maxDailyLossPct: toDoubleOrNull(json['max_daily_loss_pct']),
     dailyProfitTarget: toDoubleOrNull(json['daily_profit_target']),
     dailyProfitTargetPct: toDoubleOrNull(json['daily_profit_target_pct']),
+    maxTotalLoss: toDoubleOrNull(json['max_total_loss']),
     maxTotalLossPct: toDoubleOrNull(json['max_total_loss_pct']),
+    maxRiskPerTrade: toDoubleOrNull(json['max_risk_per_trade']),
     maxRiskPerTradePct: toDoubleOrNull(json['max_risk_per_trade_pct']),
     maxTradesPerDay: toIntOrNull(json['max_trades_per_day']),
     minRr: toDoubleOrNull(json['min_rr']),
@@ -143,7 +144,9 @@ class RuleSettings {
   final double? maxDailyLossPct;
   final double? dailyProfitTarget;
   final double? dailyProfitTargetPct;
+  final double? maxTotalLoss;
   final double? maxTotalLossPct;
+  final double? maxRiskPerTrade;
   final double? maxRiskPerTradePct;
   final int? maxTradesPerDay;
   final double? minRr;
@@ -155,7 +158,9 @@ class RuleSettings {
     'max_daily_loss_pct': maxDailyLossPct,
     'daily_profit_target': dailyProfitTarget,
     'daily_profit_target_pct': dailyProfitTargetPct,
+    'max_total_loss': maxTotalLoss,
     'max_total_loss_pct': maxTotalLossPct,
+    'max_risk_per_trade': maxRiskPerTrade,
     'max_risk_per_trade_pct': maxRiskPerTradePct,
     'max_trades_per_day': maxTradesPerDay,
     'min_rr': minRr,
@@ -180,7 +185,7 @@ class RulesPage {
   final RuleSettings rule;
   final RuleStatus status;
 
-  /// Modal awal + dana masuk/keluar: dasar perkiraan aturan berbentuk persen.
+  /// Dana masuk dikurangi keluar: dasar konversi aturan lama berbentuk persen.
   final double basis;
 }
 

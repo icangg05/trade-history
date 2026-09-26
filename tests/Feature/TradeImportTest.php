@@ -37,7 +37,7 @@ class TradeImportTest extends TestCase
             'started_at' => CarbonImmutable::parse('2026-01-01'),
         ]);
 
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
         return $account;
     }
@@ -63,7 +63,7 @@ class TradeImportTest extends TestCase
         $this->actingOnAccount();
         $this->fakeGemini(['is_trade_screenshot' => false, 'low_confidence_fields' => []]);
 
-        $this->post('/trades/extract', ['screenshot' => $this->upload()])
+        $this->api('post', 'trades/extract', ['screenshot' => $this->upload()])
             ->assertStatus(422)
             ->assertJsonPath('error', fn (string $error) => str_contains($error, 'bukan screenshot posisi trading'));
     }
@@ -79,7 +79,7 @@ class TradeImportTest extends TestCase
             'low_confidence_fields' => ['direction'],
         ]);
 
-        $response = $this->post('/trades/extract', ['screenshot' => $this->upload()]);
+        $response = $this->api('post', 'trades/extract', ['screenshot' => $this->upload()]);
 
         $response->assertStatus(422);
         $this->assertSame(['direction', 'entry_price'], $response->json('missing'));
@@ -101,7 +101,7 @@ class TradeImportTest extends TestCase
             'low_confidence_fields' => [],
         ]);
 
-        $response = $this->post('/trades/extract', ['screenshot' => $this->upload()]);
+        $response = $this->api('post', 'trades/extract', ['screenshot' => $this->upload()]);
 
         $response->assertOk();
         $this->assertSame('XAUUSD', $response->json('data.symbol'));
@@ -123,7 +123,7 @@ class TradeImportTest extends TestCase
             'low_confidence_fields' => [],
         ]);
 
-        $this->post('/trades/extract', ['screenshot' => $this->upload()])
+        $this->api('post', 'trades/extract', ['screenshot' => $this->upload()])
             ->assertOk()
             ->assertJsonPath('data.closed_at', '2026-08-20T14:05');
     }
@@ -140,7 +140,7 @@ class TradeImportTest extends TestCase
             'low_confidence_fields' => [],
         ]);
 
-        $this->post('/trades/extract', ['screenshot' => $this->upload()])->assertOk();
+        $this->api('post', 'trades/extract', ['screenshot' => $this->upload()])->assertOk();
 
         $this->assertEmpty(Storage::disk('local')->allFiles());
     }

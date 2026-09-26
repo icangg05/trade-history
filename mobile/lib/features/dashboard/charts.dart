@@ -17,7 +17,7 @@ TextScaler _axisScaler(BuildContext context) =>
     MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3);
 
 /// Kurva perkembangan akun. `pnl = true` menampilkan P/L kumulatif: saldo
-/// dikurangi modal awal dan seluruh setoran/penarikan, supaya deposit tidak
+/// dikurangi saldo awal dan seluruh setoran/penarikan, supaya deposit tidak
 /// terbaca sebagai profit. Titik cyan menandai hari dengan arus dana.
 class EquityChart extends StatelessWidget {
   const EquityChart({
@@ -33,16 +33,8 @@ class EquityChart extends StatelessWidget {
   final bool pnl;
   final double height;
 
-  List<double> get _series {
-    if (!pnl) return [for (final point in points) point.balance];
-
-    final base = points.first.balance;
-    var flow = 0.0;
-
-    return [
-      for (final point in points) point.balance - base - (flow += point.flow),
-    ];
-  }
+  List<double> get _series =>
+      pnl ? cumulativePnl(points) : [for (final point in points) point.balance];
 
   @override
   Widget build(BuildContext context) {
@@ -193,9 +185,9 @@ class EquityChart extends StatelessWidget {
                   checkToShowDot: (spot, _) => flows.contains(spot.x),
                   getDotPainter: (spot, percent, bar, index) =>
                       FlDotCirclePainter(
-                        radius: 3.5,
+                        radius: 2,
                         color: AppColors.cyan,
-                        strokeWidth: 1.5,
+                        strokeWidth: 1,
                         strokeColor: AppColors.background,
                       ),
                 ),
@@ -234,6 +226,20 @@ class EquityChart extends StatelessWidget {
   );
 }
 
+/// P/L kumulatif per titik: saldo dikurangi saldo pembuka dan seluruh
+/// setoran/penarikan sejauh itu. Saldo pembuka diambil sebelum titik pertama
+/// bergerak — titik pertama akun tanpa modal awal adalah deposit pertamanya,
+/// dan deposit itu bukan profit.
+List<double> cumulativePnl(List<EquityPoint> points) {
+  final first = points.first;
+  final base = first.balance - first.pnl - first.flow;
+  var flow = 0.0;
+
+  return [
+    for (final point in points) point.balance - base - (flow += point.flow),
+  ];
+}
+
 /// Langkah sumbu yang "bulat": 1, 2, atau 5 dikali pangkat sepuluh.
 double niceStep(double raw) {
   final magnitude = math
@@ -244,25 +250,103 @@ double niceStep(double raw) {
   return (n <= 1 ? 1 : (n <= 2 ? 2 : (n <= 5 ? 5 : 10))) * magnitude;
 }
 
-/// P/L per bulan: batang hijau ke atas, merah ke bawah dari garis nol, plus
-/// total bersih, persen terhadap saldo awal jendela, dan profit/loss kotor.
-class MonthlyPnlChart extends StatelessWidget {
-  const MonthlyPnlChart({
-    super.key,
-    required this.data,
-    required this.currency,
-    this.base,
-  });
+/// Satuan batang grafik P/L periode, ikut panjang periodenya supaya jumlah
+/// batangnya tetap terbaca: 30 hari per hari, 90 hari per minggu, setahun per
+/// bulan, lebih dari dua tahun per tahun.
+enum PnlStep {
+  day('per hari'),
+  week('per minggu'),
+  month('per bulan'),
+  year('per tahun');
 
-  final List<MonthlyPnl> data;
-  final String currency;
+  const PnlStep(this.label);
 
-  /// Saldo di awal jendela 12 bulan; null = badge persen disembunyikan.
-  final double? base;
+  final String label;
+}
+
+class PnlBar {
+  const PnlBar(this.start, this.pnl);
+
+  /// Hari pertama batang ini: Senin untuk minggu, tanggal 1 untuk bulan.
+  final DateTime start;
+  final double pnl;
+}
+
+/// P/L per batang, dijumlah dari titik kurva ekuitas (sudah per hari) mulai
+/// titik pertamanya sampai [to]. Rentang tanpa trade tetap jadi batang nol.
+(PnlStep, List<PnlBar>) pnlBars(List<EquityPoint> points, DateTime to) {
+  if (points.isEmpty) return (PnlStep.day, const []);
+
+  final from = points.first.date;
+  final days = to.difference(from).inDays;
+  final step = days <= 31
+      ? PnlStep.day
+      : days <= 120
+      ? PnlStep.week
+      : days <= 730
+      ? PnlStep.month
+      : PnlStep.year;
+
+  DateTime floor(DateTime date) => switch (step) {
+    PnlStep.day => DateTime(date.year, date.month, date.day),
+    PnlStep.week => DateTime(
+      date.year,
+      date.month,
+      date.day - date.weekday + 1,
+    ),
+    PnlStep.month => DateTime(date.year, date.month),
+    PnlStep.year => DateTime(date.year),
+  };
+
+  DateTime next(DateTime date) => switch (step) {
+    PnlStep.day => DateTime(date.year, date.month, date.day + 1),
+    PnlStep.week => DateTime(date.year, date.month, date.day + 7),
+    PnlStep.month => DateTime(date.year, date.month + 1),
+    PnlStep.year => DateTime(date.year + 1),
+  };
+
+  final sums = <DateTime, double>{};
+  for (final point in points) {
+    sums.update(
+      floor(point.date),
+      (sum) => sum + point.pnl,
+      ifAbsent: () => point.pnl,
+    );
+  }
+
+  final end = floor(to);
+
+  return (
+    step,
+    [
+      for (var at = floor(from); !at.isAfter(end); at = next(at))
+        PnlBar(at, sums[at] ?? 0),
+    ],
+  );
+}
+
+/// P/L periode yang dipilih: batang hijau ke atas, merah ke bawah dari garis
+/// nol, plus total bersih, persen terhadap saldo awal periode, dan
+/// profit/loss kotor — angka yang sama dengan kartu P/L periode.
+class PeriodPnlChart extends StatelessWidget {
+  const PeriodPnlChart({super.key, required this.data});
+
+  final Dashboard data;
 
   @override
   Widget build(BuildContext context) {
-    final values = [for (final item in data) item.pnl];
+    final summary = data.summary;
+    final currency = summary.currency;
+    final (unit, bars) = pnlBars(data.equity, summary.to);
+
+    if (bars.isEmpty) {
+      return const SizedBox(
+        height: 170,
+        child: Center(child: Caption('Belum ada data di periode ini.')),
+      );
+    }
+
+    final values = [for (final bar in bars) bar.pnl];
     final high = values.fold(0.0, math.max);
     final low = values.fold(0.0, math.min);
     final step = niceStep((high - low) / 4 == 0 ? 1 : (high - low) / 4);
@@ -271,11 +355,42 @@ class MonthlyPnlChart extends StatelessWidget {
     var bottom = (low / step).floor() * step;
     if (top == bottom) (top, bottom) = (step, -step);
 
-    final net = values.fold(0.0, (sum, value) => sum + value);
-    final profit = data.fold(0.0, (sum, item) => sum + item.profit);
-    final loss = data.fold(0.0, (sum, item) => sum + item.loss);
-    final change = base != null && base! > 0 ? net / base! * 100 : null;
+    final net = summary.netPnl;
+    final change = data.growthPct;
     final axis = _axisScaler(context);
+    // Paling banyak enam label di sumbu bawah: 31 batang harian tidak muat.
+    final every = (bars.length / 6).ceil();
+
+    String format(String pattern, DateTime date) =>
+        DateFormat(pattern, 'id_ID').format(date);
+
+    String title(DateTime start) => switch (unit) {
+      PnlStep.day => longDate(start),
+      PnlStep.week =>
+        '${format('d MMM', start)} – ${longDate(DateTime(start.year, start.month, start.day + 6))}',
+      PnlStep.month => format('MMMM y', start),
+      PnlStep.year => '${start.year}',
+    };
+
+    // Baris kedua (bulan / tahun) hanya di label pertama dan saat berganti.
+    (String, String?) tick(int index) {
+      final start = bars[index].start;
+      final previous = index == 0 ? null : bars[index - every].start;
+
+      return switch (unit) {
+        PnlStep.day || PnlStep.week => (
+          '${start.day}',
+          previous?.month == start.month ? null : format('MMM', start),
+        ),
+        PnlStep.month => (
+          format('MMM', start),
+          previous == null || start.month == 1
+              ? "'${'${start.year}'.substring(2)}"
+              : null,
+        ),
+        PnlStep.year => ('${start.year}', null),
+      };
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -294,7 +409,8 @@ class MonthlyPnlChart extends StatelessWidget {
             ),
             if (change != null)
               Tooltip(
-                message: 'Perubahan terhadap saldo di awal periode 12 bulan',
+                message:
+                    'P/L dibagi saldo awal periode ditambah deposit selama periode',
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -339,160 +455,167 @@ class MonthlyPnlChart extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 2),
+        Caption('Batang ${unit.label}'),
+        const SizedBox(height: 14),
         Semantics(
           label:
-              'Grafik P/L per bulan: ${[for (final item in data) '${monthLabel(item.month)} ${money(item.pnl, currency, signed: true)}'].join(', ')}.',
+              'Grafik P/L ${unit.label}: ${[for (final bar in bars) '${title(bar.start)} ${money(bar.pnl, currency, signed: true)}'].join(', ')}.',
           excludeSemantics: true,
           child: SizedBox(
             height: 170,
-            child: BarChart(
-              BarChartData(
-                minY: bottom,
-                maxY: top,
-                alignment: BarChartAlignment.spaceAround,
-                borderData: FlBorderData(show: false),
-                gridData: FlGridData(
-                  drawVerticalLine: false,
-                  horizontalInterval: step,
-                  getDrawingHorizontalLine: (value) => value.abs() < step / 1000
-                      ? const FlLine(color: AppColors.border, strokeWidth: 1)
-                      : FlLine(
-                          color: AppColors.border.withValues(alpha: .45),
-                          strokeWidth: 1,
-                          dashArray: const [3, 3],
-                        ),
-                ),
-                titlesData: FlTitlesData(
-                  topTitles: const AxisTitles(),
-                  rightTitles: const AxisTitles(),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: axis.scale(11) * 3.6,
-                      interval: step,
-                      getTitlesWidget: (value, meta) => SideTitleWidget(
-                        meta: meta,
-                        child: Text(
-                          compact(value),
-                          textScaler: axis,
-                          style: mono(
-                            size: 11,
-                            color: AppColors.mutedForeground,
+            child: LayoutBuilder(
+              builder: (context, constraints) => BarChart(
+                BarChartData(
+                  minY: bottom,
+                  maxY: top,
+                  alignment: BarChartAlignment.spaceAround,
+                  borderData: FlBorderData(show: false),
+                  gridData: FlGridData(
+                    drawVerticalLine: false,
+                    horizontalInterval: step,
+                    getDrawingHorizontalLine: (value) =>
+                        value.abs() < step / 1000
+                        ? const FlLine(color: AppColors.border, strokeWidth: 1)
+                        : FlLine(
+                            color: AppColors.border.withValues(alpha: .45),
+                            strokeWidth: 1,
+                            dashArray: const [3, 3],
                           ),
-                        ),
-                      ),
-                    ),
                   ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      // Dua baris label (bulan, lalu tahun) + jarak 4.
-                      reservedSize: axis.scale(11) * 1.5 * 2 + 6,
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
-                        final month = data[index].month;
-                        final showYear = index == 0 || month.endsWith('-01');
-
-                        return SideTitleWidget(
+                  titlesData: FlTitlesData(
+                    topTitles: const AxisTitles(),
+                    rightTitles: const AxisTitles(),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: axis.scale(11) * 3.6,
+                        interval: step,
+                        getTitlesWidget: (value, meta) => SideTitleWidget(
                           meta: meta,
-                          space: 4,
-                          child: Column(
-                            children: [
-                              Text(
-                                shortMonth(month),
-                                textScaler: axis,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.mutedForeground,
-                                ),
-                              ),
-                              if (showYear)
-                                Text(
-                                  "'${month.substring(2, 4)}",
-                                  textScaler: axis,
-                                  style: mono(
-                                    size: 11,
-                                    color: AppColors.mutedForeground,
-                                  ),
-                                ),
-                            ],
+                          child: Text(
+                            compact(value),
+                            textScaler: axis,
+                            style: mono(
+                              size: 11,
+                              color: AppColors.mutedForeground,
+                            ),
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                barTouchData: BarTouchData(
-                  touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.popover,
-                    tooltipBorder: const BorderSide(color: AppColors.border),
-                    tooltipBorderRadius: BorderRadius.circular(8),
-                    fitInsideHorizontally: true,
-                    fitInsideVertically: true,
-                    getTooltipItem: (group, _, rod, _) => BarTooltipItem(
-                      '${monthLabel(data[group.x].month)}\n',
-                      const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.mutedForeground,
+                        ),
                       ),
-                      children: [
-                        TextSpan(
-                          text: money(rod.toY, currency, signed: true),
-                          style: mono(
-                            size: 12,
-                            weight: FontWeight.w600,
-                            color: pnlColor(rod.toY),
-                          ),
-                        ),
-                      ],
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        // Dua baris label + jarak 4.
+                        reservedSize: axis.scale(11) * 1.5 * 2 + 6,
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+
+                          if (index % every != 0) return const SizedBox();
+
+                          final (main, sub) = tick(index);
+
+                          return SideTitleWidget(
+                            meta: meta,
+                            space: 4,
+                            child: Column(
+                              children: [
+                                for (final text in [main, ?sub])
+                                  Text(
+                                    text,
+                                    textScaler: axis,
+                                    style: mono(
+                                      size: 11,
+                                      color: AppColors.mutedForeground,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-                barGroups: [
-                  for (var i = 0; i < data.length; i++)
-                    BarChartGroupData(
-                      x: i,
-                      barRods: [
-                        BarChartRodData(
-                          toY: data[i].pnl,
-                          width: 12,
-                          color:
-                              (data[i].pnl >= 0
-                                      ? AppColors.success
-                                      : AppColors.destructive)
-                                  .withValues(alpha: .75),
-                          borderRadius: BorderRadius.circular(2),
+                  barTouchData: BarTouchData(
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipColor: (_) => AppColors.popover,
+                      tooltipBorder: const BorderSide(color: AppColors.border),
+                      tooltipBorderRadius: BorderRadius.circular(8),
+                      fitInsideHorizontally: true,
+                      fitInsideVertically: true,
+                      getTooltipItem: (group, _, rod, _) => BarTooltipItem(
+                        '${title(bars[group.x].start)}\n',
+                        const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.mutedForeground,
                         ),
-                      ],
+                        children: [
+                          TextSpan(
+                            text: money(rod.toY, currency, signed: true),
+                            style: mono(
+                              size: 12,
+                              weight: FontWeight.w600,
+                              color: pnlColor(rod.toY),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                ],
+                  ),
+                  barGroups: [
+                    for (var i = 0; i < bars.length; i++)
+                      BarChartGroupData(
+                        x: i,
+                        barRods: [
+                          BarChartRodData(
+                            toY: bars[i].pnl,
+                            // Batang mengisi 70% jatahnya, di luar sumbu kiri:
+                            // 31 batang harian tetap muat, 3 batang bulanan
+                            // tidak jadi lidi.
+                            width:
+                                ((constraints.maxWidth - axis.scale(11) * 3.6) /
+                                        bars.length *
+                                        .7)
+                                    .clamp(3, 32),
+                            color:
+                                (bars[i].pnl >= 0
+                                        ? AppColors.success
+                                        : AppColors.destructive)
+                                    .withValues(alpha: .75),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
         const Divider(height: 24),
-        _legend(AppColors.success, 'Profit', profit),
+        _legend(AppColors.success, 'Profit', summary.grossProfit, currency),
         const SizedBox(height: 4),
-        _legend(AppColors.destructive, 'Loss', loss),
+        _legend(AppColors.destructive, 'Loss', -summary.grossLoss, currency),
       ],
     );
   }
 
-  Widget _legend(Color color, String label, double value) => Row(
-    children: [
-      Container(
-        width: 8,
-        height: 8,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      ),
-      const SizedBox(width: 8),
-      Caption(label),
-      const Spacer(),
-      Text(
-        money(value, currency, signed: true),
-        style: mono(size: 12, color: color),
-      ),
-    ],
-  );
+  Widget _legend(Color color, String label, double value, String currency) =>
+      Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          Caption(label),
+          const Spacer(),
+          Text(
+            money(value, currency, signed: true),
+            style: mono(size: 12, color: color),
+          ),
+        ],
+      );
 }

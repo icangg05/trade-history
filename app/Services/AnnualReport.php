@@ -71,9 +71,8 @@ class AnnualReport
         $summary = $stats->summary($from, $to);
         $netPnl = (float) $summary['net_pnl'];
 
-        // Saldo awal = posisi per 31 Desember tahun sebelumnya. Untuk tahun pertama
-        // akun nilainya sama dengan `initial_balance` — modal awal itu tidak pernah
-        // tercatat sebagai deposit, jadi laporan menyebutnya di catatan kaki.
+        // Saldo awal = posisi per 31 Desember tahun sebelumnya. Modal awal kini
+        // tercatat sebagai deposit, jadi tahun pertama dimulai dari nol.
         $opening = $stats->balance($from->subDay());
         $closing = $stats->balance($to);
 

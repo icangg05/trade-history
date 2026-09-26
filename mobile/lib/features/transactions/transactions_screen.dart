@@ -238,17 +238,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         ],
       ),
       const SizedBox(height: 14),
+      StatCard(
+        label: 'Saldo sekarang',
+        value: money(totals.balance, currency),
+        tone: Tone.gold,
+      ),
+      const SizedBox(height: 10),
       StatGrid(
         children: [
-          StatCard(
-            label: 'Saldo sekarang',
-            value: money(totals.balance, currency),
-            tone: Tone.gold,
-          ),
-          StatCard(
-            label: 'Modal awal',
-            value: money(totals.initialBalance, currency),
-          ),
           StatCard(
             label: 'Deposit · $scope',
             value: money(totals.deposit, currency),
@@ -262,6 +259,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             tone: Tone.bad,
           ),
         ],
+      ),
+      const SizedBox(height: 10),
+      _Difference(
+        withdrawal: totals.withdrawal,
+        deposit: totals.deposit,
+        currency: currency,
+        scope: scope,
       ),
       const SizedBox(height: 14),
     ];
@@ -309,6 +313,39 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Withdrawal dikurangi deposit. Kalau uang yang sudah ditarik melebihi yang
+/// disetor, modalnya sudah kembali dan sisa saldonya untung. Kalau kebalikannya,
+/// penarikan belum menutup setoran.
+class _Difference extends StatelessWidget {
+  const _Difference({
+    required this.withdrawal,
+    required this.deposit,
+    required this.currency,
+    required this.scope,
+  });
+
+  final double withdrawal;
+  final double deposit;
+  final String currency;
+  final String scope;
+
+  @override
+  Widget build(BuildContext context) {
+    final net = withdrawal - deposit;
+
+    return StatCard(
+      label: 'Selisih WD − deposit · $scope',
+      value: money(net, currency, signed: true),
+      hint: net > 0
+          ? 'Penarikan sudah melebihi setoran. Modal sudah kembali, selebihnya untung.'
+          : net < 0
+          ? 'Setoran masih lebih besar dari penarikan. Modal belum kembali sepenuhnya.'
+          : 'Penarikan sama dengan setoran. Modal baru kembali pas.',
+      tone: net > 0 ? Tone.good : (net < 0 ? Tone.bad : Tone.plain),
     );
   }
 }

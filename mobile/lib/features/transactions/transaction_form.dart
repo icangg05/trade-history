@@ -20,18 +20,28 @@ Future<void> showTransactionForm(
   required AccountBrief account,
   FundTransaction? editing,
   double? balance,
+  bool deposit = false,
 }) => showModalBottomSheet<void>(
   context: context,
   // Menutupi tab bar juga, sama seperti modal di web.
   useRootNavigator: true,
   isScrollControlled: true,
   useSafeArea: true,
-  builder: (_) =>
-      _TransactionForm(account: account, editing: editing, balance: balance),
+  builder: (_) => _TransactionForm(
+    account: account,
+    editing: editing,
+    balance: balance,
+    deposit: deposit,
+  ),
 );
 
 class _TransactionForm extends ConsumerStatefulWidget {
-  const _TransactionForm({required this.account, this.editing, this.balance});
+  const _TransactionForm({
+    required this.account,
+    this.editing,
+    this.balance,
+    this.deposit = false,
+  });
 
   final AccountBrief account;
   final FundTransaction? editing;
@@ -40,13 +50,17 @@ class _TransactionForm extends ConsumerStatefulWidget {
   /// di sini hanya ditampilkan supaya tidak perlu menebak.
   final double? balance;
 
+  /// Dibuka sebagai deposit — dipakai untuk setoran pertama akun baru.
+  final bool deposit;
+
   @override
   ConsumerState<_TransactionForm> createState() => _TransactionFormState();
 }
 
 class _TransactionFormState extends ConsumerState<_TransactionForm> {
   // Withdrawal jadi bawaan: setoran hanya sesekali, penarikan yang rutin dicatat.
-  late String _type = widget.editing?.type ?? 'withdrawal';
+  late String _type =
+      widget.editing?.type ?? (widget.deposit ? 'deposit' : 'withdrawal');
   late final _amount = TextEditingController(
     text: inputNumber(widget.editing?.amount),
   );
@@ -235,37 +249,42 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
           const SizedBox(height: 14),
           Caption(editing == null ? 'Bukti transfer *' : 'Bukti transfer'),
           const SizedBox(height: 6),
-          Container(
-            constraints: const BoxConstraints(minHeight: 110),
-            alignment: Alignment.center,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(kRadius - 2),
-              border: Border.all(
-                color: _errors['proof'] == null
-                    ? AppColors.border
-                    : AppColors.destructive,
+          // Kotaknya sendiri bisa diketuk — sama dengan tombol Galeri.
+          InkWell(
+            onTap: () => _pickProof(ImageSource.gallery),
+            borderRadius: BorderRadius.circular(kRadius - 2),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 110),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(kRadius - 2),
+                border: Border.all(
+                  color: _errors['proof'] == null
+                      ? AppColors.border
+                      : AppColors.destructive,
+                ),
               ),
+              child: _proof != null
+                  ? Image.memory(_proof!, height: 180, fit: BoxFit.contain)
+                  : (editing?.hasProof ?? false)
+                  ? ProofThumbnail(
+                      account: widget.account.id,
+                      row: editing!,
+                      size: 150,
+                    )
+                  : const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.receipt_long_outlined,
+                          color: AppColors.mutedForeground,
+                        ),
+                        SizedBox(height: 6),
+                        Caption('Tangkapan layar mutasi rekening'),
+                      ],
+                    ),
             ),
-            child: _proof != null
-                ? Image.memory(_proof!, height: 180, fit: BoxFit.contain)
-                : (editing?.hasProof ?? false)
-                ? ProofThumbnail(
-                    account: widget.account.id,
-                    row: editing!,
-                    size: 150,
-                  )
-                : const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.receipt_long_outlined,
-                        color: AppColors.mutedForeground,
-                      ),
-                      SizedBox(height: 6),
-                      Caption('Tangkapan layar mutasi rekening'),
-                    ],
-                  ),
           ),
           const SizedBox(height: 8),
           Row(

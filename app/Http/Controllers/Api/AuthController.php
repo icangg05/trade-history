@@ -99,7 +99,6 @@ class AuthController extends Controller
             'accounts' => $user->accounts()->where('is_archived', false)->orderBy('name')->get()
                 ->map(fn (Account $account) => [
                     ...$account->only('id', 'name', 'broker', 'currency'),
-                    'initial_balance' => (float) $account->initial_balance,
                     // Tanggal polos, bukan serialisasi Carbon: tengah malam WIB
                     // yang diubah ke UTC akan terbaca sebagai hari sebelumnya.
                     'started_at' => $account->started_at->toDateString(),

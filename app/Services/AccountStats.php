@@ -38,6 +38,14 @@ class AccountStats
 
     public function netFlow(?CarbonInterface $upTo = null): float
     {
+        ['deposit' => $in, 'withdrawal' => $out] = $this->flows($upTo);
+
+        return $in - $out;
+    }
+
+    /** @return array{deposit: float, withdrawal: float} */
+    public function flows(?CarbonInterface $upTo = null): array
+    {
         $rows = Transaction::query()
             ->where('account_id', $this->account->id)
             ->when($upTo, fn ($q) => $q->whereDate('occurred_at', '<=', $upTo))
@@ -45,7 +53,7 @@ class AccountStats
             ->groupBy('type')
             ->pluck('total', 'type');
 
-        return (float) ($rows['deposit'] ?? 0) - (float) ($rows['withdrawal'] ?? 0);
+        return ['deposit' => (float) ($rows['deposit'] ?? 0), 'withdrawal' => (float) ($rows['withdrawal'] ?? 0)];
     }
 
     public function realisedPnl(?CarbonInterface $upTo = null): float
@@ -89,12 +97,25 @@ class AccountStats
         $dates = $pnlByDate->keys()->merge($flowByDate->keys())->unique()->sort()->values();
 
         $balance = (float) $this->account->initial_balance;
-        $points = [[
-            'date' => $this->account->started_at->toDateString(),
-            'balance' => round($balance, 2),
-            'pnl' => 0.0,
-            'flow' => 0.0,
-        ]];
+        $points = [];
+
+        // Akun tanpa modal awal dimulai langsung dari deposit pertamanya: titik
+        // nol sebelum itu hanya menggambar garis tegak dari 0. Akun lama bermodal
+        // awal diberi titik pembuka sehari sebelum catatan pertama (bukan
+        // `started_at`, yang sering diisi tanggal 1), dan akun kosong satu titik
+        // di `started_at`.
+        if ($dates->isEmpty() || $balance != 0.0) {
+            $opening = $dates->isEmpty()
+                ? $this->account->started_at
+                : CarbonImmutable::parse($dates->first())->subDay();
+
+            $points[] = [
+                'date' => $opening->toDateString(),
+                'balance' => round($balance, 2),
+                'pnl' => 0.0,
+                'flow' => 0.0,
+            ];
+        }
 
         foreach ($dates as $date) {
             $pnl = (float) ($pnlByDate[$date] ?? 0);
@@ -189,7 +210,9 @@ class AccountStats
         // dibaca sebagai kerugian dan menyalakan peringatan batas rugi total.
         $trading = $this->tradingCurve();
         $peak = max($trading);
+        $drawdown = round($peak - end($trading), 2);
         $drawdownPct = $peak > 0 ? round((1 - end($trading) / $peak) * 100, 2) : 0.0;
+        $drawdownLimit = $rule?->drawdownLimit($peak);
 
         // Trade yang stopnya sudah digeser ke BE/SL+ punya rr_planned null dan
         // memang tidak ikut dinilai — risiko awalnya tidak tercatat di mana pun.
@@ -209,9 +232,11 @@ class AccountStats
             'profit_reached' => $profitGoal !== null && $pnl >= $profitGoal,
             'max_trades' => $rule?->max_trades_per_day,
             'trades_breached' => $rule?->max_trades_per_day !== null && $today->count() > $rule->max_trades_per_day,
+            'drawdown' => $drawdown,
             'drawdown_pct' => $drawdownPct,
+            'max_drawdown' => $drawdownLimit === null ? null : round($drawdownLimit, 2),
             'max_drawdown_pct' => $rule?->max_total_loss_pct ? (float) $rule->max_total_loss_pct : null,
-            'drawdown_breached' => $rule?->max_total_loss_pct !== null && $drawdownPct >= (float) $rule->max_total_loss_pct,
+            'drawdown_breached' => $drawdownLimit !== null && $drawdown >= $drawdownLimit,
             'min_rr' => $rule?->min_rr === null ? null : (float) $rule->min_rr,
             'low_rr_trades' => $lowRr,
             'has_rules' => $rule !== null,
@@ -235,16 +260,17 @@ class AccountStats
         }
 
         $sessions = filled($rule->allowed_sessions) ? $rule->allowed_sessions : null;
-        $riskPct = $rule->max_risk_per_trade_pct === null ? null : (float) $rule->max_risk_per_trade_pct;
+        $risk = $rule->max_risk_per_trade !== null || $rule->max_risk_per_trade_pct !== null;
         $perDay = $rule->max_daily_loss !== null || $rule->max_daily_loss_pct !== null || $rule->max_trades_per_day !== null;
-        $perTrade = $rule->min_rr !== null || $sessions !== null || $riskPct !== null;
+        $perTrade = $rule->min_rr !== null || $sessions !== null || $risk;
 
         if (! $perDay && ! $perTrade) {
             return [];
         }
 
         // Saldo pembukaan hanya perlu ditelusuri untuk aturan yang berbasis persen.
-        $needsBalance = ($rule->max_daily_loss === null && $rule->max_daily_loss_pct !== null) || $riskPct !== null;
+        $needsBalance = ($rule->max_daily_loss === null && $rule->max_daily_loss_pct !== null)
+            || ($rule->max_risk_per_trade === null && $rule->max_risk_per_trade_pct !== null);
         $days = ($perDay || $needsBalance) ? $this->dailyPnl($from, $to) : [];
         $opening = $needsBalance ? $this->openingBalances(array_keys($days)) : [];
 
@@ -279,13 +305,14 @@ class AccountStats
                     $out[$date][] = 'entry di luar sesi yang diizinkan';
                 }
 
-                // Risiko yang benar-benar terjadi: kerugian satu trade terhadap
-                // saldo pembukaan hari itu. Yang direncanakan tidak pernah tercatat
-                // dalam nilai uang, jadi ini satu-satunya angka yang jujur.
-                $balance = $opening[$date] ?? 0.0;
+                // Risiko yang benar-benar terjadi: kerugian satu trade. Yang
+                // direncanakan tidak pernah tercatat dalam nilai uang, jadi ini
+                // satu-satunya angka yang jujur. Versi persen memakai saldo
+                // pembukaan hari itu.
+                $limit = $risk ? $rule->tradeRiskLimit($opening[$date] ?? 0.0) : null;
 
-                if ($riskPct !== null && $balance > 0 && (float) $trade->pnl < 0
-                    && abs((float) $trade->pnl) > $balance * $riskPct / 100) {
+                if ($limit !== null && $limit > 0 && (float) $trade->pnl < 0
+                    && abs((float) $trade->pnl) > $limit) {
                     $out[$date][] = 'rugi satu trade melewati batas risiko';
                 }
             }
@@ -342,13 +369,17 @@ class AccountStats
         $winRate = $count ? round($wins->count() / $count * 100, 1) : 0.0;
         $avgWin = $wins->count() ? round($grossProfit / $wins->count(), 2) : 0.0;
         $avgLoss = $losses->count() ? round($grossLoss / $losses->count(), 2) : 0.0;
+        $flows = $this->flows();
 
         return [
             'period' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
             'currency' => $this->account->currency,
             'initial_balance' => round((float) $this->account->initial_balance, 2),
             'balance' => round($this->balance(), 2),
-            'net_flow' => round($this->netFlow(), 2),
+            'net_flow' => round($flows['deposit'] - $flows['withdrawal'], 2),
+            // Semua uang yang pernah masuk. `initial_balance` sisa akun lama —
+            // kini selalu 0, modalnya sudah jadi deposit (migration 000019).
+            'total_deposited' => round((float) $this->account->initial_balance + $flows['deposit'], 2),
             'total_trades' => $count,
             'wins' => $wins->count(),
             'losses' => $losses->count(),
@@ -433,7 +464,7 @@ class AccountStats
     }
 
     /**
-     * Saldo seandainya tidak pernah ada setor maupun tarik: mulai dari modal awal,
+     * Saldo seandainya tidak pernah ada setor maupun tarik: mulai dari saldo pembuka,
      * lalu hanya laba/rugi yang menggerakkannya.
      *
      * Kurva saldo biasa tidak bisa dipakai mengukur drawdown. Menarik untung ke
@@ -445,10 +476,14 @@ class AccountStats
      */
     private function tradingCurve(): array
     {
-        $balance = (float) $this->account->initial_balance;
+        $curve = $this->equityCurve();
+        // Mulai dari saldo pembuka titik pertama, sebelum hasil tradingnya: modal
+        // awal akun lama, atau deposit pertama akun tanpa modal awal. Bukan 0 —
+        // persen drawdown diukur terhadap puncak kurva ini.
+        $balance = $curve[0]['balance'] - $curve[0]['pnl'];
         $out = [];
 
-        foreach ($this->equityCurve() as $point) {
+        foreach ($curve as $point) {
             $out[] = $balance += $point['pnl'];
         }
 

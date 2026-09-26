@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:trade_history/widgets/common.dart';
 import 'package:trade_history/widgets/trade_widgets.dart';
 
 import 'support.dart';
@@ -158,7 +159,7 @@ void main() {
     );
   });
 
-  testWidgets('aturan: batas harian dalam persen disimpan ke kolom persen', (
+  testWidgets('aturan: aturan persen lama disimpan ulang sebagai nominal', (
     tester,
   ) async {
     final server = await pumpApp(
@@ -183,8 +184,12 @@ void main() {
         server.requests.lastWhere((request) => request.method == 'PUT').data
             as Map;
 
-    expect(saved['max_daily_loss_pct'], 3);
-    expect(saved['max_daily_loss'], isNull);
+    // Basis 6200: 3% → 186, 1% → 62, 10% → 620. Kolom persennya dikosongkan.
+    expect(saved['max_daily_loss'], 186);
+    expect(saved['max_risk_per_trade'], 62);
+    expect(saved['max_total_loss'], 620);
+    expect(saved['max_daily_loss_pct'], isNull);
+    expect(saved['max_total_loss_pct'], isNull);
     expect(saved['allowed_sessions'], containsAll(['london', 'newyork']));
     expect(find.text('Aturan tersimpan.'), findsOneWidget);
   });
@@ -287,8 +292,15 @@ void main() {
     expect(find.textContaining('Rp'), findsWidgets);
   });
 
-  testWidgets('akun: form akun baru', (tester) async {
-    await pumpApp(tester);
+  testWidgets('akun baru tanpa modal awal, langsung ke deposit pertama', (
+    tester,
+  ) async {
+    final server = await pumpApp(
+      tester,
+      routes: {
+        'POST accounts': (_) => {'message': 'Akun dibuat.', 'id': 1},
+      },
+    );
     await openMore(tester, 'Akun trading');
 
     await tester.tap(find.text('Akun baru'));
@@ -297,5 +309,46 @@ void main() {
     expect(find.text('Nama akun *'), findsOneWidget);
     expect(find.textContaining('Nomor akun broker'), findsOneWidget);
     expect(find.text('Arsipkan'), findsNothing);
+    expect(find.textContaining('Saldo awal'), findsNothing);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Nama akun *'),
+      'Akun Baru',
+    );
+    await tester.tap(find.text('Simpan'));
+    await tester.pumpAndSettle();
+
+    final saved =
+        server.requests.lastWhere((request) => request.method == 'POST').data
+            as Map;
+
+    expect(saved.containsKey('initial_balance'), isFalse);
+    expect(find.text('Catat transaksi'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) => w is Segments && w.value == 'deposit'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('ganti periode dari grafik P/L tidak melempar gulir ke atas', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    final list = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(
+      find.text('P/L periode'),
+      300,
+      scrollable: list,
+    );
+    await tester.pumpAndSettle();
+
+    final before = tester.state<ScrollableState>(list).position.pixels;
+    expect(before, greaterThan(0));
+
+    await tester.tap(find.text('90 hari').last);
+    await tester.pumpAndSettle();
+
+    expect(tester.state<ScrollableState>(list).position.pixels, before);
   });
 }

@@ -1,31 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart' as sk;
 
 import '../core/theme.dart';
 import 'common.dart';
 
 /// Kilau yang menyapu kerangka selama data dimuat — pengganti spinner, jadi
-/// bentuk halaman sudah terlihat sebelum isinya datang. Satu [Shimmer] cukup
-/// untuk satu kerangka utuh; tulang-tulangnya tidak perlu beranimasi sendiri.
-class Shimmer extends StatefulWidget {
+/// bentuk halaman sudah terlihat sebelum isinya datang. Mesinnya paket
+/// skeletonizer: di dalam zona ini hanya [Bone] yang dilukis sebagai kerangka,
+/// kartu di sekitarnya tampil apa adanya.
+class Shimmer extends StatelessWidget {
   const Shimmer({super.key, required this.child});
 
   final Widget child;
-
-  @override
-  State<Shimmer> createState() => _ShimmerState();
-}
-
-class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
-  late final _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1400),
-  )..repeat();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   // Pembaca layar mendengar "Memuat…", bukan diam: tulang-tulangnya tidak
   // punya teks. Semua kerangka lewat widget ini, jadi cukup di sini.
@@ -34,43 +20,27 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
     label: 'Memuat…',
     liveRegion: true,
     excludeSemantics: true,
-    child: _sweep(context),
-  );
-
-  Widget _sweep(BuildContext context) {
-    // Pengguna yang mematikan animasi di pengaturan ponsel cukup melihat
-    // kerangkanya diam.
-    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
-
-    return AnimatedBuilder(
-      animation: _controller,
-      child: widget.child,
-      builder: (context, child) => ShaderMask(
-        blendMode: BlendMode.srcATop,
-        shaderCallback: (bounds) =>
-            LinearGradient(
-              colors: [
-                Colors.transparent,
+    child: sk.Skeletonizer.zone(
+      // Pengguna yang mematikan animasi di pengaturan ponsel cukup melihat
+      // kerangkanya diam.
+      effect: MediaQuery.disableAnimationsOf(context)
+          ? const sk.SolidColorEffect(color: AppColors.secondary)
+          : sk.ShimmerEffect(
+              baseColor: AppColors.secondary,
+              highlightColor: Color.alphaBlend(
                 Colors.white.withValues(alpha: .07),
-                Colors.transparent,
-              ],
-              stops: const [.3, .5, .7],
-            ).createShader(
-              // Menyapu dari luar kiri ke luar kanan.
-              Rect.fromLTWH(
-                (_controller.value * 2 - 1) * bounds.width,
-                0,
-                bounds.width,
-                bounds.height,
+                AppColors.secondary,
               ),
+              duration: const Duration(milliseconds: 1400),
             ),
-        child: child,
-      ),
-    );
-  }
+      child: child,
+    ),
+  );
 }
 
-/// Satu balok abu-abu di kerangka: pengganti teks, angka, atau gambar.
+/// Satu balok di kerangka: pengganti teks, angka, atau gambar. Tulang
+/// skeletonizer dengan ukuran bawaan, supaya kerangka tiap layar cukup
+/// menyebut yang berbeda.
 class Bone extends StatelessWidget {
   const Bone({
     super.key,
@@ -84,14 +54,8 @@ class Bone extends StatelessWidget {
   final double radius;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: width,
-    height: height,
-    decoration: BoxDecoration(
-      color: AppColors.secondary,
-      borderRadius: BorderRadius.circular(radius),
-    ),
-  );
+  Widget build(BuildContext context) =>
+      sk.Bone(width: width, height: height, uniRadius: radius);
 }
 
 /// Baris-baris teks: paragraf analisa, detail trade.

@@ -70,35 +70,22 @@ class _RulesForm extends ConsumerStatefulWidget {
   ConsumerState<_RulesForm> createState() => _RulesFormState();
 }
 
-/// Batas harian boleh ditulis sebagai nominal atau persen, tapi hanya salah
-/// satunya. Menukar satuan mengosongkan isinya, karena angka yang sama berarti
-/// hal yang berbeda di satuan yang lain.
-class _Limit {
-  _Limit(double? amount, double? percent)
-    : pct = amount == null && percent != null,
-      input = TextEditingController(text: inputNumber(amount ?? percent));
-
-  bool pct;
-  final TextEditingController input;
-}
-
 class _RulesFormState extends ConsumerState<_RulesForm> {
   late final RuleSettings _rule = widget.page.rule;
 
-  late final _loss = _Limit(_rule.maxDailyLoss, _rule.maxDailyLossPct);
-  late final _target = _Limit(
+  // Semua batas ditulis sebagai nominal. Aturan lama yang tersimpan dalam
+  // persen ditampilkan sebagai perkiraan nominalnya; begitu disimpan, kolom
+  // persennya ikut dikosongkan.
+  late final _loss = _amount(_rule.maxDailyLoss, _rule.maxDailyLossPct);
+  late final _target = _amount(
     _rule.dailyProfitTarget,
     _rule.dailyProfitTargetPct,
   );
-  late final _risk = TextEditingController(
-    text: inputNumber(_rule.maxRiskPerTradePct),
-  );
+  late final _risk = _amount(_rule.maxRiskPerTrade, _rule.maxRiskPerTradePct);
+  late final _drawdown = _amount(_rule.maxTotalLoss, _rule.maxTotalLossPct);
   late final _minRr = TextEditingController(text: inputNumber(_rule.minRr));
   late final _maxTrades = TextEditingController(
     text: _rule.maxTradesPerDay?.toString() ?? '',
-  );
-  late final _drawdown = TextEditingController(
-    text: inputNumber(_rule.maxTotalLossPct),
   );
   late final _notes = TextEditingController(text: _rule.notes);
   late final Set<String> _allowed = {..._rule.allowedSessions};
@@ -107,27 +94,17 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
   bool _busy = false;
   Map<String, String> _errors = {};
 
-  List<TextEditingController> get _controllers => [
-    _loss.input,
-    _target.input,
-    _risk,
-    _minRr,
-    _maxTrades,
-    _drawdown,
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-
-    for (final controller in _controllers) {
-      controller.addListener(() => setState(() {}));
-    }
-  }
-
   @override
   void dispose() {
-    for (final controller in [..._controllers, _notes]) {
+    for (final controller in [
+      _loss,
+      _target,
+      _risk,
+      _drawdown,
+      _minRr,
+      _maxTrades,
+      _notes,
+    ]) {
       controller.dispose();
     }
     super.dispose();
@@ -135,12 +112,14 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
 
   String get _currency => widget.account.currency;
 
-  /// Perkiraan nilai sebuah persentase dari modal + dana masuk/keluar.
-  double? _estimate(String text) {
-    final value = parseDecimal(text);
+  /// Persen lama → nominal, dihitung dari modal + dana masuk/keluar.
+  TextEditingController _amount(double? amount, double? percent) {
     final basis = widget.page.basis;
+    final estimate = percent != null && basis > 0
+        ? (basis * percent).roundToDouble() / 100
+        : null;
 
-    return basis > 0 && value != null && value > 0 ? basis * value / 100 : null;
+    return TextEditingController(text: inputNumber(amount ?? estimate));
   }
 
   Future<void> _save() async {
@@ -150,14 +129,10 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
     });
 
     final rule = RuleSettings(
-      maxDailyLoss: _loss.pct ? null : parseDecimal(_loss.input.text),
-      maxDailyLossPct: _loss.pct ? parseDecimal(_loss.input.text) : null,
-      dailyProfitTarget: _target.pct ? null : parseDecimal(_target.input.text),
-      dailyProfitTargetPct: _target.pct
-          ? parseDecimal(_target.input.text)
-          : null,
-      maxTotalLossPct: parseDecimal(_drawdown.text),
-      maxRiskPerTradePct: parseDecimal(_risk.text),
+      maxDailyLoss: parseDecimal(_loss.text),
+      dailyProfitTarget: parseDecimal(_target.text),
+      maxTotalLoss: parseDecimal(_drawdown.text),
+      maxRiskPerTrade: parseDecimal(_risk.text),
       maxTradesPerDay: int.tryParse(_maxTrades.text.trim()),
       minRr: parseDecimal(_minRr.text),
       allowedSessions: _allowed.toList(),
@@ -181,56 +156,6 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
     }
   }
 
-  Widget _limitField(
-    String label,
-    _Limit limit,
-    String amountKey,
-    String pctKey,
-    String example,
-  ) {
-    final estimate = limit.pct ? _estimate(limit.input.text) : null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: limit.input,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                style: mono(size: 14),
-                decoration: InputDecoration(
-                  labelText: label,
-                  hintText: 'Contoh: $example',
-                  errorText: _errors[limit.pct ? pctKey : amountKey],
-                  helperText: estimate == null
-                      ? null
-                      : 'Sekitar ${money(estimate, _currency)} per hari.',
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 110,
-              child: Segments(
-                value: limit.pct,
-                options: [(false, _currency), (true, '%')],
-                onChanged: (value) => setState(() {
-                  if (value != limit.pct) limit.input.clear();
-                  limit.pct = value;
-                }),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _field(
     TextEditingController controller,
     String label,
@@ -238,23 +163,23 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
     String hint, {
     String? helper,
     bool integer = false,
+    bool money = false,
   }) => TextField(
     controller: controller,
     keyboardType: TextInputType.numberWithOptions(decimal: !integer),
     style: mono(size: 14),
     decoration: InputDecoration(
       labelText: label,
-      hintText: hint,
+      hintText: 'Contoh: $hint',
       errorText: _errors[key],
       helperText: helper,
+      suffixText: money ? _currency : null,
     ),
   );
 
   @override
   Widget build(BuildContext context) {
     const gap = SizedBox(height: 14);
-    final risk = _estimate(_risk.text);
-    final drawdown = _estimate(_drawdown.text);
 
     return ListView(
       scrollCacheExtent: kWholePageCache,
@@ -272,26 +197,20 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _limitField(
-                'Maks. loss harian',
+              _field(
                 _loss,
+                'Maks. loss harian',
                 'max_daily_loss',
-                'max_daily_loss_pct',
                 '100',
+                money: true,
               ),
               gap,
-              _limitField(
-                'Target profit harian',
+              _field(
                 _target,
+                'Target profit harian',
                 'daily_profit_target',
-                'daily_profit_target_pct',
                 '150',
-              ),
-              gap,
-              Caption(
-                'Perkiraan dihitung dari modal ditambah dana yang masuk, sekarang ${money(widget.page.basis, _currency)}. '
-                'Saat menilai hari yang melanggar, yang dipakai adalah saldo pembukaan hari itu, jadi angkanya bisa '
-                'sedikit berbeda.',
+                money: true,
               ),
             ],
           ),
@@ -305,17 +224,14 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
               FieldPair(
                 _field(
                   _risk,
-                  'Risiko / trade (%)',
-                  'max_risk_per_trade_pct',
-                  '1',
-                  helper: risk == null
-                      ? null
-                      : 'Sekitar ${money(risk, _currency)}',
+                  'Maks. loss / trade',
+                  'max_risk_per_trade',
+                  '10',
+                  money: true,
                 ),
                 _field(_minRr, 'RR minimum', 'min_rr', '2'),
-                // Label "Risiko / trade (%)" dan "Maks. drawdown (%)" lebih
-                // panjang dari isian lain: di ponsel 360 dp keduanya ditumpuk
-                // supaya labelnya tidak terpotong.
+                // Label dan satuan mata uang lebih panjang dari isian lain:
+                // di ponsel 360 dp keduanya ditumpuk supaya tidak terpotong.
                 minWidth: 150,
               ),
               gap,
@@ -329,12 +245,11 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
                 ),
                 _field(
                   _drawdown,
-                  'Maks. drawdown (%)',
-                  'max_total_loss_pct',
-                  '10',
-                  helper: drawdown == null
-                      ? null
-                      : 'Sekitar ${money(drawdown, _currency)}',
+                  'Maks. drawdown',
+                  'max_total_loss',
+                  '500',
+                  helper: 'Dari puncak saldo trading',
+                  money: true,
                 ),
                 minWidth: 150,
               ),

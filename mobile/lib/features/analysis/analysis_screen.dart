@@ -192,7 +192,7 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
                     : number(summary.profitFactor),
               ),
               _figure(
-                'Ekspektasi / trade',
+                'Rata-rata P/L / trade',
                 money(summary.expectancy, currency, signed: true),
               ),
               _figure(

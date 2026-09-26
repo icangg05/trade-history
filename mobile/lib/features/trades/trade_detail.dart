@@ -311,8 +311,6 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
                     hintText:
                         'Contoh: Tiga entry di zona demand yang sama, dua pertama terlalu cepat.',
                     hintMaxLines: 3,
-                    helperText:
-                        'Kenapa masuk berkali-kali, kondisi pasar, dan pelajarannya.',
                   ),
                 ),
                 const SizedBox(height: 10),

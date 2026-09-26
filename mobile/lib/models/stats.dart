@@ -34,14 +34,16 @@ class Summary {
     required this.from,
     required this.to,
     required this.currency,
-    required this.initialBalance,
     required this.balance,
+    required this.totalDeposited,
     required this.totalTrades,
     required this.wins,
     required this.losses,
     required this.breakeven,
     required this.winRate,
     required this.netPnl,
+    required this.grossProfit,
+    required this.grossLoss,
     required this.profitFactor,
     required this.expectancy,
     required this.avgWin,
@@ -67,14 +69,16 @@ class Summary {
       from: wallTime('${period['from']}'),
       to: wallTime('${period['to']}'),
       currency: '${json['currency'] ?? 'USD'}',
-      initialBalance: toDouble(json['initial_balance']),
       balance: toDouble(json['balance']),
+      totalDeposited: toDouble(json['total_deposited']),
       totalTrades: toInt(json['total_trades']),
       wins: toInt(json['wins']),
       losses: toInt(json['losses']),
       breakeven: toInt(json['breakeven']),
       winRate: toDouble(json['win_rate_pct']),
       netPnl: toDouble(json['net_pnl']),
+      grossProfit: toDouble(json['gross_profit']),
+      grossLoss: toDouble(json['gross_loss']),
       profitFactor: toDoubleOrNull(json['profit_factor']),
       expectancy: toDouble(json['expectancy']),
       avgWin: toDouble(json['avg_win']),
@@ -96,14 +100,20 @@ class Summary {
   final DateTime from;
   final DateTime to;
   final String currency;
-  final double initialBalance;
   final double balance;
+
+  /// Semua deposit: seluruh uang yang pernah disetor.
+  final double totalDeposited;
   final int totalTrades;
   final int wins;
   final int losses;
   final int breakeven;
   final double winRate;
   final double netPnl;
+  final double grossProfit;
+
+  /// Positif: jumlah kerugian trade yang kalah, tanpa tanda.
+  final double grossLoss;
   final double? profitFactor;
   final double expectancy;
   final double avgWin;
@@ -133,8 +143,8 @@ class RuleStatus {
     required this.profitReached,
     required this.maxTrades,
     required this.tradesBreached,
-    required this.drawdownPct,
-    required this.maxDrawdownPct,
+    required this.drawdown,
+    required this.maxDrawdown,
     required this.drawdownBreached,
     required this.minRr,
     required this.lowRrTrades,
@@ -151,8 +161,8 @@ class RuleStatus {
     profitReached: json['profit_reached'] == true,
     maxTrades: toIntOrNull(json['max_trades']),
     tradesBreached: json['trades_breached'] == true,
-    drawdownPct: toDouble(json['drawdown_pct']),
-    maxDrawdownPct: toDoubleOrNull(json['max_drawdown_pct']),
+    drawdown: toDouble(json['drawdown']),
+    maxDrawdown: toDoubleOrNull(json['max_drawdown']),
     drawdownBreached: json['drawdown_breached'] == true,
     minRr: toDoubleOrNull(json['min_rr']),
     lowRrTrades: toInt(json['low_rr_trades']),
@@ -168,8 +178,10 @@ class RuleStatus {
   final bool profitReached;
   final int? maxTrades;
   final bool tradesBreached;
-  final double drawdownPct;
-  final double? maxDrawdownPct;
+
+  /// Turun dari puncak kurva trading, dalam nilai mata uang.
+  final double drawdown;
+  final double? maxDrawdown;
   final bool drawdownBreached;
   final double? minRr;
   final int lowRrTrades;
@@ -201,35 +213,11 @@ class EquityPoint {
   final double flow;
 }
 
-class MonthlyPnl {
-  const MonthlyPnl({
-    required this.month,
-    required this.pnl,
-    required this.profit,
-    required this.loss,
-  });
-
-  factory MonthlyPnl.fromJson(Json json) => MonthlyPnl(
-    month: '${json['month']}',
-    pnl: toDouble(json['pnl']),
-    profit: toDouble(json['profit']),
-    loss: toDouble(json['loss']),
-  );
-
-  /// `2026-03`.
-  final String month;
-  final double pnl;
-  final double profit;
-  final double loss;
-}
-
 class Dashboard {
   const Dashboard({
     required this.range,
     required this.summary,
     required this.equity,
-    required this.monthly,
-    required this.monthlyBase,
     required this.ruleStatus,
     required this.recent,
   });
@@ -240,10 +228,6 @@ class Dashboard {
     equity: list(json['equity'])
         .map((item) => EquityPoint.fromJson(map(item)))
         .toList(),
-    monthly: list(json['monthly'])
-        .map((item) => MonthlyPnl.fromJson(map(item)))
-        .toList(),
-    monthlyBase: toDoubleOrNull(json['monthlyBase']),
     ruleStatus: RuleStatus.fromJson(map(json['ruleStatus'])),
     recent: list(json['recent'])
         .map((item) => Trade.fromJson(map(item)))
@@ -253,20 +237,32 @@ class Dashboard {
   final String range;
   final Summary summary;
   final List<EquityPoint> equity;
-  final List<MonthlyPnl> monthly;
-
-  /// Saldo tepat sebelum jendela 12 bulan dimulai — dasar persen grafik bulanan.
-  final double? monthlyBase;
   final RuleStatus ruleStatus;
   final List<Trade> recent;
 
-  /// Pertumbuhan periode: P/L dibagi saldo di awal periode, bukan modal + arus
-  /// dana — withdrawal tidak boleh membuat persennya naik.
-  double get growthPct {
-    final base = equity.isEmpty ? 0.0 : equity.first.balance;
+  /// Pertumbuhan periode; null kalau tidak ada modal yang bisa dijadikan dasar.
+  double? get growthPct => periodGrowth(equity, summary.netPnl);
+}
 
-    return base > 0 ? summary.netPnl / base * 100 : 0;
+/// Pertumbuhan periode: P/L dibagi semua uang yang dipakai, yaitu saldo di
+/// awal periode ditambah deposit selama periode. Withdrawal sengaja tidak
+/// mengurangi dasarnya: profit yang rutin ditarik akan menyusutkan dasar itu
+/// sampai persennya meledak ke ribuan (itu kelemahan Modified Dietz, yang
+/// sempat dipakai di sini).
+///
+/// Saldo awal diambil sebelum hari pertama bergerak, jadi trade di hari
+/// pertama periode tidak ikut jadi modal.
+double? periodGrowth(List<EquityPoint> points, double pnl) {
+  if (points.isEmpty) return null;
+
+  final first = points.first;
+  var base = first.balance - first.pnl - first.flow;
+
+  for (final point in points) {
+    if (point.flow > 0) base += point.flow;
   }
+
+  return base > 0 ? pnl / base * 100 : null;
 }
 
 class DayStat {

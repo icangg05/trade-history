@@ -16,7 +16,8 @@ void main() {
     expect(dashboard.summary.totalTrades, greaterThan(0));
     expect(dashboard.summary.bySymbol, isNotEmpty);
     expect(dashboard.equity, isNotEmpty);
-    expect(dashboard.monthly, hasLength(12));
+    expect(dashboard.summary.grossLoss, 1267);
+    expect(dashboard.summary.totalDeposited, 6500);
     expect(dashboard.ruleStatus.hasRules, isTrue);
     expect(dashboard.recent.first.id, isNot(matches(RegExp(r'^\d+$'))));
   });

@@ -19,7 +19,6 @@ class AccountController extends Controller
 
                 return [
                     ...$account->only('id', 'name', 'broker', 'account_number', 'currency', 'is_archived'),
-                    'initial_balance' => (float) $account->initial_balance,
                     'started_at' => $account->started_at->toDateString(),
                     'balance' => $stats->balance(),
                     'net_pnl' => $stats->realisedPnl(),
@@ -60,7 +59,6 @@ class AccountController extends Controller
 
         return $this->done(
             'Akun "'.$account->name.'" dibuat.',
-            to: route('dashboard'),
             data: ['id' => $account->id],
             status: 201,
         );
@@ -81,14 +79,7 @@ class AccountController extends Controller
             $request->session()->forget('current_account_id');
         }
 
-        return $this->done('Akun dihapus beserta seluruh riwayatnya.', to: route('accounts.index'));
-    }
-
-    public function switch(Request $request, Account $account): RedirectResponse
-    {
-        $request->session()->put('current_account_id', $account->id);
-
-        return redirect()->route('dashboard');
+        return $this->done('Akun dihapus beserta seluruh riwayatnya.');
     }
 
     private function validated(Request $request): array
@@ -98,7 +89,6 @@ class AccountController extends Controller
             'broker' => ['nullable', 'string', 'max:60'],
             'account_number' => ['nullable', 'string', 'max:40'],
             'currency' => ['required', 'in:USD,USC,IDR'],
-            'initial_balance' => ['required', 'numeric', 'min:0'],
             'started_at' => ['required', 'date'],
             'is_archived' => ['nullable', 'boolean'],
         ]);

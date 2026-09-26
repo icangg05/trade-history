@@ -16,12 +16,12 @@ class LoginThrottleTest extends TestCase
 
     private function user(): User
     {
-        return User::factory()->create(['email' => 'trader@contoh.com', 'password' => 'sandi-benar']);
+        return User::factory()->create(['email' => 'admin@contoh.com', 'password' => 'sandi-benar', 'is_admin' => true]);
     }
 
     private function salah(): void
     {
-        $this->post('/login', ['email' => 'trader@contoh.com', 'password' => 'tebakan'])
+        $this->post('/login', ['email' => 'admin@contoh.com', 'password' => 'tebakan'])
             ->assertSessionHasErrors('email');
     }
 
@@ -34,7 +34,7 @@ class LoginThrottleTest extends TestCase
         }
 
         // lockedFor dipakai halaman login untuk menghitung mundur.
-        $this->post('/login', ['email' => 'trader@contoh.com', 'password' => 'sandi-benar'])
+        $this->post('/login', ['email' => 'admin@contoh.com', 'password' => 'sandi-benar'])
             ->assertSessionHasErrors('email')
             ->assertSessionHas('lockedFor', fn (int $detik) => $detik > 0 && $detik <= 60);
 
@@ -48,7 +48,7 @@ class LoginThrottleTest extends TestCase
         $this->salah();
         $this->salah();
 
-        $this->post('/login', ['email' => 'trader@contoh.com', 'password' => 'sandi-benar'])
+        $this->post('/login', ['email' => 'admin@contoh.com', 'password' => 'sandi-benar'])
             ->assertRedirect();
         $this->assertAuthenticated();
 

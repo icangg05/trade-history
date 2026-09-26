@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'account_id',
     'max_daily_loss', 'max_daily_loss_pct',
     'daily_profit_target', 'daily_profit_target_pct',
-    'max_total_loss_pct', 'max_risk_per_trade_pct',
+    'max_total_loss', 'max_total_loss_pct',
+    'max_risk_per_trade', 'max_risk_per_trade_pct',
     'max_trades_per_day', 'min_rr', 'allowed_sessions', 'notes',
 ])]
 class AccountRule extends Model
@@ -25,6 +26,8 @@ class AccountRule extends Model
             'allowed_sessions' => 'array',
             'max_daily_loss' => 'decimal:2',
             'daily_profit_target' => 'decimal:2',
+            'max_risk_per_trade' => 'decimal:2',
+            'max_total_loss' => 'decimal:2',
         ];
     }
 
@@ -56,6 +59,30 @@ class AccountRule extends Model
 
         return $this->daily_profit_target_pct !== null
             ? $balance * (float) $this->daily_profit_target_pct / 100
+            : null;
+    }
+
+    /** Batas rugi satu trade; versi persen dihitung dari saldo pembukaan hari itu. */
+    public function tradeRiskLimit(float $balance): ?float
+    {
+        if ($this->max_risk_per_trade !== null) {
+            return (float) $this->max_risk_per_trade;
+        }
+
+        return $this->max_risk_per_trade_pct !== null
+            ? $balance * (float) $this->max_risk_per_trade_pct / 100
+            : null;
+    }
+
+    /** Batas turun dari puncak kurva trading; versi persen dihitung dari puncaknya. */
+    public function drawdownLimit(float $peak): ?float
+    {
+        if ($this->max_total_loss !== null) {
+            return (float) $this->max_total_loss;
+        }
+
+        return $this->max_total_loss_pct !== null && $peak > 0
+            ? $peak * (float) $this->max_total_loss_pct / 100
             : null;
     }
 }

@@ -37,9 +37,9 @@ class RuleLimitTest extends TestCase
             'pnl' => 250, 'opened_at' => '2026-01-06 09:00', 'closed_at' => '2026-01-06 10:00',
         ]);
 
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $this->assertSame(1300.0, $this->get('/rules')->viewData('page')['props']['basis']);
+        $this->assertEquals(1300.0, $this->api('get', 'rules')->json()['basis']);
     }
 
     public function test_penarikan_dan_setoran_tidak_dihitung_sebagai_drawdown(): void
@@ -107,10 +107,10 @@ class RuleLimitTest extends TestCase
             'started_at' => '2026-01-01',
         ]);
 
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
-        $this->put('/rules', ['max_daily_loss_pct' => 2, 'daily_profit_target' => 150])
-            ->assertSessionHasNoErrors();
+        $this->api('put', 'rules', ['max_daily_loss_pct' => 2, 'daily_profit_target' => 150])
+            ->assertSuccessful();
 
         $rule = $account->refresh()->rule;
 
@@ -120,8 +120,8 @@ class RuleLimitTest extends TestCase
         $this->assertNull($rule->daily_profit_target_pct);
 
         // Ganti satuan: kolom pasangannya ikut dikosongkan.
-        $this->put('/rules', ['max_daily_loss' => 40, 'max_daily_loss_pct' => null])
-            ->assertSessionHasNoErrors();
+        $this->api('put', 'rules', ['max_daily_loss' => 40, 'max_daily_loss_pct' => null])
+            ->assertSuccessful();
 
         $rule = $account->refresh()->rule;
 
@@ -181,6 +181,33 @@ class RuleLimitTest extends TestCase
         ]);
 
         $this->assertSame([], $this->violations($account));
+    }
+
+    public function test_risiko_dan_drawdown_bisa_diisi_nominal(): void
+    {
+        $account = $this->account();                      // modal 1000
+        $account->rule()->create(['max_risk_per_trade' => 20, 'max_total_loss' => 50]);
+
+        $account->trades()->createMany([
+            ['symbol' => 'AAA', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
+                'pnl' => 100, 'opened_at' => '2026-01-05 15:00', 'closed_at' => '2026-01-05 16:00'],
+            ['symbol' => 'BBB', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
+                'pnl' => -25, 'opened_at' => '2026-01-06 15:00', 'closed_at' => '2026-01-06 16:00'],
+            ['symbol' => 'CCC', 'direction' => 'buy', 'entry_price' => 100, 'sl_price' => 90,
+                'pnl' => -30, 'opened_at' => '2026-01-07 15:00', 'closed_at' => '2026-01-07 16:00'],
+        ]);
+
+        $violations = $this->violations($account);
+
+        $this->assertSame(['rugi satu trade melewati batas risiko'], $violations['2026-01-06']);
+        $this->assertSame(['rugi satu trade melewati batas risiko'], $violations['2026-01-07']);
+
+        // Puncak 1100, sekarang 1045: turun 55 dari batas 50.
+        $status = (new AccountStats($account->refresh()))->ruleStatus(CarbonImmutable::parse('2026-01-08'));
+
+        $this->assertSame(55.0, $status['drawdown']);
+        $this->assertSame(50.0, $status['max_drawdown']);
+        $this->assertTrue($status['drawdown_breached']);
     }
 
     private function account(): Account

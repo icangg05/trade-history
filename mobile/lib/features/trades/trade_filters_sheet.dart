@@ -101,26 +101,9 @@ class _FilterSheetState extends State<_FilterSheet> {
       ? const SizedBox(height: 14)
       : Padding(
           padding: const EdgeInsets.only(top: 6, bottom: 14),
-          child: SizedBox(
-            height: 32,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                for (final option in options)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: ActionChip(
-                      label: Text(
-                        option,
-                        style: const TextStyle(fontSize: 11.5),
-                      ),
-                      visualDensity: kDenseChip,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      onPressed: () => setState(() => controller.text = option),
-                    ),
-                  ),
-              ],
-            ),
+          child: SuggestChips(
+            options: options,
+            onSelected: (option) => setState(() => controller.text = option),
           ),
         );
 

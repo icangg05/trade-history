@@ -9,7 +9,8 @@ use Tests\TestCase;
 
 /**
  * Mengganti sandi atau email berarti mengganti pintu masuk akun, jadi sandi
- * sekarang harus dibuktikan dulu. Mengganti nama tidak.
+ * sekarang harus dibuktikan dulu. Mengganti nama tidak. Profil web hanya untuk
+ * admin; trader mengubahnya lewat API (lihat ApiTest).
  */
 class ProfileTest extends TestCase
 {
@@ -17,7 +18,7 @@ class ProfileTest extends TestCase
 
     public function test_ganti_sandi_tanpa_sandi_sekarang_ditolak(): void
     {
-        $user = User::factory()->create(['password' => 'rahasia-lama']);
+        $user = User::factory()->create(['password' => 'rahasia-lama', 'is_admin' => true]);
 
         $this->actingAs($user)
             ->put('/profile', [
@@ -33,7 +34,7 @@ class ProfileTest extends TestCase
 
     public function test_ganti_email_tanpa_sandi_sekarang_ditolak(): void
     {
-        $user = User::factory()->create(['password' => 'rahasia-lama']);
+        $user = User::factory()->create(['password' => 'rahasia-lama', 'is_admin' => true]);
 
         $this->actingAs($user)
             ->put('/profile', ['name' => $user->name, 'email' => 'baru@contoh.test'])
@@ -44,7 +45,7 @@ class ProfileTest extends TestCase
 
     public function test_dengan_sandi_sekarang_penggantian_berhasil(): void
     {
-        $user = User::factory()->create(['password' => 'rahasia-lama']);
+        $user = User::factory()->create(['password' => 'rahasia-lama', 'is_admin' => true]);
 
         $this->actingAs($user)
             ->put('/profile', [
@@ -69,7 +70,7 @@ class ProfileTest extends TestCase
      */
     public function test_ganti_nama_dari_form_web_dengan_kolom_sandi_kosong(): void
     {
-        $user = User::factory()->create(['password' => 'rahasia-lama']);
+        $user = User::factory()->create(['password' => 'rahasia-lama', 'is_admin' => true]);
 
         $this->actingAs($user)
             ->put('/profile', [
@@ -87,7 +88,7 @@ class ProfileTest extends TestCase
 
     public function test_kolom_sandi_sekarang_yang_kosong_tetap_wajib_saat_ganti_email(): void
     {
-        $user = User::factory()->create(['password' => 'rahasia-lama']);
+        $user = User::factory()->create(['password' => 'rahasia-lama', 'is_admin' => true]);
 
         $this->actingAs($user)
             ->put('/profile', [
@@ -104,7 +105,7 @@ class ProfileTest extends TestCase
 
     public function test_ganti_nama_saja_tidak_minta_sandi(): void
     {
-        $user = User::factory()->create(['password' => 'rahasia-lama']);
+        $user = User::factory()->create(['password' => 'rahasia-lama', 'is_admin' => true]);
 
         $this->actingAs($user)
             ->put('/profile', ['name' => 'Nama Baru', 'email' => $user->email])

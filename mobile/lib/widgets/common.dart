@@ -204,13 +204,29 @@ class StatGrid extends StatelessWidget {
     builder: (context, constraints) {
       final columns =
           (constraints.maxWidth > 600 ? 3 : 2) - (largeText(context) ? 1 : 0);
-      final width = (constraints.maxWidth - 10 * (columns - 1)) / columns;
 
-      return Wrap(
-        spacing: 10,
-        runSpacing: 10,
+      // Per baris, bukan Wrap: kartu sebaris dibuat sama tinggi walau label
+      // atau keterangan salah satunya turun dua baris.
+      return Column(
         children: [
-          for (final child in children) SizedBox(width: width, child: child),
+          for (var row = 0; row < children.length; row += columns) ...[
+            if (row > 0) const SizedBox(height: 10),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = row; i < row + columns; i++) ...[
+                    if (i > row) const SizedBox(width: 10),
+                    Expanded(
+                      child: i < children.length
+                          ? children[i]
+                          : const SizedBox(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ],
       );
     },
@@ -629,3 +645,36 @@ Future<bool> confirm(
       ),
     ) ??
     false;
+
+/// Deret pilihan yang bisa diketuk di bawah isian — simbol atau setup yang
+/// pernah dipakai. Menggulir ke samping kalau tidak muat.
+class SuggestChips extends StatelessWidget {
+  const SuggestChips({
+    super.key,
+    required this.options,
+    required this.onSelected,
+  });
+
+  final List<String> options;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 32,
+    child: ListView(
+      scrollDirection: Axis.horizontal,
+      children: [
+        for (final option in options)
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: ActionChip(
+              label: Text(option, style: const TextStyle(fontSize: 11.5)),
+              visualDensity: kDenseChip,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              onPressed: () => onSelected(option),
+            ),
+          ),
+      ],
+    ),
+  );
+}

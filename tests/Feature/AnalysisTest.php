@@ -29,7 +29,7 @@ class AnalysisTest extends TestCase
             'started_at' => CarbonImmutable::parse('2026-01-01'),
         ]);
 
-        $this->actingAs($account->user)->withSession(['current_account_id' => $account->id]);
+        $this->onAccount($account);
 
         return $account;
     }
@@ -62,11 +62,11 @@ class AnalysisTest extends TestCase
             'model' => 'gemini-uji',
         ]);
 
-        $this->get('/analysis')->assertInertia(fn ($page) => $page
-            ->where('analysis.result_md', 'Bacaan lama.')
-            ->where('analysis.stale', true)
-            ->has('analysis.analyzed_at')
-            ->missing('history'));
+        $analysis = $this->api('get', 'analysis')->assertJsonMissingPath('history')->json('analysis');
+
+        $this->assertSame('Bacaan lama.', $analysis['result_md']);
+        $this->assertTrue($analysis['stale']);
+        $this->assertNotNull($analysis['analyzed_at']);
     }
 
     public function test_perbarui_tetap_memanggil_ai_walau_statistik_tidak_berubah(): void
@@ -78,16 +78,16 @@ class AnalysisTest extends TestCase
         GeminiKey::create(['name' => 'Uji', 'api_key' => 'kunci-uji']);
         $this->withTrade($this->account());
 
-        $this->post('/analysis', ['period' => '30d'])->assertRedirect();
+        $this->api('post', 'analysis', ['period' => '30d'])->assertSuccessful();
 
         // Data sama persis, tombol ditekan lagi setelah jeda pendinginan lewat.
         $this->travel(GeminiKey::COOLDOWN + 1)->seconds();
-        $this->post('/analysis', ['period' => '30d'])->assertRedirect();
+        $this->api('post', 'analysis', ['period' => '30d'])->assertSuccessful();
 
         Http::assertSentCount(2);
-        $this->get('/analysis')->assertInertia(fn ($page) => $page
-            ->where('analysis.result_md', 'Bacaan kedua.')
-            ->where('analysis.stale', false));
+        $this->api('get', 'analysis')
+            ->assertJsonPath('analysis.result_md', 'Bacaan kedua.')
+            ->assertJsonPath('analysis.stale', false);
     }
 
     public function test_klik_kedua_dalam_10_detik_ditolak_tanpa_memanggil_ai(): void
@@ -99,8 +99,9 @@ class AnalysisTest extends TestCase
         GeminiKey::create(['name' => 'Uji', 'api_key' => 'kunci-uji']);
         $this->withTrade($this->account());
 
-        $this->post('/analysis', ['period' => '30d']);
-        $this->post('/analysis', ['period' => '30d'])->assertSessionHas('error');
+        $this->api('post', 'analysis', ['period' => '30d']);
+        // Semua kunci sedang jeda: dijawab 502, sama seperti Gemini yang gagal.
+        $this->api('post', 'analysis', ['period' => '30d'])->assertStatus(502);
 
         Http::assertSentCount(1);
     }
