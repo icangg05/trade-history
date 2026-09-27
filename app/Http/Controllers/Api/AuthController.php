@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
+use Throwable;
 
 /**
  * Pintu masuk aplikasi mobile. Browser memakai sesi (LoginController); ponsel
@@ -185,7 +186,17 @@ class AuthController extends Controller
                 ['token' => Hash::make($code), 'created_at' => now()],
             );
 
-            defer(fn () => $user->notify(new PasswordResetCode($code, self::CODE_MINUTES)));
+            // Dikirim langsung, bukan defer(): SMTP yang menolak (mis. IP belum
+            // diizinkan di Brevo) harus terlihat di layar, bukan "kode sudah
+            // dikirim" padahal emailnya tidak pernah berangkat.
+            try {
+                $user->notify(new PasswordResetCode($code, self::CODE_MINUTES));
+            } catch (Throwable $e) {
+                report($e);
+                DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+
+                throw ValidationException::withMessages(['email' => 'Email gagal dikirim. Coba lagi nanti.']);
+            }
         }
 
         return response()->json([

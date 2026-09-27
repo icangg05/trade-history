@@ -43,10 +43,13 @@ class ReportController extends Controller
             // Kurs tanpa tanggal tidak bisa diperiksa ulang oleh petugas pajak, jadi
             // tanggalnya wajib dan ikut tercetak di laporan.
             'rate_date' => ['required', 'date', 'before_or_equal:today'],
-            'name' => ['required', 'string', 'max:255'],
             'npwp' => ['nullable', 'string', 'max:32'],
             'address' => ['nullable', 'string', 'max:500'],
         ]);
+
+        // Nama di kop selalu nama profil — laporan pajak tidak diterbitkan atas
+        // nama orang lain. NPWP dan alamat tidak disimpan, jadi tetap dikirim ponsel.
+        $name = $request->user()->name;
 
         $report = AnnualReport::build(
             $this->accounts(),
@@ -67,7 +70,7 @@ class ReportController extends Controller
                 'watermark' => self::watermark(config('app.name')),
             ],
             'identity' => [
-                'name' => $data['name'],
+                'name' => $name,
                 'npwp' => $data['npwp'] ?? null,
                 'address' => $data['address'] ?? null,
             ],
@@ -106,7 +109,7 @@ class ReportController extends Controller
             [90 / 255, 102 / 255, 121 / 255],
         );
 
-        $filename = 'laporan-trading-'.$data['year'].'-'.Str::slug($data['name']).'.pdf';
+        $filename = 'laporan-trading-'.$data['year'].'-'.Str::slug($name).'.pdf';
 
         return response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',

@@ -46,7 +46,8 @@ class Gemini
         $response = $this->call([
             'contents' => [['parts' => [['text' => sprintf(
                 'Tulis SATU kalimat motivasi untuk seorang trader bertema "%s". Maksimal 15 kata, '
-                .'bahasa Indonesia, gaya segar dan tidak klise. Balas hanya kalimat itu, tanpa tanda kutip.',
+                .'bahasa Indonesia, gaya segar dan tidak klise, tanpa tanda pisah (— atau –). '
+                .'Balas hanya kalimat itu, tanpa tanda kutip.',
                 $tema
             )]]]],
             'generationConfig' => ['temperature' => 1.5, 'maxOutputTokens' => 512],
@@ -150,14 +151,14 @@ class Gemini
      * membaca bahan yang sama dengan cara yang sama.
      */
     private const DATA_GUIDE = <<<'TXT'
-    DATA (JSON) sudah dihitung dari database — angkanya benar. Pakai apa adanya,
+    DATA (JSON) sudah dihitung dari database, angkanya benar. Pakai apa adanya,
     jangan hitung ulang, jangan mengarang angka yang tidak ada. Membandingkan dua
     angka yang ada (selisih, "dua kali lipat") boleh.
     - `statistik`: ringkasan periode ini, termasuk breakdown `by_symbol`,
       `by_direction`, `by_weekday`, `by_hour` (jam buka, WIB), `by_setup`, dan
       `violations` (tanggal → aturan yang dilanggar). `max_drawdown` diukur dari
       seluruh umur akun, bukan periode ini.
-    - `perilaku`: kebiasaan di balik angka — `by_trade_of_day` (posisi ke-berapa
+    - `perilaku`: kebiasaan di balik angka, yaitu `by_trade_of_day` (posisi ke-berapa
       dalam sehari), `after_loss` (dibuka ≤60 menit setelah posisi rugi, dibanding
       lainnya), `hold_minutes` (rata-rata lama posisi menang vs kalah),
       `avg_lot` (setelah win vs setelah loss), `by_stop` (letak SL saat ditutup),
@@ -230,10 +231,10 @@ class Gemini
 
         Lalu paling banyak tiga aturan bernomor. Tiap aturan: angka yang jelas dan
         alasannya dari data. Kalau cocok dengan kolom di halaman Aturan aplikasi,
-        tulis nama kolomnya persis — "Maks. trade / hari", "Maks. loss harian",
+        tulis nama kolomnya persis: "Maks. trade / hari", "Maks. loss harian",
         "Maks. loss / trade", "RR minimum", "Maks. drawdown", atau "Sesi"
-        (Sydney, Tokyo, London, New York) — dan bandingkan dengan
-        `aturan_terpasang` kalau sudah ada nilainya.
+        (Sydney, Tokyo, London, New York). Bandingkan dengan `aturan_terpasang`
+        kalau sudah ada nilainya.
 
         Tutup dengan **Target:** satu atau dua angka yang harus tercapai di
         analisa berikutnya (mis. profit factor ≥ 1,5, atau P/L posisi ke-3+ tidak
@@ -241,7 +242,8 @@ class Gemini
 
         Larangan: sinyal, prediksi arah pasar, rekomendasi entry; nasihat tanpa
         angka ("jaga emosi", "lebih disiplin"); paragraf pembuka atau penutup di
-        luar enam bagian; mengulang angka yang sama di banyak bagian. Kalau
+        luar enam bagian; mengulang angka yang sama di banyak bagian; tanda pisah
+        (— atau –) di dalam kalimat, pakai titik atau koma. Kalau
         `statistik.total_trades` di bawah 10, awali Ringkasan dengan satu kalimat
         bahwa sampelnya masih kecil sehingga semua temuan adalah dugaan.
         TXT;
@@ -278,12 +280,13 @@ class Gemini
 
         Gaya jawaban:
         - Bahasa Indonesia, santai tapi padat. Ini percakapan, bukan laporan.
-        - Pendek secukupnya — biasanya 2-5 kalimat atau satu daftar singkat.
+        - Pendek secukupnya, biasanya 2-5 kalimat atau satu daftar singkat.
           Panjangkan hanya kalau pertanyaannya memang menuntut itu.
         - Markdown seperlunya: **tebal** untuk angka kunci, daftar berpoin untuk
           hal sejajar. Jangan pakai judul `##` dan jangan membuat laporan tujuh bagian.
         - Setiap klaim tentang cara dia trading harus menyebut angka pendukungnya.
         - Jangan mengulang seluruh statistik kalau yang ditanya cuma satu hal.
+        - Jangan pakai tanda pisah (— atau –) di dalam kalimat. Pakai titik atau koma.
 
         Larangan: jangan memberi sinyal, prediksi arah pasar, atau rekomendasi entry.
         Kalau ditanya hal itu, tolak singkat lalu belokkan ke apa yang bisa dibaca

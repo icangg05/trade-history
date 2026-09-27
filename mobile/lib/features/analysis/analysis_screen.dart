@@ -243,13 +243,11 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Caption(
-                      'Model ${page.model}. Hasil terakhir tetap tersimpan walau data berubah.',
-                    ),
+                    Caption(page.model),
                     if (analysis != null)
                       Caption(
                         'Terakhir dianalisa ${dateTime(analysis.analyzedAt)}'
-                        '${analysis.stale ? ' · data sudah berubah sejak itu' : ''}',
+                        '${analysis.stale ? ' · data berubah' : ''}',
                         color: analysis.stale ? AppColors.gold : null,
                       ),
                   ],
@@ -265,39 +263,50 @@ class _AnalysisScreenState extends ConsumerState<AnalysisScreen> {
             ],
           ),
           const SizedBox(height: 14),
-          if (!page.aiEnabled)
-            const EmptyState(
-              icon: Icons.key_off_outlined,
-              message:
-                  'Kunci Gemini belum diisi. Minta admin mengisinya di halaman Admin.',
-            )
-          else if (_generating)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                children: [
-                  Shimmer(child: Panel(child: SkeletonLines(lines: 7))),
-                  SizedBox(height: 14),
-                  Text('Sedang membaca jurnalmu…'),
-                  SizedBox(height: 4),
-                  Caption(
-                    'Analisa penuh biasanya butuh 20-60 detik. Layar tidak perlu ditutup.',
+          // Kerangka "sedang membaca" → hasil analisa memudar, bukan meloncat.
+          FadeSwitch(
+            child: !page.aiEnabled
+                ? const EmptyState(
+                    key: ValueKey('off'),
+                    icon: Icons.key_off_outlined,
+                    message:
+                        'Kunci Gemini belum diisi. Minta admin mengisinya di halaman Admin.',
+                  )
+                : _generating
+                ? const Padding(
+                    key: ValueKey('busy'),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Column(
+                      children: [
+                        Shimmer(child: Panel(child: SkeletonLines(lines: 7))),
+                        SizedBox(height: 14),
+                        Text('Sedang membaca jurnalmu…'),
+                        SizedBox(height: 4),
+                        Caption(
+                          'Analisa penuh biasanya butuh 20-60 detik. Layar tidak perlu ditutup.',
+                        ),
+                      ],
+                    ),
+                  )
+                : analysis != null
+                ? Column(
+                    key: const ValueKey('done'),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      MarkdownView(analysis.markdown),
+                      const Divider(height: 24),
+                      Caption(
+                        'Ditulis ${analysis.model} atas data ${longDate(analysis.periodStart)} sampai '
+                        '${longDate(analysis.periodEnd)}. Ini bukan saran finansial, hanya pembacaan pola dari jurnalmu sendiri.',
+                      ),
+                    ],
+                  )
+                : const EmptyState(
+                    key: ValueKey('empty'),
+                    icon: Icons.auto_awesome_outlined,
+                    message: 'Belum ada analisa untuk periode ini.',
                   ),
-                ],
-              ),
-            )
-          else if (analysis != null) ...[
-            MarkdownView(analysis.markdown),
-            const Divider(height: 24),
-            Caption(
-              'Ditulis ${analysis.model} atas data ${longDate(analysis.periodStart)} sampai '
-              '${longDate(analysis.periodEnd)}. Ini bukan saran finansial, hanya pembacaan pola dari jurnalmu sendiri.',
-            ),
-          ] else
-            const EmptyState(
-              icon: Icons.auto_awesome_outlined,
-              message: 'Belum ada analisa untuk periode ini.',
-            ),
+          ),
         ],
       ),
     );

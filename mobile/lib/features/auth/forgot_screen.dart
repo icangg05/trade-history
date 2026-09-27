@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,8 +36,14 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
   bool _verified = false;
   ApiException? _error;
 
+  /// Detik sampai "Kirim ulang kode" aktif lagi. Sama dengan jeda satu kode
+  /// per menit di server: klik lebih cepat tidak mengirim email baru.
+  int _cooldown = 0;
+  Timer? _timer;
+
   @override
   void dispose() {
+    _timer?.cancel();
     for (final controller in [_email, _code, _password, _confirmation]) {
       controller.dispose();
     }
@@ -68,7 +76,16 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
         .read(sessionProvider.notifier)
         .requestResetCode(_email.text.trim());
 
-    if (mounted) setState(() => _sent = message);
+    if (!mounted) return;
+    setState(() {
+      _sent = message;
+      _cooldown = 60;
+    });
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() => _cooldown--);
+      if (_cooldown == 0) timer.cancel();
+    });
   });
 
   Future<void> _verify() => _run(() async {
@@ -126,9 +143,7 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
         ),
       ),
       const SizedBox(height: 14),
-      if (_sent == null)
-        const Caption('Kode 4 digit akan dikirim ke email ini.')
-      else if (!_verified) ...[
+      if (_sent != null && !_verified) ...[
         Notice(icon: Icons.mark_email_read_outlined, child: Text(_sent!)),
         const SizedBox(height: 14),
         TextField(
@@ -144,7 +159,7 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
             errorText: _error?['code'],
           ),
         ),
-      ] else ...[
+      ] else if (_verified) ...[
         const Notice(
           icon: Icons.verified_user_outlined,
           color: AppColors.success,
@@ -183,8 +198,12 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
         ),
         const SizedBox(height: 4),
         TextButton(
-          onPressed: _busy ? null : _send,
-          child: const Text('Kirim ulang kode'),
+          onPressed: _busy || _cooldown > 0 ? null : _send,
+          child: Text(
+            _cooldown > 0
+                ? 'Kirim ulang dalam $_cooldown detik'
+                : 'Kirim ulang kode',
+          ),
         ),
       ] else
         BusyButton(

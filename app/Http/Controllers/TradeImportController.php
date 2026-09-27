@@ -36,7 +36,7 @@ class TradeImportController extends Controller
 
         if (! $gemini->configured()) {
             return response()->json([
-                'error' => 'Kunci Gemini belum ditambahkan admin — silakan isi form secara manual.',
+                'error' => 'Kunci Gemini belum ditambahkan admin. Silakan isi form secara manual.',
             ], 503);
         }
 
@@ -68,7 +68,7 @@ class TradeImportController extends Controller
             $labels = array_map(fn (string $key) => self::REQUIRED[$key], $missing);
 
             return response()->json([
-                'error' => 'Data di gambar tidak lengkap — '.implode(', ', $labels)
+                'error' => 'Data di gambar tidak lengkap: '.implode(', ', $labels)
                     .' tidak terbaca. Unggah screenshot yang lebih jelas, atau isi form manual.',
                 'missing' => $missing,
             ], 422);

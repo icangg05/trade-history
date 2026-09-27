@@ -59,8 +59,8 @@ class StopBadge extends StatelessWidget {
 
     return Tooltip(
       message: state == StopState.breakeven
-          ? 'Stop loss di harga entry — risiko nol, R tidak dihitung'
-          : 'Stop loss sudah lewat entry — profit terkunci, R tidak dihitung',
+          ? 'Stop loss di harga entry, jadi risiko nol dan R tidak dihitung'
+          : 'Stop loss sudah lewat entry, jadi profit terkunci dan R tidak dihitung',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
         decoration: BoxDecoration(

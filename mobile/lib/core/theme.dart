@@ -20,8 +20,12 @@ abstract final class AppColors {
   static const accent = Color(0xFF242B38);
   static const accentForeground = Color(0xFFFBC641);
 
-  /// Data sekunder: deposit/withdrawal di grafik, penanda BE / SL+.
+  /// Data sekunder: penanda BE / SL+.
   static const cyan = Color(0xFF28DEF6);
+
+  /// Penarikan dana di grafik ekuitas. Komplementer emas dan jauh dari hijau
+  /// deposit — merah terlalu dekat dengan garis emas, apalagi bagi buta warna.
+  static const violet = Color(0xFFA78BFA);
 
   /// Rugi, hari merah, pelanggaran aturan — teks dan ikon di atas latar
   /// gelap. Sedikit lebih terang dari web: merah web hanya 4,2:1 di atas

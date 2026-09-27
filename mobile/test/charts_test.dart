@@ -8,8 +8,10 @@ import 'package:fl_chart/src/chart/base/base_chart/base_chart_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:trade_history/core/theme.dart';
 import 'package:trade_history/features/dashboard/charts.dart';
 import 'package:trade_history/models/stats.dart';
+import 'package:trade_history/widgets/skeleton.dart';
 
 import 'support.dart';
 
@@ -104,6 +106,51 @@ void main() {
       ]),
       [0, 200, 200],
     );
+  });
+
+  testWidgets('titik deposit hijau, withdrawal ungu; memuat → kerangka', (
+    tester,
+  ) async {
+    await initializeDateFormatting('id_ID');
+    Widget host(bool loading) => MaterialApp(
+      home: Scaffold(
+        body: Skeletonize(
+          enabled: loading,
+          child: EquityChart(
+            currency: 'USD',
+            points: [
+              point('2026-07-01', 0, balance: 5000, flow: 5000),
+              point('2026-07-02', 200, balance: 5200),
+              point('2026-07-03', 0, balance: 4200, flow: -1000),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(host(false));
+    final bar = tester
+        .widget<LineChart>(find.byType(LineChart))
+        .data
+        .lineBarsData
+        .single;
+    Color dot(int i) =>
+        (bar.dotData.getDotPainter(bar.spots[i], 0, bar, i)
+                as FlDotCirclePainter)
+            .color;
+
+    expect(dot(0), AppColors.success);
+    expect(dot(2), AppColors.violet);
+    expect(bar.dotData.checkToShowDot(bar.spots[1], bar), isFalse);
+
+    // Grafik lama memudar keluar, lalu hilang.
+    await tester.pumpWidget(host(true));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(LineChart), findsNothing);
+
+    // Kerangka memudar keluar tanpa sempat melukis grafik lama.
+    await tester.pumpWidget(host(false));
+    expect(find.byType(LineChart), findsOneWidget);
   });
 
   // Seluruh kolom bisa disentuh, bukan hanya batangnya: di atas dan di bawah

@@ -22,7 +22,7 @@ class PasswordResetCode extends Notification
             ->greeting('Halo '.$notifiable->name.',')
             ->line('Masukkan kode ini di aplikasi untuk membuat kata sandi baru:')
             ->line('**'.$this->code.'**')
-            ->line("Kode berlaku {$this->minutes} menit. Kalau kamu tidak memintanya, abaikan email ini — sandimu tidak berubah.")
+            ->line("Kode berlaku {$this->minutes} menit. Kalau kamu tidak memintanya, abaikan email ini. Sandimu tidak berubah.")
             ->salutation(config('app.name'));
     }
 }

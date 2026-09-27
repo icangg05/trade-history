@@ -58,8 +58,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   bool _cumulative = false;
 
   /// Isi yang terakhir tampil. Ganti periode berarti provider baru yang mulai
-  /// dari kosong; selama memuat, isi lama tetap tampil supaya kerangka tidak
-  /// mengganti daftar dan melempar posisi gulir ke atas.
+  /// dari kosong; selama memuat, isi lama tetap tampil — bagian yang ikut
+  /// periode dilukis sebagai kerangka — supaya daftar tidak diganti dan posisi
+  /// gulir tidak terlempar ke atas.
   (int, Dashboard)? _shown;
 
   @override
@@ -70,11 +71,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       final key = (account.id, _range);
       var value = ref.watch(dashboardProvider(key));
       final shown = _shown;
+      var stale = false;
 
       if (value.hasValue) {
         _shown = (account.id, value.requireValue);
       } else if (value.isLoading && shown != null && shown.$1 == account.id) {
         value = AsyncData(shown.$2);
+        stale = true;
       }
 
       return RefreshIndicator(
@@ -83,13 +86,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           value: value,
           onRetry: () => ref.invalidate(dashboardProvider(key)),
           loading: _loading,
-          builder: (data) => _content(data, account.id),
+          builder: (data) => _content(data, account.id, stale),
         ),
       );
     },
   );
 
-  Widget _content(Dashboard data, int account) {
+  Widget _content(Dashboard data, int account, bool stale) {
     final summary = data.summary;
     final currency = summary.currency;
 
@@ -101,7 +104,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           const _FirstSteps(),
           const SizedBox(height: 14),
         ],
-        Caption('${longDate(summary.from)} — ${longDate(summary.to)}'),
+        Skeletonize(
+          enabled: stale,
+          child: Caption('${longDate(summary.from)} sampai ${longDate(summary.to)}'),
+        ),
         const SizedBox(height: 10),
         Segments(
           value: _range,
@@ -109,49 +115,52 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           onChanged: (value) => setState(() => _range = value),
         ),
         const SizedBox(height: 14),
-        StatGrid(
-          children: [
-            StatCard(
-              label: 'Saldo',
-              value: money(summary.balance, currency),
-              hint: 'Total setor ${money(summary.totalDeposited, currency)}',
-              tone: Tone.gold,
-            ),
-            StatCard(
-              label: 'P/L periode',
-              value: money(summary.netPnl, currency, signed: true),
-              hint: 'Pertumbuhan ${pct(data.growthPct)}',
-              tone: summary.netPnl >= 0 ? Tone.good : Tone.bad,
-            ),
-            StatCard(
-              label: 'Winrate',
-              value: pct(summary.winRate),
-              hint: '${summary.wins}W / ${summary.losses}L',
-            ),
-            // Pasangan winrate: seberapa besar menangnya dibanding kalahnya.
-            StatCard(
-              label: 'Rata-rata win',
-              value: money(summary.avgWin, currency, signed: true),
-              hint:
-                  'Rata-rata loss ${money(-summary.avgLoss, currency, signed: true)}',
-              tone: Tone.good,
-            ),
-            StatCard(
-              label: 'Profit factor',
-              value: summary.profitFactor == null
-                  ? '—'
-                  : number(summary.profitFactor),
-              hint:
-                  'Rata-rata ${money(summary.expectancy, currency, signed: true)} per trade',
-              tone: (summary.profitFactor ?? 0) >= 1 ? Tone.good : Tone.bad,
-            ),
-            StatCard(
-              label: 'Max drawdown',
-              value: money(summary.maxDrawdown, currency),
-              hint: pct(summary.maxDrawdownPct),
-              tone: Tone.bad,
-            ),
-          ],
+        Skeletonize(
+          enabled: stale,
+          child: StatGrid(
+            children: [
+              StatCard(
+                label: 'Saldo',
+                value: money(summary.balance, currency),
+                hint: 'Total setor ${money(summary.totalDeposited, currency)}',
+                tone: Tone.gold,
+              ),
+              StatCard(
+                label: 'P/L periode',
+                value: money(summary.netPnl, currency, signed: true),
+                hint: 'Pertumbuhan ${pct(data.growthPct)}',
+                tone: summary.netPnl >= 0 ? Tone.good : Tone.bad,
+              ),
+              StatCard(
+                label: 'Winrate',
+                value: pct(summary.winRate),
+                hint: '${summary.wins}W / ${summary.losses}L',
+              ),
+              // Pasangan winrate: seberapa besar menangnya dibanding kalahnya.
+              StatCard(
+                label: 'Rata-rata win',
+                value: money(summary.avgWin, currency, signed: true),
+                hint:
+                    'Rata-rata loss ${money(-summary.avgLoss, currency, signed: true)}',
+                tone: Tone.good,
+              ),
+              StatCard(
+                label: 'Profit factor',
+                value: summary.profitFactor == null
+                    ? '—'
+                    : number(summary.profitFactor),
+                hint:
+                    'Rata-rata ${money(summary.expectancy, currency, signed: true)} per trade',
+                tone: (summary.profitFactor ?? 0) >= 1 ? Tone.good : Tone.bad,
+              ),
+              StatCard(
+                label: 'Max drawdown',
+                value: money(summary.maxDrawdown, currency),
+                hint: pct(summary.maxDrawdownPct),
+                tone: Tone.bad,
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 14),
         Panel(
@@ -165,14 +174,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 onChanged: (value) => setState(() => _cumulative = value),
               ),
               const SizedBox(height: 14),
-              EquityChart(
-                points: data.equity,
-                currency: currency,
-                pnl: _cumulative,
+              Skeletonize(
+                enabled: stale,
+                child: EquityChart(
+                  points: data.equity,
+                  currency: currency,
+                  pnl: _cumulative,
+                ),
               ),
               const SizedBox(height: 6),
               const Caption(
-                'Titik cyan menandai hari dengan deposit atau withdrawal.',
+                'Titik hijau menandai deposit, titik ungu withdrawal.',
               ),
             ],
           ),
@@ -193,7 +205,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 onChanged: (value) => setState(() => _range = value),
               ),
               const SizedBox(height: 14),
-              PeriodPnlChart(data: data),
+              Skeletonize(
+                enabled: stale,
+                child: PeriodPnlChart(data: data),
+              ),
             ],
           ),
         ),

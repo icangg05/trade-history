@@ -92,6 +92,18 @@ class AccountSecurityTest extends TestCase
         $this->assertSame(0, $user->tokens()->count());
     }
 
+    public function test_email_kode_gagal_terkirim_tidak_dilaporkan_berhasil(): void
+    {
+        // SMTP menolak (port tertutup) → galat di layar, kodenya dibuang
+        // supaya "kirim ulang" tidak terkunci semenit.
+        config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => '127.0.0.1', 'mail.mailers.smtp.port' => 1]);
+        User::factory()->create(['email' => 'saya@contoh.com']);
+
+        $this->postJson('/api/v1/auth/password/forgot', ['email' => 'saya@contoh.com'])
+            ->assertJsonValidationErrors(['email' => 'Email gagal dikirim. Coba lagi nanti.']);
+        $this->assertDatabaseMissing('password_reset_tokens', ['email' => 'saya@contoh.com']);
+    }
+
     public function test_lupa_sandi_dengan_kode_4_digit(): void
     {
         Notification::fake();
@@ -180,6 +192,34 @@ class AccountSecurityTest extends TestCase
 
         $reset($sentCode())->assertJsonValidationErrors(['code' => 'Terlalu banyak kode salah']);
         $this->assertFalse(Hash::check('sandi-baru-panjang', $user->fresh()->password));
+    }
+
+    public function test_kirim_ulang_membatalkan_kode_lama(): void
+    {
+        $user = User::factory()->create(['email' => 'saya@contoh.com']);
+        $send = function () use ($user) {
+            Notification::fake();
+            $this->postJson('/api/v1/auth/password/forgot', ['email' => 'saya@contoh.com'])->assertOk();
+            $code = null;
+            Notification::assertSentTo($user, PasswordResetCode::class, function (PasswordResetCode $n) use (&$code) {
+                $code = $n->code;
+
+                return true;
+            });
+
+            return $code;
+        };
+        $verify = fn (string $code) => $this->postJson('/api/v1/auth/password/verify', ['email' => 'saya@contoh.com', 'code' => $code]);
+
+        $old = $send();
+        $this->travel(2)->minutes();
+        $new = $send();
+
+        // Peluang 1:10.000 kodenya kembar; saat itu kode lama memang kode baru.
+        if ($old !== $new) {
+            $verify($old)->assertJsonValidationErrorFor('code');
+        }
+        $verify($new)->assertOk();
     }
 
     public function test_kode_kedaluwarsa_setelah_15_menit(): void

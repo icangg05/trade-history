@@ -9,9 +9,9 @@ import 'theme.dart';
 const _locale = 'id_ID';
 
 const currencies = <(String, String)>[
-  ('USD', 'USD — Dolar AS'),
-  ('USC', 'USC — Sen dolar (akun cent)'),
-  ('IDR', 'IDR — Rupiah'),
+  ('USD', 'USD (Dolar AS)'),
+  ('USC', 'USC (sen dolar, akun cent)'),
+  ('IDR', 'IDR (Rupiah)'),
 ];
 
 const _digits = {'USD': 2, 'USC': 2, 'IDR': 0};

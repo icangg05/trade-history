@@ -83,7 +83,6 @@ class AnnualReport
             'currency' => $currency,
             'started_at' => $account->started_at->toDateString(),
             'is_archived' => (bool) $account->is_archived,
-            'initial_balance' => round((float) $account->initial_balance, 2),
 
             // Rekonsiliasi: awal + setor − tarik + laba/rugi = akhir. Identitas ini
             // seimbang menurut definisi karena AccountStats::balance() dibangun begitu;

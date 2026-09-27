@@ -8,6 +8,7 @@ import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../models/stats.dart';
 import '../../widgets/common.dart';
+import '../../widgets/skeleton.dart';
 
 /// Label sumbu grafik ikut ukuran huruf sistem sampai 130%, lalu berhenti:
 /// grafik tidak bisa mengalir ulang seperti teks, dan angka lengkapnya ada di
@@ -18,7 +19,7 @@ TextScaler _axisScaler(BuildContext context) =>
 
 /// Kurva perkembangan akun. `pnl = true` menampilkan P/L kumulatif: saldo
 /// dikurangi saldo awal dan seluruh setoran/penarikan, supaya deposit tidak
-/// terbaca sebagai profit. Titik cyan menandai hari dengan arus dana.
+/// terbaca sebagai profit. Titik hijau menandai hari deposit, ungu withdrawal.
 class EquityChart extends StatelessWidget {
   const EquityChart({
     super.key,
@@ -69,9 +70,10 @@ class EquityChart extends StatelessWidget {
     if (hi == lo) hi = lo + step;
     final xMax = xs.last == 0 ? 1.0 : xs.last;
 
+    // Arus dana per x: tanda (+/−) menentukan warna titiknya.
     final flows = {
       for (var i = 0; i < points.length; i++)
-        if (points[i].flow != 0) xs[i],
+        if (points[i].flow != 0) xs[i]: points[i].flow,
     };
 
     String dateAt(double x) => DateFormat(
@@ -92,107 +94,110 @@ class EquityChart extends StatelessWidget {
       excludeSemantics: true,
       child: SizedBox(
         height: height,
-        child: LineChart(
-          LineChartData(
-            minX: 0,
-            maxX: xMax,
-            minY: lo,
-            maxY: hi,
-            clipData: const FlClipData.all(),
-            borderData: FlBorderData(show: false),
-            gridData: FlGridData(
-              drawVerticalLine: false,
-              horizontalInterval: step,
-              getDrawingHorizontalLine: (_) => const FlLine(
-                color: AppColors.border,
-                strokeWidth: 1,
-                dashArray: [4, 4],
+        child: ChartBone(
+          child: LineChart(
+            LineChartData(
+              minX: 0,
+              maxX: xMax,
+              minY: lo,
+              maxY: hi,
+              clipData: const FlClipData.all(),
+              borderData: FlBorderData(show: false),
+              gridData: FlGridData(
+                drawVerticalLine: false,
+                horizontalInterval: step,
+                getDrawingHorizontalLine: (_) => const FlLine(
+                  color: AppColors.border,
+                  strokeWidth: 1,
+                  dashArray: [4, 4],
+                ),
               ),
-            ),
-            titlesData: FlTitlesData(
-              topTitles: const AxisTitles(),
-              leftTitles: const AxisTitles(),
-              rightTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: axis.scale(11) * 4.2,
-                  interval: step,
-                  getTitlesWidget: (value, meta) => SideTitleWidget(
-                    meta: meta,
-                    child: Text(
-                      compact(value),
-                      textScaler: axis,
-                      style: mono(size: 11, color: AppColors.mutedForeground),
+              titlesData: FlTitlesData(
+                topTitles: const AxisTitles(),
+                leftTitles: const AxisTitles(),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: axis.scale(11) * 4.2,
+                    interval: step,
+                    getTitlesWidget: (value, meta) => SideTitleWidget(
+                      meta: meta,
+                      child: Text(
+                        compact(value),
+                        textScaler: axis,
+                        style: mono(size: 11, color: AppColors.mutedForeground),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: axis.scale(11) * 1.4 + 6,
-                  interval: xMax / 2,
-                  getTitlesWidget: (value, meta) => SideTitleWidget(
-                    meta: meta,
-                    fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
-                    child: Text(
-                      dateAt(value),
-                      textScaler: axis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.mutedForeground,
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: axis.scale(11) * 1.4 + 6,
+                    interval: xMax / 2,
+                    getTitlesWidget: (value, meta) => SideTitleWidget(
+                      meta: meta,
+                      fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                      child: Text(
+                        dateAt(value),
+                        textScaler: axis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.mutedForeground,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            lineTouchData: LineTouchData(
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (_) => AppColors.popover,
-                tooltipBorder: const BorderSide(color: AppColors.border),
-                tooltipBorderRadius: BorderRadius.circular(8),
-                fitInsideHorizontally: true,
-                fitInsideVertically: true,
-                getTooltipItems: (spots) => [
-                  for (final spot in spots)
-                    _tooltip(points[spots.first.spotIndex], spot.y),
-                ],
+              lineTouchData: LineTouchData(
+                touchTooltipData: LineTouchTooltipData(
+                  getTooltipColor: (_) => AppColors.popover,
+                  tooltipBorder: const BorderSide(color: AppColors.border),
+                  tooltipBorderRadius: BorderRadius.circular(8),
+                  fitInsideHorizontally: true,
+                  fitInsideVertically: true,
+                  getTooltipItems: (spots) => [
+                    for (final spot in spots)
+                      _tooltip(points[spots.first.spotIndex], spot.y),
+                  ],
+                ),
               ),
-            ),
-            lineBarsData: [
-              LineChartBarData(
-                spots: [
-                  for (var i = 0; i < points.length; i++) FlSpot(xs[i], ys[i]),
-                ],
-                color: AppColors.gold,
-                barWidth: 2,
-                isStrokeCapRound: true,
-                belowBarData: BarAreaData(
-                  show: true,
-                  applyCutOffY: true,
-                  cutOffY: math.max(lo, 0),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.gold.withValues(alpha: .28),
-                      AppColors.gold.withValues(alpha: 0),
-                    ],
+              lineBarsData: [
+                LineChartBarData(
+                  spots: [
+                    for (var i = 0; i < points.length; i++)
+                      FlSpot(xs[i], ys[i]),
+                  ],
+                  color: AppColors.gold,
+                  barWidth: 2,
+                  isStrokeCapRound: true,
+                  belowBarData: BarAreaData(
+                    show: true,
+                    applyCutOffY: true,
+                    cutOffY: math.max(lo, 0),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppColors.gold.withValues(alpha: .28),
+                        AppColors.gold.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                  dotData: FlDotData(
+                    checkToShowDot: (spot, _) => flows.containsKey(spot.x),
+                    getDotPainter: (spot, percent, bar, index) =>
+                        FlDotCirclePainter(
+                          radius: 2.5,
+                          color: _flowColor(flows[spot.x] ?? 0),
+                          strokeWidth: 1,
+                          strokeColor: AppColors.background,
+                        ),
                   ),
                 ),
-                dotData: FlDotData(
-                  checkToShowDot: (spot, _) => flows.contains(spot.x),
-                  getDotPainter: (spot, percent, bar, index) =>
-                      FlDotCirclePainter(
-                        radius: 2,
-                        color: AppColors.cyan,
-                        strokeWidth: 1,
-                        strokeColor: AppColors.background,
-                      ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -220,11 +225,16 @@ class EquityChart extends StatelessWidget {
         TextSpan(
           text:
               '\n${point.flow > 0 ? 'Deposit' : 'Withdrawal'} ${money(point.flow.abs(), currency)}',
-          style: mono(size: 11, color: AppColors.cyan),
+          style: mono(size: 11, color: _flowColor(point.flow)),
         ),
     ],
   );
 }
+
+/// Deposit hijau, withdrawal ungu — bukan merah, supaya tidak melebur dengan
+/// garis emas.
+Color _flowColor(double flow) =>
+    flow > 0 ? AppColors.success : AppColors.violet;
 
 /// P/L kumulatif per titik: saldo dikurangi saldo pembuka dan seluruh
 /// setoran/penarikan sejauh itu. Saldo pembuka diambil sebelum titik pertama
@@ -379,7 +389,7 @@ class _PeriodPnlChartState extends State<PeriodPnlChart> {
     String title(DateTime start) => switch (unit) {
       PnlStep.day => longDate(start),
       PnlStep.week =>
-        '${format('d MMM', start)} – ${longDate(DateTime(start.year, start.month, start.day + 6))}',
+        '${format('d MMM', start)} sampai ${longDate(DateTime(start.year, start.month, start.day + 6))}',
       PnlStep.month => format('MMMM y', start),
       PnlStep.year => '${start.year}',
     };
@@ -476,190 +486,195 @@ class _PeriodPnlChartState extends State<PeriodPnlChart> {
           excludeSemantics: true,
           child: SizedBox(
             height: 170,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // Batang mengisi 70% jatahnya, di luar sumbu kiri: 31 batang
-                // harian tetap muat, 3 batang bulanan tidak jadi lidi.
-                final slot =
-                    (constraints.maxWidth - axis.scale(11) * 3.6) / bars.length;
-                final width = (slot * .7).clamp(3.0, 32.0);
-                final touched = _touch?.$1;
-                final upper = _touch?.$2 ?? false;
+            child: ChartBone(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Batang mengisi 70% jatahnya, di luar sumbu kiri: 31 batang
+                  // harian tetap muat, 3 batang bulanan tidak jadi lidi.
+                  final slot =
+                      (constraints.maxWidth - axis.scale(11) * 3.6) /
+                      bars.length;
+                  final width = (slot * .7).clamp(3.0, 32.0);
+                  final touched = _touch?.$1;
+                  final upper = _touch?.$2 ?? false;
 
-                return BarChart(
-                  duration: MediaQuery.disableAnimationsOf(context)
-                      ? Duration.zero
-                      : const Duration(milliseconds: 150),
-                  BarChartData(
-                    minY: bottom,
-                    maxY: top,
-                    alignment: BarChartAlignment.spaceAround,
-                    borderData: FlBorderData(show: false),
-                    gridData: FlGridData(
-                      drawVerticalLine: false,
-                      horizontalInterval: step,
-                      getDrawingHorizontalLine: (value) =>
-                          value.abs() < step / 1000
-                          ? const FlLine(
-                              color: AppColors.border,
-                              strokeWidth: 1,
-                            )
-                          : FlLine(
-                              color: AppColors.border.withValues(alpha: .45),
-                              strokeWidth: 1,
-                              dashArray: const [3, 3],
-                            ),
-                    ),
-                    titlesData: FlTitlesData(
-                      topTitles: const AxisTitles(),
-                      rightTitles: const AxisTitles(),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: axis.scale(11) * 3.6,
-                          interval: step,
-                          getTitlesWidget: (value, meta) => SideTitleWidget(
-                            meta: meta,
-                            child: Text(
-                              compact(value),
-                              textScaler: axis,
-                              style: mono(
-                                size: 11,
-                                color: AppColors.mutedForeground,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          // Dua baris label + jarak 4.
-                          reservedSize: axis.scale(11) * 1.5 * 2 + 6,
-                          getTitlesWidget: (value, meta) {
-                            final index = value.toInt();
-
-                            if (index % every != 0) return const SizedBox();
-
-                            final (main, sub) = tick(index);
-
-                            return SideTitleWidget(
-                              meta: meta,
-                              space: 4,
-                              child: Column(
-                                children: [
-                                  for (final text in [main, ?sub])
-                                    Text(
-                                      text,
-                                      textScaler: axis,
-                                      style: mono(
-                                        size: 11,
-                                        color: AppColors.mutedForeground,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    // Seluruh kolom bisa disentuh, bukan hanya batangnya: jalur
-                    // latar setinggi grafik, dan celah antarbatang dibagi dua
-                    // ke kiri-kanan. Batang harian cuma beberapa px lebarnya.
-                    barTouchData: BarTouchData(
-                      allowTouchBarBackDraw: true,
-                      touchExtraThreshold: EdgeInsets.symmetric(
-                        horizontal: math.max(0, (slot - width) / 2),
-                      ),
-                      touchCallback: (event, response) {
-                        final spot = response?.spot;
-                        final next =
-                            event.isInterestedForInteractions && spot != null
-                            ? (
-                                spot.touchedBarGroupIndex,
-                                response!.touchChartCoordinate.dy >
-                                    (top + bottom) / 2,
+                  return BarChart(
+                    duration: MediaQuery.disableAnimationsOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 150),
+                    BarChartData(
+                      minY: bottom,
+                      maxY: top,
+                      alignment: BarChartAlignment.spaceAround,
+                      borderData: FlBorderData(show: false),
+                      gridData: FlGridData(
+                        drawVerticalLine: false,
+                        horizontalInterval: step,
+                        getDrawingHorizontalLine: (value) =>
+                            value.abs() < step / 1000
+                            ? const FlLine(
+                                color: AppColors.border,
+                                strokeWidth: 1,
                               )
-                            : null;
-
-                        if (next != _touch) setState(() => _touch = next);
-                      },
-                      touchTooltipData: BarTouchTooltipData(
-                        // Di separuh yang tidak disentuh: margin sebesar ini
-                        // melewati tepi grafik, lalu `fitInsideVertically`
-                        // menempelkannya di tepi atas atau bawah.
-                        direction: upper
-                            ? TooltipDirection.bottom
-                            : TooltipDirection.top,
-                        tooltipMargin: 1000,
-                        getTooltipColor: (_) => AppColors.popover,
-                        tooltipBorder: const BorderSide(
-                          color: AppColors.border,
-                        ),
-                        tooltipBorderRadius: BorderRadius.circular(8),
-                        fitInsideHorizontally: true,
-                        fitInsideVertically: true,
-                        getTooltipItem: (group, _, rod, _) => BarTooltipItem(
-                          '${title(bars[group.x].start)}\n',
-                          const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.mutedForeground,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: money(rod.toY, currency, signed: true),
-                              style: mono(
-                                size: 12,
-                                weight: FontWeight.w600,
-                                color: pnlColor(rod.toY),
+                            : FlLine(
+                                color: AppColors.border.withValues(alpha: .45),
+                                strokeWidth: 1,
+                                dashArray: const [3, 3],
+                              ),
+                      ),
+                      titlesData: FlTitlesData(
+                        topTitles: const AxisTitles(),
+                        rightTitles: const AxisTitles(),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: axis.scale(11) * 3.6,
+                            interval: step,
+                            getTitlesWidget: (value, meta) => SideTitleWidget(
+                              meta: meta,
+                              child: Text(
+                                compact(value),
+                                textScaler: axis,
+                                style: mono(
+                                  size: 11,
+                                  color: AppColors.mutedForeground,
+                                ),
                               ),
                             ),
-                          ],
+                          ),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            // Dua baris label + jarak 4.
+                            reservedSize: axis.scale(11) * 1.5 * 2 + 6,
+                            getTitlesWidget: (value, meta) {
+                              final index = value.toInt();
+
+                              if (index % every != 0) return const SizedBox();
+
+                              final (main, sub) = tick(index);
+
+                              return SideTitleWidget(
+                                meta: meta,
+                                space: 4,
+                                child: Column(
+                                  children: [
+                                    for (final text in [main, ?sub])
+                                      Text(
+                                        text,
+                                        textScaler: axis,
+                                        style: mono(
+                                          size: 11,
+                                          color: AppColors.mutedForeground,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                    barGroups: [
-                      for (var i = 0; i < bars.length; i++)
-                        BarChartGroupData(
-                          x: i,
-                          barRods: [
-                            BarChartRodData(
-                              toY: bars[i].pnl,
-                              width: width,
-                              color:
-                                  (bars[i].pnl >= 0
-                                          ? AppColors.success
-                                          : AppColors.destructive)
-                                      .withValues(
-                                        alpha: touched == null
-                                            ? .75
-                                            : i == touched
-                                            ? 1
-                                            : .35,
-                                      ),
-                              borderRadius: BorderRadius.circular(2),
-                              // Jalur samar di tiap slot: hari tanpa trade
-                              // tetap terlihat, grafik tidak bolong. Arahnya
-                              // harus searah batang: fl_chart memakai `fromY`
-                              // jalur sebagai pangkal area sentuh, jadi jalur
-                              // yang berlawanan arah membuat kolom batang merah
-                              // tidak bisa disentuh (tooltip tidak muncul).
-                              backDrawRodData: BackgroundBarChartRodData(
-                                show: true,
-                                fromY: bars[i].pnl >= 0 ? bottom : top,
-                                toY: bars[i].pnl >= 0 ? top : bottom,
-                                color: i == touched
-                                    ? AppColors.foreground.withValues(alpha: .1)
-                                    : AppColors.border.withValues(alpha: .3),
-                              ),
-                            ),
-                          ],
+                      // Seluruh kolom bisa disentuh, bukan hanya batangnya: jalur
+                      // latar setinggi grafik, dan celah antarbatang dibagi dua
+                      // ke kiri-kanan. Batang harian cuma beberapa px lebarnya.
+                      barTouchData: BarTouchData(
+                        allowTouchBarBackDraw: true,
+                        touchExtraThreshold: EdgeInsets.symmetric(
+                          horizontal: math.max(0, (slot - width) / 2),
                         ),
-                    ],
-                  ),
-                );
-              },
+                        touchCallback: (event, response) {
+                          final spot = response?.spot;
+                          final next =
+                              event.isInterestedForInteractions && spot != null
+                              ? (
+                                  spot.touchedBarGroupIndex,
+                                  response!.touchChartCoordinate.dy >
+                                      (top + bottom) / 2,
+                                )
+                              : null;
+
+                          if (next != _touch) setState(() => _touch = next);
+                        },
+                        touchTooltipData: BarTouchTooltipData(
+                          // Di separuh yang tidak disentuh: margin sebesar ini
+                          // melewati tepi grafik, lalu `fitInsideVertically`
+                          // menempelkannya di tepi atas atau bawah.
+                          direction: upper
+                              ? TooltipDirection.bottom
+                              : TooltipDirection.top,
+                          tooltipMargin: 1000,
+                          getTooltipColor: (_) => AppColors.popover,
+                          tooltipBorder: const BorderSide(
+                            color: AppColors.border,
+                          ),
+                          tooltipBorderRadius: BorderRadius.circular(8),
+                          fitInsideHorizontally: true,
+                          fitInsideVertically: true,
+                          getTooltipItem: (group, _, rod, _) => BarTooltipItem(
+                            '${title(bars[group.x].start)}\n',
+                            const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.mutedForeground,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: money(rod.toY, currency, signed: true),
+                                style: mono(
+                                  size: 12,
+                                  weight: FontWeight.w600,
+                                  color: pnlColor(rod.toY),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      barGroups: [
+                        for (var i = 0; i < bars.length; i++)
+                          BarChartGroupData(
+                            x: i,
+                            barRods: [
+                              BarChartRodData(
+                                toY: bars[i].pnl,
+                                width: width,
+                                color:
+                                    (bars[i].pnl >= 0
+                                            ? AppColors.success
+                                            : AppColors.destructive)
+                                        .withValues(
+                                          alpha: touched == null
+                                              ? .75
+                                              : i == touched
+                                              ? 1
+                                              : .35,
+                                        ),
+                                borderRadius: BorderRadius.circular(2),
+                                // Jalur samar di tiap slot: hari tanpa trade
+                                // tetap terlihat, grafik tidak bolong. Arahnya
+                                // harus searah batang: fl_chart memakai `fromY`
+                                // jalur sebagai pangkal area sentuh, jadi jalur
+                                // yang berlawanan arah membuat kolom batang merah
+                                // tidak bisa disentuh (tooltip tidak muncul).
+                                backDrawRodData: BackgroundBarChartRodData(
+                                  show: true,
+                                  fromY: bars[i].pnl >= 0 ? bottom : top,
+                                  toY: bars[i].pnl >= 0 ? top : bottom,
+                                  color: i == touched
+                                      ? AppColors.foreground.withValues(
+                                          alpha: .1,
+                                        )
+                                      : AppColors.border.withValues(alpha: .3),
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),

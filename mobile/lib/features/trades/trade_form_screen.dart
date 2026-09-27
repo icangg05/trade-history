@@ -45,31 +45,38 @@ class TradeFormScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final account = ref.watch(currentAccountProvider).value;
 
-    if (account == null) {
-      return Scaffold(appBar: AppBar(), body: _loading);
-    }
+    final loading = Scaffold(
+      key: const ValueKey('loading'),
+      appBar: AppBar(),
+      body: _loading,
+    );
+
+    if (account == null) return FadeSwitch(child: loading);
 
     final key = (account.id, tradeId);
 
-    return ref
-        .watch(_formProvider(key))
-        .when(
-          loading: () => Scaffold(appBar: AppBar(), body: _loading),
-          error: (error, _) => Scaffold(
-            appBar: AppBar(),
-            body: ErrorView(
-              error: error,
-              onRetry: () => ref.invalidate(_formProvider(key)),
+    return FadeSwitch(
+      child: ref
+          .watch(_formProvider(key))
+          .when(
+            loading: () => loading,
+            error: (error, _) => Scaffold(
+              key: const ValueKey('error'),
+              appBar: AppBar(),
+              body: ErrorView(
+                error: error,
+                onRetry: () => ref.invalidate(_formProvider(key)),
+              ),
+            ),
+            data: (data) => _TradeForm(
+              account: account.id,
+              currency: account.currency,
+              trade: data.$1,
+              aiEnabled: data.$2,
+              symbols: data.$3,
             ),
           ),
-          data: (data) => _TradeForm(
-            account: account.id,
-            currency: account.currency,
-            trade: data.$1,
-            aiEnabled: data.$2,
-            symbols: data.$3,
-          ),
-        );
+    );
   }
 }
 
@@ -196,11 +203,11 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
     if (e == null || sl == null || _stopOnLossSide) return null;
 
     if (sl == e) {
-      return 'Stop loss persis di harga entry — posisi break-even, risiko sudah nol. Nilai R tidak dihitung.';
+      return 'Stop loss persis di harga entry, jadi posisi break-even dan risiko sudah nol. Nilai R tidak dihitung.';
     }
 
-    return 'Stop loss ${_direction == 'buy' ? 'di atas' : 'di bawah'} entry (SL+) — sebagian profit sudah dikunci, '
-        'posisi tidak bisa rugi lagi. Nilai R tidak dihitung.';
+    return 'Stop loss ${_direction == 'buy' ? 'di atas' : 'di bawah'} entry (SL+). Sebagian profit sudah dikunci, '
+        'jadi posisi tidak bisa rugi lagi. Nilai R tidak dihitung.';
   }
 
   bool get _tpSideWrong {
@@ -210,7 +217,7 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
   }
 
   String? _badge(String field) {
-    if (_lowConfidence.contains(field)) return 'AI ragu — periksa';
+    if (_lowConfidence.contains(field)) return 'AI ragu, periksa lagi';
 
     return _aiFields.contains(field) ? 'Diisi AI' : null;
   }
@@ -453,7 +460,7 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
             )
           else if (!_editing)
             const Caption(
-              'Import AI nonaktif — kunci Gemini belum diisi admin.',
+              'Import AI nonaktif karena kunci Gemini belum diisi admin.',
             ),
           if (_aiFields.isNotEmpty) ...[
             const SizedBox(height: 12),

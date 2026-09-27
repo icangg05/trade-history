@@ -281,7 +281,7 @@ void main() {
     for (final (menu, marker) in [
       ('Aturan trading', 'Catatan pribadi'),
       ('Analisa', 'Statistik dihitung'),
-      ('Laporan tahunan', 'Berkas PDF A4'),
+      ('Laporan tahunan', 'Rekap satu tahun pajak'),
       ('Akun trading', 'Tiap akun punya riwayat'),
       ('Profil', 'Data login kamu.'),
       ('Perangkat', 'keluar dengan sendirinya'),

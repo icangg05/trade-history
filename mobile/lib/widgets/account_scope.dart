@@ -58,13 +58,23 @@ class AccountScaffold extends ConsumerWidget {
       floatingActionButton: account == null
           ? null
           : floatingActionButton?.call(account),
-      body: current.when(
-        skipLoadingOnReload: true,
-        loading: () => loading,
-        error: (error, _) =>
-            ErrorView(error: error, onRetry: () => ref.invalidate(meProvider)),
-        data: (account) =>
-            account == null ? const NoAccount() : body(context, account),
+      body: FadeSwitch(
+        child: current.when(
+          skipLoadingOnReload: true,
+          loading: () =>
+              KeyedSubtree(key: const ValueKey('loading'), child: loading),
+          error: (error, _) => ErrorView(
+            key: const ValueKey('error'),
+            error: error,
+            onRetry: () => ref.invalidate(meProvider),
+          ),
+          data: (account) => account == null
+              ? const NoAccount(key: ValueKey('none'))
+              : KeyedSubtree(
+                  key: const ValueKey('data'),
+                  child: body(context, account),
+                ),
+        ),
       ),
     );
   }

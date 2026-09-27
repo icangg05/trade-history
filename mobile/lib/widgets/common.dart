@@ -391,14 +391,88 @@ class AsyncView<T> extends StatelessWidget {
   final Widget loading;
   final VoidCallback? onRetry;
 
+  // Kuncinya per keadaan: hanya pergantian keadaan yang memudar, isi yang
+  // diperbarui di tempat tidak.
   @override
-  Widget build(BuildContext context) => value.when(
-    skipLoadingOnReload: true,
-    data: builder,
-    loading: () => loading,
-    error: (error, _) => ErrorView(error: error, onRetry: onRetry),
+  Widget build(BuildContext context) => FadeSwitch(
+    child: value.when(
+      skipLoadingOnReload: true,
+      data: (data) =>
+          KeyedSubtree(key: const ValueKey('data'), child: builder(data)),
+      loading: () =>
+          KeyedSubtree(key: const ValueKey('loading'), child: loading),
+      error: (error, _) => ErrorView(
+        key: const ValueKey('error'),
+        error: error,
+        onRetry: onRetry,
+      ),
+    ),
   );
 }
+
+/// Kerangka berganti isi dengan memudar, bukan meloncat. Pergantian dikenali
+/// dari tipe atau kunci [child] — beri kunci per keadaan bila tipenya sama.
+class FadeSwitch extends StatelessWidget {
+  const FadeSwitch({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => AnimatedSwitcher(
+    duration: fadeDuration(context),
+    switchInCurve: Curves.easeOut,
+    // Yang lama dan yang baru ditumpuk dengan batasan induknya apa adanya —
+    // tata letaknya sama persis dengan tanpa animasi.
+    layoutBuilder: (current, previous) =>
+        Stack(fit: StackFit.passthrough, children: [...previous, ?current]),
+    child: child,
+  );
+}
+
+/// Baris halaman berikutnya yang baru tiba: memudar masuk di tempat
+/// kerangkanya tadi. [animate] hanya berpengaruh saat baris pertama kali
+/// dibangun — baris yang sudah tampil tidak berkedip saat daftar dibangun ulang.
+class FadeIn extends StatelessWidget {
+  const FadeIn({super.key, required this.animate, required this.child});
+
+  final bool animate;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: animate ? 0 : 1, end: 1),
+    duration: fadeDuration(context),
+    curve: Curves.easeOut,
+    builder: (_, value, child) => Opacity(opacity: value, child: child),
+    child: child,
+  );
+}
+
+/// Daftar bergulir tanpa ujung: entri halaman yang baru tiba memudar masuk
+/// ([FadeIn]) di tempat kerangka pemuatnya. Hanya di bingkai kedatangannya —
+/// entri yang baru dibangun kemudian karena digulir tampil biasa.
+mixin FadeNextPage<T extends StatefulWidget> on State<T> {
+  int? _from;
+
+  /// Dipanggil tiap membangun daftar, dengan jumlah entrinya saat ini.
+  void trackNextPage(bool loadingMore, int count) {
+    if (loadingMore) {
+      _from = count;
+    } else if (_from != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _from = null);
+    }
+  }
+
+  /// Entri ke-[index] milik halaman yang baru tiba.
+  bool isNextPage(int index) => index >= (_from ?? double.infinity);
+}
+
+/// Pengguna yang mematikan animasi di pengaturan ponsel langsung melihat
+/// isinya.
+Duration fadeDuration(BuildContext context) =>
+    MediaQuery.disableAnimationsOf(context)
+    ? Duration.zero
+    : const Duration(milliseconds: 300);
 
 /// Pesan singkat di bawah layar — padanan toast di web.
 void showMessage(BuildContext context, String message, {bool error = false}) {

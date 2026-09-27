@@ -360,7 +360,7 @@ class ReportTest extends TestCase
 
     public function test_unduh_menghasilkan_berkas_pdf(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['name' => 'Budi Santoso']);
         $account = $this->account($user);
         $this->trade($account, '2025-05-05 12:00', 120);
 
@@ -370,7 +370,8 @@ class ReportTest extends TestCase
                 'year' => 2025,
                 'rate' => 16000,
                 'rate_date' => '2025-12-31',
-                'name' => 'Nama Uji',
+                // Nama kiriman ponsel diabaikan: kop selalu memakai nama profil.
+                'name' => 'Orang Lain',
                 'npwp' => '00.000.000.0-000.000',
                 'address' => 'Jalan Uji 1',
             ]);
@@ -378,6 +379,7 @@ class ReportTest extends TestCase
         $response->assertOk();
         $response->assertHeader('content-type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', $response->getContent());
+        $this->assertStringContainsString('laporan-trading-2025-budi-santoso.pdf', $response->headers->get('content-disposition'));
     }
 
     /**
@@ -405,7 +407,6 @@ class ReportTest extends TestCase
                     'year' => 2025,
                     'rate' => (string) $masukan,
                     'rate_date' => '2025-12-31',
-                    'name' => 'Nama Uji',
                 ])
                 ->assertOk()
                 ->assertHeader('content-type', 'application/pdf');
@@ -433,7 +434,6 @@ class ReportTest extends TestCase
                 'year' => 2025,
                 'rate' => 'enam belas ribu',
                 'rate_date' => '2025-12-31',
-                'name' => 'Nama Uji',
             ])
             ->assertJsonValidationErrors('rate');
     }
@@ -454,7 +454,6 @@ class ReportTest extends TestCase
                 'year' => 2025,
                 'rate' => '16000',
                 'rate_date' => '2025-12-31',
-                'name' => 'Nama Uji',
             ])
             ->assertOk()
             ->getContent();

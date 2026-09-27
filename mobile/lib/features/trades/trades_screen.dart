@@ -151,7 +151,7 @@ class TradesScreen extends ConsumerStatefulWidget {
   ConsumerState<TradesScreen> createState() => _TradesScreenState();
 }
 
-class _TradesScreenState extends ConsumerState<TradesScreen> {
+class _TradesScreenState extends ConsumerState<TradesScreen> with FadeNextPage {
   TradeFilters _filters = noTradeFilters;
   final _scroll = ScrollController();
 
@@ -318,6 +318,8 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
       }
     }
 
+    trackNextPage(list.loadingMore, entries.length);
+
     return Column(
       children: [
         if (_grouping)
@@ -329,7 +331,7 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Pilih trade yang berurutan — hanya baris tepat di atas atau di bawah pilihan yang bisa ikut. '
+                    'Pilih trade yang berurutan. Hanya baris tepat di atas atau di bawah pilihan yang bisa ikut. '
                     'Ikutkan anggota grup yang sudah ada untuk menambah trade ke dalamnya.',
                   ),
                   const SizedBox(height: 8),
@@ -392,7 +394,10 @@ class _TradesScreenState extends ConsumerState<TradesScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       sliver: SliverList.builder(
                         itemCount: entries.length,
-                        itemBuilder: (_, index) => entries[index](),
+                        itemBuilder: (_, index) => FadeIn(
+                          animate: isNextPage(index),
+                          child: entries[index](),
+                        ),
                       ),
                     ),
                   ),

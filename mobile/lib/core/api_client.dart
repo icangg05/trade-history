@@ -156,7 +156,7 @@ class ApiClient {
         toStringOrNull(body['error']) ?? toStringOrNull(body['message']);
     final message = switch (status) {
       401 => 'Sesi berakhir. Silakan masuk lagi.',
-      404 => 'Data tidak ditemukan — mungkin sudah dihapus.',
+      404 => 'Data tidak ditemukan. Mungkin sudah dihapus.',
       429 => 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.',
       >= 500 && != 502 && != 503 =>
         'Server sedang bermasalah. Coba lagi nanti.',

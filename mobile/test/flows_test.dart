@@ -242,6 +242,23 @@ void main() {
     expect(find.text('Email ini belum terdaftar.'), findsNothing);
     expect(find.textContaining('Kode 4 digit sudah dikirim'), findsOneWidget);
 
+    // Kirim ulang baru aktif setelah semenit, seperti jeda di server.
+    Future<void> resend() async {
+      await tester.tap(find.textContaining('Kirim ulang'));
+      await tester.pumpAndSettle();
+    }
+
+    int sent() =>
+        server.requests.where((r) => r.path == 'auth/password/forgot').length;
+    expect(find.text('Kirim ulang dalam 60 detik'), findsOneWidget);
+    await resend();
+    expect(sent(), 2);
+    await tester.pump(const Duration(seconds: 60));
+    expect(find.text('Kirim ulang kode'), findsOneWidget);
+    await resend();
+    expect(sent(), 3);
+    expect(find.text('Kirim ulang dalam 60 detik'), findsOneWidget);
+
     const password = 'Kata sandi baru (min. 8 karakter)';
 
     Future<void> verify(String code) async {
@@ -392,7 +409,7 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Pola menang'), findsOneWidget);
-    expect(find.textContaining('data sudah berubah sejak itu'), findsOneWidget);
+    expect(find.textContaining('· data berubah'), findsOneWidget);
 
     await tester.tap(find.text('Tanya AI'));
     await tester.pumpAndSettle();

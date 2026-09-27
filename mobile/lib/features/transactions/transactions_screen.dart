@@ -114,7 +114,8 @@ class TransactionsScreen extends ConsumerStatefulWidget {
   ConsumerState<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
-class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
+class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
+    with FadeNextPage {
   // Bawaannya periode berjalan — yang dilihat orang sembilan dari sepuluh kali.
   String _year = '${DateTime.now().year}';
   String _month = '${DateTime.now().month}';
@@ -271,6 +272,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     ];
     final count = rows.isEmpty ? 1 : rows.length;
 
+    trackNextPage(list.loadingMore, rows.length);
+
     // Builder, bukan daftar jadi: hasil gulir tanpa ujung bisa ratusan baris,
     // masing-masing dengan gambar bukti. Yang dibangun hanya yang dekat layar.
     return ListView.builder(
@@ -297,19 +300,22 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
         final row = rows[at];
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: _Row(
-            key: ValueKey(row.id),
-            row: row,
-            account: account,
-            onEdit: () => showTransactionForm(
-              context,
+        return FadeIn(
+          animate: isNextPage(at),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _Row(
+              key: ValueKey(row.id),
+              row: row,
               account: account,
-              editing: row,
-              balance: totals.balance,
+              onEdit: () => showTransactionForm(
+                context,
+                account: account,
+                editing: row,
+                balance: totals.balance,
+              ),
+              onDelete: () => _delete(account, row),
             ),
-            onDelete: () => _delete(account, row),
           ),
         );
       },

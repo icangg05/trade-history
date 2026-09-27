@@ -121,18 +121,28 @@ class _TradeDetailSheetState extends ConsumerState<TradeDetailSheet> {
   Widget build(BuildContext context) {
     if (_complete) return _content(widget.initial);
 
-    return ref
-        .watch(_tradeProvider((widget.account, widget.initial.id)))
-        .when(
-          data: (trade) => trade == null
-              ? const EmptyState(message: 'Trade tidak ditemukan.')
-              : _content(trade),
-          loading: () => const Padding(
-            padding: EdgeInsets.fromLTRB(20, 8, 20, 32),
-            child: Shimmer(child: SkeletonLines(lines: 8)),
+    return FadeSwitch(
+      child: ref
+          .watch(_tradeProvider((widget.account, widget.initial.id)))
+          .when(
+            data: (trade) => trade == null
+                ? const EmptyState(
+                    key: ValueKey('none'),
+                    message: 'Trade tidak ditemukan.',
+                  )
+                : KeyedSubtree(
+                    key: const ValueKey('data'),
+                    child: _content(trade),
+                  ),
+            loading: () => const Padding(
+              key: ValueKey('loading'),
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 32),
+              child: Shimmer(child: SkeletonLines(lines: 8)),
+            ),
+            error: (error, _) =>
+                ErrorView(key: const ValueKey('error'), error: error),
           ),
-          error: (error, _) => ErrorView(error: error),
-        );
+    );
   }
 
   /// Label kecil di atas angka mono — satu sel detail.

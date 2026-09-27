@@ -60,17 +60,15 @@ class _ReportForm extends ConsumerStatefulWidget {
 }
 
 class _ReportFormState extends ConsumerState<_ReportForm> {
-  // Identitas dan kurs tersimpan di ponsel ini saja — tidak ada NPWP yang
-  // menginap di basis data hanya untuk mengisi satu kop laporan.
+  // NPWP, alamat, dan kurs tersimpan di ponsel ini saja — tidak ada NPWP yang
+  // menginap di basis data hanya untuk mengisi satu kop laporan. Namanya
+  // selalu nama profil; server tidak menerima nama lain.
   late final _prefs = ref.read(prefsProvider);
 
   late int _year = _prefs.getInt('report.year') ?? widget.options.years.first;
   late DateTime _rateDate = _endOfYear(_year);
   late final _rate = TextEditingController(
     text: _prefs.getString('report.rate') ?? '',
-  );
-  late final _name = TextEditingController(
-    text: _prefs.getString('report.name') ?? widget.options.defaultName,
   );
   late final _npwp = TextEditingController(
     text: _prefs.getString('report.npwp') ?? '',
@@ -94,7 +92,7 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
 
   @override
   void dispose() {
-    for (final controller in [_rate, _name, _npwp, _address]) {
+    for (final controller in [_rate, _npwp, _address]) {
       controller.dispose();
     }
     super.dispose();
@@ -122,7 +120,6 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
     await Future.wait([
       _prefs.setInt('report.year', _year),
       _prefs.setString('report.rate', _rate.text),
-      _prefs.setString('report.name', _name.text),
       _prefs.setString('report.npwp', _npwp.text),
       _prefs.setString('report.address', _address.text),
     ]);
@@ -133,12 +130,11 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
         // Dikirim apa adanya: server yang membaca koma sebagai desimal.
         'rate': _rate.text.trim(),
         'rate_date': isoDate(_rateDate),
-        'name': _name.text.trim(),
         'npwp': _npwp.text.trim(),
         'address': _address.text.trim(),
       });
 
-      final slug = _name.text
+      final slug = widget.options.defaultName
           .trim()
           .toLowerCase()
           .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
@@ -191,9 +187,8 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
       children: [
         const Caption(
-          'Berkas PDF A4 landscape berisi rekonsiliasi saldo, rekap bulanan, mutasi dana, dan lampiran seluruh '
-          'transaksi trade sepanjang satu tahun pajak, untuk dipegang saat petugas pajak meminta klarifikasi. '
-          'Seluruh akun ikut, termasuk yang sudah diarsipkan.',
+          'Rekap satu tahun pajak dalam PDF: saldo, rekap bulanan, mutasi dana, dan semua trade '
+          'dari semua akun, termasuk yang diarsipkan.',
         ),
         const SizedBox(height: 14),
         Panel(
@@ -255,14 +250,13 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
               ),
               const SizedBox(height: 10),
               const Caption(
-                'Kurs dan tanggalnya ikut dicetak supaya bisa diperiksa ulang. Isi dengan kurs yang punya sumber '
-                'resmi, misalnya kurs pajak KMK di akhir tahun. Angka ini hanya dipakai untuk laba/rugi trading; '
-                'setoran dan penarikan tetap memakai kurs yang tercatat pada hari transaksinya.',
+                'Pakai kurs resmi, misalnya kurs pajak KMK akhir tahun. Kurs ini hanya untuk laba/rugi '
+                'trading; deposit dan withdrawal memakai kurs di hari transaksinya.',
               ),
               if (!_foreign) ...[
                 const SizedBox(height: 6),
                 const Caption(
-                  'Semua akunmu bermata uang rupiah, jadi kursnya tidak akan mengubah angka apa pun.',
+                  'Semua akunmu dalam rupiah, jadi kurs tidak berpengaruh.',
                 ),
               ],
             ],
@@ -275,18 +269,12 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Caption(
-                'Hanya dicetak di kop laporan. Tersimpan di ponsel ini saja.',
+                'Nama dari profil. NPWP dan alamat tersimpan di ponsel ini saja.',
               ),
               gap,
-              TextField(
-                controller: _name,
-                maxLength: 255,
-                decoration: InputDecoration(
-                  labelText: 'Nama',
-                  hintText: 'Nama lengkap sesuai kartu identitas',
-                  errorText: _errors['name'],
-                  counterText: '',
-                ),
+              InputDecorator(
+                decoration: const InputDecoration(labelText: 'Nama'),
+                child: Text(widget.options.defaultName),
               ),
               gap,
               TextField(

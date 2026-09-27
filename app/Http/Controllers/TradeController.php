@@ -166,7 +166,7 @@ class TradeController extends Controller
         $existing = $trades->pluck('group_id')->filter()->unique();
 
         if ($existing->count() > 1) {
-            return $this->failed('Pilihannya menyentuh dua grup — keluarkan dulu salah satunya.');
+            return $this->failed('Pilihannya menyentuh dua grup. Keluarkan dulu salah satunya.');
         }
 
         if (! $this->adjacent($account, $trades->pluck('id')->all())) {

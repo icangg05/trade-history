@@ -221,7 +221,7 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                 hintText: '16250',
                 errorText: _errors['rate_idr'],
                 helperText: idr == null
-                    ? 'Kurs hari transaksi — tidak bisa direkonstruksi belakangan.'
+                    ? 'Pakai kurs hari transaksi karena tidak bisa dicari ulang belakangan.'
                     : 'Setara ${money(idr, 'IDR')}',
               ),
             ),

@@ -187,7 +187,7 @@ class _RulesFormState extends ConsumerState<_RulesForm> {
       children: [
         const Caption(
           'Catatan pribadi untuk mengingat batasan sendiri. Tidak ada satu pun angka di sini yang memblokir '
-          'pencatatan trade — semuanya hanya dipakai untuk menghitung sisa jatah dan menandai hari yang melanggar.',
+          'pencatatan trade. Semuanya hanya dipakai untuk menghitung sisa jatah dan menandai hari yang melanggar.',
         ),
         const SizedBox(height: 14),
         RuleStatusCard(status: widget.page.status, currency: _currency),

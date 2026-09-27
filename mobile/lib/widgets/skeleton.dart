@@ -20,21 +20,64 @@ class Shimmer extends StatelessWidget {
     label: 'Memuat…',
     liveRegion: true,
     excludeSemantics: true,
-    child: sk.Skeletonizer.zone(
-      // Pengguna yang mematikan animasi di pengaturan ponsel cukup melihat
-      // kerangkanya diam.
-      effect: MediaQuery.disableAnimationsOf(context)
-          ? const sk.SolidColorEffect(color: AppColors.secondary)
-          : sk.ShimmerEffect(
-              baseColor: AppColors.secondary,
-              highlightColor: Color.alphaBlend(
-                Colors.white.withValues(alpha: .07),
-                AppColors.secondary,
-              ),
-              duration: const Duration(milliseconds: 1400),
-            ),
-      child: child,
+    child: sk.Skeletonizer.zone(effect: _effect(context), child: child),
+  );
+}
+
+// Pengguna yang mematikan animasi di pengaturan ponsel cukup melihat
+// kerangkanya diam.
+sk.PaintingEffect _effect(BuildContext context) =>
+    MediaQuery.disableAnimationsOf(context)
+    ? const sk.SolidColorEffect(color: AppColors.secondary)
+    : sk.ShimmerEffect(
+        baseColor: AppColors.secondary,
+        highlightColor: Color.alphaBlend(
+          Colors.white.withValues(alpha: .07),
+          AppColors.secondary,
+        ),
+        duration: const Duration(milliseconds: 1400),
+      );
+
+/// Isi asli yang sedang dimuat ulang (mis. ganti periode): teks dan angka
+/// lamanya dilukis sebagai kerangka di tempatnya sendiri, jadi tata letak dan
+/// posisi gulir tidak bergeser; isi barunya memudar masuk. Grafik di
+/// dalamnya membungkus dirinya dengan [ChartBone] supaya garis data lama
+/// tidak ikut tampil.
+class Skeletonize extends StatelessWidget {
+  const Skeletonize({super.key, required this.enabled, required this.child});
+
+  final bool enabled;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: enabled ? 'Memuat…' : null,
+    excludeSemantics: enabled,
+    // Satu Skeletonizer per keadaan, bukan animasi bawaan paketnya: yang
+    // sedang memudar keluar tetap memegang keadaannya sendiri, jadi grafik
+    // lama tidak sempat muncul lagi di kerangka yang menghilang.
+    child: FadeSwitch(
+      child: sk.Skeletonizer(
+        key: ValueKey(enabled),
+        enabled: enabled,
+        effect: _effect(context),
+        child: child,
+      ),
     ),
+  );
+}
+
+/// Grafik di dalam [Skeletonize] yang sedang aktif: diganti satu balok
+/// seukuran grafiknya. Di luar itu tampil apa adanya.
+class ChartBone extends StatelessWidget {
+  const ChartBone({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => sk.Skeleton.replace(
+    replacement: const Bone(height: double.infinity, radius: 8),
+    child: child,
   );
 }
 

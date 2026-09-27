@@ -97,7 +97,7 @@ class RuleStatusCard extends StatelessWidget {
               const SizedBox(height: 4),
               Caption(
                 status.lossBreached
-                    ? 'Batas loss hari ini sudah terlampaui — waktunya berhenti.'
+                    ? 'Batas loss hari ini sudah terlampaui. Waktunya berhenti.'
                     : 'Sisa ${money(lossLimit - status.lossUsed, currency)}.',
                 color: status.lossBreached ? AppColors.destructive : null,
               ),
@@ -132,7 +132,7 @@ class RuleStatusCard extends StatelessWidget {
                 if (status.minRr != null)
                   Caption(
                     'RR minimum ${number(status.minRr)}'
-                    '${status.lowRrTrades > 0 ? ' — ${status.lowRrTrades} trade di bawahnya' : ''}',
+                    '${status.lowRrTrades > 0 ? ', ${status.lowRrTrades} trade di bawahnya' : ''}',
                     color: status.lowRrTrades > 0
                         ? AppColors.destructive
                         : null,
