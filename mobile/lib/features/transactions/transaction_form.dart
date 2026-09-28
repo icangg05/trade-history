@@ -27,6 +27,11 @@ Future<void> showTransactionForm(
   useRootNavigator: true,
   isScrollControlled: true,
   useSafeArea: true,
+  // Seret-tutup memanggil Navigator.pop langsung, melewati PopScope, dan tidak
+  // bisa dimatikan setelah terbuka — jadi dimatikan sejak awal supaya lembar
+  // ini tidak tertutup di tengah unggahan. Tetap bisa ditutup lewat Batal,
+  // ketuk latar, atau tombol kembali selama tidak sedang mengirim.
+  enableDrag: false,
   builder: (_) => _TransactionForm(
     account: account,
     editing: editing,
@@ -76,6 +81,9 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   Map<String, String> _errors = {};
   bool _busy = false;
 
+  /// Bagian yang sudah terkirim, 0–1. Setelah 1 server masih mengolah buktinya.
+  double _sent = 0;
+
   String get _currency => widget.account.currency;
 
   /// Batas withdrawal. Saat memperbaiki, baris ini sendiri dikeluarkan dulu
@@ -118,30 +126,57 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
 
     if (file == null) return;
 
+    // Batas yang sama dengan server — ditolak di sini supaya tidak menunggu
+    // unggahan yang pasti gagal. Yang kena hanya foto asli dari galeri; foto
+    // lewat tombol Kamera sudah dikecilkan di atas.
+    if (await file.length() > 5 * 1024 * 1024) {
+      if (mounted) {
+        setState(
+          () => _errors = {
+            ..._errors,
+            'proof':
+                'Ukuran bukti transfer maksimal 5 MB. Pilih gambar lain atau pakai Kamera.',
+          },
+        );
+      }
+      return;
+    }
+
     final bytes = await file.readAsBytes();
 
-    if (mounted) setState(() => _proof = bytes);
+    if (mounted) {
+      setState(() {
+        _proof = bytes;
+        _errors = {..._errors}..remove('proof');
+      });
+    }
   }
 
   Future<void> _submit() async {
     setState(() {
       _busy = true;
+      _sent = 0;
       _errors = {};
     });
 
     try {
-      final message = await ref.read(journalProvider).saveTransaction(
-        widget.account.id,
-        widget.editing?.id,
-        {
-          'type': _type,
-          'amount': parseDecimal(_amount.text),
-          'rate_idr': _needsRate ? parseDecimal(_rate.text) : null,
-          'occurred_at': isoDate(_date),
-          'note': _note.text.trim(),
-        },
-        proof: _proof,
-      );
+      final message = await ref
+          .read(journalProvider)
+          .saveTransaction(
+            widget.account.id,
+            widget.editing?.id,
+            {
+              'type': _type,
+              'amount': parseDecimal(_amount.text),
+              'rate_idr': _needsRate ? parseDecimal(_rate.text) : null,
+              'occurred_at': isoDate(_date),
+              'note': _note.text.trim(),
+            },
+            proof: _proof,
+            onProgress: (sent, total) {
+              if (total > 0 && mounted) setState(() => _sent = sent / total);
+            },
+          );
 
       ref.read(revisionProvider.notifier).bump();
 
@@ -170,175 +205,196 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
       _currency,
     );
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-        children: [
-          Text(
-            editing == null ? 'Catat transaksi' : 'Ubah transaksi',
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 16),
-          Segments(
-            value: _type,
-            options: const [
-              ('deposit', 'Deposit'),
-              ('withdrawal', 'Withdrawal'),
-            ],
-            colors: const {
-              'deposit': AppColors.success,
-              'withdrawal': AppColors.destructive,
-            },
-            onChanged: (value) => setState(() => _type = value),
-          ),
-          const SizedBox(height: 14),
-          TextField(
-            controller: _amount,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: mono(size: 14),
-            decoration: InputDecoration(
-              labelText: 'Jumlah ($_currency) *',
-              hintText: '500',
-              errorText: _errors['amount'],
-              helperText: _available == null
-                  ? null
-                  : 'Bisa ditarik paling banyak ${money(_available, _currency)}.',
+    // Selama mengirim, tombol kembali dan ketuk latar tidak menutup lembar ini.
+    return PopScope(
+      canPop: !_busy,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          // Tanpa pegangan seret (enableDrag: false), jadi jarak atasnya sendiri.
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+          children: [
+            Text(
+              editing == null ? 'Catat transaksi' : 'Ubah transaksi',
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
-          ),
-          if (_needsRate) ...[
+            const SizedBox(height: 16),
+            Segments(
+              value: _type,
+              options: const [
+                ('deposit', 'Deposit'),
+                ('withdrawal', 'Withdrawal'),
+              ],
+              colors: const {
+                'deposit': AppColors.success,
+                'withdrawal': AppColors.destructive,
+              },
+              onChanged: (value) => setState(() => _type = value),
+            ),
             const SizedBox(height: 14),
             TextField(
-              controller: _rate,
+              controller: _amount,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               style: mono(size: 14),
               decoration: InputDecoration(
-                labelText:
-                    'Kurs rupiah (1 ${rateCurrency(_currency)} = Rp …) *',
-                hintText: '16250',
-                errorText: _errors['rate_idr'],
-                helperText: idr == null
-                    ? 'Pakai kurs hari transaksi karena tidak bisa dicari ulang belakangan.'
-                    : 'Setara ${money(idr, 'IDR')}',
+                labelText: 'Jumlah ($_currency) *',
+                hintText: '500',
+                errorText: _errors['amount'],
+                helperText: _available == null
+                    ? null
+                    : 'Bisa ditarik paling banyak ${money(_available, _currency)}.',
               ),
             ),
-          ],
-          const SizedBox(height: 14),
-          InkWell(
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _date,
-                firstDate: DateTime(2000),
-                lastDate: DateTime.now().add(const Duration(days: 1)),
-              );
-              if (picked != null) setState(() => _date = picked);
-            },
-            child: InputDecorator(
+            if (_needsRate) ...[
+              const SizedBox(height: 14),
+              TextField(
+                controller: _rate,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                style: mono(size: 14),
+                decoration: InputDecoration(
+                  labelText:
+                      'Kurs rupiah (1 ${rateCurrency(_currency)} = Rp …) *',
+                  hintText: '16250',
+                  errorText: _errors['rate_idr'],
+                  helperText: idr == null
+                      ? 'Pakai kurs hari transaksi karena tidak bisa dicari ulang belakangan.'
+                      : 'Setara ${money(idr, 'IDR')}',
+                ),
+              ),
+            ],
+            const SizedBox(height: 14),
+            InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _date,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now().add(const Duration(days: 1)),
+                );
+                if (picked != null) setState(() => _date = picked);
+              },
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Tanggal *',
+                  errorText: _errors['occurred_at'],
+                  suffixIcon: const Icon(Icons.event, size: 18),
+                ),
+                child: Text(longDate(_date)),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Caption(editing == null ? 'Bukti transfer *' : 'Bukti transfer'),
+            const SizedBox(height: 6),
+            // Kotaknya sendiri bisa diketuk — sama dengan tombol Galeri.
+            InkWell(
+              onTap: () => _pickProof(ImageSource.gallery),
+              borderRadius: BorderRadius.circular(kRadius - 2),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 110),
+                alignment: Alignment.center,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(kRadius - 2),
+                  border: Border.all(
+                    color: _errors['proof'] == null
+                        ? AppColors.border
+                        : AppColors.destructive,
+                  ),
+                ),
+                child: _proof != null
+                    ? Image.memory(_proof!, height: 180, fit: BoxFit.contain)
+                    : (editing?.hasProof ?? false)
+                    ? ProofThumbnail(
+                        account: widget.account.id,
+                        row: editing!,
+                        size: 150,
+                      )
+                    : const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.receipt_long_outlined,
+                            color: AppColors.mutedForeground,
+                          ),
+                          SizedBox(height: 6),
+                          Caption('Tangkapan layar mutasi rekening'),
+                        ],
+                      ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickProof(ImageSource.gallery),
+                    icon: const Icon(Icons.photo_library_outlined, size: 18),
+                    label: const Text('Galeri'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickProof(ImageSource.camera),
+                    icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                    label: const Text('Kamera'),
+                  ),
+                ),
+              ],
+            ),
+            if (_errors['proof'] != null) ...[
+              const SizedBox(height: 6),
+              Caption(_errors['proof']!, color: AppColors.destructive),
+            ] else if (editing != null) ...[
+              const SizedBox(height: 6),
+              const Caption('Biarkan apa adanya kalau buktinya tidak berubah.'),
+            ],
+            const SizedBox(height: 14),
+            TextField(
+              controller: _note,
+              maxLength: 255,
               decoration: InputDecoration(
-                labelText: 'Tanggal *',
-                errorText: _errors['occurred_at'],
-                suffixIcon: const Icon(Icons.event, size: 18),
+                labelText: 'Catatan',
+                hintText: 'Top up bulanan',
+                errorText: _errors['note'],
               ),
-              child: Text(longDate(_date)),
             ),
-          ),
-          const SizedBox(height: 14),
-          Caption(editing == null ? 'Bukti transfer *' : 'Bukti transfer'),
-          const SizedBox(height: 6),
-          // Kotaknya sendiri bisa diketuk — sama dengan tombol Galeri.
-          InkWell(
-            onTap: () => _pickProof(ImageSource.gallery),
-            borderRadius: BorderRadius.circular(kRadius - 2),
-            child: Container(
-              constraints: const BoxConstraints(minHeight: 110),
-              alignment: Alignment.center,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(kRadius - 2),
-                border: Border.all(
-                  color: _errors['proof'] == null
-                      ? AppColors.border
-                      : AppColors.destructive,
-                ),
-              ),
-              child: _proof != null
-                  ? Image.memory(_proof!, height: 180, fit: BoxFit.contain)
-                  : (editing?.hasProof ?? false)
-                  ? ProofThumbnail(
-                      account: widget.account.id,
-                      row: editing!,
-                      size: 150,
-                    )
-                  : const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.receipt_long_outlined,
-                          color: AppColors.mutedForeground,
-                        ),
-                        SizedBox(height: 6),
-                        Caption('Tangkapan layar mutasi rekening'),
-                      ],
-                    ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _pickProof(ImageSource.gallery),
-                  icon: const Icon(Icons.photo_library_outlined, size: 18),
-                  label: const Text('Galeri'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _pickProof(ImageSource.camera),
-                  icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                  label: const Text('Kamera'),
-                ),
+            if (_busy) ...[
+              const SizedBox(height: 4),
+              // Setelah terkirim semua, server masih mengolah gambarnya — bar
+              // jadi tanpa angka supaya tidak terlihat macet di 100%.
+              LinearProgressIndicator(value: _sent < 1 ? _sent : null),
+              const SizedBox(height: 6),
+              Caption(
+                _sent < 1
+                    ? '${_proof == null ? 'Mengirim' : 'Mengunggah bukti'}… ${(_sent * 100).round()}%'
+                    : 'Menyimpan…',
               ),
             ],
-          ),
-          if (_errors['proof'] != null) ...[
-            const SizedBox(height: 6),
-            Caption(_errors['proof']!, color: AppColors.destructive),
-          ] else if (editing != null) ...[
-            const SizedBox(height: 6),
-            const Caption('Biarkan apa adanya kalau buktinya tidak berubah.'),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: _busy ? null : () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                const Spacer(),
+                BusyButton(
+                  busy: _busy,
+                  label: 'Simpan',
+                  onPressed: editing == null && _proof == null ? null : _submit,
+                ),
+              ],
+            ),
           ],
-          const SizedBox(height: 14),
-          TextField(
-            controller: _note,
-            maxLength: 255,
-            decoration: InputDecoration(
-              labelText: 'Catatan',
-              hintText: 'Top up bulanan',
-              errorText: _errors['note'],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Batal'),
-              ),
-              const Spacer(),
-              BusyButton(
-                busy: _busy,
-                label: 'Simpan',
-                onPressed: editing == null && _proof == null ? null : _submit,
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -29,11 +29,13 @@ class TransactionController extends Controller
     private const PROOF_SIDE = 2000;
 
     /**
-     * Foto dari galeri ponsel dikirim apa adanya (lihat transaction_form.dart),
-     * jadi batasnya cukup untuk foto kamera 50 MP. Tetap di bawah
-     * upload_max_filesize (16M) di docker/php.ini.
+     * Screenshot mutasi dan foto kamera aplikasi (sudah dikecilkan ke 2000 px)
+     * jauh di bawah ini. Yang kena hanya foto kamera asli dari galeri — ponsel
+     * menolaknya lebih dulu dengan batas yang sama (transaction_form.dart).
      */
-    private const PROOF_MAX_KB = 15 * 1024;
+    private const PROOF_MAX_KB = 5 * 1024;
+
+    private const MESSAGES = ['proof.max' => 'Ukuran bukti transfer maksimal 5 MB.'];
 
     public function index(Request $request): Response|JsonResponse
     {
@@ -107,7 +109,7 @@ class TransactionController extends Controller
         $account = $request->currentAccount();
 
         // Bukti transfer wajib saat dicatat — ini catatan uang sungguhan.
-        $data = $request->validate($this->rules($account, ['required', 'image', 'max:'.self::PROOF_MAX_KB]));
+        $data = $request->validate($this->rules($account, ['required', 'image', 'max:'.self::PROOF_MAX_KB]), self::MESSAGES);
         $this->ensureAffordable($account, $data);
 
         $data['proof_path'] = Uploads::image($request->file('proof'), $account->uploadFolder(), self::PROOF_SIDE);
@@ -133,7 +135,7 @@ class TransactionController extends Controller
     {
         $account = $request->currentAccount();
 
-        $data = $request->validate($this->rules($account, ['nullable', 'image', 'max:'.self::PROOF_MAX_KB]));
+        $data = $request->validate($this->rules($account, ['nullable', 'image', 'max:'.self::PROOF_MAX_KB]), self::MESSAGES);
         $this->ensureAffordable($account, $data, $transaction);
 
         if ($request->hasFile('proof')) {
@@ -195,12 +197,17 @@ class TransactionController extends Controller
         ];
     }
 
-    /** Bukti hanya keluar lewat route ini, setelah kepemilikan dicek. */
-    public function proof(Transaction $transaction): StreamedResponse
+    /**
+     * Bukti hanya keluar lewat route ini, setelah kepemilikan dicek.
+     * `?thumb=1` untuk daftar dana; aslinya hanya saat diperbesar.
+     */
+    public function proof(Request $request, Transaction $transaction): StreamedResponse
     {
         abort_if(blank($transaction->proof_path), 404);
 
-        return Storage::disk(Uploads::DISK)->response($transaction->proof_path);
+        return Storage::disk(Uploads::DISK)->response(
+            $request->boolean('thumb') ? Uploads::thumbnail($transaction->proof_path) : $transaction->proof_path,
+        );
     }
 
     /**

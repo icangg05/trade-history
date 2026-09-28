@@ -250,6 +250,15 @@ class ApiTest extends TestCase
         [$width, $height, $type] = getimagesizefromstring($proof);
         $this->assertSame([2000, 1000, IMAGETYPE_JPEG], [$width, $height, $type]);
 
+        // Thumbnail untuk daftar: dibuat saat pertama diminta, ikut terhapus
+        // bersama aslinya.
+        $transaction = $account->transactions()->sole();
+        $thumb = $this->get("{$url}/{$transaction->getRouteKey()}/proof?thumb=1", $headers)->assertOk()->streamedContent();
+        $this->assertSame([600, 300], array_slice(getimagesizefromstring($thumb), 0, 2));
+        Storage::disk('local')->assertExists($transaction->proof_path.'.thumb.jpg');
+        $this->delete("{$url}/{$transaction->getRouteKey()}", [], $headers)->assertOk();
+        Storage::disk('local')->assertMissing($transaction->proof_path.'.thumb.jpg');
+
         $this->post('/api/v1/profile/avatar', ['avatar' => UploadedFile::fake()->image('a.png', 1000, 800)], $headers)
             ->assertOk();
         [$width, $height] = getimagesizefromstring(Storage::disk('local')->get($account->user->fresh()->avatar_path));
@@ -262,6 +271,10 @@ class ApiTest extends TestCase
         $this->post($url, [...$fields, 'proof' => UploadedFile::fake()->createWithContent('raksasa.png', $giant)], $headers)
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['proof' => 'megapiksel']);
+
+        $this->post($url, [...$fields, 'proof' => UploadedFile::fake()->image('besar.jpg')->size(5 * 1024 + 1)], $headers)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['proof' => 'maksimal 5 MB']);
     }
 
     public function test_withdrawal_tidak_boleh_melebihi_saldo(): void

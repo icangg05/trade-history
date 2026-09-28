@@ -659,8 +659,10 @@ class ProofThumbnail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final api = ref.watch(journalProvider);
     // Versinya ikut di alamat: bukti yang baru diganti langsung tampil, bukan
-    // gambar lama dari cache.
+    // gambar lama dari cache. Kotaknya memakai versi kecil; aslinya baru
+    // diunduh saat diperbesar.
     final url = api.proofUrl(account, row.id, row.proofVersion);
+    final thumb = api.proofUrl(account, row.id, row.proofVersion, thumb: true);
     final headers = api.client.imageHeaders;
 
     return Semantics(
@@ -675,13 +677,14 @@ class ProofThumbnail extends ConsumerWidget {
           image: NetworkImage(url, headers: headers),
           bytes: () => api.proofBytes(account, row.id),
           name: _proofName(row),
+          preview: NetworkImage(thumb, headers: headers),
         ),
         child: Padding(
           padding: EdgeInsets.all(size < 48 ? (48 - size) / 2 : 0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: Image.network(
-              url,
+              thumb,
               headers: headers,
               width: size,
               height: size,

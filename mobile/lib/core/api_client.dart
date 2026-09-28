@@ -76,8 +76,14 @@ class ApiClient {
   Future<Json> get(String path, {Map<String, dynamic>? query}) =>
       _json(() => dio.get<dynamic>(path, queryParameters: _clean(query)));
 
-  Future<Json> post(String path, [Object? data]) =>
-      _json(() => dio.post<dynamic>(path, data: data));
+  /// [onSendProgress] untuk unggahan besar — bukti transfer bisa belasan MB.
+  Future<Json> post(
+    String path, [
+    Object? data,
+    ProgressCallback? onSendProgress,
+  ]) => _json(
+    () => dio.post<dynamic>(path, data: data, onSendProgress: onSendProgress),
+  );
 
   Future<Json> put(String path, [Object? data]) =>
       _json(() => dio.put<dynamic>(path, data: data));
@@ -136,7 +142,8 @@ class ApiClient {
         DioExceptionType.badCertificate =>
           'Sertifikat HTTPS server tidak valid.',
         DioExceptionType.cancel => 'Permintaan dibatalkan.',
-        _ => 'Tidak bisa terhubung ke server. Periksa alamat server dan koneksi internet.',
+        _ =>
+          'Tidak bisa terhubung ke server. Periksa alamat server dan koneksi internet.',
       });
     }
 

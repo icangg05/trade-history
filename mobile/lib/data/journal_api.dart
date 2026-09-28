@@ -179,6 +179,7 @@ class JournalApi {
     String? id,
     Json fields, {
     Uint8List? proof,
+    ProgressCallback? onProgress,
   }) async {
     final form = FormData.fromMap({
       for (final entry in fields.entries)
@@ -191,6 +192,7 @@ class JournalApi {
       await client.post(
         _in(account, id == null ? 'transactions' : 'transactions/$id'),
         form,
+        onProgress,
       ),
     );
   }
@@ -199,13 +201,23 @@ class JournalApi {
       _message(await client.delete(_in(account, 'transactions/$id')));
 
   /// [version] berganti setiap kali buktinya diganti — tanpa itu gambar lama
-  /// terus tampil dari cache karena alamatnya sama.
-  String proofUrl(int account, String id, String? version) => client.url(
-    _in(
-      account,
-      'transactions/$id/proof${version == null ? '' : '?v=$version'}',
-    ),
-  );
+  /// terus tampil dari cache karena alamatnya sama. [thumb] meminta versi
+  /// kecilnya (±600 px) — cukup untuk kotak di daftar.
+  String proofUrl(
+    int account,
+    String id,
+    String? version, {
+    bool thumb = false,
+  }) {
+    final query = [
+      if (version != null) 'v=$version',
+      if (thumb) 'thumb=1',
+    ].join('&');
+
+    return client.url(
+      _in(account, 'transactions/$id/proof${query.isEmpty ? '' : '?$query'}'),
+    );
+  }
 
   Future<Uint8List> proofBytes(int account, String id) =>
       client.bytes(_in(account, 'transactions/$id/proof'));

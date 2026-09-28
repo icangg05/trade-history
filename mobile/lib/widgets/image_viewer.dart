@@ -8,14 +8,17 @@ import 'common.dart';
 
 /// Gambar layar penuh yang bisa dicubit-perbesar: tutup di kiri atas, unduh
 /// ke galeri di kanan atas. [bytes] mengambil berkas aslinya saat diunduh.
+/// [preview] (versi kecilnya) tampil lebih dulu selama aslinya diunduh.
 Future<void> showImageViewer(
   BuildContext context, {
   required ImageProvider image,
   required Future<Uint8List> Function() bytes,
   required String name,
+  ImageProvider? preview,
 }) => showDialog<void>(
   context: context,
-  builder: (_) => _ImageViewer(image: image, bytes: bytes, name: name),
+  builder: (_) =>
+      _ImageViewer(image: image, bytes: bytes, name: name, preview: preview),
 );
 
 class _ImageViewer extends StatefulWidget {
@@ -23,11 +26,13 @@ class _ImageViewer extends StatefulWidget {
     required this.image,
     required this.bytes,
     required this.name,
+    this.preview,
   });
 
   final ImageProvider image;
   final Future<Uint8List> Function() bytes;
   final String name;
+  final ImageProvider? preview;
 
   @override
   State<_ImageViewer> createState() => _ImageViewerState();
@@ -53,6 +58,16 @@ class _ImageViewerState extends State<_ImageViewer> {
       side: const BorderSide(color: Colors.white24),
     );
 
+    // Versi kecilnya dulu (kalau ada), dengan kemajuan unduhan aslinya di atas.
+    Widget loading([double? value]) => Stack(
+      fit: StackFit.expand,
+      children: [
+        if (widget.preview != null)
+          Image(image: widget.preview!, fit: BoxFit.contain),
+        _Loading(value),
+      ],
+    );
+
     return Dialog.fullscreen(
       backgroundColor: Colors.black,
       // Scaffold sendiri: pesan "disimpan ke galeri" tampil di atas gambar,
@@ -64,7 +79,28 @@ class _ImageViewerState extends State<_ImageViewer> {
           children: [
             InteractiveViewer(
               maxScale: 5,
-              child: Image(image: widget.image, fit: BoxFit.contain),
+              child: Image(
+                image: widget.image,
+                fit: BoxFit.contain,
+                // Sebelum byte pertama tiba dan selama didekode belum ada
+                // bingkai — tanpa ini layarnya hitam kosong beberapa detik.
+                frameBuilder: (_, child, frame, sync) =>
+                    frame == null && !sync ? loading() : child,
+                loadingBuilder: (_, child, progress) => progress == null
+                    ? child
+                    : loading(
+                        progress.expectedTotalBytes == null
+                            ? null
+                            : progress.cumulativeBytesLoaded /
+                                  progress.expectedTotalBytes!,
+                      ),
+                errorBuilder: (_, _, _) => const Center(
+                  child: Text(
+                    'Gambar gagal dimuat.',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ),
             ),
             // Positioned, bukan anak biasa: StackFit.expand meregangkan anak
             // biasa setinggi layar, dan tombolnya jadi ada di tengah.
@@ -110,6 +146,39 @@ class _ImageViewerState extends State<_ImageViewer> {
       ),
     );
   }
+}
+
+/// Putaran + persen selama gambar penuh diunduh. [value] null = belum tahu
+/// ukurannya (atau sedang didekode), jadi putarannya tanpa angka.
+class _Loading extends StatelessWidget {
+  const _Loading([this.value]);
+
+  final double? value;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    // Latar gelap: tetap terbaca di atas pratinjau yang putih.
+    child: Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(value: value, color: Colors.white),
+          const SizedBox(height: 12),
+          Text(
+            value == null
+                ? 'Memuat gambar…'
+                : 'Memuat gambar… ${(value! * 100).round()}%',
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Simpan gambar ke galeri ponsel, di album "Trade History".

@@ -73,6 +73,57 @@ class Uploads
         $orientation = (int) ((@exif_read_data($file->getRealPath()) ?: [])['Orientation'] ?? 1);
         $source = self::upright($source, $orientation);
 
+        [$bytes, $extension] = [self::jpeg($source, $maxSide, $quality), 'jpg'];
+
+        // Aslinya hanya boleh dipakai kalau memang tidak perlu diubah: tidak
+        // diperkecil, dan tidak bergantung pada tanda putar EXIF (tanda itu
+        // ikut terbuang bersama metadatanya).
+        if (max(imagesx($source), imagesy($source)) <= $maxSide && $orientation === 1) {
+            foreach ([[self::strippedJpeg($original), 'jpg'], [self::strippedPng($original), 'png']] as [$clean, $type]) {
+                if ($clean !== null && strlen($clean) < strlen($bytes)) {
+                    [$bytes, $extension] = [$clean, $type];
+                }
+            }
+        }
+
+        $path = $folder.'/'.Str::ulid().'.'.$extension;
+
+        Storage::disk(self::DISK)->put($path, $bytes);
+
+        return $path;
+    }
+
+    /**
+     * Versi kecil gambar yang sudah tersimpan, untuk daftar yang hanya
+     * menampilkan kotak kecil. Dibuat saat pertama diminta lalu disimpan di
+     * sebelah aslinya — tanpa kolom baru, dan bukti lama ikut kebagian.
+     * Kalau aslinya tidak terbaca, alamat aslinya yang dikembalikan.
+     */
+    public static function thumbnail(string $path, int $maxSide = 600): string
+    {
+        $disk = Storage::disk(self::DISK);
+        $thumb = $path.self::THUMB;
+
+        if ($disk->exists($thumb)) {
+            return $thumb;
+        }
+
+        $source = @imagecreatefromstring((string) $disk->get($path));
+
+        if ($source === false) {
+            return $path;
+        }
+
+        $disk->put($thumb, self::jpeg($source, $maxSide, 75));
+
+        return $thumb;
+    }
+
+    private const THUMB = '.thumb.jpg';
+
+    /** Perkecil sampai sisi terpanjang $maxSide (tidak diperbesar), lalu kodekan sebagai JPEG. */
+    private static function jpeg(GdImage $source, int $maxSide, int $quality): string
+    {
         $width = imagesx($source);
         $height = imagesy($source);
         $scale = min(1, $maxSide / max($width, $height));
@@ -87,24 +138,8 @@ class Uploads
 
         ob_start();
         imagejpeg($canvas, null, $quality);
-        [$bytes, $extension] = [ob_get_clean(), 'jpg'];
 
-        // Aslinya hanya boleh dipakai kalau memang tidak perlu diubah: tidak
-        // diperkecil, dan tidak bergantung pada tanda putar EXIF (tanda itu
-        // ikut terbuang bersama metadatanya).
-        if ($scale >= 1 && $orientation === 1) {
-            foreach ([[self::strippedJpeg($original), 'jpg'], [self::strippedPng($original), 'png']] as [$clean, $type]) {
-                if ($clean !== null && strlen($clean) < strlen($bytes)) {
-                    [$bytes, $extension] = [$clean, $type];
-                }
-            }
-        }
-
-        $path = $folder.'/'.Str::ulid().'.'.$extension;
-
-        Storage::disk(self::DISK)->put($path, $bytes);
-
-        return $path;
+        return ob_get_clean();
     }
 
     /**
@@ -184,8 +219,9 @@ class Uploads
 
     public static function delete(?string $path): void
     {
+        // Thumbnail-nya ikut; tidak apa kalau belum pernah dibuat.
         if (filled($path)) {
-            Storage::disk(self::DISK)->delete($path);
+            Storage::disk(self::DISK)->delete([$path, $path.self::THUMB]);
         }
     }
 
