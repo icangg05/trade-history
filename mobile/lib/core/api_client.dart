@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 
 import 'json.dart';
 
@@ -56,7 +59,46 @@ class ApiClient {
            },
          ),
        ) {
-    if (adapter != null) dio.httpClientAdapter = adapter;
+    dio.httpClientAdapter =
+        adapter ?? IOHttpClientAdapter(createHttpClient: _httpClient);
+  }
+
+  /// Buffer kirim socket dibatasi. Bawaannya di Android menelan ratusan KB
+  /// sekaligus, jadi persen unggahan melompat jauh di depan data yang benar-
+  /// benar sudah terkirim. 128 KB (kernel menggandakannya jadi 256 KB) masih
+  /// cukup untuk ±20 Mbps pada RTT 100 ms — di atas unggahan seluler umumnya.
+  /// ponytail: batas unggah ±20 Mbps; naikkan angkanya kalau Wi-Fi cepat terasa lambat.
+  ///
+  /// Tanpa `findProxy` koneksinya selalu langsung, jadi proxy diabaikan; TLS
+  /// dibuka di sini karena HttpClient tidak mengamankan soket dari pabrik ini.
+  static HttpClient _httpClient() =>
+      HttpClient()
+        ..connectionFactory = (uri, _, _) async {
+          final task = uri.scheme == 'https'
+              ? await SecureSocket.startConnect(uri.host, uri.port)
+              : await Socket.startConnect(uri.host, uri.port);
+
+          return ConnectionTask.fromSocket(
+            task.socket.then(_smallSendBuffer),
+            task.cancel,
+          );
+        };
+
+  static Socket _smallSendBuffer(Socket socket) {
+    try {
+      socket.setRawOption(
+        RawSocketOption.fromInt(
+          RawSocketOption.levelSocket,
+          // SO_SNDBUF: 7 di Linux/Android, 0x1001 di iOS/macOS.
+          Platform.isIOS || Platform.isMacOS ? 0x1001 : 7,
+          128 * 1024,
+        ),
+      );
+    } catch (_) {
+      // Hanya penghalus persen unggahan; tanpa ini koneksi tetap jalan.
+    }
+
+    return socket;
   }
 
   final String root;
@@ -187,6 +229,23 @@ class ApiClient {
 
     return {};
   }
+}
+
+/// Berkas untuk multipart, dipecah per 64 KB. Dio menghitung kemajuan kirim
+/// per potongan; `MultipartFile.fromBytes` mengirim seluruh berkas sebagai
+/// satu potongan, sehingga persennya langsung ±100% lalu diam sampai
+/// unggahannya selesai.
+MultipartFile chunkedFile(Uint8List bytes, String filename) {
+  const chunk = 64 * 1024;
+
+  return MultipartFile.fromStream(
+    () => Stream.fromIterable([
+      for (var at = 0; at < bytes.length; at += chunk)
+        Uint8List.sublistView(bytes, at, min(at + chunk, bytes.length)),
+    ]),
+    bytes.length,
+    filename: filename,
+  );
 }
 
 /// Server membawa `lang/id/validation.php`, jadi pesannya sudah berupa kalimat

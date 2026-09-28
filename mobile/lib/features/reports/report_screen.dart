@@ -112,6 +112,13 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
       widget.options.accounts.any((account) => account['currency'] != 'IDR');
 
   Future<void> _download() async {
+    final missing = requiredErrors({'rate': _rate.text});
+
+    if (missing.isNotEmpty) {
+      setState(() => _errors = missing);
+      return;
+    }
+
     setState(() {
       _busy = true;
       _errors = {};
@@ -218,7 +225,7 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
                 ),
                 style: mono(size: 14),
                 decoration: InputDecoration(
-                  labelText: 'Kurs rupiah per 1 USD',
+                  labelText: 'Kurs rupiah per 1 USD *',
                   hintText: 'Contoh: 17.757,40',
                   errorText: _errors['rate'],
                   // Hasil bacaannya ditampilkan kembali supaya salah tafsir

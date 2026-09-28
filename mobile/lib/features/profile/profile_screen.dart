@@ -81,6 +81,19 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
   }
 
   Future<void> _save() async {
+    final missing = requiredErrors({
+      'name': _name.text,
+      'email': _email.text,
+      // Sandi baru boleh kosong; kalau diisi, konfirmasinya wajib.
+      if (_password.text.isNotEmpty)
+        'password_confirmation': _confirmation.text,
+    });
+
+    if (missing.isNotEmpty) {
+      setState(() => _errors = missing);
+      return;
+    }
+
     setState(() {
       _busy = true;
       _errors = {};
@@ -170,7 +183,12 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
       ),
     );
 
-    if (ok != true) return;
+    if (ok != true || !mounted) return;
+
+    if (typed.isEmpty) {
+      showMessage(context, 'Kata sandi wajib diisi.', error: true);
+      return;
+    }
 
     try {
       await ref.read(journalProvider).deleteProfile(typed);

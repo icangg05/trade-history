@@ -203,6 +203,10 @@ void main() {
       find.widgetWithText(TextField, 'Email'),
       'salah@contoh.com',
     );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Kata sandi'),
+      'sandi-salah',
+    );
     await tester.tap(find.text('Masuk'));
     await tester.pumpAndSettle();
 
@@ -380,9 +384,13 @@ void main() {
       await tester.tap(find.text('Simpan').first);
       await tester.pumpAndSettle();
 
-      final saved = jsonDecode(
-        jsonEncode(server.requests.firstWhere((r) => r.method == 'POST').data),
-      ) as Map;
+      final saved =
+          jsonDecode(
+                jsonEncode(
+                  server.requests.firstWhere((r) => r.method == 'POST').data,
+                ),
+              )
+              as Map;
 
       expect(saved['symbol'], 'XAUUSD');
       expect(saved['entry_price'], 2400);

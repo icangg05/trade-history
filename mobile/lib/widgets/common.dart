@@ -489,6 +489,14 @@ void showMessage(BuildContext context, String message, {bool error = false}) {
     );
 }
 
+/// Isian wajib yang masih kosong, dalam bentuk galat per kolom seperti dari
+/// server. Dicek sebelum mengirim: tidak perlu menunggu server — apalagi
+/// mengunggah gambar — untuk galat yang sudah kelihatan di layar.
+Map<String, String> requiredErrors(Map<String, String> fields) => {
+  for (final MapEntry(:key, :value) in fields.entries)
+    if (value.trim().isEmpty) key: 'Wajib diisi.',
+};
+
 /// Tombol utama dengan spinner saat sibuk.
 class BusyButton extends StatelessWidget {
   const BusyButton({
@@ -497,6 +505,7 @@ class BusyButton extends StatelessWidget {
     required this.onPressed,
     required this.label,
     this.icon,
+    this.progress,
   });
 
   final bool busy;
@@ -504,24 +513,36 @@ class BusyButton extends StatelessWidget {
   final String label;
   final IconData? icon;
 
+  /// Bagian yang sudah terkirim, 0–1, untuk unggahan gambar. Selama belum
+  /// penuh tombolnya menampilkan persen; setelah itu server masih mengolah,
+  /// jadi kembali berputar dengan [label].
+  final double? progress;
+
   @override
-  Widget build(BuildContext context) => FilledButton(
-    onPressed: busy ? null : onPressed,
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (busy)
-          const SizedBox.square(
-            dimension: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        else if (icon != null)
-          Icon(icon, size: 18),
-        if (busy || icon != null) const SizedBox(width: 8),
-        Text(label),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final sending = busy && progress != null && progress! < 1;
+
+    return FilledButton(
+      onPressed: busy ? null : onPressed,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (busy)
+            SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                value: sending ? progress : null,
+              ),
+            )
+          else if (icon != null)
+            Icon(icon, size: 18),
+          if (busy || icon != null) const SizedBox(width: 8),
+          Text(sending ? 'Mengunggah ${(progress! * 100).round()}%' : label),
+        ],
+      ),
+    );
+  }
 }
 
 /// Pengganti `<select>`: kolomnya setinggi isian lain, menunya rapat di

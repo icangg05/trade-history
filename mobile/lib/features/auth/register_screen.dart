@@ -46,6 +46,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _submit() async {
+    final missing = requiredErrors({
+      'name': _name.text,
+      'email': _email.text,
+      'password': _password.text,
+      'password_confirmation': _confirmation.text,
+      'token': _token.text,
+    });
+
+    if (missing.isNotEmpty) {
+      setState(() => _error = ApiException('', errors: missing));
+      return;
+    }
+
     setState(() {
       _busy = true;
       _error = null;

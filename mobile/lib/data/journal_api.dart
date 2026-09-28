@@ -133,13 +133,17 @@ class JournalApi {
       _message(await client.delete(_in(account, 'trades/$id')));
 
   /// Screenshot dibaca Gemini sekali lalu dibuang — server tidak menyimpannya.
-  Future<ExtractResult> extract(int account, XFile image) async =>
-      ExtractResult.fromJson(
-        await client.post(
-          _in(account, 'trades/extract'),
-          FormData.fromMap({'screenshot': await _file(image)}),
-        ),
-      );
+  Future<ExtractResult> extract(
+    int account,
+    XFile image, {
+    ProgressCallback? onProgress,
+  }) async => ExtractResult.fromJson(
+    await client.post(
+      _in(account, 'trades/extract'),
+      FormData.fromMap({'screenshot': await _file(image)}),
+      onProgress,
+    ),
+  );
 
   Future<String> group(int account, List<String> ids) async =>
       _message(await client.post(_in(account, 'trades/group'), {'ids': ids}));
@@ -184,8 +188,7 @@ class JournalApi {
     final form = FormData.fromMap({
       for (final entry in fields.entries)
         if (entry.value != null) entry.key: '${entry.value}',
-      if (proof != null)
-        'proof': MultipartFile.fromBytes(proof, filename: 'bukti.jpg'),
+      if (proof != null) 'proof': chunkedFile(proof, 'bukti.jpg'),
     });
 
     return _message(
@@ -264,7 +267,7 @@ class JournalApi {
       client.download('reports/pdf', data: data);
 
   static Future<MultipartFile> _file(XFile file) async =>
-      MultipartFile.fromBytes(await file.readAsBytes(), filename: file.name);
+      chunkedFile(await file.readAsBytes(), file.name);
 }
 
 /// Nama HP seperti di Setelan › Tentang ponsel ("Redmi Note 12 Pro"), dari

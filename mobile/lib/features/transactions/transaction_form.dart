@@ -11,6 +11,7 @@ import '../../data/session.dart';
 import '../../models/account.dart';
 import '../../models/journal.dart';
 import '../../widgets/common.dart';
+import '../../widgets/image_viewer.dart';
 import 'transactions_screen.dart';
 
 /// Catat atau perbaiki setoran/penarikan. Bukti transfer wajib saat dicatat —
@@ -153,6 +154,28 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   }
 
   Future<void> _submit() async {
+    // Dicek di sini dulu: tanpa ini buktinya terunggah penuh — bisa beberapa
+    // MB — hanya untuk ditolak server karena jumlahnya kosong.
+    final invalid = {
+      ...requiredErrors({
+        'amount': _amount.text,
+        if (_needsRate) 'rate_idr': _rate.text,
+      }),
+      for (final (key, controller) in [
+        ('amount', _amount),
+        ('rate_idr', _rate),
+      ])
+        if (controller.text.trim().isNotEmpty &&
+            (parseDecimal(controller.text) ?? 0) <= 0)
+          key: 'Harus angka lebih dari 0.',
+      if (widget.editing == null && _proof == null) 'proof': 'Wajib diisi.',
+    };
+
+    if (invalid.isNotEmpty) {
+      setState(() => _errors = invalid);
+      return;
+    }
+
     setState(() {
       _busy = true;
       _sent = 0;
@@ -294,7 +317,7 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
             const SizedBox(height: 6),
             // Kotaknya sendiri bisa diketuk — sama dengan tombol Galeri.
             InkWell(
-              onTap: () => _pickProof(ImageSource.gallery),
+              onTap: _busy ? null : () => _pickProof(ImageSource.gallery),
               borderRadius: BorderRadius.circular(kRadius - 2),
               child: Container(
                 constraints: const BoxConstraints(minHeight: 110),
@@ -308,8 +331,24 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                         : AppColors.destructive,
                   ),
                 ),
+                // Pratinjau didekode kecil; ketuk untuk melihat ukuran asli.
                 child: _proof != null
-                    ? Image.memory(_proof!, height: 180, fit: BoxFit.contain)
+                    ? GestureDetector(
+                        onTap: () => showImageViewer(
+                          context,
+                          image: MemoryImage(_proof!),
+                          bytes: () async => _proof!,
+                          name: 'bukti-$_type-${isoDate(_date)}',
+                        ),
+                        child: Image.memory(
+                          _proof!,
+                          height: 180,
+                          cacheHeight:
+                              (180 * MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
+                          fit: BoxFit.contain,
+                        ),
+                      )
                     : (editing?.hasProof ?? false)
                     ? ProofThumbnail(
                         account: widget.account.id,
@@ -334,7 +373,11 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _pickProof(ImageSource.gallery),
+                    // Mati selama mengirim: bukti yang sedang diunggah
+                    // tidak boleh tertukar di tengah jalan.
+                    onPressed: _busy
+                        ? null
+                        : () => _pickProof(ImageSource.gallery),
                     icon: const Icon(Icons.photo_library_outlined, size: 18),
                     label: const Text('Galeri'),
                   ),
@@ -342,7 +385,9 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _pickProof(ImageSource.camera),
+                    onPressed: _busy
+                        ? null
+                        : () => _pickProof(ImageSource.camera),
                     icon: const Icon(Icons.photo_camera_outlined, size: 18),
                     label: const Text('Kamera'),
                   ),
@@ -366,18 +411,6 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                 errorText: _errors['note'],
               ),
             ),
-            if (_busy) ...[
-              const SizedBox(height: 4),
-              // Setelah terkirim semua, server masih mengolah gambarnya — bar
-              // jadi tanpa angka supaya tidak terlihat macet di 100%.
-              LinearProgressIndicator(value: _sent < 1 ? _sent : null),
-              const SizedBox(height: 6),
-              Caption(
-                _sent < 1
-                    ? '${_proof == null ? 'Mengirim' : 'Mengunggah bukti'}… ${(_sent * 100).round()}%'
-                    : 'Menyimpan…',
-              ),
-            ],
             const SizedBox(height: 8),
             Row(
               children: [
@@ -386,10 +419,13 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                   child: const Text('Batal'),
                 ),
                 const Spacer(),
+                // Persen hanya kalau ada bukti yang diunggah; setelah penuh
+                // server masih mengolah gambarnya.
                 BusyButton(
                   busy: _busy,
-                  label: 'Simpan',
-                  onPressed: editing == null && _proof == null ? null : _submit,
+                  label: _busy ? 'Menyimpan…' : 'Simpan',
+                  progress: _proof == null ? null : _sent,
+                  onPressed: _submit,
                 ),
               ],
             ),

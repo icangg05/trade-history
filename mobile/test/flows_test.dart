@@ -24,6 +24,42 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('trade baru dari tombol + → simpan → mendarat di daftar Trade', (
+    tester,
+  ) async {
+    final server = await pumpApp(
+      tester,
+      routes: {
+        'POST accounts/1/trades': (_) => {'message': 'Trade dicatat.'},
+      },
+    );
+
+    await tester.tap(find.byTooltip('Tambah trade'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Simbol *'),
+      'xauusd',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Entry *'),
+      '2412.35',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Hasil (USC) *'),
+      '25',
+    );
+    await tester.tap(find.widgetWithText(TextButton, 'Simpan'));
+    await tester.pumpAndSettle();
+
+    expect(
+      server.requests.where((r) => r.method == 'POST').single.data['symbol'],
+      'XAUUSD',
+    );
+    expect(find.text('Trade baru'), findsNothing);
+    expect(find.byTooltip('Filter'), findsOneWidget);
+  });
+
   testWidgets('kalender: ketuk hari → rincian hari dan trade-nya', (
     tester,
   ) async {
@@ -131,7 +167,7 @@ void main() {
   });
 
   testWidgets('dana: form catat butuh bukti, form ubah tidak', (tester) async {
-    await pumpApp(tester);
+    final server = await pumpApp(tester);
     await openTab(tester, 'Dana');
 
     await tester.tap(find.text('Catat'));
@@ -139,12 +175,13 @@ void main() {
 
     expect(find.text('Catat transaksi'), findsOneWidget);
     expect(find.textContaining('Kurs rupiah'), findsOneWidget);
-    expect(
-      tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Simpan'))
-          .onPressed,
-      isNull,
-    );
+
+    // Kosong: ditolak di ponsel — jumlah, kurs, dan bukti — tanpa mengirim.
+    await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wajib diisi.'), findsNWidgets(3));
+    expect(server.requests.where((r) => r.method == 'POST'), isEmpty);
 
     await tester.tap(find.text('Batal'));
     await tester.pumpAndSettle();

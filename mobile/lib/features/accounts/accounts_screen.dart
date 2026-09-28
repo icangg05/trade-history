@@ -322,23 +322,29 @@ class _AccountFormState extends ConsumerState<_AccountForm> {
   }
 
   Future<void> _submit() async {
+    final missing = requiredErrors({'name': _name.text});
+
+    if (missing.isNotEmpty) {
+      setState(() => _errors = missing);
+      return;
+    }
+
     setState(() {
       _busy = true;
       _errors = {};
     });
 
     try {
-      final (message, id) = await ref.read(journalProvider).saveAccount(
-        widget.editing?.id,
-        {
-          'name': _name.text.trim(),
-          'broker': _broker.text.trim(),
-          'account_number': _number.text.trim(),
-          'currency': _currency,
-          'started_at': isoDate(_startedAt),
-          'is_archived': _archived,
-        },
-      );
+      final (message, id) = await ref
+          .read(journalProvider)
+          .saveAccount(widget.editing?.id, {
+            'name': _name.text.trim(),
+            'broker': _broker.text.trim(),
+            'account_number': _number.text.trim(),
+            'currency': _currency,
+            'started_at': isoDate(_startedAt),
+            'is_archived': _archived,
+          });
 
       ref.invalidate(meProvider);
       ref.read(revisionProvider.notifier).bump();

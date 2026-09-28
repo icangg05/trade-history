@@ -50,7 +50,18 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
     super.dispose();
   }
 
-  Future<void> _run(Future<void> Function() action) async {
+  /// [fields]: isian wajib langkah ini — dicek sebelum ke server.
+  Future<void> _run(
+    Map<String, String> fields,
+    Future<void> Function() action,
+  ) async {
+    final missing = requiredErrors(fields);
+
+    if (missing.isNotEmpty) {
+      setState(() => _error = ApiException('', errors: missing));
+      return;
+    }
+
     setState(() {
       _busy = true;
       _error = null;
@@ -71,7 +82,7 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
     }
   }
 
-  Future<void> _send() => _run(() async {
+  Future<void> _send() => _run({'email': _email.text}, () async {
     final message = await ref
         .read(sessionProvider.notifier)
         .requestResetCode(_email.text.trim());
@@ -88,7 +99,7 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
     });
   });
 
-  Future<void> _verify() => _run(() async {
+  Future<void> _verify() => _run({'code': _code.text}, () async {
     await ref
         .read(sessionProvider.notifier)
         .verifyResetCode(_email.text.trim(), _code.text);
@@ -97,6 +108,7 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
   });
 
   Future<void> _reset() => _run(
+    {'password': _password.text, 'password_confirmation': _confirmation.text},
     () => ref
         .read(sessionProvider.notifier)
         .resetPassword(

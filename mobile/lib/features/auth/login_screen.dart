@@ -144,6 +144,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
+    final missing = requiredErrors({
+      'email': _email.text,
+      'password': _password.text,
+    });
+
+    if (missing.isNotEmpty) {
+      setState(() => _error = ApiException('', errors: missing));
+      return;
+    }
+
     setState(() {
       _busy = true;
       _error = null;

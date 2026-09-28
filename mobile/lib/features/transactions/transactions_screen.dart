@@ -692,6 +692,20 @@ class ProofThumbnail extends ConsumerWidget {
               cacheWidth: (size * MediaQuery.devicePixelRatioOf(context))
                   .round(),
               fit: BoxFit.cover,
+              // Putaran kecil selama diunduh, bukan kotak kosong.
+              frameBuilder: (_, child, frame, sync) => frame != null || sync
+                  ? child
+                  : SizedBox.square(
+                      dimension: size,
+                      child: Center(
+                        child: SizedBox.square(
+                          dimension: size < 60 ? 16 : 24,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ),
+                    ),
               errorBuilder: (_, _, _) => SizedBox.square(
                 dimension: size,
                 child: const Icon(

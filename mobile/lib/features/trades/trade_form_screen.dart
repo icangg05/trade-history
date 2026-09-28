@@ -68,7 +68,7 @@ class TradeFormScreen extends ConsumerWidget {
                 onRetry: () => ref.invalidate(_formProvider(key)),
               ),
             ),
-            data: (data) => _TradeForm(
+            data: (data) => _TradeForms(
               account: account.id,
               currency: account.currency,
               trade: data.$1,
@@ -80,8 +80,10 @@ class TradeFormScreen extends ConsumerWidget {
   }
 }
 
-class _TradeForm extends ConsumerStatefulWidget {
-  const _TradeForm({
+/// Satu tab per trade. Biasanya hanya satu, tanpa tab; tab muncul setelah
+/// beberapa screenshot dibaca sekaligus, supaya form tidak menumpuk ke bawah.
+class _TradeForms extends ConsumerStatefulWidget {
+  const _TradeForms({
     required this.account,
     required this.currency,
     required this.trade,
@@ -94,6 +96,241 @@ class _TradeForm extends ConsumerStatefulWidget {
   final Trade? trade;
   final bool aiEnabled;
   final List<String> symbols;
+
+  @override
+  ConsumerState<_TradeForms> createState() => _TradeFormsState();
+}
+
+class _TradeFormsState extends ConsumerState<_TradeForms>
+    with TickerProviderStateMixin {
+  /// Kunci tiap tab plus hasil AI pengisi awalnya. IndexedStack menjaga isian
+  /// tab yang sedang tidak terlihat; kuncinya dipakai untuk menyimpan semuanya.
+  List<(GlobalKey<_TradeFormState>, AiImport?)> _forms = [(GlobalKey(), null)];
+  TabController? _tabs;
+  bool _busy = false;
+
+  int get _index => _tabs?.index ?? 0;
+
+  void _setForms(
+    List<(GlobalKey<_TradeFormState>, AiImport?)> forms,
+    int index,
+  ) {
+    // Dilepas setelah bingkai ini: TabBar lama masih memegangnya sampai dibangun ulang.
+    final old = _tabs;
+    WidgetsBinding.instance.addPostFrameCallback((_) => old?.dispose());
+
+    _forms = forms;
+    _tabs = forms.length < 2
+        ? null
+        : (TabController(length: forms.length, vsync: this, initialIndex: index)
+            ..addListener(() => setState(() {})));
+  }
+
+  @override
+  void dispose() {
+    _tabs?.dispose();
+    super.dispose();
+  }
+
+  /// Screenshot pertama mengisi tab ini; sisanya jadi tab baru tepat di
+  /// belakangnya. Jumlah tab tidak pernah melebihi [maxScreenshots].
+  Future<void> _import() async {
+    final picked = await showAiImport(
+      context,
+      widget.account,
+      max: maxScreenshots - _forms.length + 1,
+    );
+
+    if (picked == null || picked.isEmpty || !mounted) return;
+
+    final at = _index;
+
+    _forms[at].$1.currentState!.fill(picked.first);
+
+    if (picked.length > 1) {
+      setState(
+        () => _setForms([
+          ..._forms.take(at + 1),
+          for (final result in picked.skip(1)) (GlobalKey(), result),
+          ..._forms.skip(at + 1),
+        ], at),
+      );
+      showMessage(
+        context,
+        '${picked.length} screenshot terbaca, satu tab per trade. Periksa tiap tab sebelum menyimpan.',
+      );
+    }
+  }
+
+  Future<void> _discard() async {
+    final at = _index;
+
+    if (!await confirm(
+          context,
+          title: 'Buang Trade ${at + 1}?',
+          message: 'Isian di tab ini hilang dan tidak ikut disimpan.',
+          action: 'Buang',
+          destructive: true,
+        ) ||
+        !mounted) {
+      return;
+    }
+
+    setState(
+      () =>
+          _setForms([..._forms]..removeAt(at), at.clamp(0, _forms.length - 2)),
+    );
+  }
+
+  Future<void> _save() async {
+    // Diambil di awal: daftar trade tetap disegarkan walau layar ini sudah
+    // ditutup sebelum semua tab selesai tersimpan.
+    final revision = ref.read(revisionProvider.notifier);
+
+    setState(() => _busy = true);
+
+    var saved = 0;
+    String? done;
+    String? failure;
+
+    // Berurutan dari tab pertama. Yang sudah tersimpan langsung keluar dari
+    // daftar, jadi menyimpan ulang setelah memperbaiki satu tab tidak
+    // menggandakan trade lainnya.
+    try {
+      while (true) {
+        final message = await _forms.first.$1.currentState!.submit();
+
+        if (message == null) break;
+
+        saved++;
+
+        if (_forms.length == 1) {
+          done = message;
+          break;
+        }
+
+        if (!mounted) break;
+
+        setState(() => _setForms(_forms.sublist(1), 0));
+      }
+    } on ApiException catch (error) {
+      failure = error.message;
+    }
+
+    if (saved > 0) revision.bump();
+
+    if (!mounted) return;
+
+    setState(() => _busy = false);
+
+    if (done != null) {
+      showMessage(context, saved == 1 ? done : '$saved trade dicatat.');
+      // Trade baru selalu berakhir di daftar trade, dari mana pun tombol +
+      // ditekan. Mengubah trade kembali ke tempat asalnya.
+      widget.trade == null ? context.go('/trades') : context.pop();
+
+      return;
+    }
+
+    // Yang gagal selalu tab pertama yang tersisa.
+    _tabs?.animateTo(0);
+
+    final prefix = saved == 0 ? '' : '$saved trade tersimpan. ';
+
+    if (failure != null) {
+      showMessage(context, '$prefix$failure', error: true);
+    } else if (saved > 0) {
+      showMessage(
+        context,
+        '${prefix}Perbaiki tab yang tersisa lalu simpan lagi.',
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = _forms.length > 1
+        ? 'Simpan ${_forms.length} trade'
+        : 'Simpan';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.trade != null ? 'Ubah trade' : 'Trade baru'),
+        actions: [
+          TextButton(
+            onPressed: _busy ? null : _save,
+            child: const Text('Simpan'),
+          ),
+          const SizedBox(width: 4),
+        ],
+        bottom: _tabs == null
+            ? null
+            : TabBar(
+                controller: _tabs,
+                tabs: [
+                  for (var i = 0; i < _forms.length; i++)
+                    Tab(text: 'Trade ${i + 1}'),
+                ],
+              ),
+      ),
+      body: IndexedStack(
+        index: _index,
+        children: [
+          for (final (key, initial) in _forms)
+            _TradeForm(
+              key: key,
+              account: widget.account,
+              currency: widget.currency,
+              trade: widget.trade,
+              aiEnabled: widget.aiEnabled,
+              symbols: widget.symbols,
+              initial: initial,
+              busy: _busy,
+              saveLabel: label,
+              onSave: _save,
+              onImport: _import,
+              onDiscard: _forms.length > 1 ? _discard : null,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Isian satu trade. Tombol dan aksi yang menyangkut semua tab (simpan,
+/// import, buang tab) dipegang [_TradeForms].
+class _TradeForm extends ConsumerStatefulWidget {
+  const _TradeForm({
+    super.key,
+    required this.account,
+    required this.currency,
+    required this.trade,
+    required this.aiEnabled,
+    required this.symbols,
+    required this.initial,
+    required this.busy,
+    required this.saveLabel,
+    required this.onSave,
+    required this.onImport,
+    required this.onDiscard,
+  });
+
+  final int account;
+  final String currency;
+  final Trade? trade;
+  final bool aiEnabled;
+  final List<String> symbols;
+
+  /// Hasil AI yang mengisi tab ini sejak dibuka — tab kedua dan seterusnya.
+  final AiImport? initial;
+
+  final bool busy;
+  final String saveLabel;
+  final VoidCallback onSave;
+  final VoidCallback onImport;
+
+  /// Null kalau hanya ada satu tab.
+  final VoidCallback? onDiscard;
 
   @override
   ConsumerState<_TradeForm> createState() => _TradeFormState();
@@ -133,7 +370,6 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
   Uint8List? _aiPreview;
 
   Map<String, String> _errors = {};
-  bool _busy = false;
 
   bool get _editing => _trade != null;
 
@@ -152,6 +388,10 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
   @override
   void initState() {
     super.initState();
+
+    // Sebelum pendengarnya dipasang: mengisi teks memicu setState, dan
+    // setState belum boleh dipanggil di sini.
+    if (widget.initial case final picked?) _apply(picked);
 
     for (final controller in [..._numbers, _symbol]) {
       controller.addListener(_changed);
@@ -222,11 +462,10 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
     return _aiFields.contains(field) ? 'Diisi AI' : null;
   }
 
-  Future<void> _import() async {
-    final picked = await showAiImport(context, widget.account);
+  /// Isi tab ini dari hasil baca AI.
+  void fill(AiImport picked) => setState(() => _apply(picked));
 
-    if (picked == null) return;
-
+  void _apply(AiImport picked) {
     final data = picked.result.data;
     final filled = <String>{};
     final controllers = {
@@ -240,37 +479,35 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
       'notes': _notes,
     };
 
-    setState(() {
-      for (final MapEntry(:key, :value) in data.entries) {
-        if (value == null || '$value'.isEmpty) continue;
+    for (final MapEntry(:key, :value) in data.entries) {
+      if (value == null || '$value'.isEmpty) continue;
 
-        switch (key) {
-          case 'direction':
-            _direction = '$value';
-          case 'opened_at':
-            _openedAt = wallTime('$value');
-          case 'closed_at':
-            _closedAt = wallTime('$value');
-          case 'setup':
-            _setup = '$value';
-          default:
-            final controller = controllers[key];
-            if (controller == null) continue;
-            controller.text = value is num
-                ? inputNumber(value.toDouble())
-                : '$value';
-        }
-
-        filled.add(key);
+      switch (key) {
+        case 'direction':
+          _direction = '$value';
+        case 'opened_at':
+          _openedAt = wallTime('$value');
+        case 'closed_at':
+          _closedAt = wallTime('$value');
+        case 'setup':
+          _setup = '$value';
+        default:
+          final controller = controllers[key];
+          if (controller == null) continue;
+          controller.text = value is num
+              ? inputNumber(value.toDouble())
+              : '$value';
       }
 
-      _source = 'ai';
-      _aiRaw = picked.result.raw;
-      _aiFields = filled;
-      _lowConfidence = picked.result.lowConfidence;
-      _aiPreview = picked.image;
-      _errors = {};
-    });
+      filled.add(key);
+    }
+
+    _source = 'ai';
+    _aiRaw = picked.result.raw;
+    _aiFields = filled;
+    _lowConfidence = picked.result.lowConfidence;
+    _aiPreview = picked.image;
+    _errors = {};
   }
 
   Future<void> _pickTime({required bool closed}) async {
@@ -303,10 +540,19 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
     setState(() => closed ? _closedAt = value : _openedAt = value);
   }
 
-  Future<void> _submit() async {
+  /// Simpan trade di tab ini. Pesan server kalau berhasil; null kalau
+  /// isiannya ditolak — galatnya tampil di field masing-masing. Galat lain
+  /// (jaringan, server) dilempar ke [_TradeForms].
+  Future<String?> submit() async {
     // Angka yang tidak terbaca ditolak di sini; mengirim null diam-diam akan
     // berakhir sebagai pesan "wajib diisi" yang membingungkan.
     final invalid = {
+      ...requiredErrors({
+        'symbol': _symbol.text,
+        'entry_price': _entry.text,
+        'pnl': _pnl.text,
+      }),
+      if (_closedAt == null) 'closed_at': 'Wajib diisi.',
       for (final (key, controller) in [
         ('lot', _lot),
         ('entry_price', _entry),
@@ -322,51 +568,35 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
 
     if (invalid.isNotEmpty) {
       setState(() => _errors = invalid);
-      return;
+      return null;
     }
 
-    setState(() {
-      _busy = true;
-      _errors = {};
-    });
+    setState(() => _errors = {});
 
     try {
-      final message = await ref.read(journalProvider).saveTrade(
-        widget.account,
-        _trade?.id,
-        {
-          'symbol': _symbol.text.trim().toUpperCase(),
-          'direction': _direction,
-          'lot': parseDecimal(_lot.text),
-          'entry_price': _e,
-          'sl_price': _stop,
-          'tp_price': _target,
-          'exit_price': parseDecimal(_exit.text),
-          'pnl': parseDecimal(_pnl.text),
-          'opened_at': isoMinute(_openedAt),
-          'closed_at': _closedAt == null ? null : isoMinute(_closedAt!),
-          'setup': _setup,
-          'notes': _notes.text,
-          'source': _source,
-          'ai_raw': _aiRaw,
-        },
-      );
-
-      ref.read(revisionProvider.notifier).bump();
-
-      if (mounted) {
-        showMessage(context, message);
-        context.pop();
-      }
+      return await ref
+          .read(journalProvider)
+          .saveTrade(widget.account, _trade?.id, {
+            'symbol': _symbol.text.trim().toUpperCase(),
+            'direction': _direction,
+            'lot': parseDecimal(_lot.text),
+            'entry_price': _e,
+            'sl_price': _stop,
+            'tp_price': _target,
+            'exit_price': parseDecimal(_exit.text),
+            'pnl': parseDecimal(_pnl.text),
+            'opened_at': isoMinute(_openedAt),
+            'closed_at': _closedAt == null ? null : isoMinute(_closedAt!),
+            'setup': _setup,
+            'notes': _notes.text,
+            'source': _source,
+            'ai_raw': _aiRaw,
+          });
     } on ApiException catch (error) {
-      if (mounted) {
-        setState(() => _errors = error.errors);
-        if (error.errors.isEmpty) {
-          showMessage(context, error.message, error: true);
-        }
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
+      if (error.errors.isEmpty) rethrow;
+      if (mounted) setState(() => _errors = error.errors);
+
+      return null;
     }
   }
 
@@ -430,251 +660,245 @@ class _TradeFormState extends ConsumerState<_TradeForm> {
   Widget build(BuildContext context) {
     const gap = SizedBox(height: 14);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_editing ? 'Ubah trade' : 'Trade baru'),
-        actions: [
-          TextButton(
-            onPressed: _busy ? null : _submit,
-            child: const Text('Simpan'),
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
-        children: [
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+      children: [
+        Caption(
+          widget.onDiscard == null
+              ? 'Isi manual, atau biarkan AI membaca screenshot lalu koreksi hasilnya.'
+              : 'Satu tab satu trade. Semua tab disimpan sekaligus.',
+        ),
+        const SizedBox(height: 12),
+        if (!_editing && widget.aiEnabled)
+          OutlinedButton.icon(
+            onPressed: widget.busy ? null : widget.onImport,
+            icon: const Icon(
+              Icons.auto_awesome,
+              color: AppColors.gold,
+              size: 18,
+            ),
+            label: const Text('Isi dari screenshot'),
+          )
+        else if (!_editing)
           const Caption(
-            'Isi manual, atau biarkan AI membaca screenshot lalu koreksi hasilnya.',
+            'Import AI nonaktif karena kunci Gemini belum diisi admin.',
           ),
+        if (_aiFields.isNotEmpty) ...[
           const SizedBox(height: 12),
-          if (!_editing && widget.aiEnabled)
-            OutlinedButton.icon(
-              onPressed: _import,
-              icon: const Icon(
-                Icons.auto_awesome,
-                color: AppColors.gold,
-                size: 18,
-              ),
-              label: const Text('Isi dari screenshot'),
-            )
-          else if (!_editing)
-            const Caption(
-              'Import AI nonaktif karena kunci Gemini belum diisi admin.',
+          Notice(
+            icon: Icons.auto_awesome,
+            child: Text(
+              '${_aiFields.length} field terisi dari gambar. '
+              '${_lowConfidence.isEmpty ? '' : 'AI ragu pada: ${_lowConfidence.join(', ')}. '}'
+              'Periksa semua angka sebelum menyimpan.',
             ),
-          if (_aiFields.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Notice(
-              icon: Icons.auto_awesome,
-              child: Text(
-                '${_aiFields.length} field terisi dari gambar. '
-                '${_lowConfidence.isEmpty ? '' : 'AI ragu pada: ${_lowConfidence.join(', ')}. '}'
-                'Periksa semua angka sebelum menyimpan.',
-              ),
-            ),
-          ],
-          const SizedBox(height: 14),
-          Panel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: _symbol,
-                  textCapitalization: TextCapitalization.characters,
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                  decoration: InputDecoration(
-                    labelText: 'Simbol *',
-                    hintText: 'XAUUSD',
-                    errorText: _errors['symbol'],
-                    helperText: _badge('symbol'),
-                    helperStyle: const TextStyle(color: AppColors.gold),
-                  ),
-                ),
-                if (widget.symbols.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  SuggestChips(
-                    options: widget.symbols,
-                    onSelected: (symbol) => _symbol.text = symbol,
-                  ),
-                ],
-                gap,
-                Segments(
-                  value: _direction,
-                  options: const [('buy', 'Buy'), ('sell', 'Sell')],
-                  colors: const {
-                    'buy': AppColors.success,
-                    'sell': AppColors.destructive,
-                  },
-                  onChanged: (value) => setState(() => _direction = value),
-                ),
-                gap,
-                _number(_lot, 'Lot', 'lot', hint: '0.05'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Panel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _number(
-                  _entry,
-                  'Entry',
-                  'entry_price',
-                  hint: '2412.35',
-                  required: true,
-                ),
-                gap,
-                FieldPair(
-                  _number(_sl, 'Stop loss', 'sl_price', hint: '2405.00'),
-                  _number(
-                    _tp,
-                    'Take profit',
-                    'tp_price',
-                    hint: '2430.00',
-                    note: _tpSideWrong
-                        ? 'TP harus di ${_direction == 'buy' ? 'atas' : 'bawah'} entry.'
-                        : null,
-                    noteColor: AppColors.destructive,
-                  ),
-                ),
-                if (_stopNote != null) ...[
-                  const SizedBox(height: 10),
-                  Notice(
-                    color: AppColors.cyan,
-                    icon: Icons.shield_outlined,
-                    child: Text(_stopNote!),
-                  ),
-                ],
-                if (_plannedRr != null) ...[
-                  const SizedBox(height: 10),
-                  Text.rich(
-                    TextSpan(
-                      text: 'Risk/reward rencana: ',
-                      children: [
-                        TextSpan(
-                          text: rr(_plannedRr),
-                          style: const TextStyle(color: AppColors.gold),
-                        ),
-                      ],
-                    ),
-                    style: mono(size: 12, color: AppColors.mutedForeground),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Panel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _timeField('Dibuka', _openedAt, 'opened_at', closed: false),
-                gap,
-                _timeField('Ditutup', _closedAt, 'closed_at', closed: true),
-                gap,
-                FieldPair(
-                  _number(
-                    _exit,
-                    'Harga keluar',
-                    'exit_price',
-                    hint: 'Opsional',
-                  ),
-                  _number(
-                    _pnl,
-                    'Hasil (${widget.currency})',
-                    'pnl',
-                    hint: 'Untung/rugi',
-                    required: true,
-                    signed: true,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (_inGroup) ...[
-            const Notice(
-              icon: Icons.layers_outlined,
-              child: Text(
-                'Trade ini bagian dari sebuah grup. Setup dan catatannya dipakai bersama seluruh anggota grup, '
-                'jadi dikunci di sini. Ubah lewat detail trade di tab Trade, atau keluarkan dari grupnya dulu.',
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-          Panel(
-            title: 'Setup / strategi',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SetupPicker(
-                  value: _setup,
-                  enabled: !_inGroup,
-                  onChanged: (value) => setState(() => _setup = value),
-                ),
-                if (_badge('setup') != null || _errors['setup'] != null) ...[
-                  const SizedBox(height: 6),
-                  Caption(
-                    _errors['setup'] ?? _badge('setup')!,
-                    color: _errors['setup'] != null
-                        ? AppColors.destructive
-                        : AppColors.gold,
-                  ),
-                ],
-                gap,
-                TextField(
-                  controller: _notes,
-                  enabled: !_inGroup,
-                  minLines: 3,
-                  maxLines: 8,
-                  decoration: InputDecoration(
-                    labelText: 'Catatan',
-                    // Contoh nyata di dalam kolom, arahan tetap di bawahnya —
-                    // yang di dalam hilang begitu mulai mengetik.
-                    hintText:
-                        'Contoh: Entry di retest support H1 setelah break of structure. '
-                        'Terlalu cepat, harusnya tunggu candle konfirmasi.',
-                    hintMaxLines: 3,
-                    helperText:
-                        'Tulis alasan masuk, kondisi pasar saat itu, dan pelajaran setelah trade selesai.',
-                    alignLabelWithHint: true,
-                    errorText: _errors['notes'],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_aiPreview != null) ...[
-            const SizedBox(height: 12),
-            Panel(
-              title: 'Gambar sumber',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: InteractiveViewer(
-                      child: Image.memory(_aiPreview!, fit: BoxFit.contain),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Caption(
-                    'Hanya untuk mencocokkan angka. Gambar tidak disimpan dan akan hilang setelah form ditutup.',
-                  ),
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 20),
-          BusyButton(
-            busy: _busy,
-            onPressed: _submit,
-            label: 'Simpan',
-            icon: Icons.check,
           ),
         ],
-      ),
+        const SizedBox(height: 14),
+        Panel(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _symbol,
+                textCapitalization: TextCapitalization.characters,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+                decoration: InputDecoration(
+                  labelText: 'Simbol *',
+                  hintText: 'XAUUSD',
+                  errorText: _errors['symbol'],
+                  helperText: _badge('symbol'),
+                  helperStyle: const TextStyle(color: AppColors.gold),
+                ),
+              ),
+              if (widget.symbols.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                SuggestChips(
+                  options: widget.symbols,
+                  onSelected: (symbol) => _symbol.text = symbol,
+                ),
+              ],
+              gap,
+              Segments(
+                value: _direction,
+                options: const [('buy', 'Buy'), ('sell', 'Sell')],
+                colors: const {
+                  'buy': AppColors.success,
+                  'sell': AppColors.destructive,
+                },
+                onChanged: (value) => setState(() => _direction = value),
+              ),
+              gap,
+              _number(_lot, 'Lot', 'lot', hint: '0.05'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Panel(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _number(
+                _entry,
+                'Entry',
+                'entry_price',
+                hint: '2412.35',
+                required: true,
+              ),
+              gap,
+              FieldPair(
+                _number(_sl, 'Stop loss', 'sl_price', hint: '2405.00'),
+                _number(
+                  _tp,
+                  'Take profit',
+                  'tp_price',
+                  hint: '2430.00',
+                  note: _tpSideWrong
+                      ? 'TP harus di ${_direction == 'buy' ? 'atas' : 'bawah'} entry.'
+                      : null,
+                  noteColor: AppColors.destructive,
+                ),
+              ),
+              if (_stopNote != null) ...[
+                const SizedBox(height: 10),
+                Notice(
+                  color: AppColors.cyan,
+                  icon: Icons.shield_outlined,
+                  child: Text(_stopNote!),
+                ),
+              ],
+              if (_plannedRr != null) ...[
+                const SizedBox(height: 10),
+                Text.rich(
+                  TextSpan(
+                    text: 'Risk/reward rencana: ',
+                    children: [
+                      TextSpan(
+                        text: rr(_plannedRr),
+                        style: const TextStyle(color: AppColors.gold),
+                      ),
+                    ],
+                  ),
+                  style: mono(size: 12, color: AppColors.mutedForeground),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Panel(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _timeField('Dibuka', _openedAt, 'opened_at', closed: false),
+              gap,
+              _timeField('Ditutup', _closedAt, 'closed_at', closed: true),
+              gap,
+              FieldPair(
+                _number(_exit, 'Harga keluar', 'exit_price', hint: 'Opsional'),
+                _number(
+                  _pnl,
+                  'Hasil (${widget.currency})',
+                  'pnl',
+                  hint: 'Untung/rugi',
+                  required: true,
+                  signed: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (_inGroup) ...[
+          const Notice(
+            icon: Icons.layers_outlined,
+            child: Text(
+              'Trade ini bagian dari sebuah grup. Setup dan catatannya dipakai bersama seluruh anggota grup, '
+              'jadi dikunci di sini. Ubah lewat detail trade di tab Trade, atau keluarkan dari grupnya dulu.',
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Panel(
+          title: 'Setup / strategi',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SetupPicker(
+                value: _setup,
+                enabled: !_inGroup,
+                onChanged: (value) => setState(() => _setup = value),
+              ),
+              if (_badge('setup') != null || _errors['setup'] != null) ...[
+                const SizedBox(height: 6),
+                Caption(
+                  _errors['setup'] ?? _badge('setup')!,
+                  color: _errors['setup'] != null
+                      ? AppColors.destructive
+                      : AppColors.gold,
+                ),
+              ],
+              gap,
+              TextField(
+                controller: _notes,
+                enabled: !_inGroup,
+                minLines: 3,
+                maxLines: 8,
+                decoration: InputDecoration(
+                  labelText: 'Catatan',
+                  // Contoh nyata di dalam kolom, arahan tetap di bawahnya —
+                  // yang di dalam hilang begitu mulai mengetik.
+                  hintText:
+                      'Contoh: Entry di retest support H1 setelah break of structure. '
+                      'Terlalu cepat, harusnya tunggu candle konfirmasi.',
+                  hintMaxLines: 3,
+                  helperText:
+                      'Tulis alasan masuk, kondisi pasar saat itu, dan pelajaran setelah trade selesai.',
+                  alignLabelWithHint: true,
+                  errorText: _errors['notes'],
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_aiPreview != null) ...[
+          const SizedBox(height: 12),
+          Panel(
+            title: 'Gambar sumber',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: InteractiveViewer(
+                    child: Image.memory(_aiPreview!, fit: BoxFit.contain),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Caption(
+                  'Hanya untuk mencocokkan angka. Gambar tidak disimpan dan akan hilang setelah form ditutup.',
+                ),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 20),
+        BusyButton(
+          busy: widget.busy,
+          onPressed: widget.onSave,
+          label: widget.saveLabel,
+          icon: Icons.check,
+        ),
+        if (widget.onDiscard != null) ...[
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: widget.busy ? null : widget.onDiscard,
+            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
+            icon: const Icon(Icons.close, size: 18),
+            label: const Text('Buang tab ini'),
+          ),
+        ],
+      ],
     );
   }
 }
