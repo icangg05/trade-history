@@ -157,7 +157,8 @@ class Gemini
     - `statistik`: ringkasan periode ini, termasuk breakdown `by_symbol`,
       `by_direction`, `by_weekday`, `by_hour` (jam buka, WIB), `by_setup`, dan
       `violations` (tanggal → aturan yang dilanggar). `max_drawdown` diukur dari
-      seluruh umur akun, bukan periode ini.
+      seluruh umur akun, bukan periode ini; `pct` time-weighted terhadap saldo
+      yang ada di akun, dan 100 berarti saldo pernah habis (MC).
     - `perilaku`: kebiasaan di balik angka, yaitu `by_trade_of_day` (posisi ke-berapa
       dalam sehari), `after_loss` (dibuka ≤60 menit setelah posisi rugi, dibanding
       lainnya), `hold_minutes` (rata-rata lama posisi menang vs kalah),

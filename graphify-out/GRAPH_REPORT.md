@@ -1,16 +1,16 @@
-# Graph Report - trade-history  (2026-09-28)
+# Graph Report - trade-history  (2026-10-03)
 
 ## Corpus Check
-- 366 files · ~277,488 words
+- 366 files · ~278,202 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4306 nodes · 8012 edges · 240 communities (221 shown, 19 thin omitted)
+- 4311 nodes · 8023 edges · 245 communities (221 shown, 24 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 119 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `88749670`
+- Built from commit: `f9cadd65`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -26,11 +26,11 @@
 - compilerOptions
 - scripts
 - AppLayout.vue
-- utils.ts
+- cn
 - require-dev
 - trade_widgets.dart
 - common.dart
-- types/index.ts
+- button/index.ts
 - Admin.vue
 - Account
 - AccountStats
@@ -49,7 +49,7 @@
 - Calendar.vue
 - Accounts.vue
 - Index.vue
-- trade_detail.dart
+- package:flutter/material.dart
 - Transactions.vue
 - package.json
 - App Icon 512 (rounded squircle, rising-chart mark)
@@ -76,24 +76,24 @@
 - require
 - make-icons.py
 - rules_screen.dart
-- Illuminate\Http\RedirectResponse
+- TradeController
 - format.dart
 - accounts_screen.dart
 - psr-4
-- GeminiKey
+- Gemini
 - flows_test.dart
 - Impeccable Finish Reviewer
-- User
+- AccountSecurityTest
 - setLiveState
 - session.dart
 - artisan
 - account.dart
 - bootstrap/app.php
-- AdminTest
+- GeminiKey
 - theme.dart
 - journal_api.dart
 - 4. DESIGN ENGINEERING DIRECTIVES (Bias Correction)
-- ReportTest
+- User
 - SelectContent.vue
 - modern-screenshot.umd.js
 - trade_filters_sheet.dart
@@ -104,27 +104,27 @@
 - api_client.dart
 - el
 - Illuminate\Http\Request
-- package:flutter/material.dart
+- applyEditing
 - TradeImportTest
 - report_screen.dart
 - 10. REFERENCE VOCABULARY (Pattern Names the Agent Should Know)
 - backdrop.dart
 - image_viewer.dart
-- RegisterRequest
+- Illuminate\Http\RedirectResponse
 - useFormat.ts
 - .application
-- Hashid
+- self
 - profile_screen.dart
 - initPageChat
 - Form.vue
 - charts.dart
-- AnalysisController.php
-- cn
+- Inertia\Response
+- utils.ts
 - ApiTest
-- analysis_screen.dart
+- TradeController.php
 - 9. AI TELLS (Forbidden Patterns)
 - Illuminate\Support\Facades\Schema
-- initGlobalBar
+- handleGo
 - APPENDICES - Real Source-Backed Reference Material
 - 11. REDESIGN PROTOCOL
 - mountSvelteComponentVariant
@@ -137,30 +137,30 @@
 - Trade History — mobile
 - 8. DARK MODE PROTOCOL
 - _List
-- Diagnostic Scan
+- AdminTest
 - impeccable/SKILL.md
 - json.dart
 - 7. DIAL DEFINITIONS (Technical Reference)
 - vite.config.ts
 - dashboard_screen.dart
-- captureElementToBlob
+- onAnnotDown
 - Progress.vue
-- register_screen.dart
+- package:flutter_riverpod/flutter_riverpod.dart
 - forgot_screen.dart
 - Illuminate\Database\Migrations\Migration
 - @tailwindcss/vite
-- @vitejs/plugin-vue
+- /impeccable hooks
 - MainActivity.kt
-- UserFactory.php
+- SetupPicker.vue
 - home_user_trade_history_mobile_ios_runner_generatedpluginregistrant_h
 - LaunchImage.imageset/README.md
 - showToast
 - Responsive Design
-- prefsProvider
+- Illuminate\Database\Eloquent\Model
 - live.md
 - Image
 - document.md
-- dialog/index.ts
+- types/index.ts
 - onboard.md
 - PasswordResetCode
 - The Toolkit
@@ -188,9 +188,9 @@
 - DropdownMenuCheckboxItem.vue
 - Common Cognitive Load Violations
 - iOS platform
-- Operate mode depth (and Read notes)
+- Hashid
 - Shape
-- Illuminate\Database\Seeder
+- DemoSeeder.php
 - Android platform
 - Persona-Based Design Testing
 - live-setup.md
@@ -200,33 +200,38 @@
 - Generate Report
 - Cognitive Load Assessment
 - Impeccable Asset Producer
-- doctor.md
+- Operate mode depth (and Read notes)
 - Impeccable Manual Edit Applier
 - live-browser-ignores.js
-- SelectItem.vue
+- 1. THE THREE DIALS (Core Configuration)
 - Extract Flow
 - impeccable
 - Impeccable Documenter
-- bolder.md
+- DropdownMenuLabel.vue
 - Heuristics Scoring Guide
 - Input.vue
-- Visualize: Direction Comps & Asset Production
+- DropdownMenuSubContent.vue
 - post-autoload-dump
 - DialogDescription.vue
-- 1. THE THREE DIALS (Core Configuration)
+- LoginThrottleTest
 - keywords
-- post-create-project-cmd
+- AuthController.php
 - DialogContent.vue
 - @inertiajs/vue3
 - @types/node
 - DialogTitle.vue
-- DropdownMenuItem.vue
-- Badge.vue
-- DropdownMenuSubTrigger.vue
-- dev
+- TradeDayTest
+- @vitejs/plugin-vue
+- ValidationLangTest
+- setup
 - api_client_test.dart
 - TradeFilters
-- Button.vue
+- Dialog.vue
+- DropdownMenuItem.vue
+- SelectItem.vue
+- Separator.vue
+- adapt.native.md
+- Label.vue
 
 ## God Nodes (most connected - your core abstractions)
 1. `User` - 122 edges
@@ -237,8 +242,8 @@
 6. `AccountStats` - 38 edges
 7. `setLiveState()` - 32 edges
 8. `resumeSession()` - 32 edges
-9. `connectSSE()` - 31 edges
-10. `JournalTest` - 31 edges
+9. `JournalTest` - 32 edges
+10. `connectSSE()` - 31 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Penyimpanan bukti transfer privat` --semantically_similar_to--> `Screenshot trade tidak disimpan`  [INFERRED] [semantically similar]
@@ -247,9 +252,9 @@
   resources/js/components/AnalysisChat.vue → .claude/skills/impeccable/scripts/live-browser.js
 - `robots.txt mengizinkan seluruh crawler` --conceptually_related_to--> `REGISTER_TOKEN penjaga pendaftaran mandiri`  [AMBIGUOUS]
   public/robots.txt → README.md
+- `maybeWarnConditionalAncestor()` --references--> `css`  [EXTRACTED]
+  .claude/skills/impeccable/scripts/live-browser.js → components.json
 - `compose service: app (FrankenPHP dev)` --implements--> `FrankenPHP + Laravel Octane (worker mode)`  [EXTRACTED]
-  compose.yml → RANCANGAN.md
-- `compose service: vite (node:24-slim, one-shot)` --implements--> `Vite 8 (rolldown)`  [EXTRACTED]
   compose.yml → RANCANGAN.md
 
 ## Import Cycles
@@ -262,7 +267,7 @@
 - **Maskable-Purpose Icon Variants** — public_icons_maskable_512_maskable_icon, public_icons_maskable_192_maskable_icon, public_icons_maskable_512_safe_zone [INFERRED 0.85]
 - **PWA / Web App Manifest Icon Set** — public_icons_icon_512_app_icon, public_icons_icon_192_app_icon, public_icons_icon_32_favicon, public_icons_apple_touch_icon_icon, public_icons_maskable_512_maskable_icon, public_icons_maskable_192_maskable_icon [INFERRED 0.95]
 
-## Communities (240 total, 19 thin omitted)
+## Communities (245 total, 24 thin omitted)
 
 ### Community 0 - "stats.dart"
 Cohesion: 0.03
@@ -277,12 +282,12 @@ Cohesion: 0.14
 Nodes (13): autoload-dev, psr-4, description, extra, laravel, dont-discover, license, minimum-stability (+5 more)
 
 ### Community 4 - "avatar_cropper.dart"
-Cohesion: 0.09
-Nodes (23): dart:math, dart:typed_data, dart:ui, MaterialPageRoute, build, _busy, createState, cropAvatar (+15 more)
+Cohesion: 0.08
+Nodes (25): dart:math, dart:typed_data, dart:ui, MaterialPageRoute, AvatarCropper, _AvatarCropperState, build, _busy (+17 more)
 
 ### Community 5 - "dropdown-menu/index.ts"
-Cohesion: 0.05
-Nodes (26): emits, forwarded, props, props, delegatedProps, forwardedProps, props, emits (+18 more)
+Cohesion: 0.06
+Nodes (22): emits, forwarded, props, props, emits, forwarded, props, delegatedProps (+14 more)
 
 ### Community 6 - "devDependencies"
 Cohesion: 0.12
@@ -298,15 +303,15 @@ Nodes (26): DOM, DOM.Iterable, ESNext, node, resources/js/**/*.d.ts, resources/j
 
 ### Community 9 - "scripts"
 Cohesion: 0.13
-Nodes (16): scripts, post-root-package-install, post-update-cmd, pre-package-uninstall, setup, test, composer install, Illuminate\\Foundation\\ComposerScripts::prePackageUninstall (+8 more)
+Nodes (15): scripts, dev, post-create-project-cmd, post-update-cmd, pre-package-uninstall, test, Composer\\Config::disableProcessTimeout, Illuminate\\Foundation\\ComposerScripts::prePackageUninstall (+7 more)
 
 ### Community 10 - "AppLayout.vue"
 Cohesion: 0.07
 Nodes (27): resources_css_app, BARE_PAGES, resources_js_components_ui_dropdown_menu_index_dropdownmenu, resources_js_components_ui_dropdown_menu_index_dropdownmenucontent, resources_js_components_ui_dropdown_menu_index_dropdownmenuitem, resources_js_components_ui_dropdown_menu_index_dropdownmenulabel, resources_js_components_ui_dropdown_menu_index_dropdownmenuseparator, resources_js_components_ui_dropdown_menu_index_dropdownmenutrigger (+19 more)
 
-### Community 11 - "utils.ts"
+### Community 11 - "cn"
 Cohesion: 0.13
-Nodes (11): props, props, props, props, props, delegatedProps, props, props (+3 more)
+Nodes (12): props, props, props, props, props, delegatedProps, props, props (+4 more)
 
 ### Community 12 - "require-dev"
 Cohesion: 0.25
@@ -318,19 +323,19 @@ Nodes (27): build, currency, dimmed, direction, DirectionBadge, first, group, gr
 
 ### Community 14 - "common.dart"
 Cohesion: 0.03
-Nodes (58): AsyncValue, Color get, action, animate, borderColor, build, busy, child (+50 more)
+Nodes (59): AsyncValue, Color get, action, animate, borderColor, build, busy, child (+51 more)
 
-### Community 15 - "types/index.ts"
-Cohesion: 0.07
-Nodes (24): pages, props, tones, props, TAG, currency, form, PERIODS (+16 more)
+### Community 15 - "button/index.ts"
+Cohesion: 0.13
+Nodes (10): pages, props, resources_js_components_ui_button_index_button, props, message, MESSAGES, props, signedIn (+2 more)
 
 ### Community 16 - "Admin.vue"
 Cohesion: 0.09
 Nodes (17): backingUp, Backup, csrf(), editing, gemini, GeminiKey, now, open (+9 more)
 
 ### Community 17 - "Account"
-Cohesion: 0.06
-Nodes (21): Account, Carbon\CarbonImmutable, Illuminate\Database\Eloquent\Relations\HasMany, Illuminate\Foundation\Testing\RefreshDatabase, Illuminate\Foundation\Testing\TestCase, Illuminate\Http\UploadedFile, Illuminate\Support\Facades\Hash, Illuminate\Support\Facades\Http (+13 more)
+Cohesion: 0.07
+Nodes (21): Account, CarbonImmutable, Carbon\CarbonImmutable, Illuminate\Foundation\Testing\RefreshDatabase, Illuminate\Foundation\Testing\TestCase, Illuminate\Http\UploadedFile, Illuminate\Support\Facades\Hash, Illuminate\Support\Facades\Http (+13 more)
 
 ### Community 18 - "AccountStats"
 Cohesion: 0.20
@@ -342,23 +347,23 @@ Nodes (11): 0.A Read these signals first, 0.B Output a one-line "Design Read" be
 
 ### Community 20 - "AnalysisChat.vue"
 Cohesion: 0.12
-Nodes (20): busy, clear(), close(), closing, confirming, csrf(), draft, error (+12 more)
+Nodes (21): frame(), busy, clear(), close(), closing, confirming, csrf(), draft (+13 more)
 
 ### Community 21 - "transaction_form.dart"
 Cohesion: 0.07
 Nodes (29): AccountBrief, double? get, account, _amount, _available, balance, build, _busy (+21 more)
 
 ### Community 22 - "components.json"
-Cohesion: 0.12
-Nodes (15): aliases, components, composables, lib, ui, utils, iconLibrary, $schema (+7 more)
+Cohesion: 0.11
+Nodes (17): cssEscapeIdent(), aliases, components, composables, lib, ui, utils, iconLibrary (+9 more)
 
 ### Community 23 - "dependencies"
 Cohesion: 0.11
 Nodes (19): class-variance-authority, clsx, @lucide/vue, marked, dependencies, class-variance-authority, clsx, @lucide/vue (+11 more)
 
 ### Community 24 - "Uploads"
-Cohesion: 0.08
-Nodes (12): TransactionController, AccountRule, Transaction, Uploads, GdImage, Illuminate\Database\Eloquent\Attributes\Fillable, Illuminate\Database\Eloquent\Model, Illuminate\Database\Eloquent\Relations\BelongsTo (+4 more)
+Cohesion: 0.13
+Nodes (6): TransactionController, Transaction, Uploads, GdImage, Illuminate\Http\Response, Illuminate\Validation\Rule
 
 ### Community 25 - "Tabs.vue"
 Cohesion: 0.12
@@ -374,31 +379,31 @@ Nodes (60): accounts, aiEnabled, allowedSessions, amount, analysis, AnalysisPage
 
 ### Community 28 - "live-browser.js"
 Cohesion: 0.03
-Nodes (134): addManualContextText(), applyGlobalBarLabelState(), applyPlaceholderSizingStyles(), bindEditBadgeProxy(), bufferToBase64(), buildCollapsible(), buildColorModels(), buildInsertPlaceholderSnapshotFromDom() (+126 more)
+Nodes (136): applyGlobalBarLabelState(), averageRgb01(), bindEditBadgeProxy(), bufferToBase64(), buildCollapsible(), buildColorModels(), buildDesignHeader(), buildListHtml() (+128 more)
 
 ### Community 29 - "resumeSession"
 Cohesion: 0.05
-Nodes (98): abortSvelteComponentInjection(), applyParamDefaults(), applyParamValue(), applyPlaceholderDimensions(), applySavedSessionMeta(), buildParamsPanel(), captureAndEmit(), clampVariantIndex() (+90 more)
+Nodes (92): abortSvelteComponentInjection(), applyParamDefaults(), applyParamValue(), applyPlaceholderSizingStyles(), applySavedSessionMeta(), buildParamsPanel(), checkpointPayload(), clampVariantIndex() (+84 more)
 
 ### Community 30 - "DropdownMenuContent.vue"
 Cohesion: 0.40
 Nodes (4): delegatedProps, emits, forwarded, props
 
 ### Community 31 - "Calendar.vue"
-Cohesion: 0.08
-Nodes (26): emit, iso(), maxAbs, props, today, WEEKDAYS, weeks, useBackClose() (+18 more)
+Cohesion: 0.07
+Nodes (29): emit, iso(), maxAbs, props, today, WEEKDAYS, weeks, delegatedProps (+21 more)
 
 ### Community 32 - "Accounts.vue"
 Cohesion: 0.06
-Nodes (45): busy, close(), csrf(), emit, error, file, onDrop(), onPaste() (+37 more)
+Nodes (36): busy, close(), csrf(), emit, error, file, onDrop(), onPaste() (+28 more)
 
 ### Community 33 - "Index.vue"
-Cohesion: 0.06
-Nodes (39): resources_js_components_ui_badge_index_badge, dateTime(), longDate(), frameClass(), frameGap(), frameTop(), Groupable, currency (+31 more)
+Cohesion: 0.07
+Nodes (28): frameClass(), frameGap(), frameTop(), Groupable, activeFilters, apply, blockRange(), currency (+20 more)
 
-### Community 34 - "trade_detail.dart"
-Cohesion: 0.10
-Nodes (20): account, build, _busy, _complete, _content, createState, currency, dispose (+12 more)
+### Community 34 - "package:flutter/material.dart"
+Cohesion: 0.05
+Nodes (50): ../core/api_client.dart, ../core/theme.dart, ../data/session.dart, build, _busy, _confirmation, createState, dispose (+42 more)
 
 ### Community 35 - "Transactions.vue"
 Cohesion: 0.06
@@ -421,12 +426,12 @@ Cohesion: 0.05
 Nodes (43): DateTime get, active, aiRaw, closedAt, daily, data, day, dayKey (+35 more)
 
 ### Community 40 - "charts_test.dart"
-Cohesion: 0.10
-Nodes (19): BarChart, Exception, LineChart, ApiException, main, point, main, package:fl_chart/fl_chart.dart (+11 more)
+Cohesion: 0.09
+Nodes (21): BarChart, LineChart, main, point, main, main, main, package:fl_chart/fl_chart.dart (+13 more)
 
 ### Community 41 - "trade_form_screen.dart"
-Cohesion: 0.03
-Nodes (58): ai_import_sheet.dart, account, aiEnabled, _aiFields, _aiPreview, _aiRaw, _apply, _badge (+50 more)
+Cohesion: 0.04
+Nodes (56): ai_import_sheet.dart, account, aiEnabled, _aiFields, _aiPreview, _aiRaw, _apply, _badge (+48 more)
 
 ### Community 42 - "StatelessWidget"
 Cohesion: 0.05
@@ -474,23 +479,23 @@ Nodes (7): pestphp/pest-plugin, php-http/discovery, config, allow-plugins, optim
 
 ### Community 53 - "trades_screen.dart"
 Cohesion: 0.04
-Nodes (59): AsyncNotifier, journalProvider, revisionProvider, _after, _delete, _revoke, _save, _download (+51 more)
+Nodes (66): journalProvider, meProvider, revisionProvider, sessionProvider, _after, _delete, _content, build (+58 more)
 
 ### Community 54 - "Rules.vue"
 Cohesion: 0.09
 Nodes (18): html, props, resources_js_components_ui_textarea_index_textarea, emits, modelValue, props, AmountKey, currency (+10 more)
 
 ### Community 55 - "support.dart"
-Cohesion: 0.08
-Nodes (24): body, close, defaultRoutes, fetch, fixture, Handler, initializeDateFormatting, loggedIn (+16 more)
+Cohesion: 0.07
+Nodes (30): app.dart, initializeDateFormatting, main, prefs, body, close, defaultRoutes, fetch (+22 more)
 
 ### Community 56 - "chat_screen.dart"
-Cohesion: 0.07
-Nodes (29): analysis_screen.dart, _account, _bubble, _busy, _charsPerSecond, ChatScreen, _ChatScreenState, _clear (+21 more)
+Cohesion: 0.04
+Nodes (47): analysis_screen.dart, ../dashboard/dashboard_screen.dart, _aiCard, analysisProvider, AnalysisScreen, _AnalysisScreenState, _Breakdown, build (+39 more)
 
 ### Community 57 - "home_shell.dart"
 Cohesion: 0.05
-Nodes (38): BorderSide, EdgeInsetsGeometry get, IconData?, activeIcon, _border, button, _Cradle, _cradled (+30 more)
+Nodes (40): BorderSide, EdgeInsetsGeometry get, IconData?, activeIcon, _border, build, button, _Cradle (+32 more)
 
 ### Community 58 - "require"
 Cohesion: 0.20
@@ -504,10 +509,6 @@ Nodes (4): pil, draw_icon(), main(), Image
 Cohesion: 0.07
 Nodes (30): account, _allowed, _amount, build, _busy, createState, _currency, dispose (+22 more)
 
-### Community 61 - "Illuminate\Http\RedirectResponse"
-Cohesion: 0.14
-Nodes (4): AdminController, TradeController, Illuminate\Http\RedirectResponse, Symfony\Component\HttpFoundation\BinaryFileResponse
-
 ### Community 62 - "format.dart"
 Cohesion: 0.06
 Nodes (34): amount, clock, compact, currencies, currency, dateTime, _digits, _fixed (+26 more)
@@ -520,37 +521,37 @@ Nodes (29): selectedAccountProvider, _AccountCard, _AccountForm, _AccountFormSta
 Cohesion: 0.40
 Nodes (5): autoload, psr-4, App\\, Database\\Factories\\, Database\\Seeders\\
 
-### Community 65 - "GeminiKey"
-Cohesion: 0.13
-Nodes (8): TradeImportController, GeminiKey, Gemini, Illuminate\Http\Client\ConnectionException, Illuminate\Http\Client\RequestException, Illuminate\Support\Facades\Log, RuntimeException, Throwable
+### Community 65 - "Gemini"
+Cohesion: 0.23
+Nodes (4): TradeImportController, Gemini, Illuminate\Support\Facades\Log, Throwable
 
 ### Community 66 - "flows_test.dart"
-Cohesion: 0.15
-Nodes (12): FilledButton, main, main, openMore, openTab, main, package:flutter/services.dart, package:flutter_test/flutter_test.dart (+4 more)
+Cohesion: 0.22
+Nodes (8): FilledButton, main, openMore, openTab, package:flutter/services.dart, package:trade_history/widgets/common.dart, package:trade_history/widgets/trade_widgets.dart, ScrollableState
 
 ### Community 67 - "Impeccable Finish Reviewer"
 Cohesion: 0.29
 Nodes (6): Checks, in order, Disposition, Impeccable Finish Reviewer, Input Contract, Output Contract, Verdict Pass
 
-### Community 68 - "User"
-Cohesion: 0.07
-Nodes (9): User, Illuminate\Database\Eloquent\Attributes\Hidden, Illuminate\Database\Eloquent\Factories\HasFactory, Illuminate\Foundation\Auth\User, Illuminate\Notifications\Notifiable, Laravel\Sanctum\HasApiTokens, AccountSecurityTest, ProfileTest (+1 more)
-
 ### Community 69 - "setLiveState"
 Cohesion: 0.09
-Nodes (57): applyEditing(), beginNewLiveConfiguration(), buildLocatorForLeaf(), cancelEditing(), cancelEditingToPicking(), cancelInsertConfigure(), cleanup(), cleanupAcceptedSession() (+49 more)
+Nodes (65): agentStatusText(), barPaletteForTheme(), beginNewLiveConfiguration(), brandMarkSvg(), cancelEditing(), cancelEditingToPicking(), cancelInsertConfigure(), cleanup() (+57 more)
 
 ### Community 70 - "session.dart"
-Cohesion: 0.08
-Nodes (32): FlutterSecureStorage, journal_api.dart, JournalApi, _accountKey, apiClientProvider, build, bump, defaultServer (+24 more)
+Cohesion: 0.07
+Nodes (40): FlutterSecureStorage, int?, journal_api.dart, JournalApi, _accountKey, apiClientProvider, build, bump (+32 more)
 
 ### Community 79 - "account.dart"
 Cohesion: 0.07
 Nodes (27): DateTime, AccountBrief, accountNumber, AccountRow, accounts, AccountsPage, AccountTotal, avatar (+19 more)
 
 ### Community 80 - "bootstrap/app.php"
-Cohesion: 0.12
+Cohesion: 0.11
 Nodes (14): EnsureAdmin, EnsureTrader, HandleInertiaRequests, SetCurrentAccount, UseRouteAccount, Closure, Illuminate\Foundation\Application, Illuminate\Foundation\Configuration\Exceptions (+6 more)
+
+### Community 81 - "GeminiKey"
+Cohesion: 0.12
+Nodes (5): GeminiKey, Illuminate\Http\Client\ConnectionException, Illuminate\Http\Client\RequestException, AnalysisChatTest, AnalysisTest
 
 ### Community 82 - "theme.dart"
 Cohesion: 0.05
@@ -563,6 +564,10 @@ Nodes (39): accounts, analysis, avatarBytes, avatarUrl, calendar, chat, client, 
 ### Community 84 - "4. DESIGN ENGINEERING DIRECTIVES (Bias Correction)"
 Cohesion: 0.17
 Nodes (12): 4.10 Quotes & Testimonials, 4.11 Page Theme Lock (Light / Dark Mode Consistency), 4.1 Typography, 4.2 Color Calibration, 4.3 Layout Diversification, 4.4 Materiality, Shadows, Cards, 4.5 Interactive UI States, 4.6 Data & Form Patterns (+4 more)
+
+### Community 85 - "User"
+Cohesion: 0.17
+Nodes (4): User, AnnualReport, Illuminate\Foundation\Auth\User, ReportTest
 
 ### Community 86 - "SelectContent.vue"
 Cohesion: 0.29
@@ -581,8 +586,8 @@ Cohesion: 0.06
 Nodes (33): DayStat?, account, build, calendarProvider, CalendarScreen, _CalendarScreenState, _Cell, _content (+25 more)
 
 ### Community 91 - "transactions_screen.dart"
-Cohesion: 0.06
-Nodes (39): ConsumerState, ConsumerStatefulWidget, _TradeForm, _TradeFormState, account, _content, createState, currency (+31 more)
+Cohesion: 0.05
+Nodes (52): AsyncNotifier, ConsumerState, ConsumerStatefulWidget, ChatScreen, _ChatScreenState, ForgotScreen, _ForgotScreenState, RegisterScreen (+44 more)
 
 ### Community 92 - "app.dart"
 Cohesion: 0.04
@@ -598,15 +603,15 @@ Nodes (31): Dio, json.dart, ApiClient, _body, bytes, chunk, chunkedFile, _clean 
 
 ### Community 95 - "el"
 Cohesion: 0.07
-Nodes (52): actionLabel(), applyConfigureBarChrome(), bindConfigureCountPillTooltip(), bindConfigureInlineControlHover(), bindConfigureModifierPillHover(), buildConfigureActionControl(), buildConfigureCountControl(), buildConfigureRow() (+44 more)
+Nodes (56): actionLabel(), applyConfigureBarChrome(), bindConfigureCountPillTooltip(), bindConfigureInlineControlHover(), bindConfigureModifierPillHover(), buildConfigureActionControl(), buildConfigureCountControl(), buildConfigureRow() (+48 more)
 
 ### Community 96 - "Illuminate\Http\Request"
-Cohesion: 0.07
-Nodes (18): AccountController, AuthController, LoginController, CalendarController, CarbonImmutable, Controller, DashboardController, ProfileController (+10 more)
+Cohesion: 0.12
+Nodes (8): AccountController, AuthController, ProfileController, RuleController, Illuminate\Http\JsonResponse, Illuminate\Http\Request, Route /, Symfony\Component\HttpFoundation\StreamedResponse
 
-### Community 97 - "package:flutter/material.dart"
-Cohesion: 0.07
-Nodes (30): app.dart, ../core/theme.dart, ../data/session.dart, build, _devicesProvider, DevicesScreen, _loading, initializeDateFormatting (+22 more)
+### Community 97 - "applyEditing"
+Cohesion: 0.08
+Nodes (37): addManualContextText(), applyEditing(), buildLocatorForLeaf(), canRestoreManualEditElement(), collectEditableTextRows(), visit(), collectManualContextPieces(), walk() (+29 more)
 
 ### Community 99 - "report_screen.dart"
 Cohesion: 0.08
@@ -624,57 +629,57 @@ Nodes (18): CustomPainter, _CircleGuide, Backdrop, build, _Cached, child, _glow,
 Cohesion: 0.12
 Nodes (16): double?, ImageProvider, build, createState, image, _ImageViewer, _ImageViewerState, _Loading (+8 more)
 
-### Community 104 - "RegisterRequest"
-Cohesion: 0.16
-Nodes (5): RegisterRequest, TradeRequest, Illuminate\Contracts\Validation\Validator, Illuminate\Foundation\Http\FormRequest, Illuminate\Validation\Rules\Password
+### Community 104 - "Illuminate\Http\RedirectResponse"
+Cohesion: 0.19
+Nodes (4): AdminController, LoginController, Illuminate\Http\RedirectResponse, Symfony\Component\HttpFoundation\BinaryFileResponse
 
 ### Community 105 - "useFormat.ts"
-Cohesion: 0.06
-Nodes (36): active, areaPath, box, flowPoints, gridLines, hover, PAD, path (+28 more)
+Cohesion: 0.07
+Nodes (38): axis, bars, changePct, niceStep(), props, totals, breached, lossPct (+30 more)
 
 ### Community 106 - ".application"
 Cohesion: 0.11
 Nodes (14): Any, Bool, Flutter, FlutterAppDelegate, FlutterImplicitEngineBridge, FlutterImplicitEngineDelegate, FlutterSceneDelegate, AppDelegate (+6 more)
 
-### Community 107 - "Hashid"
-Cohesion: 0.06
-Nodes (18): BackupDatabase, getRouteKey(), AppServiceProvider, CarbonImmutable, Hashid, Hashids\Hashids, Illuminate\Cache\RateLimiting\Limit, Illuminate\Console\Command (+10 more)
+### Community 107 - "self"
+Cohesion: 0.08
+Nodes (8): BackupDatabase, ReportController, CarbonImmutable, Illuminate\Console\Command, Illuminate\Support\Carbon, Illuminate\Support\Facades\File, Illuminate\Support\Facades\Process, self
 
 ### Community 108 - "profile_screen.dart"
 Cohesion: 0.10
 Nodes (21): ../auth/login_screen.dart, ../core/json.dart, Map, accountCount, build, _busy, _confirmation, createState (+13 more)
 
 ### Community 109 - "initPageChat"
-Cohesion: 0.08
-Nodes (50): armPageChatForTyping(), attachSteerFocusDebug(), attachSteerFocusGuard(), buildSteerProcessingDots(), buildSteerQueueHint(), clearSteerAwaitTimer(), clearSteerFocusRecoverTimer(), collapsePageChat() (+42 more)
+Cohesion: 0.07
+Nodes (55): agentHasWorkInFlight(), armPageChatForTyping(), attachSteerFocusDebug(), attachSteerFocusGuard(), buildSteerProcessingDots(), buildSteerQueueHint(), clearSteerAwaitTimer(), clearSteerFocusRecoverTimer() (+47 more)
 
 ### Community 110 - "Form.vue"
-Cohesion: 0.10
-Nodes (16): emit, options, props, selected, SETUPS, aiFields, aiPreview, currency (+8 more)
+Cohesion: 0.09
+Nodes (20): FEATURES, model, shown, resources_js_components_ui_input_index_input, resources_js_components_ui_label_index_label, form, props, sisaKunci (+12 more)
 
 ### Community 111 - "charts.dart"
 Cohesion: 0.06
-Nodes (35): _axisScaler, base, build, createState, cumulativePnl, currency, data, days (+27 more)
+Nodes (34): _axisScaler, base, build, createState, cumulativePnl, currency, data, days (+26 more)
 
-### Community 112 - "AnalysisController.php"
-Cohesion: 0.17
-Nodes (6): AnalysisController, CarbonImmutable, AiAnalysis, Period, CarbonImmutable, AnalysisTest
+### Community 112 - "Inertia\Response"
+Cohesion: 0.19
+Nodes (6): AnalysisController, CarbonImmutable, Controller, DashboardController, Period, Inertia\Response
 
-### Community 113 - "cn"
-Cohesion: 0.11
-Nodes (11): props, props, props, props, props, props, props, delegatedProps (+3 more)
+### Community 113 - "utils.ts"
+Cohesion: 0.14
+Nodes (8): props, props, props, props, props, props, props, props
 
-### Community 115 - "analysis_screen.dart"
-Cohesion: 0.10
-Nodes (21): ../dashboard/dashboard_screen.dart, _aiCard, analysisProvider, AnalysisScreen, _AnalysisScreenState, _Breakdown, build, _content (+13 more)
+### Community 115 - "TradeController.php"
+Cohesion: 0.15
+Nodes (5): RegisterRequest, TradeRequest, Illuminate\Contracts\Validation\Validator, Illuminate\Foundation\Http\FormRequest, Illuminate\Validation\Rules\Password
 
 ### Community 116 - "9. AI TELLS (Forbidden Patterns)"
 Cohesion: 0.25
 Nodes (8): 9.A Visual & CSS, 9. AI TELLS (Forbidden Patterns), 9.B Typography, 9.C Layout & Spacing, 9.D Content & Data ("Jane Doe" Effect), 9.E External Resources & Components, 9.F Production-Test Tells (banned outright), 9.G EM-DASH BAN (the single most-violated Tell)
 
-### Community 118 - "initGlobalBar"
-Cohesion: 0.09
-Nodes (40): agentHasWorkInFlight(), agentStatusText(), barPaletteForTheme(), brandMarkSvg(), buildDesignHeader(), designPanelCss(), detectPageTheme(), ensureAgentPollTooltip() (+32 more)
+### Community 118 - "handleGo"
+Cohesion: 0.20
+Nodes (14): buildInsertPlaceholderSnapshotFromDom(), buildPickedAnchorSnapshot(), captureAndEmit(), clearMountErrorCard(), handleGo(), handleInsertCreate(), mountErrorCardBottomOffset(), renderMountErrorCard() (+6 more)
 
 ### Community 119 - "APPENDICES - Real Source-Backed Reference Material"
 Cohesion: 0.29
@@ -685,8 +690,8 @@ Cohesion: 0.29
 Nodes (7): 11.A Detect the Mode (first action), 11.B Audit Before Touching, 11.C Preservation Rules, 11.D Modernisation Levers (priority order), 11.E Decision Tree: Targeted Evolution vs Full Redesign, 11.F What Never Changes Silently, 11. REDESIGN PROTOCOL
 
 ### Community 121 - "mountSvelteComponentVariant"
-Cohesion: 0.08
-Nodes (37): applyOriginalAttrsToSvelteAnchor(), buildSvelteExpressionTextMap(), buildSveltePropValuesFromLiveElement(), buildSveltePropValuesV2(), cloneWithoutElements(), collectTextNodes(), collectVisibleTexts(), commitAcceptedSvelteComponentToDom() (+29 more)
+Cohesion: 0.11
+Nodes (28): abandonForeignSession(), applyOriginalAttrsToSvelteAnchor(), commitAcceptedSvelteComponentToDom(), componentModuleCandidates(), describeMountFailure(), detectDevServerBase(), elementMatchesOriginalMarkup(), findInsertAnchorInDom() (+20 more)
 
 ### Community 122 - "3. DEFAULT ARCHITECTURE & CONVENTIONS"
 Cohesion: 0.29
@@ -694,15 +699,15 @@ Nodes (7): 3.A Stack, 3.B State, 3.C Icons, 3.D Emoji Policy, 3. DEFAULT ARCHITE
 
 ### Community 123 - "new-work.md"
 Cohesion: 0.07
-Nodes (25): Adaptation Strategies, Assess Adaptation Challenge, Implement & Verify, Orientation & foldables, Phone → Tablet (iPad / large screens), Platform → platform (iOS ↔ Android), Web → native (porting a website or web app), Recommended Actions (+17 more)
+Nodes (25): Recommended Actions, Craft (deprecated alias), Impeccable Documenter, Input Contract, Output Contract, Workflow, Monorepo notes, Opting out of the boot check (+17 more)
 
 ### Community 124 - "6. PERFORMANCE & ACCESSIBILITY GUARDRAILS"
 Cohesion: 0.29
 Nodes (7): 6.A Hardware Acceleration, 6.B Reduced Motion (mandatory), 6.C Dark Mode (mandatory for any consumer-facing page), 6.D Core Web Vitals Targets, 6.E DOM Cost, 6.F Z-Index Restraint, 6. PERFORMANCE & ACCESSIBILITY GUARDRAILS
 
 ### Community 125 - "ReportController.php"
-Cohesion: 0.15
-Nodes (5): ReportController, Dompdf\Dompdf, Illuminate\Database\Eloquent\Collection, Illuminate\Support\Str, Pdo\Mysql
+Cohesion: 0.16
+Nodes (7): static, UserFactory, Dompdf\Dompdf, Illuminate\Database\Eloquent\Collection, Illuminate\Database\Eloquent\Factories\Factory, Illuminate\Support\Str, Pdo\Mysql
 
 ### Community 126 - "12. THE BLOCK LIBRARY (Contract - Implementations Land Here Iteratively)"
 Cohesion: 0.40
@@ -721,16 +726,12 @@ Cohesion: 0.40
 Nodes (5): 8.A Token Strategy (pick one, stick to it), 8.B Do Not Prescribe Specific Colors Here, 8.C Default Mode, 8.D Test in Both Modes Before Finishing, 8. DARK MODE PROTOCOL
 
 ### Community 131 - "_List"
-Cohesion: 0.11
-Nodes (24): _Branches, _BranchesState, _Thinking, _ThinkingState, _AddTrade, _AddTradeState, _FilterSheet, _FilterSheetState (+16 more)
-
-### Community 132 - "Diagnostic Scan"
-Cohesion: 0.33
-Nodes (6): 1. Accessibility (VoiceOver / TalkBack), 2. Performance, 3. Appearance & Theming, 4. Platform Conformance (CRITICAL), 5. Adaptivity, Diagnostic Scan
+Cohesion: 0.17
+Nodes (17): _Branches, _BranchesState, _Thinking, _ThinkingState, PeriodPnlChart, _PeriodPnlChartState, _AddTrade, _AddTradeState (+9 more)
 
 ### Community 134 - "impeccable/SKILL.md"
 Cohesion: 0.10
-Nodes (16): Craft floor, Refuse, Verify, Constraints, Failure modes, Flow, /impeccable hooks, Routing (+8 more)
+Nodes (15): Before you finish, Scope is sovereign, The amplification, The skeleton test, Why it reads flat, Craft floor, Refuse, Verify (+7 more)
 
 ### Community 135 - "json.dart"
 Cohesion: 0.18
@@ -746,39 +747,43 @@ Nodes (3): ref_node_fs, ref_node_path, ref_vue_compiler_sfc
 
 ### Community 138 - "dashboard_screen.dart"
 Cohesion: 0.06
-Nodes (34): charts.dart, Color, ../core/format.dart, build, _content, createState, _cumulative, dashboardProvider (+26 more)
+Nodes (34): charts.dart, Color, ../core/format.dart, dart:convert, build, createState, _cumulative, dashboardProvider (+26 more)
 
-### Community 139 - "captureElementToBlob"
-Cohesion: 0.08
-Nodes (38): averageRgb01(), beginEditPin(), buildAnnotationsForCapture(), buildPinElement(), cancelEditingPin(), captureChromeNodes(), captureElementFromRenderedAncestor(), captureElementToBlob() (+30 more)
+### Community 139 - "onAnnotDown"
+Cohesion: 0.15
+Nodes (21): applyPlaceholderDimensions(), beginEditPin(), buildAnnotationsForCapture(), buildPinElement(), cancelEditingPin(), clampPlaceholderSize(), finalizeEditingPin(), initAnnotOverlay() (+13 more)
 
-### Community 141 - "register_screen.dart"
-Cohesion: 0.06
-Nodes (32): bool get, ../core/api_client.dart, dart:convert, login_screen.dart, build, _busy, _confirmation, createState (+24 more)
+### Community 141 - "package:flutter_riverpod/flutter_riverpod.dart"
+Cohesion: 0.20
+Nodes (9): data, build, count, createState, loadingMore, main, Opacity, package:flutter_riverpod/flutter_riverpod.dart (+1 more)
 
 ### Community 142 - "forgot_screen.dart"
 Cohesion: 0.08
-Nodes (24): dart:async, build, _busy, _code, _confirmation, _cooldown, createState, dispose (+16 more)
+Nodes (24): dart:async, Exception, ApiException, build, _busy, _code, _confirmation, _cooldown (+16 more)
+
+### Community 146 - "/impeccable hooks"
+Cohesion: 0.33
+Nodes (6): Constraints, Failure modes, Flow, /impeccable hooks, Routing, Triage findings
 
 ### Community 148 - "MainActivity.kt"
 Cohesion: 0.43
 Nodes (4): Bundle, FlutterActivity, FlutterEngine, MainActivity
 
-### Community 149 - "UserFactory.php"
-Cohesion: 0.47
-Nodes (3): static, UserFactory, Illuminate\Database\Eloquent\Factories\Factory
+### Community 149 - "SetupPicker.vue"
+Cohesion: 0.40
+Nodes (5): emit, options, props, selected, SETUPS
 
 ### Community 152 - "showToast"
-Cohesion: 0.12
-Nodes (34): abandonForeignSession(), clearStoredManualApplyState(), discardOrphanedSession(), dismissToast(), fetchPendingCount(), handleManualEditActivity(), hidePendingApplyDock(), manualApplyLoadingText() (+26 more)
+Cohesion: 0.13
+Nodes (33): clearStoredManualApplyState(), discardOrphanedSession(), dismissToast(), fetchPendingCount(), handleManualEditActivity(), hidePendingApplyDock(), manualApplyLoadingText(), manualApplyStateKey() (+25 more)
 
 ### Community 155 - "Responsive Design"
 Cohesion: 0.08
 Nodes (25): Assess Adaptation Challenge, Breakpoints: Content-Driven, Content Adaptation, Desktop Adaptation (Mobile → Desktop), Detect Input Method, Not Just Screen Size, Email Adaptation (Web → Email), Implement Adaptations, Layout Adaptation Patterns (+17 more)
 
-### Community 156 - "prefsProvider"
-Cohesion: 0.22
-Nodes (10): int?, prefsProvider, Revision, select, SelectedAccount, ServerController, _load, _finish (+2 more)
+### Community 156 - "Illuminate\Database\Eloquent\Model"
+Cohesion: 0.09
+Nodes (11): AccountRule, AiAnalysis, Illuminate\Database\Eloquent\Attributes\Fillable, Illuminate\Database\Eloquent\Attributes\Hidden, Illuminate\Database\Eloquent\Factories\HasFactory, Illuminate\Database\Eloquent\Model, Illuminate\Database\Eloquent\Relations\BelongsTo, Illuminate\Database\Eloquent\Relations\HasMany (+3 more)
 
 ### Community 157 - "live.md"
 Cohesion: 0.08
@@ -788,9 +793,9 @@ Nodes (22): Apply at system scale, Audit before choosing, Choose a strategy, Con
 Cohesion: 0.08
 Nodes (23): Component translation rules, Narrative mapping, Pitfalls, Scan mode (approach C: auto-extract, then confirm descriptive language), Schema, Seed mode, Step 1: Find the design assets, Step 1: Route through new-work's workshop (+15 more)
 
-### Community 160 - "dialog/index.ts"
-Cohesion: 0.22
-Nodes (5): emits, forwarded, props, props, props
+### Community 160 - "types/index.ts"
+Cohesion: 0.08
+Nodes (25): active, areaPath, box, flowPoints, gridLines, hover, PAD, path (+17 more)
 
 ### Community 161 - "onboard.md"
 Cohesion: 0.09
@@ -809,12 +814,12 @@ Cohesion: 0.21
 Nodes (15): createLiveBrowserSessionState(), clearHandled(), clearScrollY(), clearSession(), isHandled(), loadSession(), markHandled(), nextCheckpointRevision() (+7 more)
 
 ### Community 165 - "login_screen.dart"
-Cohesion: 0.08
-Nodes (26): AuthShell, build, _busy, _canRegisterKey, canRegisterProvider, children, createState, dispose (+18 more)
+Cohesion: 0.05
+Nodes (40): bool get, login_screen.dart, AuthShell, build, _busy, _canRegisterKey, canRegisterProvider, children (+32 more)
 
 ### Community 166 - "user_avatar.dart"
 Cohesion: 0.07
-Nodes (33): avatar_cropper.dart, common.dart, ConsumerWidget, ../data/journal_api.dart, image_viewer.dart, currentAccountProvider, meProvider, sessionProvider (+25 more)
+Nodes (32): avatar_cropper.dart, common.dart, ConsumerWidget, ../data/journal_api.dart, image_viewer.dart, currentAccountProvider, build, build (+24 more)
 
 ### Community 168 - "animate.md"
 Cohesion: 0.12
@@ -896,16 +901,16 @@ Nodes (9): 1. The Wall of Options, 2. The Memory Bridge, 3. The Hidden Navigatio
 Cohesion: 0.22
 Nodes (9): Color & materials, Components & controls, iOS platform, Layout & structure, Motion, The iOS slop test, Touch targets, Typography (+1 more)
 
-### Community 188 - "Operate mode depth (and Read notes)"
-Cohesion: 0.22
-Nodes (9): Color, Components, Layout, Motion, Operate mode depth (and Read notes), Product constraints, Product permissions, The product slop test (+1 more)
+### Community 188 - "Hashid"
+Cohesion: 0.29
+Nodes (5): CalendarController, CarbonImmutable, getRouteKey(), Hashid, Hashids\Hashids
 
 ### Community 189 - "Shape"
 Cohesion: 0.22
 Nodes (8): Cadence, Confirm and stop, Phase 1: Discovery interview, Phase 2: Resolve the design direction, Phase 3: Write the brief, Round 1: purpose, people, and outcome, Round 2: material, behavior, and boundaries, Shape
 
-### Community 190 - "Illuminate\Database\Seeder"
-Cohesion: 0.40
+### Community 190 - "DemoSeeder.php"
+Cohesion: 0.38
 Nodes (3): DatabaseSeeder, DemoSeeder, Illuminate\Database\Seeder
 
 ### Community 191 - "Android platform"
@@ -944,9 +949,9 @@ Nodes (7): Cognitive Load Assessment, Cognitive Load Checklist, Extraneous Load:
 Cohesion: 0.29
 Nodes (6): Core Rule, Decision Comps, Impeccable Asset Producer, Input Contract, Output Contract, The job
 
-### Community 201 - "doctor.md"
-Cohesion: 0.25
-Nodes (7): Monorepo notes, Opting out of the boot check, Step 1: Run the pass, Step 2: Act by severity, Step 3: Deprecated fields are binding, Step 4: Do not overclaim on truth drift, What this owns, and what it does not
+### Community 201 - "Operate mode depth (and Read notes)"
+Cohesion: 0.22
+Nodes (9): Color, Components, Layout, Motion, Operate mode depth (and Read notes), Product constraints, Product permissions, The product slop test (+1 more)
 
 ### Community 202 - "Impeccable Manual Edit Applier"
 Cohesion: 0.29
@@ -956,9 +961,9 @@ Nodes (6): Checks, Entry Atomicity, Impeccable Manual Edit Applier, Input Contra
 Cohesion: 0.52
 Nodes (6): globToRegex(), matchesScope(), normalizeIgnoreRule(), normalizeIgnoreValue(), pageCandidates(), resolveDetectIgnores()
 
-### Community 204 - "SelectItem.vue"
+### Community 204 - "1. THE THREE DIALS (Core Configuration)"
 Cohesion: 0.50
-Nodes (3): delegatedProps, forwardedProps, props
+Nodes (4): 1.A Dial Inference (design read → dial values), 1.B Use-Case Presets, 1.C How the Dials Drive Output, 1. THE THREE DIALS (Core Configuration)
 
 ### Community 205 - "Extract Flow"
 Cohesion: 0.25
@@ -972,41 +977,37 @@ Nodes (5): impeccable script, check_download(), fetch_url(), probe_ok(), setup_h
 Cohesion: 0.40
 Nodes (4): Impeccable Documenter, Input Contract, Output Contract, Workflow
 
-### Community 208 - "bolder.md"
-Cohesion: 0.33
-Nodes (5): Before you finish, Scope is sovereign, The amplification, The skeleton test, Why it reads flat
+### Community 208 - "DropdownMenuLabel.vue"
+Cohesion: 0.50
+Nodes (3): delegatedProps, forwardedProps, props
 
 ### Community 210 - "Heuristics Scoring Guide"
 Cohesion: 0.50
 Nodes (4): Heuristics Scoring Guide, Issue Severity (P0–P3), Reference Material, Score Summary
 
 ### Community 217 - "Input.vue"
-Cohesion: 0.21
-Nodes (5): emits, modelValue, props, delegatedProps, props
+Cohesion: 0.50
+Nodes (3): emits, modelValue, props
 
-### Community 220 - "Visualize: Direction Comps & Asset Production"
-Cohesion: 0.33
-Nodes (5): After approval: the comp becomes a spec, Generate three compositional options, One approval point, Plates and provenance, Visualize: Direction Comps & Asset Production
+### Community 220 - "DropdownMenuSubContent.vue"
+Cohesion: 0.40
+Nodes (4): delegatedProps, emits, forwarded, props
 
 ### Community 222 - "post-autoload-dump"
 Cohesion: 0.67
 Nodes (3): post-autoload-dump, Illuminate\\Foundation\\ComposerScripts::postAutoloadDump, @php artisan package:discover --ansi
 
 ### Community 223 - "DialogDescription.vue"
-Cohesion: 0.50
-Nodes (3): delegatedProps, forwardedProps, props
-
-### Community 224 - "1. THE THREE DIALS (Core Configuration)"
-Cohesion: 0.50
-Nodes (4): 1.A Dial Inference (design read → dial values), 1.B Use-Case Presets, 1.C How the Dials Drive Output, 1. THE THREE DIALS (Core Configuration)
+Cohesion: 0.29
+Nodes (5): Props, ButtonVariants, delegatedProps, forwardedProps, props
 
 ### Community 225 - "keywords"
 Cohesion: 0.67
 Nodes (3): keywords, framework, laravel
 
-### Community 226 - "post-create-project-cmd"
-Cohesion: 0.50
-Nodes (4): post-create-project-cmd, @php artisan key:generate --ansi, @php artisan migrate --graceful --ansi, @php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\
+### Community 226 - "AuthController.php"
+Cohesion: 0.15
+Nodes (11): AppServiceProvider, Illuminate\Auth\Events\Lockout, Illuminate\Cache\RateLimiting\Limit, Illuminate\Foundation\Inspiring, Illuminate\Support\Facades\Artisan, Illuminate\Support\Facades\Auth, Illuminate\Support\Facades\RateLimiter, Illuminate\Support\Facades\Schedule (+3 more)
 
 ### Community 227 - "DialogContent.vue"
 Cohesion: 0.25
@@ -1016,48 +1017,52 @@ Nodes (6): delegatedProps, emits, forwarded, props, delegatedProps, props
 Cohesion: 0.50
 Nodes (3): delegatedProps, forwardedProps, props
 
-### Community 231 - "DropdownMenuItem.vue"
-Cohesion: 0.50
-Nodes (3): delegatedProps, forwardedProps, props
-
-### Community 232 - "Badge.vue"
-Cohesion: 0.50
-Nodes (3): delegatedProps, props, BadgeVariants
-
-### Community 233 - "DropdownMenuSubTrigger.vue"
-Cohesion: 0.50
-Nodes (3): delegatedProps, forwardedProps, props
-
-### Community 236 - "dev"
-Cohesion: 0.67
-Nodes (3): dev, Composer\\Config::disableProcessTimeout, @php artisan dev
+### Community 236 - "setup"
+Cohesion: 0.25
+Nodes (8): post-root-package-install, setup, composer install, npm install --ignore-scripts, npm run build, @php artisan key:generate, @php artisan migrate --force, @php -r \"file_exists('.env') || copy('.env.example', '.env');\
 
 ### Community 237 - "api_client_test.dart"
 Cohesion: 0.25
 Nodes (7): HttpClientAdapter, close, _Drain, fetch, main, FakeServer, package:dio/dio.dart
+
+### Community 239 - "Dialog.vue"
+Cohesion: 0.50
+Nodes (3): emits, forwarded, props
+
+### Community 240 - "DropdownMenuItem.vue"
+Cohesion: 0.50
+Nodes (3): delegatedProps, forwardedProps, props
+
+### Community 241 - "SelectItem.vue"
+Cohesion: 0.50
+Nodes (3): delegatedProps, forwardedProps, props
+
+### Community 243 - "adapt.native.md"
+Cohesion: 0.09
+Nodes (18): Adaptation Strategies, Assess Adaptation Challenge, Implement & Verify, Orientation & foldables, Phone → Tablet (iPad / large screens), Platform → platform (iOS ↔ Android), Web → native (porting a website or web app), 1. Accessibility (VoiceOver / TalkBack) (+10 more)
 
 ## Ambiguous Edges - Review These
 - `robots.txt mengizinkan seluruh crawler` → `REGISTER_TOKEN penjaga pendaftaran mandiri`  [AMBIGUOUS]
   public/robots.txt · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **1918 isolated node(s):** `$schema`, `style`, `typescript`, `config`, `baseColor` (+1913 more)
+- **1920 isolated node(s):** `$schema`, `style`, `typescript`, `config`, `baseColor` (+1915 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **19 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `robots.txt mengizinkan seluruh crawler` and `REGISTER_TOKEN penjaga pendaftaran mandiri`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `User` connect `User` to `Illuminate\Http\Request`, `TradeImportTest`, `RuleLimitTest`, `Hashid`, `Trade`, `AnalysisController.php`, `Account`, `AdminTest`, `ApiTest`, `UserFactory.php`, `ReportTest`, `Illuminate\Http\RedirectResponse`, `Illuminate\Database\Seeder`?**
-  _High betweenness centrality (0.073) - this node is a cross-community bridge._
-- **Why does `_List` connect `_List` to `stats.dart`, `ai_import_sheet.dart`, `trade_detail.dart`, `login_screen.dart`, `trade.dart`, `journal.dart`, `trade_form_screen.dart`, `transactions_screen.dart`, `StatelessWidget`, `common.dart`, `charts.dart`, `account.dart`, `trades_screen.dart`, `chat_screen.dart`, `calendar_screen.dart`, `trade_filters_sheet.dart`, `app.dart`?**
-  _High betweenness centrality (0.043) - this node is a cross-community bridge._
-- **Why does `showShaderOverlay()` connect `captureElementToBlob` to `live-browser.js`, `resumeSession`?**
+- **Why does `User` connect `User` to `Illuminate\Http\Request`, `LoginThrottleTest`, `AuthController.php`, `TradeImportTest`, `AccountSecurityTest`, `AdminTest`, `RuleLimitTest`, `Illuminate\Http\RedirectResponse`, `TradeDayTest`, `ValidationLangTest`, `self`, `Trade`, `Account`, `GeminiKey`, `ApiTest`, `Illuminate\Database\Eloquent\Model`, `ReportController.php`, `DemoSeeder.php`?**
+  _High betweenness centrality (0.075) - this node is a cross-community bridge._
+- **Why does `_List` connect `_List` to `stats.dart`, `ai_import_sheet.dart`, `package:flutter/material.dart`, `login_screen.dart`, `trade.dart`, `journal.dart`, `trade_form_screen.dart`, `transactions_screen.dart`, `StatelessWidget`, `package:flutter_riverpod/flutter_riverpod.dart`, `common.dart`, `charts.dart`, `account.dart`, `trades_screen.dart`, `chat_screen.dart`, `calendar_screen.dart`, `trade_filters_sheet.dart`, `app.dart`?**
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Why does `showShaderOverlay()` connect `live-browser.js` to `AnalysisChat.vue`, `resumeSession`, `handleGo`?**
   _High betweenness centrality (0.038) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `typescript` to the rest of the system?**
-  _1918 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1920 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `stats.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.029850746268656716 - nodes in this community are weakly interconnected._
 - **Should `ai_import_sheet.dart` be split into smaller, more focused modules?**

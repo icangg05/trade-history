@@ -185,6 +185,30 @@ class JournalTest extends TestCase
         $this->assertSame(['amount' => 300.0, 'pct' => 25.0], $summary['max_drawdown']);
     }
 
+    public function test_drawdown_diukur_dari_saldo_yang_ada_dan_mc_berarti_seratus_persen(): void
+    {
+        $account = $this->account(['initial_balance' => 0]);
+        $flow = fn (string $type, float $amount, string $date) => $account->transactions()
+            ->create(['type' => $type, 'amount' => $amount, 'occurred_at' => $date]);
+
+        $flow('deposit', 5000, '2026-01-05');
+        $this->trade($account, '2026-01-06', 5000);      // saldo 10.000
+        $flow('withdrawal', 8000, '2026-01-07');         // untung ditarik, saldo 2.000
+        $this->trade($account, '2026-01-08', -1000);     // −50% dari uang yang ada
+        $this->trade($account, '2026-01-09', -1000);     // saldo habis: MC
+        $flow('deposit', 5000, '2026-01-10');
+        $this->trade($account, '2026-01-12', -500);      // hidup baru: cuma −10%
+
+        $summary = (new AccountStats($account))->summary(
+            CarbonImmutable::parse('2026-01-01'),
+            CarbonImmutable::parse('2026-01-31'),
+        );
+
+        // Kurva trading lama membaginya dengan puncak 10.000 yang uangnya sudah
+        // ditarik: 2.500 / 25% — padahal saldonya habis.
+        $this->assertSame(['amount' => 2000.0, 'pct' => 100.0], $summary['max_drawdown']);
+    }
+
     public function test_status_aturan_melaporkan_sisa_jatah_loss_harian(): void
     {
         $account = $this->account();

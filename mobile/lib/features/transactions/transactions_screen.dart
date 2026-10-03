@@ -265,6 +265,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       _Difference(
         withdrawal: totals.withdrawal,
         deposit: totals.deposit,
+        idr: needsRate ? totals.withdrawalIdr - totals.depositIdr : null,
         currency: currency,
         scope: scope,
       ),
@@ -326,31 +327,38 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 /// Withdrawal dikurangi deposit. Kalau uang yang sudah ditarik melebihi yang
 /// disetor, modalnya sudah kembali dan sisa saldonya untung. Kalau kebalikannya,
 /// penarikan belum menutup setoran.
+///
+/// [idr] selisih rupiahnya dengan kurs yang tercatat per transaksi — sama
+/// dengan rupiah di kartu deposit & withdrawal; null untuk akun rupiah.
 class _Difference extends StatelessWidget {
   const _Difference({
     required this.withdrawal,
     required this.deposit,
+    required this.idr,
     required this.currency,
     required this.scope,
   });
 
   final double withdrawal;
   final double deposit;
+  final double? idr;
   final String currency;
   final String scope;
 
   @override
   Widget build(BuildContext context) {
     final net = withdrawal - deposit;
+    // Dua baris muat di kartu: rupiah, lalu satu kalimat pendek.
+    final note = net > 0
+        ? 'Modal sudah kembali, selebihnya untung.'
+        : net < 0
+        ? 'Modal belum kembali sepenuhnya.'
+        : 'Modal baru kembali pas.';
 
     return StatCard(
       label: 'Selisih WD − deposit · $scope',
       value: money(net, currency, signed: true),
-      hint: net > 0
-          ? 'Penarikan sudah melebihi setoran. Modal sudah kembali, selebihnya untung.'
-          : net < 0
-          ? 'Setoran masih lebih besar dari penarikan. Modal belum kembali sepenuhnya.'
-          : 'Penarikan sama dengan setoran. Modal baru kembali pas.',
+      hint: idr == null ? note : '${money(idr, 'IDR', signed: true)}\n$note',
       tone: net > 0 ? Tone.good : (net < 0 ? Tone.bad : Tone.plain),
     );
   }

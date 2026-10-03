@@ -150,15 +150,15 @@
     "semantic_hash": ""
   },
   "app/Services/AccountStats.php": {
-    "mtime": 1790451656.0416138,
-    "seen": 1790451913.0149398,
-    "ast_hash": "fbd268c5ebfa70c2380372b207966865",
+    "mtime": 1791030555.1364002,
+    "seen": 1791030578.2761257,
+    "ast_hash": "70019f0519957e4e599dae844fef5884",
     "semantic_hash": ""
   },
   "app/Services/Gemini.php": {
-    "mtime": 1790489371.4595637,
-    "seen": 1790489431.0713656,
-    "ast_hash": "7bf6b46fb948b199c2154a4d645546e3",
+    "mtime": 1791030532.2757044,
+    "seen": 1791030578.2761776,
+    "ast_hash": "d200412e36a1d6ebe9c10f4eb07722f9",
     "semantic_hash": ""
   },
   "app/Services/Uploads.php": {
@@ -1002,9 +1002,9 @@
     "semantic_hash": ""
   },
   "tests/Feature/JournalTest.php": {
-    "mtime": 1790408983.7778316,
-    "seen": 1790409849.0121508,
-    "ast_hash": "d006ee2f9b5b765cfa29f6e3ec15b941",
+    "mtime": 1791030532.2366853,
+    "seen": 1791030578.2881274,
+    "ast_hash": "a03eebc05ecbaf36f7fecb38c504d9e7",
     "semantic_hash": ""
   },
   "tests/Feature/TradeImportTest.php": {
@@ -1236,9 +1236,9 @@
     "semantic_hash": ""
   },
   "tests/Feature/RuleLimitTest.php": {
-    "mtime": 1790406958.8890438,
-    "seen": 1790409849.0121613,
-    "ast_hash": "24d25a64e1190069903cb3ae2cc9b637",
+    "mtime": 1791030532.236842,
+    "seen": 1791030578.2882814,
+    "ast_hash": "4a69c0fb812c371df1a4d786014c4938",
     "semantic_hash": ""
   },
   "database/migrations/2026_08_28_000012_drop_pips_and_tags_from_trades.php": {
@@ -1512,15 +1512,15 @@
     "semantic_hash": ""
   },
   "mobile/lib/features/dashboard/charts.dart": {
-    "mtime": 1790532352.2483122,
-    "seen": 1790532373.41174,
-    "ast_hash": "b31ec7becea63cfb86de1069d944127e",
+    "mtime": 1791028848.3540163,
+    "seen": 1791028885.379944,
+    "ast_hash": "59f3778bf0487c426e06d5bc7e980c36",
     "semantic_hash": ""
   },
   "mobile/lib/features/dashboard/dashboard_screen.dart": {
-    "mtime": 1790559365.5774984,
-    "seen": 1790559390.0719588,
-    "ast_hash": "88e63cbcdacfcc0016a06fe218ca77cd",
+    "mtime": 1791028856.231599,
+    "seen": 1791028885.379946,
+    "ast_hash": "78c26981da0f46471a4a8ebf5f8f9c57",
     "semantic_hash": ""
   },
   "mobile/lib/features/more/more_screen.dart": {
@@ -1572,15 +1572,15 @@
     "semantic_hash": ""
   },
   "mobile/lib/features/trades/trade_form_screen.dart": {
-    "mtime": 1790559282.7566826,
-    "seen": 1790559351.785645,
-    "ast_hash": "120089307f302aaf9518a99ef4b86ce5",
+    "mtime": 1791029510.9825015,
+    "seen": 1791029581.0545843,
+    "ast_hash": "32047bf563e5e6d124e5007c551a162b",
     "semantic_hash": ""
   },
   "mobile/lib/features/trades/trades_screen.dart": {
-    "mtime": 1790489319.9728434,
-    "seen": 1790489431.0729938,
-    "ast_hash": "949428102925b59b753ce7948e2f9666",
+    "mtime": 1791029510.982344,
+    "seen": 1791029581.0545862,
+    "ast_hash": "2f9bd6d2e17842fd92b466a3d51b92a3",
     "semantic_hash": ""
   },
   "mobile/lib/features/transactions/transaction_form.dart": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": ""
   },
   "mobile/lib/features/transactions/transactions_screen.dart": {
-    "mtime": 1790559237.4399958,
-    "seen": 1790559351.7857025,
-    "ast_hash": "1dbc55fd1f3519074bd9b62dc7d5e0f2",
+    "mtime": 1791028848.3536854,
+    "seen": 1791028885.3803415,
+    "ast_hash": "71c491bf1c6a2c235efa7667b1ca1d72",
     "semantic_hash": ""
   },
   "mobile/lib/main.dart": {
@@ -1602,26 +1602,26 @@
     "semantic_hash": ""
   },
   "mobile/lib/models/account.dart": {
-    "mtime": 1790559365.5776777,
-    "seen": 1790559390.0722935,
+    "mtime": 1791029588.9531739,
+    "seen": 1791030578.279863,
     "ast_hash": "aa24340e841498d4863ad92a3a8fff03",
     "semantic_hash": ""
   },
   "mobile/lib/models/journal.dart": {
-    "mtime": 1790559365.5776777,
-    "seen": 1790559390.0722945,
+    "mtime": 1791029588.9533217,
+    "seen": 1791030578.2798657,
     "ast_hash": "be66622b7a262e6851a91bfcad501af7",
     "semantic_hash": ""
   },
   "mobile/lib/models/stats.dart": {
-    "mtime": 1790559365.5780096,
-    "seen": 1790559390.072295,
+    "mtime": 1791029588.9535666,
+    "seen": 1791030578.2798674,
     "ast_hash": "01324835129a6639ca9443206cb6fc27",
     "semantic_hash": ""
   },
   "mobile/lib/models/trade.dart": {
-    "mtime": 1790559365.5781455,
-    "seen": 1790559390.0722957,
+    "mtime": 1791029588.9537792,
+    "seen": 1791030578.2798684,
     "ast_hash": "cffa8edaefbb21c6909976134d293322",
     "semantic_hash": ""
   },
@@ -1632,9 +1632,9 @@
     "semantic_hash": ""
   },
   "mobile/lib/widgets/common.dart": {
-    "mtime": 1790559165.919648,
-    "seen": 1790559351.785911,
-    "ast_hash": "e4ee66b9c5606bd100bb45853e09f60f",
+    "mtime": 1791029565.9910462,
+    "seen": 1791029581.0547879,
+    "ast_hash": "de865a5c0f11c296107f34c83847eb4b",
     "semantic_hash": ""
   },
   "mobile/lib/widgets/markdown_view.dart": {
@@ -1782,9 +1782,9 @@
     "semantic_hash": ""
   },
   "mobile/README.md": {
-    "mtime": 1790350298.1031802,
-    "seen": 1790350742.5340917,
-    "ast_hash": "82ccb04a863e1bd82c3eb73ed391e642",
+    "mtime": 1790644038.0078638,
+    "seen": 1791028885.3864207,
+    "ast_hash": "14d43850906b66fa7501590e30392362",
     "semantic_hash": ""
   },
   "mobile/analysis_options.yaml": {
@@ -2412,9 +2412,9 @@
     "semantic_hash": ""
   },
   "mobile/test/charts_test.dart": {
-    "mtime": 1790532360.5469089,
-    "seen": 1790532373.412694,
-    "ast_hash": "f37214e437e68cf0035b0f7715daa214",
+    "mtime": 1791028855.005565,
+    "seen": 1791028885.3808093,
+    "ast_hash": "aac4fa42739d7250f63da4517730deb6",
     "semantic_hash": ""
   },
   "database/migrations/2026_09_26_000019_move_initial_balance_to_deposit.php": {
@@ -2466,9 +2466,9 @@
     "semantic_hash": ""
   },
   "mobile/test/fade_test.dart": {
-    "mtime": 1790488581.764597,
-    "seen": 1790488615.201871,
-    "ast_hash": "98ea8ee052c4a3a90dd3fbe2f9fb7952",
+    "mtime": 1791029538.7214665,
+    "seen": 1791029581.0551932,
+    "ast_hash": "0a5dc42f04e748bbf4cd73b871554803",
     "semantic_hash": ""
   },
   "mobile/test/api_client_test.dart": {

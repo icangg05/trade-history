@@ -23,7 +23,8 @@ diingat di perangkat. Tanpa skema, `https://` yang dipakai.
 |---|---|
 | `flutter test` | uji model, format angka, dan seluruh layar (360 px) dengan jawaban server rekaman |
 | `flutter analyze` | lint (`flutter_lints`) |
-| `flutter build apk --release --dart-define=API_BASE_URL=https://…` | APK rilis |
+| `flutter build apk --release --dart-define=API_BASE_URL=https://trade.ilmifaizan.cloud` | APK rilis |
+| `flutter build apk --release --split-per-abi --target-platform android-arm64 --dart-define=API_BASE_URL=https://trade.ilmifaizan.cloud` | APK rilis v8a |
 | `flutter build ipa --dart-define=API_BASE_URL=https://…` | iOS (butuh macOS + Xcode) |
 | `dart run flutter_launcher_icons` | buat ulang ikon dari `assets/icon/` (disalin dari `public/icons/`) |
 

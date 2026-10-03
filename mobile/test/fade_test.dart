@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:trade_history/data/session.dart';
 import 'package:trade_history/widgets/common.dart';
 
 class _List extends StatefulWidget {
@@ -27,6 +29,54 @@ class _ListState extends State<_List> with FadeNextPage {
 }
 
 void main() {
+  testWidgets('dimuat ulang setelah simpan → kerangka; tarik-segarkan tidak', (
+    tester,
+  ) async {
+    final data = FutureProvider<int>((ref) async {
+      final revision = ref.watch(revisionProvider);
+      await Future<void>.delayed(const Duration(seconds: 1));
+      return revision;
+    });
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    Future<void> arrive() async {
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Consumer(
+            builder: (_, ref, _) => AsyncView(
+              value: ref.watch(data),
+              loading: const Text('kerangka'),
+              skeletonOnReload: true,
+              builder: (value) => Text('isi $value'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await arrive();
+    expect(find.text('isi 0'), findsOneWidget);
+
+    container.read(revisionProvider.notifier).bump();
+    await tester.pump();
+    expect(find.text('kerangka'), findsOneWidget);
+
+    await arrive();
+    expect(find.text('isi 1'), findsOneWidget);
+    expect(find.text('kerangka'), findsNothing);
+
+    container.refresh(data);
+    await tester.pump();
+    expect(find.text('kerangka'), findsNothing);
+    await arrive();
+  });
+
   testWidgets('hanya halaman yang baru tiba yang memudar masuk', (
     tester,
   ) async {

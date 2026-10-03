@@ -248,6 +248,9 @@ class _TradesScreenState extends ConsumerState<TradesScreen> with FadeNextPage {
           value: ref.watch(tradesProvider(query)),
           onRetry: () => ref.invalidate(tradesProvider(query)),
           loading: _loading,
+          // Trade baru (atau beberapa sekaligus dari import) muncul lewat
+          // kerangka, bukan menyelip ke daftar lama di depan mata.
+          skeletonOnReload: true,
           builder: (list) => _list(list, account),
         ),
       );

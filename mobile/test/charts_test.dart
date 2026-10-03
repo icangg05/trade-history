@@ -108,6 +108,14 @@ void main() {
     );
   });
 
+  test('titik arus dana hanya sampai rentang sebulan', () {
+    final start = point('2026-07-01', 0, flow: 5000);
+
+    expect(flowDots([start, point('2026-08-01', 0, flow: -100)]), isTrue);
+    expect(flowDots([start, point('2026-08-02', 0, flow: -100)]), isFalse);
+    expect(flowDots([start]), isFalse);
+  });
+
   testWidgets('titik deposit hijau, withdrawal ungu; memuat → kerangka', (
     tester,
   ) async {

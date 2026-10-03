@@ -19,7 +19,8 @@ TextScaler _axisScaler(BuildContext context) =>
 
 /// Kurva perkembangan akun. `pnl = true` menampilkan P/L kumulatif: saldo
 /// dikurangi saldo awal dan seluruh setoran/penarikan, supaya deposit tidak
-/// terbaca sebagai profit. Titik hijau menandai hari deposit, ungu withdrawal.
+/// terbaca sebagai profit. Titik hijau menandai hari deposit, ungu withdrawal
+/// — hanya kalau [flowDots].
 class EquityChart extends StatelessWidget {
   const EquityChart({
     super.key,
@@ -72,8 +73,9 @@ class EquityChart extends StatelessWidget {
 
     // Arus dana per x: tanda (+/−) menentukan warna titiknya.
     final flows = {
-      for (var i = 0; i < points.length; i++)
-        if (points[i].flow != 0) xs[i]: points[i].flow,
+      if (flowDots(points))
+        for (var i = 0; i < points.length; i++)
+          if (points[i].flow != 0) xs[i]: points[i].flow,
     };
 
     String dateAt(double x) => DateFormat(
@@ -230,6 +232,13 @@ class EquityChart extends StatelessWidget {
     ],
   );
 }
+
+/// Titik deposit/withdrawal hanya untuk rentang sampai sebulan. Lebih panjang
+/// dari itu, hari-hari berdekatan tinggal beberapa piksel dan titiknya
+/// menumpuk; tooltip tetap menyebut arus dana tiap hari.
+bool flowDots(List<EquityPoint> points) =>
+    points.length > 1 &&
+    points.last.date.difference(points.first.date).inDays <= 31;
 
 /// Deposit hijau, withdrawal ungu — bukan merah, supaya tidak melebur dengan
 /// garis emas.

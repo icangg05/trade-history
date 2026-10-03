@@ -384,6 +384,7 @@ class AsyncView<T> extends StatelessWidget {
     required this.builder,
     required this.loading,
     this.onRetry,
+    this.skeletonOnReload = false,
   });
 
   final AsyncValue<T> value;
@@ -391,12 +392,17 @@ class AsyncView<T> extends StatelessWidget {
   final Widget loading;
   final VoidCallback? onRetry;
 
+  /// Kerangka juga saat datanya dimuat ulang karena ada yang disimpan
+  /// (`revisionProvider` naik), bukan isi lama yang tiba-tiba berganti.
+  /// Tarik-untuk-segarkan tetap menahan isi lama: itu refresh, bukan reload.
+  final bool skeletonOnReload;
+
   // Kuncinya per keadaan: hanya pergantian keadaan yang memudar, isi yang
   // diperbarui di tempat tidak.
   @override
   Widget build(BuildContext context) => FadeSwitch(
     child: value.when(
-      skipLoadingOnReload: true,
+      skipLoadingOnReload: !skeletonOnReload,
       data: (data) =>
           KeyedSubtree(key: const ValueKey('data'), child: builder(data)),
       loading: () =>

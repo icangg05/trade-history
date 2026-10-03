@@ -71,7 +71,8 @@ class RuleLimitTest extends TestCase
 
         $this->assertSame(400_000.0, $summary['max_drawdown']['amount']);
 
-        // Persennya diukur dari puncak kurva trading (12jt), bukan saldo berjalan.
+        // Persennya dari saldo yang ada saat rugi itu (12jt); withdrawal dan
+        // deposit sesudahnya tidak menggeser persen apa pun.
         $this->assertSame(3.33, $summary['max_drawdown']['pct']);
     }
 

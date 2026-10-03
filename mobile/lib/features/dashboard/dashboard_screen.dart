@@ -106,7 +106,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
         Skeletonize(
           enabled: stale,
-          child: Caption('${longDate(summary.from)} sampai ${longDate(summary.to)}'),
+          child: Caption(
+            '${longDate(summary.from)} sampai ${longDate(summary.to)}',
+          ),
         ),
         const SizedBox(height: 10),
         Segments(
@@ -183,8 +185,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
               const SizedBox(height: 6),
-              const Caption(
-                'Titik hijau menandai deposit, titik ungu withdrawal.',
+              Caption(
+                flowDots(data.equity)
+                    ? 'Titik hijau menandai deposit, titik ungu withdrawal.'
+                    : 'Sentuh grafik untuk melihat deposit & withdrawal tiap hari.',
               ),
             ],
           ),

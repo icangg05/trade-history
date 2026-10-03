@@ -579,26 +579,57 @@ class AccountStats
     }
 
     /**
-     * Penurunan terdalam dari puncak, dalam mata uang & persen. Diukur di atas
-     * kurva trading, jadi yang terbaca murni hasil trading — bukan arus dana.
+     * Penurunan terdalam dalam persen time-weighted (TWR) — cara baku mengukur
+     * drawdown akun yang uangnya keluar-masuk. Tiap hari dinilai sebagai persen
+     * untung/rugi terhadap saldo yang sedang ada di akun, lalu dirangkai. Arus
+     * dana mengubah saldo tapi bukan persennya: menarik untung tidak terbaca
+     * rugi, dan rugi sesudah menarik untung tidak mengecil karena dibagi puncak
+     * yang uangnya sudah keluar.
+     *
+     * Transaksi hanya bertanggal, jadi arus dana dianggap terjadi sesudah trading
+     * hari itu — kecuali ruginya melebihi saldo pembuka: deposit hari itu pasti
+     * sudah masuk lebih dulu. Saldo habis (MC) adalah drawdown 100%, lalu
+     * pengukuran mulai lagi dari deposit berikutnya; tanpa itu kurva TWR
+     * tertahan di nol selamanya.
+     *
+     * `amount` adalah rugi trading sepanjang penurunan yang sama. Dua penurunan
+     * sama dalam, yang lebih besar nominalnya yang dilaporkan.
      */
     private function maxDrawdown(): array
     {
-        $peak = null;
-        $worst = 0.0;
-        $worstPct = 0.0;
+        $curve = $this->equityCurve();
+        $balance = $curve[0]['balance'] - $curve[0]['pnl'] - $curve[0]['flow'];
+        $index = $peak = 1.0;
+        $lost = 0.0;
+        $worst = ['amount' => 0.0, 'pct' => 0.0];
 
-        foreach ($this->tradingCurve() as $balance) {
-            $peak = $peak === null ? $balance : max($peak, $balance);
-            $drop = $peak - $balance;
+        foreach ($curve as $point) {
+            $pnl = $point['pnl'];
+            $base = $balance;
 
-            if ($drop > $worst) {
-                $worst = $drop;
-                $worstPct = $peak > 0 ? $drop / $peak * 100 : 0.0;
+            if ($base <= 0 || round($base + $pnl, 2) < 0) {
+                $base += max($point['flow'], 0.0);
             }
+
+            $wiped = $base > 0 && $pnl < 0 && round($base + $pnl, 2) <= 0;
+            $index = $wiped ? 0.0 : $index * (1 + ($base > 0 ? $pnl / $base : 0));
+            $lost = $index >= $peak ? 0.0 : $lost - $pnl;
+            $peak = max($peak, $index);
+            $pct = round((1 - $index / $peak) * 100, 2);
+
+            if ($pct > $worst['pct'] || ($pct == $worst['pct'] && $lost > $worst['amount'])) {
+                $worst = ['amount' => round($lost, 2), 'pct' => $pct];
+            }
+
+            if ($wiped) {
+                $index = $peak = 1.0;
+                $lost = 0.0;
+            }
+
+            $balance = $point['balance'];
         }
 
-        return ['amount' => round($worst, 2), 'pct' => round($worstPct, 2)];
+        return $worst;
     }
 
     private function avg(Collection $trades, string $field): ?float

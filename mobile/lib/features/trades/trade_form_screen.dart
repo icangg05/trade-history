@@ -189,29 +189,23 @@ class _TradeFormsState extends ConsumerState<_TradeForms>
 
     setState(() => _busy = true);
 
+    final forms = _forms;
     var saved = 0;
     String? done;
     String? failure;
 
-    // Berurutan dari tab pertama. Yang sudah tersimpan langsung keluar dari
-    // daftar, jadi menyimpan ulang setelah memperbaiki satu tab tidak
-    // menggandakan trade lainnya.
+    // Berurutan dari tab pertama. Tab-tabnya dibiarkan utuh selama menyimpan:
+    // membuangnya satu per satu membuat layar berkedip sebelum pindah halaman.
+    // Isian tab lain tetap hidup di IndexedStack, jadi tetap bisa dikirim.
     try {
-      while (true) {
-        final message = await _forms.first.$1.currentState!.submit();
-
-        if (message == null) break;
-
-        saved++;
-
-        if (_forms.length == 1) {
-          done = message;
-          break;
-        }
-
+      for (final (key, _) in forms) {
         if (!mounted) break;
 
-        setState(() => _setForms(_forms.sublist(1), 0));
+        done = await key.currentState!.submit();
+
+        if (done == null) break;
+
+        saved++;
       }
     } on ApiException catch (error) {
       failure = error.message;
@@ -221,10 +215,9 @@ class _TradeFormsState extends ConsumerState<_TradeForms>
 
     if (!mounted) return;
 
-    setState(() => _busy = false);
-
-    if (done != null) {
-      showMessage(context, saved == 1 ? done : '$saved trade dicatat.');
+    if (saved == forms.length) {
+      setState(() => _busy = false);
+      showMessage(context, saved == 1 ? done! : '$saved trade dicatat.');
       // Trade baru selalu berakhir di daftar trade, dari mana pun tombol +
       // ditekan. Mengubah trade kembali ke tempat asalnya.
       widget.trade == null ? context.go('/trades') : context.pop();
@@ -232,7 +225,13 @@ class _TradeFormsState extends ConsumerState<_TradeForms>
       return;
     }
 
-    // Yang gagal selalu tab pertama yang tersisa.
+    // Yang sudah tersimpan baru dibuang sekarang, sekaligus: menyimpan ulang
+    // setelah memperbaiki satu tab tidak menggandakan trade lainnya. Yang
+    // gagal jadi tab pertama yang tersisa.
+    setState(() {
+      _busy = false;
+      if (saved > 0) _setForms(forms.sublist(saved), 0);
+    });
     _tabs?.animateTo(0);
 
     final prefix = saved == 0 ? '' : '$saved trade tersimpan. ';
