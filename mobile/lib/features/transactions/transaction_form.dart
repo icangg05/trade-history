@@ -67,12 +67,21 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   // Withdrawal jadi bawaan: setoran hanya sesekali, penarikan yang rutin dicatat.
   late String _type =
       widget.editing?.type ?? (widget.deposit ? 'deposit' : 'withdrawal');
-  late final _amount = TextEditingController(
-    text: inputNumber(widget.editing?.amount),
-  );
-  late final _rate = TextEditingController(
-    text: inputNumber(widget.editing?.rateIdr),
-  );
+  late final _amount = TextEditingController(text: _initialAmount);
+
+  // Akun dolar: rupiah yang benar-benar disetor / diterima, persis seperti di
+  // mutasi rekening. Kursnya dihitung dari angka ini, bukan diketik sendiri.
+  late final _rupiah = TextEditingController(text: _initialRupiah);
+
+  late final _initialAmount = inputNumber(widget.editing?.amount);
+  late final _initialRupiah = () {
+    final rate = widget.editing?.rateIdr;
+    final idr = rate == null
+        ? null
+        : toIdr(widget.editing!.amount, rate, _currency);
+
+    return idr == null ? '' : inputNumber(rounded(idr));
+  }();
   late final _note = TextEditingController(text: widget.editing?.note ?? '');
   late DateTime _date = widget.editing?.occurredAt ?? DateTime.now();
 
@@ -96,17 +105,49 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   /// Akun rupiah (IDR, IDC) tidak perlu kurs — nilainya sudah rupiah.
   bool get _needsRate => needsRate(_currency);
 
+  /// Kurs dari jumlah akun dan rupiahnya. Selama keduanya tidak disentuh saat
+  /// memperbaiki, kurs yang tercatat dipakai utuh — rupiah di kolom isian
+  /// sudah dibulatkan, jadi menghitung ulang bisa menggeser desimal ketiganya.
+  double? get _rate =>
+      widget.editing != null &&
+          _amount.text == _initialAmount &&
+          _rupiah.text == _initialRupiah
+      ? widget.editing!.rateIdr
+      : impliedRate(
+          parseAmount(_amount.text, _currency),
+          _currency,
+          parseAmount(_rupiah.text, 'IDR'),
+          'IDR',
+        );
+
   @override
   void initState() {
     super.initState();
-    _amount.addListener(() => setState(() {}));
-    _rate.addListener(() => setState(() {}));
+    _watch(_amount, 'amount');
+    _watch(_rupiah, 'rate_idr');
+  }
+
+  /// Galat sebuah kolom hilang begitu isinya diubah: selama galat tampil,
+  /// helper di bawahnya — termasuk kurs otomatis — disembunyikan Flutter.
+  void _watch(TextEditingController controller, String key) {
+    var last = controller.text;
+
+    controller.addListener(() {
+      final changed = controller.text != last;
+      last = controller.text;
+
+      setState(() {
+        if (changed && _errors.containsKey(key)) {
+          _errors = {..._errors}..remove(key);
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     _amount.dispose();
-    _rate.dispose();
+    _rupiah.dispose();
     _note.dispose();
     super.dispose();
   }
@@ -159,19 +200,18 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
     final invalid = {
       ...requiredErrors({
         'amount': _amount.text,
-        if (_needsRate) 'rate_idr': _rate.text,
+        if (_needsRate) 'rate_idr': _rupiah.text,
       }),
-      for (final (key, controller) in [
-        ('amount', _amount),
-        ('rate_idr', _rate),
+      for (final (key, controller, currency) in [
+        ('amount', _amount, _currency),
+        ('rate_idr', _rupiah, 'IDR'),
       ])
         if (controller.text.trim().isNotEmpty &&
-            (parseDecimal(controller.text) ?? 0) <= 0)
+            (parseAmount(controller.text, currency) ?? 0) <= 0)
           key: 'Harus angka lebih dari 0.',
-      if (_needsRate &&
-          (parseDecimal(_rate.text) ?? 0) > 0 &&
-          !fitsRate(parseDecimal(_rate.text)!))
-        'rate_idr': 'Kurs maksimal 3 angka di belakang koma.',
+      // Kurs nol atau semiliar lebih hampir pasti salah ketik salah satu angka.
+      if (_needsRate && _rate != null && (_rate! <= 0 || _rate! >= 1e10))
+        'rate_idr': 'Tidak cocok dengan jumlah di atas.',
       if (widget.editing == null && _proof == null) 'proof': 'Wajib diisi.',
     };
 
@@ -194,8 +234,8 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
             widget.editing?.id,
             {
               'type': _type,
-              'amount': parseDecimal(_amount.text),
-              'rate_idr': _needsRate ? parseDecimal(_rate.text) : null,
+              'amount': parseAmount(_amount.text, _currency),
+              'rate_idr': _needsRate ? _rate : null,
               'occurred_at': isoDate(_date),
               'note': _note.text.trim(),
             },
@@ -226,11 +266,8 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
   @override
   Widget build(BuildContext context) {
     final editing = widget.editing;
-    final idr = toIdr(
-      parseDecimal(_amount.text),
-      parseDecimal(_rate.text),
-      _currency,
-    );
+    final idr = toIdr(parseAmount(_amount.text, _currency), null, _currency);
+    final rate = _rate;
     // Akun sen rupiah tidak punya kolom kurs, jadi setara rupiahnya ikut di
     // bawah jumlah — 1.000.000 IDC baru Rp10.000.
     final hints = [
@@ -287,19 +324,20 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
             if (_needsRate) ...[
               const SizedBox(height: 14),
               TextField(
-                controller: _rate,
+                controller: _rupiah,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 style: mono(size: 14),
                 decoration: InputDecoration(
-                  labelText:
-                      'Kurs rupiah (1 ${rateCurrency(_currency)} = Rp …) *',
-                  hintText: '16250,125',
+                  labelText: _type == 'deposit'
+                      ? 'Rupiah yang disetor *'
+                      : 'Rupiah yang diterima *',
+                  hintText: '1625000',
                   errorText: _errors['rate_idr'],
-                  helperText: idr == null
-                      ? 'Kurs hari transaksi, sampai 3 angka di belakang koma.'
-                      : 'Setara ${money(idr, 'IDR')}',
+                  helperText: rate == null
+                      ? 'Sesuai mutasi rekening — kursnya dihitung otomatis.'
+                      : 'Kurs otomatis: 1 ${rateCurrency(_currency)} = Rp ${exchangeRate(rate)}',
                 ),
               ),
             ],

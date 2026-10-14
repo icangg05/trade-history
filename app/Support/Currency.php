@@ -47,4 +47,28 @@ class Currency
 
         return round($value * self::cents($to), 2);
     }
+
+    /** Dolar ↔ rupiah: pindah akun lewat dua keluarga berbeda butuh kurs. */
+    public static function crosses(string $from, string $to): bool
+    {
+        return self::needsRate($from) !== self::needsRate($to);
+    }
+
+    /**
+     * Kurs (Rp per dolar, tiga desimal) dari dua nominal yang nilainya sama:
+     * satu dalam mata uang dolar, satu dalam mata uang rupiah — mis. 1.000 USC
+     * yang jadi Rp160.000 berarti kurs 16.000. Null kalau keduanya sekeluarga.
+     */
+    public static function rate(float $amount, string $currency, float $other, string $otherCurrency): ?float
+    {
+        if (! self::crosses($currency, $otherCurrency)) {
+            return null;
+        }
+
+        [$dollar, $rupiah] = self::needsRate($currency)
+            ? [$amount / self::cents($currency), $other / self::cents($otherCurrency)]
+            : [$other / self::cents($otherCurrency), $amount / self::cents($currency)];
+
+        return round($rupiah / $dollar, 3);
+    }
 }

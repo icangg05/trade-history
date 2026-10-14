@@ -132,8 +132,13 @@ scripts/make-icons.py            generator ikon PWA
   satu tempat di `App\Support\Currency`.
 - **Transfer antar akun** (`POST accounts/{akun}/transfers`, dari aplikasi mobile)
   mencatat withdrawal di akun asal dan deposit di akun tujuan sekaligus, saling
-  menunjuk lewat `transfer_pair_id`. Satu sisinya tidak bisa diubah; menghapus satu
-  sisi menghapus keduanya. Kurs setor/tarik dicatat sampai tiga desimal.
+  menunjuk lewat `transfer_pair_id`. Sekeluarga (USC → USD) jumlah diterimanya
+  dihitung sendiri; lintas dolar ↔ rupiah yang diisi jumlah yang benar-benar masuk
+  (`received`), dan kursnya dihitung dari kedua angka itu (`Currency::rate()`). Satu
+  sisinya tidak bisa diubah; menghapus satu sisi menghapus keduanya.
+- **Kurs setor/tarik dicatat sampai tiga desimal.** Di aplikasi mobile kurs tidak
+  diketik: yang diisi jumlah akun dan rupiah dari mutasi rekening, kursnya dihitung
+  otomatis. Form web masih mengetik kursnya langsung.
 - **PWA**: `public/manifest.webmanifest` + `public/sw.js`. Service worker hanya
   meng-cache aset ber-hash (`/build/`, `/icons/`); semua HTML dan request Inertia
   langsung ke jaringan, jadi tidak ada halaman basi. Didaftarkan di dev maupun

@@ -174,9 +174,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Catat transaksi'), findsOneWidget);
-    expect(find.textContaining('Kurs rupiah'), findsOneWidget);
+    // Akun USC: kurs tidak diketik — yang diisi rupiah dari mutasi rekening.
+    expect(find.textContaining('Kurs rupiah'), findsNothing);
+    expect(find.text('Rupiah yang diterima *'), findsOneWidget);
 
-    // Kosong: ditolak di ponsel — jumlah, kurs, dan bukti — tanpa mengirim.
+    // Kosong: ditolak di ponsel — jumlah, rupiah, dan bukti — tanpa mengirim.
     await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
     await tester.pumpAndSettle();
 
@@ -206,24 +208,69 @@ void main() {
     );
   });
 
-  // Dua akun: Demo XAUUSD (USC, akun aktif) dan Bertobatlah (USD).
+  testWidgets('dana: kurs deposit dihitung dari jumlah USC dan rupiahnya', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await openTab(tester, 'Dana');
+
+    await tester.tap(find.text('Catat'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Deposit').last);
+    await tester.pumpAndSettle();
+
+    // 1.234 USC = $12,34; Rp200.000 → 16.207,455 per dolar, tiga desimal.
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Jumlah (USC) *'),
+      '1234',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Rupiah yang disetor *'),
+      '200.000',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kurs otomatis: 1 USD = Rp 16.207,455'), findsOneWidget);
+  });
+
+  // Tiga akun: Demo XAUUSD (USC, akun aktif), Bertobatlah (USD), dan
+  // Bersyukur (IDC).
   Map<String, dynamic> twoAccounts() {
     final me = fixture('me');
-    (me['accounts'] as List).add({
-      'id': 2,
-      'name': 'Bertobatlah',
-      'broker': 'Exness',
-      'currency': 'USD',
-      'started_at': '2026-02-01',
-    });
+    (me['accounts'] as List).addAll([
+      {
+        'id': 2,
+        'name': 'Bertobatlah',
+        'broker': 'Exness',
+        'currency': 'USD',
+        'started_at': '2026-02-01',
+      },
+      {
+        'id': 3,
+        'name': 'Bersyukur',
+        'broker': 'Exness',
+        'currency': 'IDC',
+        'started_at': '2026-02-01',
+      },
+    ]);
     return me;
   }
 
-  testWidgets('dana: transfer seluruh saldo ke akun lain', (tester) async {
+  // Saldo dari server adalah jumlahan float — ekor seperti ini sungguhan ada.
+  Map<String, dynamic> noisyBalance() {
+    final transactions = fixture('transactions');
+    (transactions['totals'] as Map)['balance'] = 17653.120000000003;
+    return transactions;
+  }
+
+  testWidgets('dana: transfer seluruh saldo ke akun sekeluarga', (
+    tester,
+  ) async {
     final server = await pumpApp(
       tester,
       routes: {
         'GET me': (_) => twoAccounts(),
+        'GET accounts/1/transactions': (_) => noisyBalance(),
         'POST accounts/1/transfers': (_) => {
           'message': 'Transfer ke "Bertobatlah" dicatat.',
           'id': 'abc',
@@ -236,31 +283,71 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Transfer antar akun'), findsOneWidget);
-    // Bawaannya seluruh saldo (17.653 USC), dan USC → USD cukup dibagi seratus.
-    expect(find.widgetWithText(TextField, '17653'), findsOneWidget);
+    // Bawaannya seluruh saldo, sudah dibulatkan — bukan 17653.120000000003.
+    expect(find.widgetWithText(TextField, '17653.12'), findsOneWidget);
+    // USC → USD cukup dibagi seratus: tidak ada kurs, tidak ada isian kedua.
     expect(find.text('+US\$176,53'), findsOneWidget);
+    expect(find.textContaining('Jumlah diterima'), findsNothing);
 
-    // Akun dolar butuh kurs; empat desimal ditolak di ponsel.
-    final rate = find.widgetWithText(TextField, 'Kurs rupiah (1 USD = Rp …) *');
-    await tester.enterText(rate, '16250,1234');
-    await tester.tap(find.widgetWithText(FilledButton, 'Transfer'));
-    await tester.pumpAndSettle();
-
-    expect(
-      find.text('Kurs maksimal 3 angka di belakang koma.'),
-      findsOneWidget,
-    );
-    expect(server.requests.where((r) => r.method == 'POST'), isEmpty);
-
-    await tester.enterText(rate, '16250,125');
     await tester.tap(find.widgetWithText(FilledButton, 'Transfer'));
     await tester.pumpAndSettle();
 
     final sent = server.requests.singleWhere((r) => r.method == 'POST');
     expect(sent.data, containsPair('to_account_id', 2));
-    expect(sent.data, containsPair('amount', 17653));
-    expect(sent.data, containsPair('rate_idr', 16250.125));
+    expect(sent.data, containsPair('amount', 17653.12));
+    expect(sent.data, isNot(contains('received')));
+    expect(sent.data, isNot(contains('rate_idr')));
     expect(find.text('Transfer ke "Bertobatlah" dicatat.'), findsOneWidget);
+  });
+
+  testWidgets('dana: transfer USC ke IDC, kursnya dihitung otomatis', (
+    tester,
+  ) async {
+    final server = await pumpApp(
+      tester,
+      routes: {
+        'GET me': (_) => twoAccounts(),
+        'POST accounts/1/transfers': (_) => {
+          'message': 'Transfer ke "Bersyukur" dicatat.',
+          'id': 'abc',
+        },
+      },
+    );
+    await openTab(tester, 'Dana');
+
+    await tester.tap(find.text('Transfer ke akun lain'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bertobatlah · USD').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bersyukur · IDC').last);
+    await tester.pumpAndSettle();
+
+    // 1.000 USC = $10; yang masuk 16.000.000 IDC = Rp160.000 → kurs 16.000.
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Jumlah dikirim (USC) *'),
+      '1000',
+    );
+    final received = find.widgetWithText(TextField, 'Jumlah diterima (IDC) *');
+
+    // Lintas dolar ↔ rupiah: jumlah diterima wajib, ditolak di ponsel.
+    await tester.tap(find.widgetWithText(FilledButton, 'Transfer'));
+    await tester.pumpAndSettle();
+    expect(find.text('Wajib diisi.'), findsOneWidget);
+    expect(server.requests.where((r) => r.method == 'POST'), isEmpty);
+
+    // Ditulis dengan titik ribuan, seperti kebiasaan menulis rupiah.
+    await tester.enterText(received, '16.000.000');
+    await tester.pumpAndSettle();
+    expect(find.text('Kurs otomatis: 1 USD = Rp 16.000,000'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Transfer'));
+    await tester.pumpAndSettle();
+
+    final sent = server.requests.singleWhere((r) => r.method == 'POST');
+    expect(sent.data, containsPair('to_account_id', 3));
+    expect(sent.data, containsPair('amount', 1000));
+    expect(sent.data, containsPair('received', 16000000));
+    expect(find.text('Transfer ke "Bersyukur" dicatat.'), findsOneWidget);
   });
 
   testWidgets('dana: tanpa akun lain, tombol transfer tidak muncul', (

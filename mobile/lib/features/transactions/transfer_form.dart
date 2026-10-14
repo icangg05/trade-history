@@ -48,11 +48,16 @@ class _TransferForm extends ConsumerStatefulWidget {
 class _TransferFormState extends ConsumerState<_TransferForm> {
   late int _to = widget.targets.first.id;
 
-  // Bawaannya seluruh saldo — itu yang paling sering dipindah.
-  late final _amount = TextEditingController(
-    text: (widget.balance ?? 0) > 0 ? inputNumber(widget.balance) : '',
-  );
-  final _rate = TextEditingController();
+  // Bawaannya seluruh saldo — itu yang paling sering dipindah. Dibulatkan dulu:
+  // saldo dari server jumlahan float, bisa 17653.120000000003, dan angka
+  // seperti itu ditolak sebagai "melebihi saldo".
+  late final _all = (widget.balance ?? 0) > 0
+      ? inputNumber(rounded(widget.balance!))
+      : '';
+  late final _amount = TextEditingController(text: _all);
+
+  /// Jumlah yang masuk di akun tujuan — hanya diisi lintas dolar ↔ rupiah.
+  final _received = TextEditingController();
   final _note = TextEditingController();
   DateTime _date = DateTime.now();
 
@@ -64,39 +69,61 @@ class _TransferFormState extends ConsumerState<_TransferForm> {
   AccountBrief get _target =>
       widget.targets.firstWhere((account) => account.id == _to);
 
-  /// Kurs dibutuhkan kalau salah satu sisinya akun dolar — tiap sisi dolar
-  /// mencatat kurs harinya, sama seperti deposit/withdrawal biasa.
-  bool get _needsRate => needsRate(_from) || needsRate(_target.currency);
+  /// Dolar ↔ rupiah: jumlah yang masuk di akun tujuan diisi sendiri dan
+  /// kursnya dihitung dari situ. Sekeluarga (USC → USD) jumlahnya sudah pasti.
+  bool get _crosses => needsRate(_from) != needsRate(_target.currency);
 
   @override
   void initState() {
     super.initState();
-    _amount.addListener(() => setState(() {}));
-    _rate.addListener(() => setState(() {}));
+    _watch(_amount, 'amount');
+    _watch(_received, 'received');
+  }
+
+  /// Galat sebuah kolom hilang begitu isinya diubah: selama galat tampil,
+  /// helper di bawahnya — termasuk kurs otomatis — disembunyikan Flutter.
+  void _watch(TextEditingController controller, String key) {
+    var last = controller.text;
+
+    controller.addListener(() {
+      final changed = controller.text != last;
+      last = controller.text;
+
+      setState(() {
+        if (changed && _errors.containsKey(key)) {
+          _errors = {..._errors}..remove(key);
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     _amount.dispose();
-    _rate.dispose();
+    _received.dispose();
     _note.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    final amount = parseDecimal(_amount.text);
-    final rate = parseDecimal(_rate.text);
+    final amount = parseAmount(_amount.text, _from);
+    final received = parseAmount(_received.text, _target.currency);
+    final rate = impliedRate(amount, _from, received, _target.currency);
     final invalid = {
       ...requiredErrors({
         'amount': _amount.text,
-        if (_needsRate) 'rate_idr': _rate.text,
+        if (_crosses) 'received': _received.text,
       }),
-      if (_amount.text.trim().isNotEmpty && (amount ?? 0) <= 0)
-        'amount': 'Harus angka lebih dari 0.',
-      if (_needsRate && _rate.text.trim().isNotEmpty && (rate ?? 0) <= 0)
-        'rate_idr': 'Harus angka lebih dari 0.',
-      if (_needsRate && (rate ?? 0) > 0 && !fitsRate(rate!))
-        'rate_idr': 'Kurs maksimal 3 angka di belakang koma.',
+      for (final (key, controller, currency) in [
+        ('amount', _amount, _from),
+        ('received', _received, _target.currency),
+      ])
+        if (controller.text.trim().isNotEmpty &&
+            (parseAmount(controller.text, currency) ?? 0) <= 0)
+          key: 'Harus angka lebih dari 0.',
+      // Kurs nol atau semiliar lebih hampir pasti salah ketik salah satu angka.
+      if (rate != null && (rate <= 0 || rate >= 1e10))
+        'received': 'Tidak masuk akal untuk jumlah yang dikirim.',
     };
 
     if (invalid.isNotEmpty) {
@@ -115,7 +142,7 @@ class _TransferFormState extends ConsumerState<_TransferForm> {
           .transfer(widget.account.id, {
             'to_account_id': _to,
             'amount': amount,
-            'rate_idr': _needsRate ? rate : null,
+            if (_crosses) 'received': received,
             'occurred_at': isoDate(_date),
             'note': _note.text.trim(),
           });
@@ -141,13 +168,13 @@ class _TransferFormState extends ConsumerState<_TransferForm> {
   @override
   Widget build(BuildContext context) {
     final target = _target;
-    final amount = parseDecimal(_amount.text);
-    final rate = parseDecimal(_rate.text);
-    final received = convertAmount(amount, _from, target.currency, rate);
-    // Rupiahnya dihitung dari sisi yang punya kurs — akun rupiah tidak butuh.
-    final idr = toIdr(amount, rate, _from);
+    final amount = parseAmount(_amount.text, _from);
+    final received = _crosses
+        ? parseAmount(_received.text, target.currency)
+        : convertAmount(amount, _from, target.currency, null);
+    final rate = impliedRate(amount, _from, received, target.currency);
     final balance = widget.balance;
-    final rateFor = rateCurrency(needsRate(_from) ? _from : target.currency);
+    final dollar = rateCurrency(needsRate(_from) ? _from : target.currency);
 
     return PopScope(
       canPop: !_busy,
@@ -185,7 +212,12 @@ class _TransferFormState extends ConsumerState<_TransferForm> {
                 for (final account in widget.targets)
                   (account.id, '${account.name} · ${account.currency}'),
               ],
-              onChanged: (value) => setState(() => _to = value),
+              onChanged: (value) => setState(() {
+                final before = _target.currency;
+                _to = value;
+                // Jumlah diterima hanya berarti untuk mata uang tujuannya.
+                if (_target.currency != before) _received.clear();
+              }),
             ),
             const SizedBox(height: 14),
             TextField(
@@ -195,7 +227,7 @@ class _TransferFormState extends ConsumerState<_TransferForm> {
               ),
               style: mono(size: 14),
               decoration: InputDecoration(
-                labelText: 'Jumlah ($_from) *',
+                labelText: 'Jumlah dikirim ($_from) *',
                 errorText: _errors['amount'],
                 helperText: balance == null
                     ? null
@@ -204,61 +236,60 @@ class _TransferFormState extends ConsumerState<_TransferForm> {
                 suffixIcon: balance == null || balance <= 0
                     ? null
                     : TextButton(
-                        onPressed: _busy
-                            ? null
-                            : () => _amount.text = inputNumber(balance),
+                        onPressed: _busy ? null : () => _amount.text = _all,
                         child: const Text('Semua'),
                       ),
               ),
             ),
-            if (_needsRate) ...[
-              const SizedBox(height: 14),
+            const SizedBox(height: 14),
+            if (_crosses)
               TextField(
-                controller: _rate,
+                controller: _received,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 style: mono(size: 14),
                 decoration: InputDecoration(
-                  labelText: 'Kurs rupiah (1 $rateFor = Rp …) *',
-                  hintText: '16250,125',
-                  errorText: _errors['rate_idr'],
-                  helperText: idr == null || _from == 'IDR'
-                      ? 'Kurs hari transfer, sampai 3 angka di belakang koma.'
-                      : 'Setara ${money(idr, 'IDR')}',
+                  labelText: 'Jumlah diterima (${target.currency}) *',
+                  errorText: _errors['received'],
+                  helperText: rate == null
+                      ? 'Yang masuk di ${target.name} — kursnya dihitung otomatis.'
+                      : 'Kurs otomatis: 1 $dollar = Rp ${exchangeRate(rate)}',
                 ),
-              ),
-            ],
-            const SizedBox(height: 14),
-            // Yang sampai di akun tujuan, dalam mata uangnya sendiri — USC ke
-            // USD dibagi seratus, dolar ke rupiah memakai kurs di atas.
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: .08),
-                borderRadius: BorderRadius.circular(kRadius - 2),
-                border: Border.all(
-                  color: AppColors.success.withValues(alpha: .25),
+              )
+            else
+              // Sekeluarga: yang sampai di akun tujuan sudah pasti — USC ke
+              // USD dibagi seratus, IDR ke IDC dikali seratus.
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Caption('Diterima di ${target.name}'),
-                  const SizedBox(height: 2),
-                  Text(
-                    received == null
-                        ? '—'
-                        : money(received, target.currency, signed: true),
-                    style: mono(
-                      size: 16,
-                      weight: FontWeight.w600,
-                      color: AppColors.success,
-                    ),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: .08),
+                  borderRadius: BorderRadius.circular(kRadius - 2),
+                  border: Border.all(
+                    color: AppColors.success.withValues(alpha: .25),
                   ),
-                ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Caption('Diterima di ${target.name}'),
+                    const SizedBox(height: 2),
+                    Text(
+                      received == null
+                          ? '—'
+                          : money(received, target.currency, signed: true),
+                      style: mono(
+                        size: 16,
+                        weight: FontWeight.w600,
+                        color: AppColors.success,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
             const SizedBox(height: 14),
             InkWell(
               onTap: () async {

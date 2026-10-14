@@ -83,12 +83,32 @@ String rateCurrency(String currency) => currency == 'USC' ? 'USD' : currency;
 /// Kurs deposit/withdrawal: selalu tiga angka di belakang koma (16.250,125).
 String exchangeRate(double? value) => number(value, 3);
 
-/// Kurs paling banyak tiga angka di belakang koma — batas kolom `rate_idr`.
-bool fitsRate(double value) {
-  final scaled = value * 1000;
+/// Kurs (Rp per dolar, tiga desimal) dari dua nominal yang nilainya sama:
+/// satu dalam mata uang dolar, satu dalam rupiah — 1.000 USC yang jadi
+/// Rp160.000 berarti kurs 16.000. Padanan `Currency::rate()` di server; null
+/// selama salah satunya kosong, atau kalau keduanya sekeluarga.
+double? impliedRate(
+  double? amount,
+  String currency,
+  double? other,
+  String otherCurrency,
+) {
+  if (amount == null || other == null || amount <= 0 || other <= 0) {
+    return null;
+  }
+  if (needsRate(currency) == needsRate(otherCurrency)) return null;
 
-  return (scaled - scaled.roundToDouble()).abs() < 1e-6;
+  final (dollar, rupiah) = needsRate(currency)
+      ? (amount / cents(currency), other / cents(otherCurrency))
+      : (other / cents(otherCurrency), amount / cents(currency));
+
+  return (rupiah / dollar * 1000).roundToDouble() / 1000;
 }
+
+/// Dibulatkan ke [digits] desimal. Saldo dari server adalah jumlahan float
+/// (17653.120000000003) — tidak boleh masuk kolom isian apa adanya.
+double rounded(double value, [int digits = 2]) =>
+    double.parse(value.toStringAsFixed(digits));
 
 String number(double? value, [int digits = 2]) =>
     value == null ? '—' : _fixed(value, digits);
@@ -185,6 +205,20 @@ double? parseDecimal(String? raw) {
   return double.tryParse(
     text.contains(',') ? text.replaceAll('.', '').replaceAll(',', '.') : text,
   );
+}
+
+/// Nominal dalam mata uang akun. Rupiah (IDR, IDC) biasa ditulis dengan titik
+/// ribuan dan tidak pernah bertiga desimal, jadi `200.000` atau `1.625.000`
+/// dibaca dua ratus ribu dan satu koma enam juta — bukan 200,0 seperti di
+/// [parseDecimal]. Dolar tetap memakai aturan [parseDecimal].
+double? parseAmount(String? raw, String currency) {
+  final text = (raw ?? '').trim().replaceAll(' ', '');
+
+  if (!needsRate(currency) && RegExp(r'^\d{1,3}(\.\d{3})+$').hasMatch(text)) {
+    return double.tryParse(text.replaceAll('.', ''));
+  }
+
+  return parseDecimal(text);
 }
 
 /// Kebalikannya: angka untuk mengisi ulang kolom isian, tanpa nol di ujung.

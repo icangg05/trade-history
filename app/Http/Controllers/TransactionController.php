@@ -175,11 +175,16 @@ class TransactionController extends Controller
     /**
      * Pindahkan dana dari akun yang sedang dibuka ke akun lain milik pengguna
      * yang sama: withdrawal di akun ini, deposit di akun tujuan, keduanya saling
-     * menunjuk. Mata uang berbeda dikonversi — sekeluarga (USC → USD) cukup
-     * menggeser sen, lintas dolar ↔ rupiah memakai kurs yang diisi.
+     * menunjuk.
      *
-     * Kedua sisi memakai kurs yang sama, jadi di laporan pajak setoran dan
-     * penarikannya saling menghapus: transfer bukan penghasilan.
+     * Sekeluarga (USC → USD, IDR → IDC) jumlah yang diterima sudah pasti —
+     * cukup menggeser sen. Lintas dolar ↔ rupiah, yang diisi adalah jumlah yang
+     * benar-benar masuk di akun tujuan (`received`), dan kursnya dihitung dari
+     * kedua angka itu. Jumlah itulah yang tercatat apa adanya; kursnya hanya
+     * untuk nilai rupiah sisi dolarnya.
+     *
+     * Transfer sekeluarga dolar tidak punya kurs sendiri: di laporan pajak
+     * kedua sisinya memakai kurs tahunan yang sama, jadi tetap saling menghapus.
      *
      * Tanpa bukti transfer: uangnya tidak keluar dari broker, dan pasangannya
      * di akun seberang sudah jadi jejaknya.
@@ -188,7 +193,7 @@ class TransactionController extends Controller
     {
         $from = $request->currentAccount();
         $to = $request->user()->accounts()->whereKeyNot($from->id)->find($request->integer('to_account_id'));
-        $needsRate = Currency::needsRate($from->currency) || ($to !== null && Currency::needsRate($to->currency));
+        $crosses = $to !== null && Currency::crosses($from->currency, $to->currency);
 
         $data = $request->validate([
             'to_account_id' => ['bail', 'required', 'integer', function ($attribute, $value, $fail) use ($to) {
@@ -196,16 +201,20 @@ class TransactionController extends Controller
                     $fail('Pilih akun tujuan yang lain.');
                 }
             }],
-            'amount' => ['required', 'numeric', 'gt:0'],
-            'rate_idr' => [Rule::requiredIf($needsRate), 'nullable', 'numeric', 'gt:0', 'decimal:0,3'],
+            // Satuan terkecil kolom `amount`; di bawahnya jadi 0 setelah dibulatkan.
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'received' => [Rule::requiredIf($crosses), 'nullable', 'numeric', 'min:0.01'],
             'occurred_at' => ['required', 'date'],
             'note' => ['nullable', 'string', 'max:255'],
-        ], self::MESSAGES);
+        ], ['received.required' => 'Isi jumlah yang masuk di akun tujuan.']);
 
-        $this->ensureAffordable($from, ['type' => 'withdrawal', ...$data]);
+        $amount = round((float) $data['amount'], 2);
+        $this->ensureAffordable($from, ['type' => 'withdrawal', 'amount' => $amount]);
 
-        $rate = $needsRate ? (float) $data['rate_idr'] : null;
-        $received = Currency::convert((float) $data['amount'], $from->currency, $to->currency, $rate);
+        $received = $crosses
+            ? round((float) $data['received'], 2)
+            : Currency::convert($amount, $from->currency, $to->currency, null);
+        $rate = $crosses ? Currency::rate($amount, $from->currency, $received, $to->currency) : null;
 
         if ($received <= 0) {
             throw ValidationException::withMessages([
@@ -213,16 +222,24 @@ class TransactionController extends Controller
             ]);
         }
 
-        $leg = fn (Account $account, string $type, float $amount) => $account->transactions()->create([
+        // Batas kolom `rate_idr` (13,3). Kurs 0 atau semiliar lebih hampir pasti
+        // salah ketik di salah satu jumlah.
+        if ($crosses && ($rate <= 0 || $rate >= 1e10)) {
+            throw ValidationException::withMessages([
+                'received' => 'Jumlah ini tidak masuk akal untuk jumlah yang dikirim.',
+            ]);
+        }
+
+        $leg = fn (Account $account, string $type, float $value) => $account->transactions()->create([
             'type' => $type,
-            'amount' => $amount,
+            'amount' => $value,
             'rate_idr' => Currency::needsRate($account->currency) ? $rate : null,
             'occurred_at' => $data['occurred_at'],
             'note' => $data['note'] ?? null,
         ]);
 
-        $out = DB::transaction(function () use ($leg, $from, $to, $data, $received) {
-            $out = $leg($from, 'withdrawal', (float) $data['amount']);
+        $out = DB::transaction(function () use ($leg, $from, $to, $amount, $received) {
+            $out = $leg($from, 'withdrawal', $amount);
             $in = $leg($to, 'deposit', $received);
 
             $out->update(['transfer_pair_id' => $in->id]);

@@ -98,8 +98,33 @@ void main() {
   test('kurs selalu tiga angka di belakang koma', () {
     expect(exchangeRate(16250), '16.250,000');
     expect(exchangeRate(16250.125), '16.250,125');
-    expect(fitsRate(16250.125), isTrue);
-    expect(fitsRate(16250), isTrue);
-    expect(fitsRate(16250.1234), isFalse);
+  });
+
+  test('kurs dihitung dari dua nominal yang sama nilainya', () {
+    // 1.000 USC = $10 → Rp160.000: kurs 16.000, dari arah mana pun.
+    expect(impliedRate(1000, 'USC', 160000, 'IDR'), 16000);
+    expect(impliedRate(160000, 'IDR', 1000, 'USC'), 16000);
+    expect(impliedRate(10, 'USD', 16000000, 'IDC'), 16000);
+    // Dibulatkan tiga desimal: Rp200.000 / $12,34.
+    expect(impliedRate(1234, 'USC', 200000, 'IDR'), 16207.455);
+    // Sekeluarga tidak punya kurs; nominal kosong belum bisa dihitung.
+    expect(impliedRate(3700, 'USC', 37, 'USD'), isNull);
+    expect(impliedRate(1000, 'USC', null, 'IDR'), isNull);
+  });
+
+  test('nominal rupiah membaca titik sebagai pemisah ribuan', () {
+    expect(parseAmount('200.000', 'IDR'), 200000);
+    expect(parseAmount('16.000.000', 'IDC'), 16000000);
+    expect(parseAmount('1.625.000,50', 'IDR'), 1625000.5);
+    expect(parseAmount('1625000', 'IDR'), 1625000);
+    expect(parseAmount('200.5', 'IDR'), 200.5); // bukan kelompok tiga angka
+    // Dolar tetap: titik tunggal adalah desimal.
+    expect(parseAmount('17653.120', 'USC'), 17653.12);
+    expect(parseAmount('1.000', 'USD'), 1);
+  });
+
+  test('saldo float dibulatkan sebelum masuk kolom isian', () {
+    expect(inputNumber(rounded(17653.120000000003)), '17653.12');
+    expect(inputNumber(rounded(17653.000000000004)), '17653');
   });
 }
