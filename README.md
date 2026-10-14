@@ -125,8 +125,15 @@ scripts/make-icons.py            generator ikon PWA
 - **Import AI diverifikasi dua lapis** sebelum menyentuh form: gambar harus benar-benar
   layar trading (`is_trade_screenshot`), dan simbol + arah + harga entry harus terbaca.
   Yang lolos tetap melewati `TradeRequest` yang sama dengan input manual.
-- **Mata uang akun terbatas pada USD, USC (akun sen), dan IDR.** USC bukan kode
-  ISO 4217, jadi `money()` memformatnya sebagai angka + akhiran kode.
+- **Mata uang akun terbatas pada USD, USC, IDR, dan IDC.** USC (sen dolar) dan IDC
+  (sen rupiah, akun Standard Cent Exness) bernilai 1/100 induknya — 3700 USC = $37,
+  1.000.000 IDC = Rp10.000. Keduanya bukan kode ISO 4217, jadi `money()` memformatnya
+  sebagai angka + akhiran kode. Akun rupiah (IDR, IDC) tidak butuh kurs; aturannya
+  satu tempat di `App\Support\Currency`.
+- **Transfer antar akun** (`POST accounts/{akun}/transfers`, dari aplikasi mobile)
+  mencatat withdrawal di akun asal dan deposit di akun tujuan sekaligus, saling
+  menunjuk lewat `transfer_pair_id`. Satu sisinya tidak bisa diubah; menghapus satu
+  sisi menghapus keduanya. Kurs setor/tarik dicatat sampai tiga desimal.
 - **PWA**: `public/manifest.webmanifest` + `public/sw.js`. Service worker hanya
   meng-cache aset ber-hash (`/build/`, `/icons/`); semua HTML dan request Inertia
   langsung ke jaringan, jadi tidak ada halaman basi. Didaftarkan di dev maupun

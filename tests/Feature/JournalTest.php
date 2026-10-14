@@ -377,7 +377,7 @@ class JournalTest extends TestCase
         $this->api('post', 'transactions/'.$transaksi->getRouteKey(), [
             'type' => 'deposit',
             'amount' => 550,
-            'rate_idr' => 16300,
+            'rate_idr' => 16300.125,
             'occurred_at' => '2026-01-06',
             'note' => 'Koreksi',
         ])->assertSuccessful();
@@ -385,7 +385,7 @@ class JournalTest extends TestCase
         $transaksi->refresh();
 
         $this->assertSame('550.00', $transaksi->amount);
-        $this->assertSame('16300.00', $transaksi->rate_idr);
+        $this->assertSame('16300.125', $transaksi->rate_idr);
         $this->assertSame($bukti, $transaksi->proof_path);
         Storage::disk('local')->assertExists($bukti);
     }
@@ -542,6 +542,55 @@ class JournalTest extends TestCase
         $this->assertNull($account->transactions()->sole()->rate_idr);
     }
 
+    public function test_kurs_paling_banyak_tiga_angka_di_belakang_koma(): void
+    {
+        Storage::fake('local');
+
+        $account = $this->account();
+        $this->onAccount($account);
+        $deposit = fn ($rate) => $this->api('post', 'transactions', [
+            'type' => 'deposit',
+            'amount' => 100,
+            'rate_idr' => $rate,
+            'occurred_at' => '2026-01-05',
+            'proof' => UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+        $deposit('16250.1234')->assertJsonValidationErrors(['rate_idr' => '3 angka di belakang koma']);
+
+        $deposit('16250.125')->assertSuccessful();
+        $this->assertSame('16250.125', $account->transactions()->sole()->rate_idr);
+
+        // Kurs yang tercatat dikirim utuh — tiga desimalnya tidak dibulatkan.
+        $this->api('get', 'transactions?year=2026&month=1')
+            ->assertJsonPath('items.data.0.rate_idr', 16250.125)
+            ->assertJsonPath('totals.deposit_idr', 1625012.5);
+    }
+
+    public function test_akun_idc_tanpa_kurs_dan_bernilai_seperseratus_rupiah(): void
+    {
+        Storage::fake('local');
+
+        $account = $this->account(['currency' => 'IDC']);
+        $this->onAccount($account);
+
+        // Akun sen rupiah tidak butuh kurs dolar.
+        $this->api('post', 'transactions', [
+            'type' => 'deposit',
+            'amount' => 10_000_000,
+            'occurred_at' => '2026-01-05',
+            'proof' => UploadedFile::fake()->image('bukti.jpg'),
+        ])->assertSuccessful();
+
+        $this->assertNull($account->transactions()->sole()->rate_idr);
+
+        // 10.000.000 IDC = Rp100.000.
+        $this->api('get', 'transactions?year=2026&month=1')
+            ->assertJsonPath('totals.deposit', 10_000_000)
+            ->assertJsonPath('totals.deposit_idr', 100_000)
+            ->assertJsonPath('totals.balance', 10_001_000);
+    }
+
     public function test_jejak_bacaan_ai_ikut_tersimpan(): void
     {
         $account = $this->account();
@@ -568,7 +617,7 @@ class JournalTest extends TestCase
         $this->assertSame($raw, $trade->ai_raw);
     }
 
-    public function test_mata_uang_akun_dibatasi_tiga_pilihan(): void
+    public function test_mata_uang_akun_dibatasi_empat_pilihan(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -580,7 +629,7 @@ class JournalTest extends TestCase
             'started_at' => '2026-01-01',
         ])->assertJsonValidationErrors('currency');
 
-        foreach (['USD', 'USC', 'IDR'] as $currency) {
+        foreach (['USD', 'USC', 'IDR', 'IDC'] as $currency) {
             $this->api('post', 'accounts', [
                 'name' => 'Akun '.$currency,
                 'currency' => $currency,
@@ -589,7 +638,7 @@ class JournalTest extends TestCase
             ])->assertSuccessful();
         }
 
-        $this->assertSame(3, $user->accounts()->count());
+        $this->assertSame(4, $user->accounts()->count());
     }
 
     public function test_pnl_bulanan_memisahkan_profit_dan_loss_kotor(): void

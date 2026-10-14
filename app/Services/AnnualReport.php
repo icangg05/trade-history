@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\Trade;
 use App\Models\Transaction;
+use App\Support\Currency;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
@@ -60,6 +61,7 @@ class AnnualReport
         $currency = $account->currency;
 
         $mutations = $account->transactions()
+            ->with('pair.account:id,name')
             ->whereBetween('occurred_at', [$from->toDateString(), $to->toDateString()])
             ->orderBy('occurred_at')
             ->orderBy('id')
@@ -127,6 +129,8 @@ class AnnualReport
                     ? URL::signedRoute('proofs.link', $t->getRouteKey())
                     : null,
                 'note' => $t->note,
+                // Transfer antar akun: nama akun di seberangnya.
+                'transfer' => $t->pair?->account->name,
             ])->all(),
             'trades' => $stats->trades($from, $to)->map(fn (Trade $t) => [
                 'opened_at' => $t->opened_at->format('Y-m-d H:i'),
@@ -146,7 +150,7 @@ class AnnualReport
     }
 
     /**
-     * Total lintas akun hanya sah dalam rupiah — akun USD, USC dan IDR tidak bisa
+     * Total lintas akun hanya sah dalam rupiah — akun USD, USC, IDR dan IDC tidak bisa
      * dijumlahkan apa adanya. Kebetulan itu juga satuan yang diminta pajak.
      */
     private static function consolidate(Collection $sections): array
@@ -188,15 +192,11 @@ class AnnualReport
     }
 
     /**
-     * Cerminan `toIdr()` di useFormat.ts: kurs selalu per dolar, dan akun sen (USC)
-     * bernilai 1/100 dolar per unit.
+     * Kurs selalu per dolar, akun sen (USC, IDC) bernilai 1/100 induknya per
+     * unit, dan akun rupiah tidak memakai kurs — lihat `Currency`.
      */
     private static function idr(float $amount, float $rate, string $currency): float
     {
-        return round(match ($currency) {
-            'IDR' => $amount,
-            'USC' => $amount / 100 * $rate,
-            default => $amount * $rate,
-        }, 2);
+        return round(Currency::toIdr($amount, $rate, $currency), 2);
     }
 }

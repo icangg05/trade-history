@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useBackClose } from '@/composables/useBackClose'
-import { longDate, money, monthLabel, price, rateCurrency, toIdr, useCurrency } from '@/composables/useFormat'
+import { longDate, money, monthLabel, needsRate as currencyNeedsRate, num, rateCurrency, toIdr, useCurrency } from '@/composables/useFormat'
 import type { Paginated } from '@/types'
 
 interface Row {
@@ -74,8 +74,8 @@ const scopeLabel = computed(() => {
     : String(props.filters.year)
 })
 
-// Akun rupiah tidak perlu kurs — nilainya sudah rupiah.
-const needsRate = computed(() => currency.value !== 'IDR')
+// Akun rupiah (IDR, IDC) tidak perlu kurs — nilainya sudah rupiah.
+const needsRate = computed(() => currencyNeedsRate(currency.value))
 
 // Bukti transfer dibaca di sini, bukan di tab baru: gambarnya kecil dan
 // tab baru selalu berarti kehilangan tempat di daftar.
@@ -243,7 +243,7 @@ function submit() {
           </p>
           <p v-if="needsRate" class="tnum font-mono text-[11px] text-muted-foreground">
             {{ money(inIdr(row), 'IDR') }}
-            <span v-if="row.rate_idr" class="opacity-70">@ {{ price(row.rate_idr) }}</span>
+            <span v-if="row.rate_idr" class="opacity-70">@ {{ num(row.rate_idr, 3) }}</span>
           </p>
         </div>
 
@@ -299,7 +299,7 @@ function submit() {
             <td v-if="needsRate" class="tnum p-3 text-right font-mono text-xs text-muted-foreground">
               {{ money(inIdr(row), 'IDR') }}
               <span v-if="row.rate_idr" class="block text-[11px] opacity-70">
-                @ {{ price(row.rate_idr) }}/{{ rateCurrency(currency) }}
+                @ {{ num(row.rate_idr, 3) }}/{{ rateCurrency(currency) }}
               </span>
             </td>
             <td class="p-3 text-right">
@@ -374,7 +374,7 @@ function submit() {
 
           <div v-if="needsRate" class="space-y-2">
             <Label for="rate_idr">Kurs rupiah (1 {{ rateCurrency(currency) }} = Rp …)</Label>
-            <Input id="rate_idr" v-model="form.rate_idr" type="number" step="0.01" min="0" placeholder="16250" required />
+            <Input id="rate_idr" v-model="form.rate_idr" type="number" step="0.001" min="0" placeholder="16250" required />
             <p v-if="form.amount && form.rate_idr" class="text-xs text-muted-foreground">
               Setara <span class="tnum font-mono">{{ money(toIdr(form.amount, form.rate_idr, currency), 'IDR') }}</span>
             </p>

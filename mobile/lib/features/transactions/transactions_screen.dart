@@ -12,6 +12,7 @@ import '../../widgets/common.dart';
 import '../../widgets/image_viewer.dart';
 import '../../widgets/skeleton.dart';
 import 'transaction_form.dart';
+import 'transfer_form.dart';
 
 /// Filter periode: tahun + bulan, atau `all`. Bulan hanya berarti kalau
 /// tahunnya juga dipilih — "Agustus" lintas tahun bukan angka yang berarti.
@@ -123,11 +124,15 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   Future<void> _delete(AccountBrief account, FundTransaction row) async {
     final ok = await confirmWithCode(
       context,
-      title: row.isDeposit ? 'Hapus deposit ini?' : 'Hapus withdrawal ini?',
-      description:
-          '${money(row.amount, account.currency)} pada ${longDate(row.occurredAt)} beserta bukti transfernya '
-          'dihapus permanen, dan saldo akun ikut berubah.',
-      confirmLabel: 'Hapus transaksi',
+      title: row.isTransfer
+          ? 'Hapus transfer ini?'
+          : (row.isDeposit ? 'Hapus deposit ini?' : 'Hapus withdrawal ini?'),
+      description: row.isTransfer
+          ? 'Transfer ${money(row.amount, account.currency)} ${row.transferNote} pada ${longDate(row.occurredAt)} '
+                'dihapus dari kedua akun, dan saldo keduanya ikut berubah.'
+          : '${money(row.amount, account.currency)} pada ${longDate(row.occurredAt)} beserta bukti transfernya '
+                'dihapus permanen, dan saldo akun ikut berubah.',
+      confirmLabel: row.isTransfer ? 'Hapus transfer' : 'Hapus transaksi',
     );
 
     if (!ok) return;
@@ -146,6 +151,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
   FundsQuery _query(AccountBrief account) =>
       (account.id, _year, _year == 'all' ? 'all' : _month);
+
+  /// Akun lain yang bisa menerima transfer. Arsip tidak ikut — sama dengan
+  /// pengalih akun.
+  List<AccountBrief> _targets(AccountBrief account) => [
+    for (final other in ref.watch(meProvider).value?.accounts ?? [])
+      if (other.id != account.id) other,
+  ];
 
   @override
   Widget build(BuildContext context) => AccountScaffold(
@@ -192,7 +204,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final page = list.first;
     final totals = page.totals;
     final currency = account.currency;
-    final needsRate = currency != 'IDR';
+    // Setara rupiah untuk semua akun kecuali yang memang sudah rupiah penuh —
+    // akun IDC pun perlu: 1.000.000 IDC baru Rp10.000.
+    final showIdr = currency != 'IDR';
+    final targets = _targets(account);
     final scope = page.year == null
         ? 'sepanjang waktu'
         : (page.month == null
@@ -242,21 +257,38 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       StatCard(
         label: 'Saldo sekarang',
         value: money(totals.balance, currency),
+        hint: showIdr && !needsRate(currency)
+            ? money(toIdr(totals.balance, null, currency), 'IDR')
+            : null,
         tone: Tone.gold,
       ),
+      // Dengan satu akun tidak ada tujuan transfer.
+      if (targets.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => showTransferForm(
+            context,
+            account: account,
+            targets: targets,
+            balance: totals.balance,
+          ),
+          icon: const Icon(Icons.swap_horiz, size: 18),
+          label: const Text('Transfer ke akun lain'),
+        ),
+      ],
       const SizedBox(height: 10),
       StatGrid(
         children: [
           StatCard(
             label: 'Deposit · $scope',
             value: money(totals.deposit, currency),
-            hint: needsRate ? money(totals.depositIdr, 'IDR') : null,
+            hint: showIdr ? money(totals.depositIdr, 'IDR') : null,
             tone: Tone.good,
           ),
           StatCard(
             label: 'Withdrawal · $scope',
             value: money(totals.withdrawal, currency),
-            hint: needsRate ? money(totals.withdrawalIdr, 'IDR') : null,
+            hint: showIdr ? money(totals.withdrawalIdr, 'IDR') : null,
             tone: Tone.bad,
           ),
         ],
@@ -265,7 +297,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       _Difference(
         withdrawal: totals.withdrawal,
         deposit: totals.deposit,
-        idr: needsRate ? totals.withdrawalIdr - totals.depositIdr : null,
+        idr: showIdr ? totals.withdrawalIdr - totals.depositIdr : null,
         currency: currency,
         scope: scope,
       ),
@@ -417,8 +449,15 @@ class _RowState extends ConsumerState<_Row> {
         ),
         if (account.currency != 'IDR')
           Text(
-            '${money(idr, 'IDR')}${row.rateIdr == null ? '' : ' @ ${price(row.rateIdr)}'}',
+            money(idr, 'IDR'),
             style: mono(size: 11, color: AppColors.mutedForeground),
+          ),
+        // Baris sendiri: kurs tiga desimal di sebelah rupiahnya tidak muat
+        // di layar 360 px.
+        if (row.rateIdr != null)
+          Text(
+            '@ ${exchangeRate(row.rateIdr)}',
+            style: mono(size: 10.5, color: AppColors.mutedForeground),
           ),
       ],
     );
@@ -439,6 +478,20 @@ class _RowState extends ConsumerState<_Row> {
             children: [
               if (row.hasProof)
                 ProofThumbnail(account: account.id, row: row)
+              else if (row.isTransfer)
+                // Transfer antar akun tidak punya bukti; ikon arahnya saja.
+                Container(
+                  width: 44,
+                  height: 44,
+                  margin: const EdgeInsets.all(2),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: .08),
+                    border: Border.all(color: color.withValues(alpha: .25)),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(Icons.swap_horiz, size: 20, color: color),
+                )
               else
                 Container(
                   width: 44,
@@ -461,13 +514,14 @@ class _RowState extends ConsumerState<_Row> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      row.isDeposit ? 'Deposit' : 'Withdrawal',
+                      row.label,
                       style: TextStyle(fontSize: 14, color: color),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       [
                         longDate(row.occurredAt),
+                        ?row.transferNote,
                         if ((row.note ?? '').isNotEmpty) row.note!,
                       ].join(' · '),
                       maxLines: 2,
@@ -503,7 +557,10 @@ class _RowState extends ConsumerState<_Row> {
                   _ => widget.onDelete(),
                 },
                 itemBuilder: (_) => [
-                  const PopupMenuItem(value: 'edit', child: Text('Ubah')),
+                  // Satu sisi transfer tidak bisa diubah sendiri — hapus lalu
+                  // catat ulang, supaya kedua akun tetap cocok.
+                  if (!row.isTransfer)
+                    const PopupMenuItem(value: 'edit', child: Text('Ubah')),
                   if (row.hasProof)
                     const PopupMenuItem(
                       value: 'download',
@@ -566,7 +623,7 @@ Future<void> _showDetail(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            row.isDeposit ? 'Deposit' : 'Withdrawal',
+            row.label,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -574,7 +631,7 @@ Future<void> _showDetail(
             ),
           ),
           const SizedBox(height: 2),
-          Caption(longDate(row.occurredAt)),
+          Caption([longDate(row.occurredAt), ?row.transferNote].join(' · ')),
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -591,7 +648,13 @@ Future<void> _showDetail(
           if (currency != 'IDR') ...[
             const SizedBox(height: 14),
             FieldPair(
-              fact('Kurs', row.rateIdr == null ? '—' : price(row.rateIdr)),
+              fact(
+                'Kurs',
+                // Akun sen rupiah tidak punya kurs: nilainya tetap.
+                !needsRate(currency)
+                    ? '${cents(currency)} $currency = Rp1'
+                    : (row.rateIdr == null ? '—' : exchangeRate(row.rateIdr)),
+              ),
               fact(
                 'Setara rupiah',
                 money(toIdr(row.amount, row.rateIdr, currency), 'IDR'),
@@ -614,9 +677,11 @@ Future<void> _showDetail(
               child: ProofThumbnail(account: account.id, row: row, size: 120),
             )
           else
-            const Text(
-              'Tidak ada bukti transfer.',
-              style: TextStyle(
+            Text(
+              row.isTransfer
+                  ? 'Transfer antar akun, tanpa bukti transfer. Pasangannya tercatat di ${row.transferAccount}.'
+                  : 'Tidak ada bukti transfer.',
+              style: const TextStyle(
                 fontSize: 13.5,
                 color: AppColors.mutedForeground,
               ),
@@ -633,11 +698,12 @@ Future<void> _showDetail(
                 label: const Text('Hapus'),
               ),
               const Spacer(),
-              FilledButton.icon(
-                onPressed: () => close(onEdit),
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                label: const Text('Ubah'),
-              ),
+              if (!row.isTransfer)
+                FilledButton.icon(
+                  onPressed: () => close(onEdit),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Ubah'),
+                ),
             ],
           ),
         ],

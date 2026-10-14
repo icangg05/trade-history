@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { num } from '@/composables/useFormat'
+import { needsRate, num } from '@/composables/useFormat'
 import type { PageProps } from '@/types'
 
 const props = defineProps<{
@@ -56,7 +56,7 @@ watch(
   (year) => (form.value.rate_date = endOfYear(year)),
 )
 
-const foreign = computed(() => props.accounts.some((a) => a.currency !== 'IDR'))
+const foreign = computed(() => props.accounts.some((a) => needsRate(a.currency)))
 
 /**
  * Cerminan `ReportController::decimal()`: koma hanya bisa berarti desimal, jadi

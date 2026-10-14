@@ -203,6 +203,11 @@ class JournalApi {
   Future<String> deleteTransaction(int account, String id) async =>
       _message(await client.delete(_in(account, 'transactions/$id')));
 
+  /// Pindah dana dari [account] ke akun lain: server mencatat withdrawal di
+  /// sini dan deposit di akun tujuan sekaligus. Tanpa bukti transfer.
+  Future<String> transfer(int account, Json data) async =>
+      _message(await client.post(_in(account, 'transfers'), data));
+
   /// [version] berganti setiap kali buktinya diganti — tanpa itu gambar lama
   /// terus tampil dari cache karena alamatnya sama. [thumb] meminta versi
   /// kecilnya (±600 px) — cukup untuk kotak di daftar.

@@ -93,8 +93,8 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
       ? null
       : widget.balance! - (widget.editing?.signed ?? 0);
 
-  /// Akun rupiah tidak perlu kurs — nilainya sudah rupiah.
-  bool get _needsRate => _currency != 'IDR';
+  /// Akun rupiah (IDR, IDC) tidak perlu kurs — nilainya sudah rupiah.
+  bool get _needsRate => needsRate(_currency);
 
   @override
   void initState() {
@@ -168,6 +168,10 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
         if (controller.text.trim().isNotEmpty &&
             (parseDecimal(controller.text) ?? 0) <= 0)
           key: 'Harus angka lebih dari 0.',
+      if (_needsRate &&
+          (parseDecimal(_rate.text) ?? 0) > 0 &&
+          !fitsRate(parseDecimal(_rate.text)!))
+        'rate_idr': 'Kurs maksimal 3 angka di belakang koma.',
       if (widget.editing == null && _proof == null) 'proof': 'Wajib diisi.',
     };
 
@@ -227,6 +231,14 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
       parseDecimal(_rate.text),
       _currency,
     );
+    // Akun sen rupiah tidak punya kolom kurs, jadi setara rupiahnya ikut di
+    // bawah jumlah — 1.000.000 IDC baru Rp10.000.
+    final hints = [
+      if (_available != null)
+        'Bisa ditarik paling banyak ${money(_available, _currency)}.',
+      if (!_needsRate && _currency != 'IDR' && idr != null)
+        'Setara ${money(idr, 'IDR')}.',
+    ];
 
     // Selama mengirim, tombol kembali dan ketuk latar tidak menutup lembar ini.
     return PopScope(
@@ -268,9 +280,8 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                 labelText: 'Jumlah ($_currency) *',
                 hintText: '500',
                 errorText: _errors['amount'],
-                helperText: _available == null
-                    ? null
-                    : 'Bisa ditarik paling banyak ${money(_available, _currency)}.',
+                helperText: hints.isEmpty ? null : hints.join('\n'),
+                helperMaxLines: 2,
               ),
             ),
             if (_needsRate) ...[
@@ -284,10 +295,10 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                 decoration: InputDecoration(
                   labelText:
                       'Kurs rupiah (1 ${rateCurrency(_currency)} = Rp …) *',
-                  hintText: '16250',
+                  hintText: '16250,125',
                   errorText: _errors['rate_idr'],
                   helperText: idr == null
-                      ? 'Pakai kurs hari transaksi karena tidak bisa dicari ulang belakangan.'
+                      ? 'Kurs hari transaksi, sampai 3 angka di belakang koma.'
                       : 'Setara ${money(idr, 'IDR')}',
                 ),
               ),

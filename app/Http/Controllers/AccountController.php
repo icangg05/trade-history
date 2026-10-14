@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use App\Services\AccountStats;
+use App\Support\Currency;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Response;
 
 class AccountController extends Controller
@@ -30,7 +32,7 @@ class AccountController extends Controller
             'items' => $accounts,
             // Satu-satunya tempat yang menjumlahkan seluruh akun: layar lain
             // selalu mengikuti akun aktif. Dikelompokkan per mata uang, karena
-            // USD, USC (akun sen), dan IDR bukan satuan yang sama — laporan
+            // USD, IDR, dan akun sen (USC, IDC) bukan satuan yang sama — laporan
             // pajaklah yang mengubah semuanya jadi rupiah, dengan kurs yang
             // diisi sendiri dan tanggal berlakunya.
             'totals' => $accounts->groupBy('currency')
@@ -88,7 +90,7 @@ class AccountController extends Controller
             'name' => ['required', 'string', 'max:60'],
             'broker' => ['nullable', 'string', 'max:60'],
             'account_number' => ['nullable', 'string', 'max:40'],
-            'currency' => ['required', 'in:USD,USC,IDR'],
+            'currency' => ['required', Rule::in(Currency::CODES)],
             'started_at' => ['required', 'date'],
             'is_archived' => ['nullable', 'boolean'],
         ]);

@@ -72,4 +72,34 @@ void main() {
     expect(toIdr(37, 16000, 'USD'), 592000);
     expect(rateCurrency('USC'), 'USD');
   });
+
+  test('IDC: sen rupiah, 100 IDC = Rp1, tanpa kurs', () {
+    expect(money(1000000, 'IDC'), '1.000.000,00 IDC');
+    expect(money(-2500, 'IDC', signed: true), '−2.500,00 IDC');
+    expect(toIdr(1000000, null, 'IDC'), 10000);
+    expect(toIdr(1000000, 16000, 'IDC'), 10000); // kurs dolar diabaikan
+    expect(toIdr(5000, null, 'IDR'), 5000);
+    expect(toIdr(37, null, 'USD'), isNull);
+    expect(needsRate('IDC'), isFalse);
+    expect(needsRate('USC'), isTrue);
+  });
+
+  test('konversi transfer antar akun', () {
+    // Sekeluarga: cukup geser sen, kursnya tidak dipakai.
+    expect(convertAmount(3700, 'USC', 'USD', null), 37);
+    expect(convertAmount(10000, 'IDR', 'IDC', null), 1000000);
+    // Lintas dolar ↔ rupiah memakai kurs; tanpa kurs belum bisa dihitung.
+    expect(convertAmount(100, 'USD', 'IDR', 16250.5), 1625050);
+    expect(convertAmount(3700, 'USC', 'IDC', 16000), 59200000);
+    expect(convertAmount(1625050, 'IDR', 'USD', 16250.5), 100);
+    expect(convertAmount(100, 'USD', 'IDR', null), isNull);
+  });
+
+  test('kurs selalu tiga angka di belakang koma', () {
+    expect(exchangeRate(16250), '16.250,000');
+    expect(exchangeRate(16250.125), '16.250,125');
+    expect(fitsRate(16250.125), isTrue);
+    expect(fitsRate(16250), isTrue);
+    expect(fitsRate(16250.1234), isFalse);
+  });
 }

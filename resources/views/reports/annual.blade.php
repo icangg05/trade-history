@@ -1,4 +1,5 @@
 @php
+    use App\Support\Currency;
     use Carbon\CarbonImmutable;
 
     // dompdf hanya paham CSS 2.1 — tidak ada flexbox, tidak ada grid, dan Tailwind
@@ -23,6 +24,8 @@
     // Kurs selalu dua desimal: `$rp()` membulatkan ke rupiah penuh, dan kurs 17.757,40
     // yang tercetak jadi "Rp17.757" tidak lagi cocok dengan angka yang dipakai menghitung.
     $kurs = fn (?float $v) => $v === null ? '—' : 'Rp'.number_format($v, 2, ',', '.');
+    // Kurs setor/tarik dicatat sampai tiga desimal, jadi dicetak tiga desimal juga.
+    $kursMutasi = fn (?float $v) => $v === null ? '—' : 'Rp'.number_format($v, 3, ',', '.');
     $sign = fn (?float $v) => $v === null ? '' : ($v > 0 ? 'pos' : ($v < 0 ? 'neg' : ''));
     $tgl = fn (?string $d) => $d === null ? '—' : CarbonImmutable::parse($d)->translatedFormat('j M Y');
     $arah = fn (string $d) => $d === 'buy' ? 'Beli' : 'Jual';
@@ -258,6 +261,8 @@
         // Akun rupiah: kolom mata uang akun dan kolom rupiahnya berisi angka yang
         // persis sama. Kolom kedua dibuang, yang tersisa diformat sebagai rupiah.
         $isRp = $c === 'IDR';
+        // Akun sen rupiah (IDC): nilainya tetap 1/100 rupiah, tidak memakai kurs dolar.
+        $tanpaKurs = ! Currency::needsRate($c);
         $u = $isRp ? 'Rp' : $c;
         $v = $isRp ? $rp : fn (?float $x) => $cur($x, $c);
     @endphp
@@ -398,7 +403,7 @@
                     <th style="width: 10%">Jenis</th>
                     @unless ($isRp)
                         <th class="num" style="width: 14%">Jumlah ({{ $c }})</th>
-                        <th class="num" style="width: 12%">Kurs (Rp/USD)</th>
+                        <th class="num" style="width: 12%">Kurs (Rp/{{ $tanpaKurs ? $c : 'USD' }})</th>
                     @endunless
                     <th class="num" style="width: 15%">Jumlah (Rp)</th>
                     <th style="width: 10%">Bukti</th>
@@ -413,8 +418,12 @@
                         @unless ($isRp)
                             <td class="num">{{ $cur($m['amount'], $c) }}</td>
                             <td class="num">
-                                {{ $kurs($m['rate_idr'] ?? $report['rate']) }}
-                                @if ($m['rate_idr'] === null)<span class="muted">*</span>@endif
+                                @if ($tanpaKurs)
+                                    {{ 'Rp'.number_format(1 / Currency::cents($c), 2, ',', '.') }}
+                                @else
+                                    {{ $kursMutasi($m['rate_idr'] ?? $report['rate']) }}
+                                    @if ($m['rate_idr'] === null)<span class="muted">*</span>@endif
+                                @endif
                             </td>
                         @endunless
                         <td class="num">{{ $rp($m['amount_idr']) }}</td>
@@ -425,7 +434,13 @@
                                 <span class="muted">Tidak ada</span>
                             @endif
                         </td>
-                        <td>{{ $m['note'] ?: '—' }}</td>
+                        <td>
+                            @if ($m['transfer'])
+                                Transfer {{ $m['type'] === 'deposit' ? 'dari' : 'ke' }} akun {{ $m['transfer'] }}@if ($m['note']) · {{ $m['note'] }}@endif
+                            @else
+                                {{ $m['note'] ?: '—' }}
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
                 <tr class="total">
@@ -445,7 +460,7 @@
             15 detik; lewat dari itu alamat yang terbuka kedaluwarsa, dan berkasnya dibuka
             kembali dengan mengklik ulang tautan di dokumen ini. Berkasnya dapat dicetak
             terpisah bila diminta.
-            @unless ($isRp)
+            @unless ($isRp || $tanpaKurs)
                 Tanda <span class="muted">*</span> berarti kurs harian baris itu tidak tercatat
                 sehingga dipakai kurs tahunan.
             @endunless

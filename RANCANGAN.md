@@ -193,7 +193,7 @@ users ─┬─< accounts ─┬─< transactions
 | user_id | fk | |
 | name | string | "FTMO 10k", "Real Exness" |
 | broker | string null | |
-| currency | char(3) default USD | hanya `USD`, `USC` (akun sen), `IDR` |
+| currency | char(3) default USD | hanya `USD`, `USC` (sen dolar), `IDR`, `IDC` (sen rupiah) |
 | initial_balance | decimal(18,2) | saldo awal |
 | started_at | date | tanggal saldo awal berlaku |
 | is_archived | bool default 0 | |

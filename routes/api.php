@@ -83,6 +83,8 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
                 Route::post('/transactions/{transaction}', [TransactionController::class, 'update'])->middleware('throttle:20,1,upload');
                 Route::get('/transactions/{transaction}/proof', [TransactionController::class, 'proof']);
                 Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy']);
+                // Pindah dana ke akun lain milik pengguna yang sama.
+                Route::post('/transfers', [TransactionController::class, 'transfer']);
 
                 Route::get('/rules', [RuleController::class, 'edit']);
                 Route::put('/rules', [RuleController::class, 'update']);

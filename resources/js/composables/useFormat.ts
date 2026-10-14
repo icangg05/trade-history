@@ -14,17 +14,21 @@ export const CURRENCIES = [
   { code: 'USD', label: 'USD — Dolar AS' },
   { code: 'USC', label: 'USC — Sen dolar (akun cent)' },
   { code: 'IDR', label: 'IDR — Rupiah' },
+  { code: 'IDC', label: 'IDC — Sen rupiah (akun cent)' },
 ] as const
 
 export type CurrencyCode = (typeof CURRENCIES)[number]['code']
 
-const DIGITS: Record<string, number> = { USD: 2, USC: 2, IDR: 0 }
+const DIGITS: Record<string, number> = { USD: 2, USC: 2, IDR: 0, IDC: 2 }
+
+/** Akun sen: satu unitnya 1/100 induknya — 3700 USC = $37, 1.000.000 IDC = Rp10.000. */
+const CENTS: Record<string, number> = { USC: 100, IDC: 100 }
 
 /**
  * Uang lengkap dengan mata uang akun.
  *
- * USC (akun sen) bukan kode ISO 4217, jadi Intl akan menolaknya — nilainya
- * diformat sebagai angka biasa lalu diberi akhiran kodenya.
+ * USC dan IDC (akun sen) bukan kode ISO 4217, jadi Intl akan menolaknya —
+ * nilainya diformat sebagai angka biasa lalu diberi akhiran kodenya.
  */
 export function money(value: number | null | undefined, currency = 'USD', signed = false): string {
   if (value === null || value === undefined) return '—'
@@ -33,8 +37,8 @@ export function money(value: number | null | undefined, currency = 'USD', signed
   const magnitude = Math.abs(value)
 
   const text =
-    currency === 'USC'
-      ? `${num(magnitude, digits)} USC`
+    currency in CENTS
+      ? `${num(magnitude, digits)} ${currency}`
       : new Intl.NumberFormat(LOCALE, {
           style: 'currency',
           currency,
@@ -47,18 +51,26 @@ export function money(value: number | null | undefined, currency = 'USD', signed
   return value < 0 ? `−${text}` : value > 0 ? `+${text}` : text
 }
 
+/** Akun rupiah (IDR, IDC) tidak butuh kurs — nilainya sudah rupiah. */
+export function needsRate(currency: string): boolean {
+  return currency !== 'IDR' && currency !== 'IDC'
+}
+
 /**
  * Nilai rupiah dari nominal akun. Kurs selalu dicatat per dolar, sedangkan akun
- * sen (USC) dinyatakan dalam 1/100 dolar — 3700 USC = $37, bukan $3700.
+ * sen dinyatakan dalam 1/100 induknya — 3700 USC = $37, bukan $3700. Akun
+ * rupiah tidak memakai kursnya.
  */
 export function toIdr(
   amount: number | null | undefined,
   rate: number | null | undefined,
   currency: string,
 ): number | null {
-  if (amount === null || amount === undefined || rate === null || rate === undefined) return null
+  if (amount === null || amount === undefined) return null
+  if (!needsRate(currency)) return amount / (CENTS[currency] ?? 1)
+  if (rate === null || rate === undefined) return null
 
-  return currency === 'USC' ? (amount * rate) / 100 : amount * rate
+  return (amount * rate) / (CENTS[currency] ?? 1)
 }
 
 /** Mata uang yang kursnya dipakai: akun sen memakai kurs dolar induknya. */

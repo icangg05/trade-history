@@ -6,12 +6,14 @@ use App\Models\Account;
 use App\Models\Transaction;
 use App\Services\AccountStats;
 use App\Services\Uploads;
+use App\Support\Currency;
 use App\Support\Hashid;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
@@ -35,7 +37,10 @@ class TransactionController extends Controller
      */
     private const PROOF_MAX_KB = 5 * 1024;
 
-    private const MESSAGES = ['proof.max' => 'Ukuran bukti transfer maksimal 5 MB.'];
+    private const MESSAGES = [
+        'proof.max' => 'Ukuran bukti transfer maksimal 5 MB.',
+        'rate_idr.decimal' => 'Kurs maksimal 3 angka di belakang koma.',
+    ];
 
     public function index(Request $request): Response|JsonResponse
     {
@@ -65,8 +70,12 @@ class TransactionController extends Controller
             ->get()
             ->keyBy('type');
 
-        // Kurs dicatat per dolar; akun sen (USC) bernilai 1/100 dolar per unit.
-        $cents = $account->currency === 'USC' ? 100 : 1;
+        // Akun dolar memakai kurs yang tercatat per transaksi; akun rupiah (IDR,
+        // IDC) tidak punya kurs, nilainya cukup digeser sennya. Kurs dicatat per
+        // dolar, dan akun sen bernilai 1/100 induknya per unit.
+        $cents = Currency::cents($account->currency);
+        $column = Currency::needsRate($account->currency) ? 'total_idr' : 'total';
+        $idr = fn (string $type) => (float) ($flow[$type]->{$column} ?? 0) / $cents;
 
         // Rentang tahun diambil dari dua nilai agregat, bukan daftar tanggal —
         // MIN/MAX portabel antara MySQL & SQLite, DISTINCT YEAR() tidak. Tahun
@@ -79,6 +88,7 @@ class TransactionController extends Controller
             'filters' => ['year' => $year, 'month' => $month],
             'years' => range($newest, $oldest),
             'items' => $scoped()
+                ->with('pair.account:id,name')
                 ->orderByDesc('occurred_at')
                 ->orderByDesc('id')
                 ->paginate(30)
@@ -93,12 +103,18 @@ class TransactionController extends Controller
                     // Alamat bukti selalu sama; penanda ini yang berubah saat
                     // buktinya diganti, supaya ponsel tidak menampilkan cache lama.
                     'proof_version' => $t->proof_path ? substr(md5($t->proof_path), 0, 8) : null,
+                    // Transfer antar akun: akun di seberangnya. Withdrawal berarti
+                    // "ke" akun itu, deposit berarti "dari".
+                    'transfer' => $t->pair === null ? null : [
+                        'account_id' => $t->pair->account_id,
+                        'account' => $t->pair->account->name,
+                    ],
                 ]),
             'totals' => [
                 'deposit' => (float) ($flow['deposit']->total ?? 0),
                 'withdrawal' => (float) ($flow['withdrawal']->total ?? 0),
-                'deposit_idr' => (float) ($flow['deposit']->total_idr ?? 0) / $cents,
-                'withdrawal_idr' => (float) ($flow['withdrawal']->total_idr ?? 0) / $cents,
+                'deposit_idr' => $idr('deposit'),
+                'withdrawal_idr' => $idr('withdrawal'),
                 'balance' => $stats->balance(),
             ],
         ]);
@@ -133,6 +149,11 @@ class TransactionController extends Controller
      */
     public function update(Request $request, Transaction $transaction): RedirectResponse|JsonResponse
     {
+        // Mengubah satu sisi transfer membuat kedua akun tidak lagi cocok.
+        if ($transaction->transfer_pair_id !== null) {
+            return $this->failed('Transfer antar akun tidak bisa diubah. Hapus lalu catat ulang transfernya.');
+        }
+
         $account = $request->currentAccount();
 
         $data = $request->validate($this->rules($account, ['nullable', 'image', 'max:'.self::PROOF_MAX_KB]), self::MESSAGES);
@@ -149,6 +170,72 @@ class TransactionController extends Controller
         $transaction->update($data);
 
         return $this->done('Transaksi diperbarui.');
+    }
+
+    /**
+     * Pindahkan dana dari akun yang sedang dibuka ke akun lain milik pengguna
+     * yang sama: withdrawal di akun ini, deposit di akun tujuan, keduanya saling
+     * menunjuk. Mata uang berbeda dikonversi — sekeluarga (USC → USD) cukup
+     * menggeser sen, lintas dolar ↔ rupiah memakai kurs yang diisi.
+     *
+     * Kedua sisi memakai kurs yang sama, jadi di laporan pajak setoran dan
+     * penarikannya saling menghapus: transfer bukan penghasilan.
+     *
+     * Tanpa bukti transfer: uangnya tidak keluar dari broker, dan pasangannya
+     * di akun seberang sudah jadi jejaknya.
+     */
+    public function transfer(Request $request): RedirectResponse|JsonResponse
+    {
+        $from = $request->currentAccount();
+        $to = $request->user()->accounts()->whereKeyNot($from->id)->find($request->integer('to_account_id'));
+        $needsRate = Currency::needsRate($from->currency) || ($to !== null && Currency::needsRate($to->currency));
+
+        $data = $request->validate([
+            'to_account_id' => ['bail', 'required', 'integer', function ($attribute, $value, $fail) use ($to) {
+                if ($to === null) {
+                    $fail('Pilih akun tujuan yang lain.');
+                }
+            }],
+            'amount' => ['required', 'numeric', 'gt:0'],
+            'rate_idr' => [Rule::requiredIf($needsRate), 'nullable', 'numeric', 'gt:0', 'decimal:0,3'],
+            'occurred_at' => ['required', 'date'],
+            'note' => ['nullable', 'string', 'max:255'],
+        ], self::MESSAGES);
+
+        $this->ensureAffordable($from, ['type' => 'withdrawal', ...$data]);
+
+        $rate = $needsRate ? (float) $data['rate_idr'] : null;
+        $received = Currency::convert((float) $data['amount'], $from->currency, $to->currency, $rate);
+
+        if ($received <= 0) {
+            throw ValidationException::withMessages([
+                'amount' => 'Terlalu kecil — di akun tujuan jumlahnya jadi 0,00 '.$to->currency.'.',
+            ]);
+        }
+
+        $leg = fn (Account $account, string $type, float $amount) => $account->transactions()->create([
+            'type' => $type,
+            'amount' => $amount,
+            'rate_idr' => Currency::needsRate($account->currency) ? $rate : null,
+            'occurred_at' => $data['occurred_at'],
+            'note' => $data['note'] ?? null,
+        ]);
+
+        $out = DB::transaction(function () use ($leg, $from, $to, $data, $received) {
+            $out = $leg($from, 'withdrawal', (float) $data['amount']);
+            $in = $leg($to, 'deposit', $received);
+
+            $out->update(['transfer_pair_id' => $in->id]);
+            $in->update(['transfer_pair_id' => $out->id]);
+
+            return $out;
+        });
+
+        return $this->done(
+            'Transfer ke "'.$to->name.'" dicatat.',
+            data: ['id' => $out->getRouteKey()],
+            status: 201,
+        );
     }
 
     /**
@@ -190,7 +277,7 @@ class TransactionController extends Controller
             'amount' => ['required', 'numeric', 'gt:0'],
             // Kurs wajib untuk akun non-rupiah: kurs hari transaksi tidak bisa
             // direkonstruksi belakangan, jadi harus ikut tercatat saat itu juga.
-            'rate_idr' => [Rule::requiredIf($account->currency !== 'IDR'), 'nullable', 'numeric', 'gt:0'],
+            'rate_idr' => [Rule::requiredIf(Currency::needsRate($account->currency)), 'nullable', 'numeric', 'gt:0', 'decimal:0,3'],
             'occurred_at' => ['required', 'date'],
             'proof' => [...$proof, Uploads::readable()],
             'note' => ['nullable', 'string', 'max:255'],
@@ -261,11 +348,23 @@ class TransactionController extends Controller
     /** Umur alamat pandang, dihitung sejak tautan di dokumen diklik. */
     private const VIEW_SECONDS = 15;
 
+    /**
+     * Transfer antar akun dihapus kedua sisinya sekaligus — setengah transfer
+     * berarti uang yang lenyap dari satu akun tanpa pernah sampai di akun lain.
+     */
     public function destroy(Transaction $transaction): RedirectResponse|JsonResponse
     {
-        Uploads::delete($transaction->proof_path);
-        $transaction->delete();
+        $pair = $transaction->pair;
 
-        return $this->done('Transaksi dihapus.');
+        foreach (array_filter([$pair, $transaction]) as $row) {
+            Uploads::delete($row->proof_path);
+        }
+
+        DB::transaction(function () use ($pair, $transaction) {
+            $pair?->delete();
+            $transaction->delete();
+        });
+
+        return $this->done($pair === null ? 'Transaksi dihapus.' : 'Transfer dihapus dari kedua akun.');
     }
 }

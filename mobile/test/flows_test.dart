@@ -206,6 +206,109 @@ void main() {
     );
   });
 
+  // Dua akun: Demo XAUUSD (USC, akun aktif) dan Bertobatlah (USD).
+  Map<String, dynamic> twoAccounts() {
+    final me = fixture('me');
+    (me['accounts'] as List).add({
+      'id': 2,
+      'name': 'Bertobatlah',
+      'broker': 'Exness',
+      'currency': 'USD',
+      'started_at': '2026-02-01',
+    });
+    return me;
+  }
+
+  testWidgets('dana: transfer seluruh saldo ke akun lain', (tester) async {
+    final server = await pumpApp(
+      tester,
+      routes: {
+        'GET me': (_) => twoAccounts(),
+        'POST accounts/1/transfers': (_) => {
+          'message': 'Transfer ke "Bertobatlah" dicatat.',
+          'id': 'abc',
+        },
+      },
+    );
+    await openTab(tester, 'Dana');
+
+    await tester.tap(find.text('Transfer ke akun lain'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Transfer antar akun'), findsOneWidget);
+    // Bawaannya seluruh saldo (17.653 USC), dan USC → USD cukup dibagi seratus.
+    expect(find.widgetWithText(TextField, '17653'), findsOneWidget);
+    expect(find.text('+US\$176,53'), findsOneWidget);
+
+    // Akun dolar butuh kurs; empat desimal ditolak di ponsel.
+    final rate = find.widgetWithText(TextField, 'Kurs rupiah (1 USD = Rp …) *');
+    await tester.enterText(rate, '16250,1234');
+    await tester.tap(find.widgetWithText(FilledButton, 'Transfer'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Kurs maksimal 3 angka di belakang koma.'),
+      findsOneWidget,
+    );
+    expect(server.requests.where((r) => r.method == 'POST'), isEmpty);
+
+    await tester.enterText(rate, '16250,125');
+    await tester.tap(find.widgetWithText(FilledButton, 'Transfer'));
+    await tester.pumpAndSettle();
+
+    final sent = server.requests.singleWhere((r) => r.method == 'POST');
+    expect(sent.data, containsPair('to_account_id', 2));
+    expect(sent.data, containsPair('amount', 17653));
+    expect(sent.data, containsPair('rate_idr', 16250.125));
+    expect(find.text('Transfer ke "Bertobatlah" dicatat.'), findsOneWidget);
+  });
+
+  testWidgets('dana: tanpa akun lain, tombol transfer tidak muncul', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await openTab(tester, 'Dana');
+
+    expect(find.text('Transfer ke akun lain'), findsNothing);
+  });
+
+  testWidgets(
+    'dana: sisi transfer tampil dengan arahnya dan tidak bisa diubah',
+    (tester) async {
+      final transactions = fixture('transactions');
+      final rows = (transactions['items'] as Map)['data'] as List;
+      rows.first = {
+        ...rows.first as Map,
+        'note': null,
+        'rate_idr': 16250.125,
+        'transfer': {'account_id': 2, 'account': 'Bertobatlah'},
+      };
+
+      await pumpApp(
+        tester,
+        routes: {
+          'GET me': (_) => twoAccounts(),
+          'GET accounts/1/transactions': (_) => transactions,
+        },
+      );
+      await openTab(tester, 'Dana');
+
+      expect(find.text('Transfer keluar'), findsOneWidget);
+      expect(find.textContaining('ke Bertobatlah'), findsOneWidget);
+      expect(find.textContaining('@ 16.250,125'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Transfer keluar'));
+      await tester.tap(find.text('Transfer keluar'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Pasangannya tercatat di Bertobatlah'),
+        findsOneWidget,
+      );
+      expect(find.widgetWithText(FilledButton, 'Ubah'), findsNothing);
+    },
+  );
+
   testWidgets('dana: ketuk baris → detail transaksi, Ubah membuka form', (
     tester,
   ) async {

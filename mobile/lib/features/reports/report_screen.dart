@@ -108,8 +108,10 @@ class _ReportFormState extends ConsumerState<_ReportForm> {
         : last;
   }
 
-  bool get _foreign =>
-      widget.options.accounts.any((account) => account['currency'] != 'IDR');
+  /// Ada akun dolar — akun rupiah (IDR, IDC) tidak terpengaruh kurs.
+  bool get _foreign => widget.options.accounts.any(
+    (account) => needsRate('${account['currency']}'),
+  );
 
   Future<void> _download() async {
     final missing = requiredErrors({'rate': _rate.text});

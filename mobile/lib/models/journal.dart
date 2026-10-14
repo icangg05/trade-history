@@ -14,6 +14,7 @@ class FundTransaction {
     required this.note,
     required this.hasProof,
     this.proofVersion,
+    this.transferAccount,
   });
 
   factory FundTransaction.fromJson(Json json) => FundTransaction(
@@ -25,6 +26,9 @@ class FundTransaction {
     note: toStringOrNull(json['note']),
     hasProof: json['has_proof'] == true,
     proofVersion: toStringOrNull(json['proof_version']),
+    transferAccount: json['transfer'] is Map
+        ? toStringOrNull(map(json['transfer'])['account'])
+        : null,
   );
 
   final String id;
@@ -40,7 +44,22 @@ class FundTransaction {
   /// Berganti saat buktinya diganti; ikut di alamat gambar (lihat `proofUrl`).
   final String? proofVersion;
 
+  /// Nama akun di seberang kalau baris ini satu sisi transfer antar akun —
+  /// deposit "dari" akun itu, withdrawal "ke" akun itu.
+  final String? transferAccount;
+
   bool get isDeposit => type == 'deposit';
+
+  bool get isTransfer => transferAccount != null;
+
+  /// "Deposit", "Withdrawal", atau arah transfernya.
+  String get label => isTransfer
+      ? (isDeposit ? 'Transfer masuk' : 'Transfer keluar')
+      : (isDeposit ? 'Deposit' : 'Withdrawal');
+
+  /// "dari Bersyukur" / "ke Bertobatlah"; null untuk transaksi biasa.
+  String? get transferNote =>
+      isTransfer ? '${isDeposit ? 'dari' : 'ke'} $transferAccount' : null;
 
   /// Positif untuk setoran, negatif untuk penarikan.
   double get signed => isDeposit ? amount : -amount;

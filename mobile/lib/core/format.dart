@@ -12,9 +12,10 @@ const currencies = <(String, String)>[
   ('USD', 'USD (Dolar AS)'),
   ('USC', 'USC (sen dolar, akun cent)'),
   ('IDR', 'IDR (Rupiah)'),
+  ('IDC', 'IDC (sen rupiah, akun cent)'),
 ];
 
-const _digits = {'USD': 2, 'USC': 2, 'IDR': 0};
+const _digits = {'USD': 2, 'USC': 2, 'IDR': 0, 'IDC': 2};
 
 String _fixed(double value, int digits) => NumberFormat(
   digits == 0 ? '#,##0' : '#,##0.${'0' * digits}',
@@ -22,7 +23,7 @@ String _fixed(double value, int digits) => NumberFormat(
 ).format(value);
 
 /// Uang lengkap dengan mata uang akun: `US$1.234,50`, `Rp 1.234.567`,
-/// `3.700,00 USC`. USC (akun sen) bukan kode ISO 4217, jadi diberi akhiran.
+/// `3.700,00 USC`. USC dan IDC (akun sen) bukan kode ISO 4217, jadi diberi akhiran.
 ///
 /// `signed` memakai tanda minus tipografis (−) dan plus eksplisit, sama seperti
 /// web; tanpa `signed` minusnya tanda hubung biasa.
@@ -31,7 +32,7 @@ String money(double? value, String currency, {bool signed = false}) {
 
   final amount = _fixed(value.abs(), _digits[currency] ?? 2);
   final text = switch (currency) {
-    'USC' => '$amount USC',
+    'USC' || 'IDC' => '$amount $currency',
     'IDR' => 'Rp $amount',
     'USD' => 'US\$$amount',
     _ => '$currency $amount',
@@ -42,16 +43,52 @@ String money(double? value, String currency, {bool signed = false}) {
   return value < 0 ? '−$text' : (value > 0 ? '+$text' : text);
 }
 
-/// Nilai rupiah dari nominal akun. Kurs selalu dicatat per dolar, sedangkan
-/// akun sen dinyatakan dalam 1/100 dolar — 3700 USC = $37, bukan $3700.
-double? toIdr(double? amount, double? rate, String currency) {
-  if (amount == null || rate == null) return null;
+/// Akun sen: satu unitnya 1/100 induknya — 3700 USC = $37, 1.000.000 IDC =
+/// Rp10.000. Sama dengan `Currency::cents()` di server.
+int cents(String currency) => currency == 'USC' || currency == 'IDC' ? 100 : 1;
 
-  return currency == 'USC' ? amount * rate / 100 : amount * rate;
+/// Akun rupiah (IDR, IDC) tidak butuh kurs — nilainya sudah rupiah.
+bool needsRate(String currency) => currency != 'IDR' && currency != 'IDC';
+
+/// Nilai rupiah dari nominal akun. Kurs selalu dicatat per dolar, sedangkan
+/// akun sen dinyatakan dalam 1/100 induknya — 3700 USC = $37, bukan $3700.
+/// Akun rupiah tidak memakai [rate].
+double? toIdr(double? amount, double? rate, String currency) {
+  if (amount == null) return null;
+  if (!needsRate(currency)) return amount / cents(currency);
+  if (rate == null) return null;
+
+  return amount * rate / cents(currency);
+}
+
+/// Nominal akun [from] dalam satuan akun [to] — padanan `Currency::convert()`
+/// di server. Sekeluarga (USC → USD, IDR → IDC) cukup menggeser sennya;
+/// lintas dolar ↔ rupiah baru memakai [rate], dan null selama kursnya kosong.
+double? convertAmount(double? amount, String from, String to, double? rate) {
+  if (amount == null) return null;
+
+  var value = amount / cents(from);
+
+  if (needsRate(from) != needsRate(to)) {
+    if (rate == null || rate <= 0) return null;
+    value = needsRate(from) ? value * rate : value / rate;
+  }
+
+  return value * cents(to);
 }
 
 /// Mata uang yang kursnya dipakai: akun sen memakai kurs dolar induknya.
 String rateCurrency(String currency) => currency == 'USC' ? 'USD' : currency;
+
+/// Kurs deposit/withdrawal: selalu tiga angka di belakang koma (16.250,125).
+String exchangeRate(double? value) => number(value, 3);
+
+/// Kurs paling banyak tiga angka di belakang koma — batas kolom `rate_idr`.
+bool fitsRate(double value) {
+  final scaled = value * 1000;
+
+  return (scaled - scaled.roundToDouble()).abs() < 1e-6;
+}
 
 String number(double? value, [int digits = 2]) =>
     value == null ? '—' : _fixed(value, digits);
